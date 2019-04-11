@@ -11,39 +11,31 @@ from psyhive.py_gui import base
 from psyhive.py_gui.misc import (
     get_code_fn, get_exec_fn, get_help_fn, get_def_icon)
 
-
-def _read_option_menu(name, type_):
-    """Read the selected item in an option menu.
-
-    Args:
-        name (str): option menu to read
-        type_ (type): type of result to obtain
-
-    Returns:
-        (any): selected item if given type
-    """
-    _sel = cmds.optionMenu(name, query=True, select=True)
-    _items = cmds.optionMenu(name, query=True, itemListLong=True)
-    _item = _items[_sel-1]
-    _text = cmds.menuItem(_item, query=True, label=True)
-    return type_(_text)
+from maya_psyhive import ui
 
 
-def _set_option_menu(name, value):
-    """Set the selected item in an option menu.
+def _get_update_fn(set_fn, update, field):
+    """Get function to execute when arg field needs updating.
 
     Args:
-        name (str): option menu to update
-        value (any): string value to apply
+        set_fn (fn): function to set arg field
+        update (ArgUpdater): updater object
+        field (str): field being updated
     """
-    _items = [
-        cmds.menuItem(_item, query=True, label=True)
-        for _item in cmds.optionMenu(name, query=True, itemListLong=True)]
-    if str(value) not in _items:
-        print 'Failed to select', value, 'from', _items
-        return
-    _idx = _items.index(str(value))
-    cmds.optionMenu(name, edit=True, select=_idx+1)
+
+    def _update_fn(*xargs):
+        del xargs
+        _choices = update.get_choices()
+        _default = update.get_default()
+        if _choices:
+            ui.populate_option_menu(field, _choices)
+            ui.set_option_menu(field, _default)
+            print 'UPDATED CHOICES', _default, _choices
+        else:
+            print 'UPDATED', _default
+            set_fn(_default)
+
+    return _update_fn
 
 
 class MayaPyGui(base.BasePyGui):
@@ -86,57 +78,69 @@ class MayaPyGui(base.BasePyGui):
         cmds.columnLayout(self.master, adjustableColumn=1)
 
     def add_arg(
-            self, arg, name=None, choices=None, label_width=None,
-            verbose=0):
+            self, arg, default, label=None, choices=None, label_width=None,
+            update=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
             arg (PyArg): arg to add
-            name (str): override arg name
+            default (any): default value for arg
+            label (str): override arg label
             choices (dict): list of options to show in the interface
             label_width (int): label width in pixels
+            update (ArgUpdater): updater for this arg
             verbose (int): print process data
         """
         lprint('ADDING', arg, verbose=verbose)
         _label_width = label_width or self.label_width
 
-        cmds.rowLayout(
-            numberOfColumns=2,
-            columnWidth=((1, _label_width), (2, 1000)),
-            adjustableColumn2=2)
+        if update:
+            cmds.rowLayout(
+                numberOfColumns=3,
+                columnWidth=((1, _label_width), (2, 100), (3, update.width)),
+                adjustableColumn3=2)
+        else:
+            cmds.rowLayout(
+                numberOfColumns=2,
+                columnWidth=((1, _label_width), (2, 1000)),
+                adjustableColumn2=2)
 
-        cmds.text(name or arg.name, align='left')
+        cmds.text(label or arg.name, align='left')
 
         _set_fn = None
         if choices:
-            _menu = cmds.optionMenu()
-            for _choice in choices:
-                cmds.menuItem(label=_choice, parent=_menu)
-            _read_fn = wrap_fn(_read_option_menu, _menu, type_=arg.type_)
-            _set_fn = wrap_fn(_set_option_menu, _menu, arg_to_kwarg='value')
-            _set_option_menu(_menu, arg.default)
+            _field = cmds.optionMenu()
+            ui.populate_option_menu(_field, choices)
+            _read_fn = wrap_fn(ui.read_option_menu, _field, type_=arg.type_)
+            _set_fn = wrap_fn(ui.set_option_menu, _field, arg_to_kwarg='value')
+            ui.set_option_menu(_field, default)
         elif arg.type_ is int:
-            _field = cmds.intField(value=arg.default)
+            _field = cmds.intField(value=default)
             _read_fn = wrap_fn(cmds.intField, _field, query=True, value=True)
             _set_fn = wrap_fn(
                 cmds.intField, _field, arg_to_kwarg='value', edit=True)
         elif arg.type_ is float:
-            _field = cmds.floatField(value=arg.default)
+            _field = cmds.floatField(value=default)
             _read_fn = wrap_fn(cmds.floatField, _field, query=True, value=True)
             _set_fn = wrap_fn(
                 cmds.floatField, _field, arg_to_kwarg='value', edit=True)
         elif arg.type_ is str or arg.type_ is None:
-            _field = cmds.textField(text=arg.default or '')
+            _field = cmds.textField(text=default or '')
             _read_fn = wrap_fn(cmds.textField, _field, query=True, text=True)
             _set_fn = wrap_fn(
                 cmds.textField, _field, arg_to_kwarg='text', edit=True)
         elif arg.type_ is bool:
-            _field = cmds.checkBox(label='', value=arg.default)
+            _field = cmds.checkBox(label='', value=default)
             _read_fn = wrap_fn(cmds.checkBox, _field, query=True, value=True)
             _set_fn = wrap_fn(
                 cmds.checkBox, _field, arg_to_kwarg='value', edit=True)
         else:
             raise ValueError(arg.type_)
+
+        if update:
+            cmds.button(
+                label=update.label, height=19, command=_get_update_fn(
+                    set_fn=_set_fn, update=update, field=_field))
 
         self.read_arg_fns[arg.def_.name][arg.name] = _read_fn
         self.set_arg_fns[arg.def_.name][arg.name] = _set_fn
@@ -179,7 +183,7 @@ class MayaPyGui(base.BasePyGui):
         _icon = cmds.iconTextButton(
             image1=_icon, width=depth, height=depth,
             style='iconOnly', command=get_code_fn(def_))
-        _col = qt.get_col(col) if col else qt.HColor('grey')
+        _col = qt.get_col(col if col else self.base_col)
         _btn = cmds.button(
             label=label or to_nice(def_.name),
             height=depth,

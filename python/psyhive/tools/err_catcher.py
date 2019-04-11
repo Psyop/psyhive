@@ -81,7 +81,12 @@ class _Traceback(object):
         assert _lines.pop(0) == 'Traceback (most recent call last):'
         while len(_lines) > 2:
             check_heart()
-            _trace_line = _TraceStep([_lines.pop(0), _lines.pop(0)])
+            try:
+                _trace_line = _TraceStep([_lines.pop(0), _lines.pop(0)])
+            except IndexError:
+                print '[traceback]'
+                print self.body
+                raise RuntimeError('Failed to parse traceback')
             self.lines.append(_trace_line)
 
 

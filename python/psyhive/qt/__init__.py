@@ -7,3 +7,4 @@ from psyhive.qt.widgets import HLabel
 from psyhive.qt.interface import HUiDialog
 from psyhive.qt.misc import get_application, get_col
 from psyhive.qt.gui import HPixmap, HColor
+from psyhive.qt.constants import COLS

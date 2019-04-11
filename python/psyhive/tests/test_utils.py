@@ -108,15 +108,6 @@ class TestUtils(unittest.TestCase):
         obj_write(obj=_obj, path=_path, verbose=1)
         assert obj_read(_path) == 'blah'
 
-    def test_store_result(self):
-
-        @store_result
-        def _test():
-            return random.random()
-
-        _result = _test()
-        assert _test() == _result
-
     def test_passes_filter(self):
 
         assert passes_filter('blah', '-ag', verbose=1)
@@ -141,7 +132,20 @@ class TestUtils(unittest.TestCase):
         # Test quotes
         assert passes_filter('this is text', '"This is"')
 
-    def wrap_fn(self):
+    def test_store_result(self):
+
+        @store_result
+        def _test():
+            return random.random()
+
+        _result = _test()
+        assert _test() == _result
+
+    def test_to_nice(self):
+
+        assert to_nice('_get_flex_opts') == 'Get flex opts'
+
+    def test_wrap_fn(self):
 
         def _test(a=1, b=2, c=3):
             return a, b, c

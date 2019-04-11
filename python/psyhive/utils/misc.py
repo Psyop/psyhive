@@ -281,7 +281,8 @@ def to_nice(text):
     Returns:
         (str): readable string
     """
-    return text[0].capitalize() + text[1:].replace('_', ' ')
+    _text = text.strip('_')
+    return _text[0].capitalize() + _text[1:].replace('_', ' ')
 
 
 def wrap_fn(func, *args, **kwargs):

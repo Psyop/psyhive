@@ -80,5 +80,6 @@ ignore:
         psyhive/qt/mgr.py
 allowed_names:
     keyPressEvent
+    mousePressEvent
     objectName
     ui

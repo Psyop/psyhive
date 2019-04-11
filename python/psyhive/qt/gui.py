@@ -2,7 +2,8 @@
 
 import os
 
-from psyhive.utils import File, abs_path, lprint
+from psyhive.utils import File, lprint, test_path
+from psyhive.qt.misc import get_p, get_pixmap
 from psyhive.qt.mgr import QtGui, QtCore
 
 
@@ -37,6 +38,51 @@ class HColor(QtGui.QColor):
 class HPixmap(QtGui.QPixmap):
     """Override for QPixmap object."""
 
+    def add_overlay(self, pix, pos, anchor='TL', operation=None):
+        """Add overlay to this pixmap.
+
+        Args:
+            pix (QPixmap|str): image to overlay
+            pos (QPoint|tuple): position of overlay
+            anchor (str): anchor position
+            operation (str): overlay mode
+        """
+        _pix = get_pixmap(pix)
+        _pos = get_p(pos)
+        _pnt = QtGui.QPainter()
+
+        # Set offset
+        if anchor == 'C':
+            _pos = _pos - get_p([_pix.width()/2, _pix.height()/2])
+        elif anchor == 'BL':
+            _pos = _pos - get_p([0, _pix.height()])
+        elif anchor == 'BR':
+            _pos = _pos - get_p([_pix.width(), _pix.height()])
+        elif anchor == 'TL':
+            pass
+        elif anchor == 'TR':
+            _pos = _pos - get_p([_pix.width(), 0])
+        else:
+            raise ValueError(anchor)
+
+        # Set operation mode
+        if operation is not None:
+            _comp_mode = QtGui.QPainter.CompositionMode
+            if operation == 'over':
+                _mode = _comp_mode.CompositionMode_SourceOver
+            elif operation == 'add':
+                _mode = _comp_mode.CompositionMode_Plus
+            elif operation == 'mult':
+                _mode = _comp_mode.CompositionMode_Multiply
+            else:
+                raise ValueError(operation)
+            _pnt.setCompositionMode(_mode)
+
+        # Apply image
+        _pnt.begin(self)
+        _pnt.drawPixmap(_pos.x(), _pos.y(), _pix)
+        _pnt.end()
+
     def resize(self, width, height):
         """Return a resized version of this pixmap.
 
@@ -48,17 +94,21 @@ class HPixmap(QtGui.QPixmap):
             self, width, height, transformMode=QtCore.Qt.SmoothTransformation)
         return HPixmap(_pix)
 
-    def save_as(self, path, verbose=0):
+    def save_as(self, path, force=False, verbose=0):
         """Save this pixmap at the given path.
 
         Args:
             path (str): path to save at
+            force (bool): force overwrite with no confirmation
             verbose (int): print process data
         """
+        from psyhive import qt
+
         lprint("SAVING", path, verbose=verbose)
         _path = File(path)
         _fmt = {}.get(_path.extn, _path.extn.upper())
-        _save_path = abs_path(path, win=True)
-        print _save_path
-        self.save(_save_path, format=_fmt)
+        if not force and _path.exists():
+            qt.ok_cancel('Overwrite existing image?\n\n'+path)
+        test_path(_path.dir)
+        self.save(path, format=_fmt)
         assert os.path.exists(path)

@@ -8,8 +8,9 @@ import sys
 from psyhive import icons
 from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
-    read_yaml, dprint, Collection)
+    read_yaml, dprint, Collection, str_to_seed)
 from psyhive.py_gui import install
+from psyhive.py_gui.misc import NICE_COLS
 
 
 class BasePyGui(object):
@@ -32,19 +33,23 @@ class BasePyGui(object):
 
         self.py_file = PyFile(path)
         self.label_width = 70
-        self.width = 300
         self.height = 400
         self.all_defs = all_defs
 
-        self.mod_name = self.py_file.get_module().__name__
+        _mod = self.py_file.get_module()
+
+        self.mod_name = _mod.__name__
         self.title = title or self.mod_name
         self.ui_name = self.mod_name.replace(".", "_")+"_ui"
         self.settings_file = abs_path(
             '{}/Psyop/settings/py_gui/{}.yml'.format(
                 os.environ['HOME'], self.mod_name.replace('.', '_')))
 
-        self.icon_set = getattr(
-            self.py_file.get_module(), 'ICON_SET', icons.FRUIT)
+        # Read attrs from module
+        self.icon_set = getattr(_mod, 'PYGUI_ICON_SET', icons.FRUIT)
+        self.width = getattr(_mod, 'PYGUI_WIDTH', 300)
+        self.base_col = getattr(
+            _mod, 'PYGUI_COL', str_to_seed(self.mod_name).choice(NICE_COLS))
         assert isinstance(self.icon_set, Collection)
 
         # Build defs into ui
@@ -60,15 +65,17 @@ class BasePyGui(object):
             self.load_settings()
 
     def add_arg(
-            self, arg, name=None, choices=None, label_width=None,
-            verbose=0):
+            self, arg, default, label=None, choices=None, label_width=None,
+            update=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
             arg (PyArg): arg to add
-            name (str): override arg name
+            default (any): default value for arg
+            label (str): override arg label
             choices (dict): list of options to show in the interface
             label_width (int): label width in pixels
+            update (ArgUpdater): updater for this arg
             verbose (int): print process data
         """
 
@@ -81,6 +88,7 @@ class BasePyGui(object):
             last_ (bool): whether this is last def in interface
             verbose (int): print process data
         """
+        _update = opts.get('update') or {}
         _choices = opts.get('choices') or {}
         _hide = opts.get('hide') or []
 
@@ -89,21 +97,33 @@ class BasePyGui(object):
 
         # Add args
         for _arg in def_.find_args():
+
             if _arg.name in _hide:
                 continue
             lprint('  ADDING ARG', _arg, verbose=verbose)
+
+            # Check for update fn
+            _default = _arg.default
+            _arg_choices = _choices.get(_arg.name)
+            _arg_update = _update.get(_arg.name)
+            if _arg_update:
+                _arg_choices = _arg_update.get_choices() or _arg_choices
+                _default = _arg_update.get_default() or _default
+
             self.add_arg(
                 _arg,
-                name=to_nice(_arg.name),
-                choices=_choices.get(_arg.name),
+                default=_default,
+                label=to_nice(_arg.name),
+                choices=_arg_choices,
                 label_width=opts.get('label_width'),
+                update=_arg_update,
             )
 
         self.add_execute(
             def_=def_,
-            icon=opts.get('icons'),
+            icon=opts.get('icon'),
             label=opts.get('label'),
-            col=opts.get('col'),
+            col=opts.get('col') or self.base_col,
         )
 
     def add_execute(self, def_, depth=35, icon=None, label=None, col=None):

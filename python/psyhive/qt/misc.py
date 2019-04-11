@@ -5,7 +5,7 @@ import sys
 import six
 
 from psyhive.utils import store_result
-from psyhive.qt.mgr import QtWidgets
+from psyhive.qt.mgr import QtWidgets, QtCore, QtGui
 
 
 @store_result
@@ -35,6 +35,42 @@ def get_col(col):
     else:
         raise ValueError(col)
     return _col
+
+
+def get_p(pos):
+    """Get a point object from the given data.
+
+    Args:
+        pos (tuple|list|QPoint): point data
+
+    Returns:
+        (QPoint): point object
+    """
+    if isinstance(pos, (tuple, list)) and len(pos) == 2:
+        return QtCore.QPoint(*pos)
+    elif isinstance(pos, QtCore.QPoint):
+        return pos
+    raise ValueError(pos)
+
+
+def get_pixmap(pix):
+    """Get pixmap from the given data.
+
+    Args:
+        pix (QPixmap|str): pixmap data or path to pixmap
+
+    Returns:
+        (HPixmap): pixmap object
+    """
+    from psyhive import qt
+
+    if isinstance(pix, qt.HPixmap):
+        return pix
+    elif isinstance(pix, QtGui.QPixmap):
+        return qt.HPixmap(pix)
+    elif isinstance(pix, six.string_types):
+        return qt.HPixmap(pix)
+    raise ValueError(pix)
 
 
 def get_qt_str(obj):

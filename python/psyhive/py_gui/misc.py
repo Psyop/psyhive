@@ -3,6 +3,24 @@
 from psyhive import icons, tools, qt
 from psyhive.utils import PyFile, str_to_seed, to_nice
 
+NICE_COLS = [
+    'salmon', 'tomato', 'darksalmon', 'coral', 'orangered', 'lightsalmon',
+    'sandybrown', 'darkorange', 'orange', 'goldenrod', 'gold', 'yellow',
+    'olivedrab', 'yellowgreen', 'darkolivegreen', 'greenyellow', 'chartreuse',
+    'lawngreen', 'darkgreen', 'forestgreen', 'green', 'lightgreen', 'lime',
+    'limegreen', 'palegreen', 'mediumseagreen', 'seagreen', 'springgreen',
+    'mediumspringgreen', 'aquamarine', 'mediumaquamarine', 'turquoise',
+    'lightseagreen', 'mediumturquoise', 'cyan', 'darkcyan', 'darkslategrey',
+    'darkturquoise', 'teal', 'cadetblue', 'powderblue', 'lightblue',
+    'deepskyblue', 'lightskyblue', 'steelblue', 'dodgerblue',
+    'lightslategrey', 'slategray', 'slategrey', 'lightsteelblue',
+    'cornflowerblue', 'royalblue', 'blue', 'darkblue', 'mediumblue',
+    'midnightblue', 'navy', 'darkslateblue', 'mediumslateblue', 'slateblue',
+    'mediumpurple', 'blueviolet', 'indigo', 'darkorchid', 'darkviolet',
+    'mediumorchid', 'darkmagenta', 'magenta', 'plum', 'purple', 'thistle',
+    'violet', 'orchid', 'mediumvioletred', 'deeppink', 'hotpink',
+    'palevioletred', 'crimson', 'pink', 'lightpink']
+
 
 def get_def_icon(name, set_):
     """Pick random icon for the given def name.

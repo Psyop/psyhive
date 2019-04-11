@@ -1,6 +1,7 @@
 """Tools for managing paths in a file structure."""
 
 import filecmp
+import functools
 import os
 import shutil
 import six
@@ -310,11 +311,14 @@ def restore_cwd(func):
         func (fn): function to decorate
     """
 
+    @functools.wraps(func)
     def _restore_cwd_fn(*args, **kwargs):
         _cwd = os.getcwd()
         _result = func(*args, **kwargs)
         os.chdir(_cwd)
         return _result
+
+    return _restore_cwd_fn
 
 
 def search_files_for_text(
@@ -341,7 +345,7 @@ def search_files_for_text(
             _print_line = False
             if text and text in _line:
                 _print_line = True
-            elif filter_ and passes_filter(_line, filter_):
+            elif passes_filter(_line, filter_, case_sensitive=True):
                 _print_line = True
 
             if _print_line:
