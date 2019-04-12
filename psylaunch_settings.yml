@@ -2,4 +2,7 @@ apps:
     maya:
         addon_types:
             modules:
-            -   path: '{project_branch_path}/pipeline/psyhive/python'
+            -   path: '{project_branch_path}/addons/maya/modules/laser'
+                restrictions:
+                    version:
+                    -   2018*
