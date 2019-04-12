@@ -1,0 +1,5 @@
+apps:
+    maya:
+        addon_types:
+            modules:
+            -   path: '{project_branch_path}/pipeline/psyhive/python'
