@@ -63,9 +63,10 @@ ignore:
         psyhive/utils/py_file/docs.py
     too-many-locals:
         hv_test/diary/
+        hv_test/release/pylint.py
+        psyhive/utils/path.py
         psyhive/utils/range_.py
         sanity_check/checks/
-        hv_test/release/pylint.py
     too-many-statements:
         hv_test/diary/
         psyhive/utils/range_.py

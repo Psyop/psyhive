@@ -166,7 +166,7 @@ def diff(left, right):
 
 def find(
         dir_=None, type_=None, extn=None, filter_=None, base=None, depth=-1,
-        verbose=0):
+        name=None, verbose=0):
     """Find files/dirs in a given path.
 
     Args:
@@ -176,6 +176,7 @@ def find(
         filter_ (str): apply filter to the list
         base (str): filter by file basename
         depth (int): max dir depth to traverse (-1 means unlimited)
+        name (str): match exact file/dir name
         verbose (int): print process data
     """
     _kwargs = locals()
@@ -231,6 +232,10 @@ def find(
         # Apply filter
         if filter_ and not passes_filter(_path, filter_):
             lprint(' - FILTERED', verbose=verbose)
+            continue
+
+        if name and not _file == name:
+            lprint(' - NAME FILTER', verbose=verbose)
             continue
 
         _results.append(_path)

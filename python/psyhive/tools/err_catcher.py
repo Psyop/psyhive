@@ -73,9 +73,14 @@ class _TraceStep(object):
 class _Traceback(object):
     """Represents a traceback."""
 
-    def __init__(self):
-        """Constructor."""
-        self.body = traceback.format_exc().strip()
+    def __init__(self, traceback_=None):
+        """Constructor.
+
+        Args:
+            traceback_ (str): override traceback string
+                (otherwise read from traceback module)
+        """
+        self.body = (traceback_ or traceback.format_exc()).strip()
         self.lines = []
         _lines = self.body.split('\n')
         assert _lines.pop(0) == 'Traceback (most recent call last):'
@@ -117,7 +122,6 @@ def _handle_exception(exc, verbose=0):
     lprint('MSG', exc.message, verbose=verbose)
     lprint('TYPE', type(exc), verbose=verbose)
     _traceback = _Traceback()
-    # print _traceback.body
 
     _app = qt.get_application()
     _dialog = _ErrDialog(traceback_=_traceback, message=exc.message)
@@ -144,6 +148,18 @@ def catch_error(func):
         return _result
 
     return _catch_error_fn
+
+
+def launch_err_catcher(traceback_, message):
+    """Launch error catcher dialog with the given message/traceback.
+
+    Args:
+        traceback_ (str): traceback
+        message (str): error message
+    """
+    _traceback = _Traceback(traceback_)
+    _dialog = _ErrDialog(traceback_=_traceback, message=message)
+    _dialog.ui.exec_()
 
 
 def toggle_file_errors():

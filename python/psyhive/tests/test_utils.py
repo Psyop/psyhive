@@ -6,7 +6,9 @@ import unittest
 
 from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
-    store_result, restore_cwd, MissingDocs)
+    store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
+    text_to_py_file)
+from psyhive.utils.py_file.docs import MissingDocs
 
 
 class TestPyFile(unittest.TestCase):
@@ -39,8 +41,14 @@ class TestPyFile(unittest.TestCase):
 
         _example = abs_path('example.py', root=os.path.dirname(__file__))
         _py_file = PyFile(_example)
-        with self.assertRaises(MissingDocs):
+        # with self.assertRaises(MissingDocs):
+        #     _py_file.find_def('missing_docs').check_docs()
+        try:
             _py_file.find_def('missing_docs').check_docs()
+        except MissingDocs:
+            pass
+        else:
+            assert False
         with self.assertRaises(MissingDocs):
             _py_file.find_def('missing_docs_args').check_docs()
         with self.assertRaises(MissingDocs):
