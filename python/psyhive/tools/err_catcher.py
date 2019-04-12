@@ -137,7 +137,7 @@ def catch_error(func):
 
     @functools.wraps(func)
     def _catch_error_fn(*args, **kwargs):
-        if os.environ.get('ERR_CATCHER_DISABLE'):
+        if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
             return func(*args, **kwargs)
         try:
             _result = func(*args, **kwargs)
@@ -162,11 +162,21 @@ def launch_err_catcher(traceback_, message):
     _dialog.ui.exec_()
 
 
+def toggle_err_catcher():
+    """Toggle error catcher decorator."""
+    if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
+        del os.environ['EXC_DISABLE_ERR_CATCHER']
+        dprint("Enabled error catcher")
+    else:
+        os.environ['EXC_DISABLE_ERR_CATCHER'] = '1'
+        dprint("Disabled error catcher")
+
+
 def toggle_file_errors():
     """Toggle error catcher decorator."""
     if os.environ.get('EXC_DISABLE_FILE_ERROR'):
         del os.environ['EXC_DISABLE_FILE_ERROR']
-        dprint("Enabled error catcher")
+        dprint("Enabled file errors")
     else:
         os.environ['EXC_DISABLE_FILE_ERROR'] = '1'
-        dprint("Disabled error catcher")
+        dprint("Disabled file errors")

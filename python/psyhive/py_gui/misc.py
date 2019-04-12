@@ -1,6 +1,7 @@
 """General utilities for py_gui interfaces."""
 
 from psyhive import icons, tools, qt
+from psyhive.tools import catch_error
 from psyhive.utils import PyFile, str_to_seed, to_nice
 
 NICE_COLS = [
@@ -63,6 +64,8 @@ def get_code_fn(def_):
     Args:
         def_ (PyDef): def to open code for
     """
+
+    @catch_error
     def _code_fn(*args):
         del args
         print 'SEARCHING FOR', def_.name, 'IN', def_.py_file
