@@ -44,8 +44,9 @@ def get_exec_fn(def_, read_arg_fns, catch_error=True):
     """
     _mod = def_.py_file.get_module()
 
-    def _exec_fn(*args):
-        del args
+    def _exec_fn(*xargs):
+        print '############ Start {} ##############'.format(def_.name)
+        del xargs
         reload(_mod)
         _kwargs = {}
         for _arg_name, _arg_fn in read_arg_fns.items():
@@ -54,6 +55,7 @@ def get_exec_fn(def_, read_arg_fns, catch_error=True):
         if catch_error:
             _fn = tools.catch_error(_fn)
         _fn(**_kwargs)
+        print '############ Complete {} ############'.format(def_.name)
 
     return _exec_fn
 
