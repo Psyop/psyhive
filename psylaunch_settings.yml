@@ -2,7 +2,7 @@ apps:
     maya:
         addon_types:
             modules:
-            -   path: '{project_branch_path}/addons/maya/modules/laser'
+            -   path: '{project_branch_path}/addons/maya/modules/'
                 restrictions:
                     version:
                     -   2018*
