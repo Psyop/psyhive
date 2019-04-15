@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+from psyhive.utils import abs_path
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        _path = sys.argv[1]
+    else:
+        _path = os.getcwd()
+    print abs_path(_path)

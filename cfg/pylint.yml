@@ -46,11 +46,12 @@ ignore:
     too-many-arguments:
         hv_test/diary/
         psyhive/py_gui/base.py
+        psyhive/py_gui/install.py
         psyhive/py_gui/maya_.py
         psyhive/qt/dialog.py
         psyhive/utils/cache.py
+        psyhive/utils/misc.py
         psyhive/utils/path.py
-        psyhive/py_gui/install.py
     too-many-branches:
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
@@ -59,11 +60,13 @@ ignore:
         psyhive/utils/range_.py
     too-many-instance-attributes:
         hv_test/diary/
+        maya_psyhive/tools/fkik_switcher.py
         psyhive/py_gui/base.py
         psyhive/utils/py_file/docs.py
     too-many-locals:
         hv_test/diary/
         hv_test/release/pylint.py
+        hv_test/release/tools.py
         psyhive/utils/path.py
         psyhive/utils/range_.py
         sanity_check/checks/
@@ -84,3 +87,4 @@ allowed_names:
     mousePressEvent
     objectName
     ui
+    userSetup

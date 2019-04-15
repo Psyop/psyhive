@@ -91,7 +91,9 @@ def get_cfg(namespace, verbose=0):
     return read_yaml(_yaml)
 
 
-def get_single(items, catch=False, name='items', verb='found', verbose=0):
+def get_single(
+        items, catch=False, name='items', verb='found', fail_message=None,
+        verbose=0):
     """Get single item from a list.
 
     If the list does not contain exactly one item, the function will fail.
@@ -101,6 +103,7 @@ def get_single(items, catch=False, name='items', verb='found', verbose=0):
         catch (bool): on error return None rather than fail
         name (str): name of objects (for error message)
         verb (str): verb for object discovery (for error message)
+        fail_message (str): override fail message
         verbose (int): print process data
 
     Returns:
@@ -118,6 +121,7 @@ def get_single(items, catch=False, name='items', verb='found', verbose=0):
 
     # Handle fail
     if _err_msg:
+        _err_msg = fail_message or _err_msg
         if catch:
             lprint(_err_msg, verbose=verbose)
             return None

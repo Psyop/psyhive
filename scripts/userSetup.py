@@ -1,3 +1,5 @@
+"""Executed on launch maya."""
+
 from maya import cmds
 from maya_psyhive import startup
 

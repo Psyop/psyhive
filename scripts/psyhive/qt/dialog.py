@@ -155,7 +155,8 @@ def notify(msg, title='Notification', icon=None, icon_size=None):
         icon_size (int): icon size in pixels
     """
     raise_dialog(
-        msg=msg, title=title, icon=icon, buttons=['Ok'], icon_size=icon_size)
+        msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
+        icon=icon or icons.EMOJI.find('Slightly Smiling Face'))
 
 
 def raise_dialog(

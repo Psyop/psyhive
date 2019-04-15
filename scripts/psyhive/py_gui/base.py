@@ -16,7 +16,7 @@ from psyhive.py_gui.misc import NICE_COLS
 class BasePyGui(object):
     """Base class for any py_gui interface."""
 
-    def __init__(self, path, title=None, all_defs=False):
+    def __init__(self, path, title=None, all_defs=False, verbose=0):
         """Constructor.
 
         Args:
@@ -25,6 +25,7 @@ class BasePyGui(object):
             all_defs (bool): force all defs into interface (by default
                 only defs decorated with the py_gui.install decorator
                 are added)
+            verbose (int): print process data
         """
 
         # Store kwargs for rebuild
@@ -57,9 +58,12 @@ class BasePyGui(object):
         self.set_arg_fns = {}
         _defs_data = self._get_defs_data()
         self.init_ui()
+        lprint(
+            'FOUND {:d} DEFS TO ADD'.format(len(_defs_data)), verbose=verbose)
         for _last, (_fn, _opts) in last(_defs_data):
-            _def = self.py_file.find_def(_fn.__name__)
-            self.add_def(_def, opts=_opts, last_=_last)
+            _def = self.py_file.find_def(_fn.__name__, catch=True)
+            if _def:
+                self.add_def(_def, opts=_opts, last_=_last)
         self.finalise_ui()
         if os.path.exists(self.settings_file):
             self.load_settings()

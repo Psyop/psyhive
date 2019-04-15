@@ -2,12 +2,13 @@ import operator
 import os
 import random
 import shutil
+import tempfile
 import unittest
 
 from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
-    text_to_py_file)
+    text_to_py_file, touch, get_single, find)
 from psyhive.utils.py_file.docs import MissingDocs
 
 
@@ -107,6 +108,16 @@ class TestUtils(unittest.TestCase):
 
         _path = 'file:///W:/Temp/icons/Emoji/icon.2469.png'
         assert abs_path(_path) == 'W:/Temp/icons/Emoji/icon.2469.png'
+
+    def test_find(self):
+
+        _test_dir = '{}/psyhive/testing/blah'.format(tempfile.gettempdir())
+        _test_file = abs_path('{}/test.txt'.format(_test_dir))
+        if os.path.exists(_test_dir):
+            shutil.rmtree(_test_dir)
+        touch(_test_file)
+        assert get_single(find(_test_dir)) == _test_file
+        assert get_single(find(_test_dir, full_path=False)) == 'test.txt'
 
     def test_obj_write(self):
 

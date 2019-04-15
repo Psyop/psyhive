@@ -118,11 +118,13 @@ def _handle_exception(exc, verbose=0):
         print '[DialogCancelled]'
         return
 
+    _pass_exception_to_sentry(exc)
+
+    # Raise error dialog
     lprint('HANDLING EXCEPTION', exc, verbose=verbose)
     lprint('MSG', exc.message, verbose=verbose)
     lprint('TYPE', type(exc), verbose=verbose)
     _traceback = _Traceback()
-
     _app = qt.get_application()
     _dialog = _ErrDialog(traceback_=_traceback, message=exc.message)
     _dialog.ui.exec_()
@@ -160,6 +162,19 @@ def launch_err_catcher(traceback_, message):
     _traceback = _Traceback(traceback_)
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
     _dialog.ui.exec_()
+
+
+def _pass_exception_to_sentry(exc):
+    """Send exception data to sentry.
+
+    Args:
+        exc (Exception): exception that was raised
+    """
+    print 'PASSING EXCEPTION TO SENTRY', exc
+
+    import psyop.utils
+    _logger = psyop.utils.get_logger('psyhive')
+    _logger.exception(str(exc))
 
 
 def toggle_err_catcher():

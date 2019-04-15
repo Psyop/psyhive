@@ -1,6 +1,36 @@
 """Tools for managing maya interface."""
 
-from maya import cmds
+from maya import cmds, mel
+
+
+def get_main_window():
+    """Get maya main window ui element name."""
+    return mel.eval('$s=$gMainWindow', verbose=0)
+
+
+def obtain_menu(name, replace=False):
+    """Find a menu element with the given name.
+
+    If it doesn't exist, it is create.
+
+    Args:
+        name (name): name of menu element to search for
+        replace (bool): replace any existing element
+    """
+
+    # Find parent menu
+    for _menu in cmds.lsUI(menus=True):
+        _label = cmds.menu(_menu, query=True, label=True)
+        if _label == name:
+            if replace:
+                cmds.deleteUI(_menu)
+                break
+            else:
+                return _menu
+
+    # Create if not found
+    return cmds.menu(
+        name+"_MENU", label=name, tearOff=True, parent=get_main_window())
 
 
 def populate_option_menu(name, choices):

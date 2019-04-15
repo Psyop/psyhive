@@ -61,12 +61,17 @@ class PyBase(object):
                 _objs, filter_, key=operator.attrgetter('name'))
         return _objs
 
-    def find_def(self, match=None, recursive=False):
+    def find_def(self, match=None, recursive=False, catch=False):
         """Find child def.
 
         Args:
             match (str): def name to search for
             recursive (bool): also check children's children recursively
+            catch (bool): no error on fail to find def
+
+        Returns:
+            (PyDef): matching def
+            (None): if no def found and catch used
 
         Raises:
             (ValueError): if exactly one matching child wasn't found
@@ -76,12 +81,18 @@ class PyBase(object):
         if _filtered:
             return _filtered
 
-        _exact_match = get_single([
-            _def for _def in self.find_defs(recursive=recursive)
-            if _def.name == match])
+        _exact_match = get_single(
+            [
+                _def for _def in self.find_defs(recursive=recursive)
+                if _def.name == match],
+            fail_message='Failed to find {} in {}'.format(
+                match, self.py_file.path),
+            catch=catch)
         if _exact_match:
             return _exact_match
 
+        if catch:
+            return None
         raise ValueError(match)
 
     def find_defs(self, filter_=None, recursive=False):

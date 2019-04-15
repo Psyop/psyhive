@@ -10,6 +10,10 @@ from psyhive.qt.widgets import HProgressBar
 from psyhive.qt.dialog import DialogCancelled
 
 
+class _CancelIteration(StopIteration, DialogCancelled):
+    """Raised when in iteration is cancelled by closing the progress bar."""
+
+
 class ProgressBar(QtWidgets.QDialog):
     """Simple dialog for showing progress of an interation."""
 
@@ -64,7 +68,7 @@ class ProgressBar(QtWidgets.QDialog):
     def __next__(self):
 
         if not self._hidden and not self.isVisible():
-            raise DialogCancelled
+            raise _CancelIteration
 
         _pc = 100.0 * self.counter / len(self.items)
         self.progress_bar.setValue(_pc)

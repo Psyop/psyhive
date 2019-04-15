@@ -166,7 +166,7 @@ def diff(left, right):
 
 def find(
         dir_=None, type_=None, extn=None, filter_=None, base=None, depth=-1,
-        name=None, verbose=0):
+        name=None, full_path=True, verbose=0):
     """Find files/dirs in a given path.
 
     Args:
@@ -177,14 +177,16 @@ def find(
         base (str): filter by file basename
         depth (int): max dir depth to traverse (-1 means unlimited)
         name (str): match exact file/dir name
+        full_path (bool): return full path to file
         verbose (int): print process data
     """
     _kwargs = locals()
     _kwargs.pop('dir_')
     _kwargs.pop('depth')
+    _kwargs.pop('full_path')
 
     _results = []
-    _dir = dir_ or os.getcwd()
+    _dir = abs_path(dir_ or os.getcwd())
 
     # Get a list of files in dir
     try:
@@ -239,6 +241,10 @@ def find(
             continue
 
         _results.append(_path)
+
+    if not full_path:
+        _results = [
+            _result.replace(_dir+'/', '') for _result in _results]
 
     return sorted(_results)
 

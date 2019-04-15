@@ -1,7 +1,7 @@
 """General utilities for py_gui interfaces."""
 
-from psyhive import icons, tools, qt
-from psyhive.tools import catch_error
+from psyhive import icons, qt
+from psyhive.tools import catch_error, track_usage
 from psyhive.utils import PyFile, str_to_seed, to_nice
 
 NICE_COLS = [
@@ -34,13 +34,14 @@ def get_def_icon(name, set_):
     return _rand.choice(set_.get_paths())
 
 
-def get_exec_fn(def_, read_arg_fns, catch_error=True):
+def get_exec_fn(def_, read_arg_fns, catch_error_=True, track_usage_=True):
     """Get execute command for the given def and read arg functions.
 
     Args:
         def_ (PyDef): def being executed
         read_arg_fns (dict): name/fn dict of functions to read def args
-        catch_error (bool): apply catch_error decorator
+        catch_error_ (bool): apply catch_error decorator
+        track_usage_ (bool): apply track usage decorator
     """
     _mod = def_.py_file.get_module()
 
@@ -52,8 +53,10 @@ def get_exec_fn(def_, read_arg_fns, catch_error=True):
         for _arg_name, _arg_fn in read_arg_fns.items():
             _kwargs[_arg_name] = _arg_fn()
         _fn = getattr(_mod, def_.name)
-        if catch_error:
-            _fn = tools.catch_error(_fn)
+        if catch_error_:
+            _fn = catch_error(_fn)
+        if track_usage_:
+            _fn = track_usage(_fn)
         _fn(**_kwargs)
         print '############ Complete {} ############'.format(def_.name)
 
