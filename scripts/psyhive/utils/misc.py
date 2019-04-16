@@ -68,6 +68,11 @@ def copy_text(text, verbose=1):
         lprint("[copied]", text, verbose=verbose)
 
 
+def dev_mode():
+    """Test whether dev mode env var is set."""
+    return bool(os.environ.get('PSYOP_DEV'))
+
+
 def dprint(*args, **kwargs):
     """Print text to terminal with a date prefix."""
     lprint(time.strftime('[%H:%M:%S]'), *args, **kwargs)

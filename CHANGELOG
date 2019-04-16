@@ -1,3 +1,14 @@
+#### v0.4.0 ####
+
+progress bar: bugfix stop iteration on cancel dialog,
+
+psyhive:
+    qt.progress fixed no stop iteration on cancel dialog,
+    tools.err_catcher suppress write to sentry in dev mode,
+    utils.dev_mode added,
+    utils.check_heart replace heart on missing,
+
+
 #### v0.3.0 ####
 
 added maya menu with fk/ik switcher

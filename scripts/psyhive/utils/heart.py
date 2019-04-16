@@ -27,4 +27,5 @@ def check_heart():
         _INITIATED = True
 
     if not os.path.exists(_heart):
+        touch(_heart)
         raise RuntimeError("Missing heart")

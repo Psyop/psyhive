@@ -7,7 +7,7 @@ import traceback
 
 from psyhive import qt
 from psyhive.utils import (
-    abs_path, check_heart, File, FileError, lprint, dprint)
+    abs_path, check_heart, File, FileError, lprint, dprint, dev_mode)
 
 _UI_FILE = abs_path('err_dialog.ui', root=os.path.dirname(__file__))
 
@@ -118,7 +118,8 @@ def _handle_exception(exc, verbose=0):
         print '[DialogCancelled]'
         return
 
-    _pass_exception_to_sentry(exc)
+    if not dev_mode():
+        _pass_exception_to_sentry(exc)
 
     # Raise error dialog
     lprint('HANDLING EXCEPTION', exc, verbose=verbose)

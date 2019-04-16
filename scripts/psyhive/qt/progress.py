@@ -2,16 +2,11 @@
 
 import collections
 
-from psyhive.utils import get_plural
+from psyhive.utils import get_plural, check_heart, lprint
 
 from psyhive.qt.misc import get_application
 from psyhive.qt.mgr import QtWidgets
 from psyhive.qt.widgets import HProgressBar
-from psyhive.qt.dialog import DialogCancelled
-
-
-class _CancelIteration(StopIteration, DialogCancelled):
-    """Raised when in iteration is cancelled by closing the progress bar."""
 
 
 class ProgressBar(QtWidgets.QDialog):
@@ -55,7 +50,7 @@ class ProgressBar(QtWidgets.QDialog):
         if col:
             self.progress_bar.set_col(col)
 
-        self._hidden = True
+        self._hidden = not show
         if show:
             self.show()
 
@@ -65,10 +60,15 @@ class ProgressBar(QtWidgets.QDialog):
     def __len__(self):
         return len(self.items)
 
-    def __next__(self):
+    def __next__(self, verbose=0):
+
+        from psyhive import qt
+
+        lprint('ITERATING', self.isVisible(), verbose=verbose)
+        check_heart()
 
         if not self._hidden and not self.isVisible():
-            raise _CancelIteration
+            raise qt.DialogCancelled
 
         _pc = 100.0 * self.counter / len(self.items)
         self.progress_bar.setValue(_pc)
