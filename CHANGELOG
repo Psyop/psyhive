@@ -1,3 +1,18 @@
+#### v0.5.0 ####
+
+qt tools: added function to close all managed dialogs,
+
+maya_psyhive:
+    ref.get_attr added,
+    tools.fkik_switcher added wip,
+psyhive:
+    py_gui.get_exec_fn added functools.wraps,
+    qt.close_all_dialogs added,
+    qt.HUiDialog.connect_widgets added catch_error_ option,
+    tools.err_catcher remove QApplication.exec_ for stability,
+    usage.track_usage quieter,
+
+
 #### v0.4.0 ####
 
 progress bar: bugfix stop iteration on cancel dialog,
