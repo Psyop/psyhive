@@ -21,6 +21,14 @@ class FileRef(object):
         """Get this ref's file path (with copy number)."""
         return cmds.referenceQuery(self.ref_node, filename=True)
 
+    def get_attr(self, attr):
+        """Get an attribute on this rig.
+
+        Args:
+            attr (str): attribute name
+        """
+        return '{}:{}'.format(self.namespace, attr)
+
     def get_node(self, name):
         """Get node from this ref matching the given name.
 

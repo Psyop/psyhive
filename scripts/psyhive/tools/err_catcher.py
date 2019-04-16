@@ -128,7 +128,6 @@ def _handle_exception(exc, verbose=0):
     _traceback = _Traceback()
     _app = qt.get_application()
     _dialog = _ErrDialog(traceback_=_traceback, message=exc.message)
-    _dialog.ui.exec_()
 
 
 def catch_error(func):

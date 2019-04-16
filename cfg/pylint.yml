@@ -6,6 +6,7 @@ ignore:
     global-statement:
         hv_test/diary/
         hv_test/tools/qube.py
+        maya_psyhive/tools/fkik_switcher/interface.py
         psyhive/py_gui/install.py
         psyhive/qt/misc.py
         psyhive/utils/heart.py
@@ -15,6 +16,8 @@ ignore:
         hv_test/diary/
     invalid-name:
         sanity_check/checks/
+    invalid-unary-operand-type:
+        maya_psyhive/tools/fkik_switcher/system.py
     missing-docstring: '*'
     no-member:
         psyhive/qt/widgets.py
@@ -45,6 +48,7 @@ ignore:
         psyhive/utils/seq.py
     too-many-arguments:
         hv_test/diary/
+        hv_test/release/tools.py
         psyhive/py_gui/base.py
         psyhive/py_gui/install.py
         psyhive/py_gui/maya_.py
@@ -53,6 +57,7 @@ ignore:
         psyhive/utils/misc.py
         psyhive/utils/path.py
     too-many-branches:
+        maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
         psyhive/utils/path.py
@@ -60,7 +65,7 @@ ignore:
         psyhive/utils/range_.py
     too-many-instance-attributes:
         hv_test/diary/
-        maya_psyhive/tools/fkik_switcher.py
+        maya_psyhive/tools/fkik_switcher/system.py
         psyhive/py_gui/base.py
         psyhive/utils/py_file/docs.py
     too-many-locals:
@@ -72,6 +77,7 @@ ignore:
         sanity_check/checks/
     too-many-statements:
         hv_test/diary/
+        maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/range_.py
     unreachable:
         hv_test/diary/

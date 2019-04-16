@@ -6,11 +6,12 @@ import os
 import pprint
 import platform
 import tempfile
+import time
 
 from maya import cmds
 from elasticsearch import Elasticsearch
 
-from psyhive.utils import lprint
+from psyhive.utils import dprint
 
 ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
 DATA_FILE = os.path.join(tempfile.gettempdir(), 'psyhive.json')
@@ -42,8 +43,7 @@ def _write_usage_to_kibana(func, verbose=1):
         func (fn): function that was executed
         verbose (int): print process data
     """
-    lprint('WRITING USAGE TO KIBANA', verbose=verbose)
-
+    _start = time.time()
     _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
     _data = {
         'filename': cmds.file(query=True, location=True),
@@ -53,9 +53,9 @@ def _write_usage_to_kibana(func, verbose=1):
         'timestamp': datetime.datetime.utcnow(),
         'username': os.environ.get('USER'),
     }
-
-    print _index_name
-    pprint.pprint(_data)
+    if verbose > 1:
+        print _index_name
+        pprint.pprint(_data)
 
     _conn = Elasticsearch([ELASTIC_URL])
     if not _conn.ping():
@@ -69,6 +69,9 @@ def _write_usage_to_kibana(func, verbose=1):
         id=_data.pop('_id', None))
 
     _data['_id'] = _res['_id']
+
+    _dur = time.time() - _start
+    dprint('Wrote usage to kibana ({:.02f}s)'.format(_dur), verbose=verbose)
 
 
 def track_usage(func):

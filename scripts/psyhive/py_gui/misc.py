@@ -1,5 +1,7 @@
 """General utilities for py_gui interfaces."""
 
+import functools
+
 from psyhive import icons, qt
 from psyhive.tools import catch_error, track_usage
 from psyhive.utils import PyFile, str_to_seed, to_nice
@@ -44,7 +46,9 @@ def get_exec_fn(def_, read_arg_fns, catch_error_=True, track_usage_=True):
         track_usage_ (bool): apply track usage decorator
     """
     _mod = def_.py_file.get_module()
+    _fn = getattr(_mod, def_.name)
 
+    @functools.wraps(_fn)
     def _exec_fn(*xargs):
         print '############ Start {} ##############'.format(def_.name)
         del xargs
