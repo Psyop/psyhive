@@ -16,14 +16,6 @@ from psyhive.utils.py_file.docs import PyDefDocs, MissingDocs
 class PyDef(PyBase):
     """Represents a python definition."""
 
-    def __init__(self, *args, **kwargs):
-        """Constructor."""
-        super(PyDef, self).__init__(*args, **kwargs)
-
-        self.clean_name = self._ast.name
-        self.is_super_private = self._ast.name.startswith('__')
-        self.is_private = self._ast.name.startswith('_')
-
     def find_arg(self, filter_=None):
         """Find an arg belonging to this def.
 
@@ -70,8 +62,10 @@ class PyDef(PyBase):
         if self.is_super_private and not self.clean_name == '__init__':
             return
         elif (  # Ignore ui callbacks
+                self.clean_name.startswith('_redraw__') or
                 self.clean_name.startswith('_callback__') or
-                self.clean_name.startswith('_redraw__')):
+                self.clean_name.startswith('_context__')
+        ):
             return
 
         # Check header

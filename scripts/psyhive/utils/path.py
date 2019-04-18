@@ -78,6 +78,14 @@ class Path(object):
 class Dir(Path):
     """Represents a directory on disk."""
 
+    def find(self, **kwargs):
+        """Search for files in this dir.
+
+        Returns:
+            (str list): list of files
+        """
+        return find(self.path, **kwargs)
+
 
 class File(Path):
     """Represents a file on disk."""

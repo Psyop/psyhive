@@ -159,6 +159,19 @@ def notify(msg, title='Notification', icon=None, icon_size=None):
         icon=icon or icons.EMOJI.find('Slightly Smiling Face'))
 
 
+def notify_warning(msg, title='Warning', icon=None):
+    """Raise a warning notification dialog.
+
+    Args:
+        msg (str): notification message
+        title (str): dialog title
+        icon (str): path to dialog icon
+    """
+    notify(
+        msg=msg, title=title,
+        icon=icon or icons.EMOJI.find('Cold Face'))
+
+
 def raise_dialog(
         msg="No message", title="Dialog", buttons=("Ok", "Cancel"),
         icon=None, icon_size=None, verbose=1):

@@ -29,6 +29,10 @@ class PyBase(object):
         self.py_file = py_file
         self.name = name or ast_.name
 
+        self.clean_name = name.split('.')[-1]
+        self.is_super_private = self.clean_name.startswith('__')
+        self.is_private = self.clean_name.startswith('_')
+
     def check_docs(self, recursive=False, verbose=0):
         """Check this def's docstring.
 
@@ -41,25 +45,66 @@ class PyBase(object):
         """Open this component in a editor."""
         self.py_file.edit(line_n=self._ast.lineno)
 
-    def find_children(self, filter_=None, recursive=False):
+    def find_child(self, match=None, recursive=False, catch=False, type_=None):
+        """Find child node of this object.
+
+        Args:
+            match (str): filter or exact match string
+            recursive (bool): recurse into children's children
+            catch (bool): no error on fail to find
+            type_ (PyBase): filter by object type
+        """
+
+        # Try match as filter
+        _filtered = get_single(self.find_children(
+            filter_=match, recursive=recursive, type_=type_), catch=True)
+        if _filtered:
+            return _filtered
+
+        # Try match as exact name match
+        _exact_match = get_single(
+            [
+                _child for _child in self.find_children(
+                    recursive=recursive, type_=type_)
+                if _child.name == match],
+            fail_message='Failed to find {} in {}'.format(
+                match, self.py_file.path),
+            catch=catch)
+        if _exact_match:
+            return _exact_match
+
+        # Handle fail
+        if catch:
+            return None
+        raise ValueError(match)
+
+    def find_children(
+            self, filter_=None, recursive=False, force=False, type_=None):
         """Find children of this object.
 
         Args:
             filter_ (str): apply filter to list of children
             recursive (bool): also check children's children recursively
+            force (bool): force reread ast from disk
+            type_ (PyBase): filter by type
         """
         if not recursive:
-            _objs = self._read_children()
+            _children = self._read_children(force=force)
         else:
-            _objs = []
-            for _obj in self._read_children():
-                _objs.append(_obj)
-                _objs += _obj.find_children(recursive=True)
+            _children = []
+            for _child in self._read_children(force=force):
+                _children.append(_child)
+                _children += _child.find_children(recursive=True)
+
+        if type_:
+            _children = [
+                _child for _child in _children if isinstance(_child, type_)]
 
         if filter_:
-            _objs = apply_filter(
-                _objs, filter_, key=operator.attrgetter('name'))
-        return _objs
+            _children = apply_filter(
+                _children, filter_, key=operator.attrgetter('name'))
+
+        return _children
 
     def find_def(self, match=None, recursive=False, catch=False):
         """Find child def.
@@ -76,24 +121,9 @@ class PyBase(object):
         Raises:
             (ValueError): if exactly one matching child wasn't found
         """
-        _filtered = get_single(self.find_defs(
-            filter_=match, recursive=recursive), catch=True)
-        if _filtered:
-            return _filtered
-
-        _exact_match = get_single(
-            [
-                _def for _def in self.find_defs(recursive=recursive)
-                if _def.name == match],
-            fail_message='Failed to find {} in {}'.format(
-                match, self.py_file.path),
-            catch=catch)
-        if _exact_match:
-            return _exact_match
-
-        if catch:
-            return None
-        raise ValueError(match)
+        from psyhive.utils.py_file.def_ import PyDef
+        return self.find_child(
+            match=match, recursive=recursive, catch=catch, type_=PyDef)
 
     def find_defs(self, filter_=None, recursive=False):
         """Find child defs of this object.
@@ -103,12 +133,8 @@ class PyBase(object):
             recursive (bool): also check children's children recursively
         """
         from psyhive.utils.py_file.def_ import PyDef
-
-        _defs = [
-            _item for _item in self.find_children(
-                filter_=filter_, recursive=recursive)
-            if isinstance(_item, PyDef)]
-        return _defs
+        return self.find_children(
+            filter_=filter_, recursive=recursive, type_=PyDef)
 
     def fix_docs(self, recursive=True):
         """Fix docs of this object.
@@ -138,8 +164,15 @@ class PyBase(object):
             verbose (int): print process data
         """
 
-    def _get_ast(self):
-        """Get this objects associated absract syntax tree object."""
+    def _get_ast(self, force=False):
+        """Get this objects associated absract syntax tree object.
+
+        Args:
+            force (bool): provided for symmetry
+
+        Returns:
+            (ast.Module): this object's syntax tree
+        """
         return self._ast
 
     @store_result_on_obj
@@ -154,7 +187,7 @@ class PyBase(object):
         from psyhive.utils.py_file.def_ import PyDef
         from psyhive.utils.py_file.file_ import PyFile
 
-        _ast = self._get_ast()
+        _ast = self._get_ast(force=force)
         _objs = []
 
         for _item in _ast.body:

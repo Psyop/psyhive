@@ -8,6 +8,8 @@ EMOJI = EmojiSet(
     'P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.%04d.png',
     frames=str_to_ints('0-2775'))
 
+COPY = EMOJI.find('Spiral Notepad')
+
 ANIMALS = Collection([
     EMOJI[_idx] for _idx in str_to_ints('1576-1672')])
 FRUIT = Collection([

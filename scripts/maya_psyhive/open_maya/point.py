@@ -3,13 +3,11 @@
 from maya import cmds
 from maya.api import OpenMaya as om
 
-from maya_psyhive.open_maya.utils import HArray3Base, cast_result
+from maya_psyhive.open_maya.utils import HArray3Base
 
 
 class HPoint(HArray3Base, om.MPoint):
     """Represents a point in 3d space."""
-
-    __add__ = cast_result(om.MPoint.__add__)
 
 
 def get_p(node):

@@ -62,11 +62,12 @@ def read_option_menu(name, type_):
     Returns:
         (any): selected item if given type
     """
+    _type = type_ or str
     _sel = cmds.optionMenu(name, query=True, select=True)
     _items = cmds.optionMenu(name, query=True, itemListLong=True)
     _item = _items[_sel-1]
     _text = cmds.menuItem(_item, query=True, label=True)
-    return type_(_text)
+    return _type(_text)
 
 
 def set_option_menu(name, value):

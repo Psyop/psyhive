@@ -24,7 +24,8 @@ class _ErrDialog(qt.HUiDialog):
         """
         self.traceback = traceback_
         self.message = message
-        super(_ErrDialog, self).__init__(ui_file=_UI_FILE)
+        super(_ErrDialog, self).__init__(
+            ui_file=_UI_FILE, catch_error_=False)
         self.ui.setWindowTitle('Error')
 
     def _callback__er_view_code(self):

@@ -1,12 +1,14 @@
 """Tools for managing qt interfaces."""
 
+import tempfile
 import os
 import sys
 
-from psyhive.tools import catch_error
-from psyhive.qt.mgr import QtWidgets, QtUiTools
-from psyhive.qt.widgets import HLabel, HTextBrowser
 from psyhive.utils import wrap_fn, lprint
+
+from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
+from psyhive.qt.widgets import HLabel, HTextBrowser, HPushButton, HMenu
+from psyhive.qt.misc import get_pixmap
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
     sys.QT_DIALOG_STACK = {}
@@ -15,18 +17,22 @@ if not hasattr(sys, 'QT_DIALOG_STACK'):
 class HUiDialog(QtWidgets.QDialog):
     """Base class for any interface."""
 
-    def __init__(self, ui_file, verbose=0):
+    def __init__(
+            self, ui_file, catch_error_=False, dialog_stack_key=None,
+            verbose=0):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
+            catch_error_ (bool): apply catch error decorator to callbacks
+            dialog_stack_key (str): override dialog stack key
             verbose (int): print process data
         """
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
 
         # Remove any existing widgets
-        _dialog_stack_key = ui_file
+        _dialog_stack_key = dialog_stack_key or ui_file
         if _dialog_stack_key in sys.QT_DIALOG_STACK:
             sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
@@ -37,16 +43,35 @@ class HUiDialog(QtWidgets.QDialog):
         _loader = QtUiTools.QUiLoader()
         _loader.registerCustomWidget(HLabel)
         _loader.registerCustomWidget(HTextBrowser)
+        _loader.registerCustomWidget(HPushButton)
         self.ui = _loader.load(ui_file, self)
 
         # Setup widgets
         self.widgets = self.read_widgets()
-        self.connect_widgets(verbose=verbose)
+        self.connect_widgets(catch_error_=catch_error_, verbose=verbose)
+
+        # Handle settings
+        self.settings_file = '{}/psyhive/{}.ini'.format(
+            tempfile.gettempdir(), _dialog_stack_key)
+        self.settings = QtCore.QSettings(
+            self.settings_file, QtCore.QSettings.IniFormat)
+        self.read_settings()
 
         self.redraw_ui()
         self.ui.show()
 
-    def connect_widgets(self, catch_error_=True, verbose=0):
+    def closeEvent(self, event):
+        """Triggered on close dialog.
+
+        Args:
+            event (QEvent): triggered event
+        """
+        _result = QtWidgets.QDialog.closeEvent(self, event)
+        if hasattr(self, 'write_settings'):
+            self.write_settings()
+        return _result
+
+    def connect_widgets(self, catch_error_=False, verbose=0):
         """Connect widgets with redraw/callback methods.
 
         Only widgets with override types are linked.
@@ -64,12 +89,20 @@ class HUiDialog(QtWidgets.QDialog):
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
                 if catch_error_:
+                    from psyhive.tools import catch_error
                     _callback = catch_error(_callback)
                 lprint(' - CONNECTING', _widget, verbose=verbose)
-                for _hook_name in ['clicked']:
+                for _hook_name in ['clicked', 'textChanged']:
                     _hook = getattr(_widget, _hook_name, None)
                     if _hook:
                         _hook.connect(_callback)
+
+            # Connect context
+            _context = getattr(self, '_context__'+_name, None)
+            if _context:
+                _widget.customContextMenuRequested.connect(
+                    _get_context_fn(_context, widget=_widget))
+                _widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
             # Connect draw callback
             _redraw = getattr(self, '_redraw__'+_name, None)
@@ -86,6 +119,7 @@ class HUiDialog(QtWidgets.QDialog):
         for _fn in [
                 self.ui.close if hasattr(self, 'ui') else None,
                 self.ui.deleteLater if hasattr(self, 'ui') else None,
+                self.close,
                 self.deleteLater,
         ]:
             if not _fn:
@@ -120,6 +154,76 @@ class HUiDialog(QtWidgets.QDialog):
             _redraw = getattr(_widget, 'redraw', None)
             if _redraw:
                 _redraw()
+
+    def read_settings(self):
+        """Read settings from disk."""
+        print 'READ SETTINGS'
+
+        # Apply widget settings
+        for _widget in self.widgets:
+            _name = _widget.objectName()
+            _val = self.settings.value(_name)
+            if not _val:
+                continue
+            print ' - APPLY', _name, _val
+            if isinstance(_widget, QtWidgets.QLineEdit):
+                _widget.setText(_val)
+            elif isinstance(_widget, (
+                    QtWidgets.QRadioButton,
+                    QtWidgets.QCheckBox)):
+                _widget.setChecked(_val)
+            else:
+                raise ValueError(_widget)
+
+        # Apply window settings
+        _pos = self.settings.value('window/pos')
+        if _pos:
+            print ' - APPLYING POS', _pos
+            self.ui.move(_pos)
+
+    def set_icon(self, icon):
+        """Set icon for this interface.
+
+        Args:
+            icon (str|QPixmap): icon to apply
+        """
+        _pix = get_pixmap(icon)
+        self.setWindowIcon(_pix)
+
+    def write_settings(self):
+        """Write settings to disk."""
+        print 'SAVING SETTINGS', self.settings.fileName()
+
+        for _widget in self.widgets:
+            if isinstance(_widget, QtWidgets.QLineEdit):
+                _val = _widget.text()
+            elif isinstance(_widget, (
+                    QtWidgets.QRadioButton,
+                    QtWidgets.QCheckBox)):
+                _val = _widget.isChecked()
+            else:
+                continue
+            print ' - SAVING', _widget.objectName(), _val
+            self.settings.setValue(_widget.objectName(), _val)
+
+        self.settings.setValue('window/pos', self.ui.pos())
+        print ' - SAVING POS', self.ui.pos()
+
+
+def _get_context_fn(callback, widget):
+    """Build function connect widget right-click to the given callback.
+
+    Args:
+        callback (fn): context menu callback to connect to
+        widget (QWidget): widget to apply callback to
+    """
+
+    def _context_fn(pos):
+        _menu = HMenu(widget)
+        callback(_menu)
+        _menu.exec_(widget.mapToGlobal(pos))
+
+    return _context_fn
 
 
 def close_all_dialogs():

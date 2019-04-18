@@ -10,7 +10,6 @@ from maya_psyhive.utils import set_col
 class HVector(HArray3Base, om.MVector):
     """Represents a 3d vector."""
 
-    __add__ = cast_result(om.MVector.__add__)
     __mul__ = cast_result(om.MVector.__mul__)
     __neg__ = cast_result(om.MVector.__neg__)
     __xor__ = cast_result(om.MVector.__xor__)

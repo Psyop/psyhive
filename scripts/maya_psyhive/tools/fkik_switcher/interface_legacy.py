@@ -86,12 +86,17 @@ def ik_to_fk(build_tmp_geo=True, apply_=True):
 @get_ns_cleaner(":tmp")
 @py_gui.install_gui(
     label='Toggle IK/FK', label_width=100,
-    icon=_get_flex_icon('Left-Right Arrow'))
-def toggle_ik_fk(build_tmp_geo=False):
+    icon=_get_flex_icon('Left-Right Arrow'),
+    choices={'refresh_': range(3)})
+def toggle_ik_fk(refresh_=1, build_tmp_geo=False, apply_=True):
     """Toggle between IK/FK.
 
     Args:
+        refresh_ (int): refresh code level
         build_tmp_geo (bool): build tmp geo
+        apply_ (bool): apply switch
     """
-    refresh.reload_libs(filter_='fkik')
-    system.get_selected_system().toggle_ik_fk(build_tmp_geo=build_tmp_geo)
+    if refresh_:
+        refresh.reload_libs(filter_=None if refresh_ == 2 else 'fkik')
+    system.get_selected_system().toggle_ik_fk(
+        build_tmp_geo=build_tmp_geo, apply_=apply_)

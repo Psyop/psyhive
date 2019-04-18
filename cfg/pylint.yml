@@ -5,6 +5,7 @@ ignore:
         psyhive/tools/err_catcher.py
     global-statement:
         hv_test/diary/
+        hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         maya_psyhive/tools/fkik_switcher/interface.py
         psyhive/py_gui/install.py
@@ -24,6 +25,7 @@ ignore:
         sanity_check/checks/maya/general/shotgun.py
     no-self-use:
         /tests/test_
+        hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         sanity_check/checks/maya/
     pointless-statement:
@@ -49,6 +51,7 @@ ignore:
     too-many-arguments:
         hv_test/diary/
         hv_test/release/tools.py
+        maya_psyhive/tools/fkik_switcher/system.py
         psyhive/py_gui/base.py
         psyhive/py_gui/install.py
         psyhive/py_gui/maya_.py
@@ -83,12 +86,14 @@ ignore:
         hv_test/diary/
     unused-argument:
         hv_test/diary/
+        maya_psyhive/tools/fkik_switcher/system.py
         psyhive/py_gui/base.py
         psyhive/utils/cache.py
         sanity_check/checks/
     unused-import:
         psyhive/qt/mgr.py
 allowed_names:
+    closeEvent
     keyPressEvent
     mousePressEvent
     objectName

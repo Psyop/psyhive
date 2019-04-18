@@ -137,7 +137,7 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="key_range">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -221,7 +221,7 @@ color: rgb(0, 0, 0);</string>
   <connection>
    <sender>key_none</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>key_range</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -237,7 +237,7 @@ color: rgb(0, 0, 0);</string>
   <connection>
    <sender>key_on_switch</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>key_range</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -253,7 +253,7 @@ color: rgb(0, 0, 0);</string>
   <connection>
    <sender>key_prev</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>key_range</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -269,7 +269,7 @@ color: rgb(0, 0, 0);</string>
   <connection>
    <sender>key_over_range</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>key_range</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

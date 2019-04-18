@@ -61,8 +61,15 @@ class PyFile(File, PyBase):
         dprint('FIX DOCS COMPLETE')
 
     @store_result_on_obj
-    def _get_ast(self):
-        """Get this py file's ast object."""
+    def _get_ast(self, force=False):
+        """Get this py file's ast object.
+
+        Args:
+            force (bool): force reread ast object from disk
+
+        Returns:
+            (ast.Module): abstract syntax tree
+        """
         _body = self.body or self.read()
         try:
             return ast.parse(_body)

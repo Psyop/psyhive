@@ -17,15 +17,6 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         """Constructor."""
         super(_FkIkSwitcherUi, self).__init__(ui_file=_UI_FILE)
 
-    def _read_key_mode(self):
-        """Read current key mode from radio buttons."""
-        for _name in ['none', 'on_switch', 'prev', 'over_range']:
-            _elem = getattr(self.ui, 'key_'+_name)
-            if _elem.isChecked():
-                return _name
-
-        raise ValueError
-
     def _callback__fk_to_ik(self):
         print 'FK -> IK'
         self._execute_switch(mode='fk_to_ik')
@@ -41,10 +32,23 @@ class _FkIkSwitcherUi(qt.HUiDialog):
             mode (str): transition to make
         """
         _system = system.get_selected_system()
-        _key_mode = self._read_key_mode()
-        _fn = getattr(_system, 'apply_'+mode)
+        if not _system:
+            qt.notify_warning('No ik/fk controls selected')
+            return
+        _system.exec_switch_and_key(
+            switch_mode=mode,
+            key_mode=self._read_key_mode(),
+            pole_vect_depth=self.ui.pole_vector_depth.value(),
+            build_tmp_geo=self.ui.build_tmp_geo.isChecked(),
+            range_=self.ui.key_range.text())
 
-        print 'APPLYING', _fn, _key_mode
+    def _read_key_mode(self):
+        """Read current key mode from radio buttons."""
+        for _name in ['none', 'on_switch', 'prev', 'over_range']:
+            _elem = getattr(self.ui, 'key_'+_name)
+            if _elem.isChecked():
+                return _name
+        raise ValueError
 
 
 def launch_interface():

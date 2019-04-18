@@ -281,6 +281,18 @@ def system(cmd, verbose=0):
     return _pipe.communicate()[0]
 
 
+def to_camel(text):
+    """Convert text to camel case.
+
+    Args:
+        text (str): text to convert
+
+    Returns:
+        (str): camel text
+    """
+    return text.strip().lower().replace(' ', '_')
+
+
 def to_nice(text):
     """Convert camel or snake case to a readable string.
 

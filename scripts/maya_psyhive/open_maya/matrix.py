@@ -82,6 +82,8 @@ class HMatrix(om.MMatrix):
         return '<{}:{}>'.format(
             type(self).__name__.strip('_'), _vals.strip(' ,'))
 
+    __repr__ = __str__
+
 
 def axes_to_m(pos=None, lx_=None, ly_=None, lz_=None, verbose=0):
     """Convert axes and position to a matrix.

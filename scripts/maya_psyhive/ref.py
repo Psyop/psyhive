@@ -110,8 +110,11 @@ def get_selected(catch=False):
     _nss = sorted(set([
         _node.split(":")[0] for _node in cmds.ls(selection=True)
         if ":" in _node]))
-    return find_ref(get_single(
-        _nss, name='reference', verb='selected', catch=catch))
+    _ns = get_single(
+        _nss, fail_message='No reference selected', catch=catch)
+    if not _ns:
+        return None
+    return find_ref(_ns)
 
 
 def obtain_ref(file_, namespace):

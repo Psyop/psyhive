@@ -36,16 +36,22 @@ def cast_result(func, verbose=0):
 class HArray3Base(object):
     """Base class for any 3d array object."""
 
-    def apply_to(self, node):
+    def apply_to(self, node, use_constraint=False):
         """Apply this data to the given node.
 
         Args:
             node (str): node to apply to
+            use_constraint (bool): use locator and point constraint to apply
+                position, deleting them after use - this seems more reliable
+                in some cases but is slower
         """
-        # from maya_psyhive import open_maya as hom
-        # _piv = hom.HPoint(cmds.getAttr(node+'.rotatePivot')[0])
-        # print 'APPLY TO', self, _piv
-        # _pos = self - _piv
+        if use_constraint:
+            _loc = self.build_loc()
+            _cons = cmds.pointConstraint(
+                _loc, node, maintainOffset=False)[0]
+            cmds.delete(_cons, _loc)
+            return
+
         cmds.xform(
             node, translation=self.to_tuple(), worldSpace=True)
 
@@ -70,6 +76,11 @@ class HArray3Base(object):
             (float tuple): 3 floats
         """
         return tuple([self[_idx] for _idx in range(3)])
+
+    def __add__(self, other):
+        from maya_psyhive import open_maya as hom
+        return hom.HVector(
+            self[0]+other[0], self[1]+other[1], self[2]+other[2])
 
     def __str__(self):
         return '<{}:({})>'.format(
