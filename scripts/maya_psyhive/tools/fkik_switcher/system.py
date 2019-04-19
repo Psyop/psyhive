@@ -277,31 +277,51 @@ class _FkIkSystem(object):
             self.apply_ik_to_fk(
                 build_tmp_geo=build_tmp_geo, apply_=apply_)
 
+    def __cmp__(self, other):
+        return cmp(str(self), str(other))
+
+    def __hash__(self):
+        return hash(str(self))
+
     def __repr__(self):
         return '<{}:{}{}>'.format(
             type(self).__name__.strip("_"), self.side,
             self.limb.capitalize())
 
 
-def get_selected_system():
-    """Get selected fk/ik system.
+def get_selected_systems():
+    """Get selected FK/IK systems.
 
     Returns:
-        (_FkIkSystem): currently selected system
+        (_FkIkSystem list): selected systems
     """
     _rig = ref.get_selected(catch=True)
     if not _rig:
-        return None
-    _node = get_single(
-        cmds.ls(selection=True),
-        fail_message='no ik/fk system selected')
+        return []
 
-    _side = _node.split(":")[1][:2]
-    if 'arm' in _node or 'wrist' in _node:
-        _limb = 'arm'
-    elif 'leg' in _node or 'ankle' in _node:
-        _limb = 'leg'
-    else:
-        raise ValueError(_node)
-    print 'RIG/SIDE/LIMB', _rig, _side, _limb
-    return _FkIkSystem(rig=_rig, side=_side, limb=_limb)
+    _systems = set()
+    for _node in cmds.ls(selection=True):
+        for _side in ['Lf', 'Rt']:
+            for _limb in ['arm', 'leg']:
+                _system = _FkIkSystem(rig=_rig, limb=_limb, side=_side)
+                if _node in _system.get_ctrls():
+                    _systems.add(_system)
+
+    return sorted(_systems)
+
+
+def get_selected_system(error=None):
+    """Get selected fk/ik system.
+
+    Args:
+        error (Exception): override exception
+
+    Returns:
+        (_FkIkSystem): currently selected system
+
+    Raises:
+        (ValueError): if no systems selected
+    """
+    _systems = get_selected_systems()
+    return get_single(
+        _systems, name='ik/fk system', verb='selected', error=error)

@@ -93,7 +93,7 @@ class HUiDialog(QtWidgets.QDialog):
             if _callback:
                 if catch_error_:
                     from psyhive.tools import get_error_catcher
-                    _catcher = get_error_catcher(error_func=None)
+                    _catcher = get_error_catcher(exit_on_error=False)
                     _callback = _catcher(_callback)
                 _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)

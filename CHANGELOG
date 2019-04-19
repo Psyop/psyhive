@@ -1,3 +1,20 @@
+#### v0.8.0 ####
+
+FK/IK switcher: working release
+
+maya_psyhive:
+    tools.fkik_switcher shared error for no/multi systems selected,
+    tools.fkik_switcher catch multiple systems selected,
+psyhive:
+    tools.get_error_catcher bugfix exit on error option,
+    tools.HandledError added,
+    tools.catch_error dialog shows error type,
+    tools.catch_error disabled make ticket option,
+    utils.get_single added error override option,
+    utils.get_single bugfix error message on multiple,
+    utils.get_plural bugfix multiple,
+
+
 #### v0.7.0 ####
 
 fkik switcher: added keyframe button + working key options,

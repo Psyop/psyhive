@@ -98,7 +98,7 @@ def get_cfg(namespace, verbose=0):
 
 def get_single(
         items, catch=False, name='items', verb='found', fail_message=None,
-        verbose=0):
+        error=None, verbose=0):
     """Get single item from a list.
 
     If the list does not contain exactly one item, the function will fail.
@@ -109,6 +109,7 @@ def get_single(
         name (str): name of objects (for error message)
         verb (str): verb for object discovery (for error message)
         fail_message (str): override fail message
+        error (Exception): override exception to raise on fail
         verbose (int): print process data
 
     Returns:
@@ -122,7 +123,8 @@ def get_single(
     if not items:
         _err_msg = 'No {} {}'.format(name, verb)
     elif len(items) > 1:
-        _err_msg = '{:d} {} {}'.format(len(items), name, verbose)
+        _err_msg = '{:d} {}{} {}'.format(
+            len(items), name, get_plural(items), verb)
 
     # Handle fail
     if _err_msg:
@@ -130,7 +132,8 @@ def get_single(
         if catch:
             lprint(_err_msg, verbose=verbose)
             return None
-        raise ValueError(_err_msg)
+        _error = error or ValueError
+        raise _error(_err_msg)
 
     if isinstance(items, set):
         items = list(items)
@@ -150,7 +153,7 @@ def get_plural(items):
     Returns:
         (str): plural character
     """
-    return '' if len(items) == 1 else ''
+    return '' if len(items) == 1 else 's'
 
 
 def get_ord(idx):
