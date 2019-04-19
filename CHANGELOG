@@ -1,3 +1,20 @@
+#### v0.11.0 ####
+
+FK/IK switcher:
+    switch key as separate option,
+    reset Knee/Arm offset to switch to IK,
+
+maya_psyhive:
+    open_maya.HMatrix.apply_to added use constraint option,
+    open_maya.HMatrix.build_loc added,
+    startup added fix logging level,
+    tools.fkik_switcher separated switch key option from key modes,
+    tools.fkik_switcher working key range mode,
+    tools.fkik_switcher fix ik Knee/Arm offset on switch,
+psyhive:
+    qt.HCheckBox added,
+
+
 #### v0.10.0 ####
 
 qt tools: track usage of interface callbacks,

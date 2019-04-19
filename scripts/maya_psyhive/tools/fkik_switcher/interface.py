@@ -6,7 +6,7 @@ from maya import cmds
 
 from psyhive import qt
 from psyhive.tools import HandledError
-from psyhive.utils import abs_path, dev_mode, wrap_fn
+from psyhive.utils import abs_path, wrap_fn
 
 from maya_psyhive.tools.fkik_switcher import system
 
@@ -31,9 +31,6 @@ class _FkIkSwitcherUi(qt.HUiDialog):
     def __init__(self):
         """Constructor."""
         super(_FkIkSwitcherUi, self).__init__(ui_file=_UI_FILE)
-
-    def _redraw__build_tmp_geo(self, widget):
-        widget.setVisible(dev_mode())
 
     def _callback__fk_to_ik(self):
         print 'FK -> IK'
@@ -65,15 +62,17 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         """
         _system = system.get_selected_system(error=HandledError)
         _system.exec_switch_and_key(
-            switch_mode=mode, key_mode=self._read_key_mode())
+            switch_mode=mode,
+            switch_key=self.ui.switch_key.isChecked(),
+            key_mode=self._read_key_mode())
 
     def _read_key_mode(self):
         """Read current key mode from radio buttons."""
-        for _name in ['none', 'on_switch', 'prev', 'over_timeline']:
+        for _name in ['none', 'frame', 'timeline']:
             _elem = getattr(self.ui, 'key_'+_name)
             if _elem.isChecked():
                 return _name
-        raise ValueError
+        raise ValueError("Failed to read key mode")
 
 
 def launch_interface():

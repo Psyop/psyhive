@@ -8,7 +8,8 @@ from psyhive import host
 from psyhive.utils import wrap_fn, lprint, dprint
 
 from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
-from psyhive.qt.widgets import HLabel, HTextBrowser, HPushButton, HMenu
+from psyhive.qt.widgets import (
+    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu)
 from psyhive.qt.misc import get_pixmap
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
@@ -45,6 +46,7 @@ class HUiDialog(QtWidgets.QDialog):
 
         # Load ui file
         _loader = QtUiTools.QUiLoader()
+        _loader.registerCustomWidget(HCheckBox)
         _loader.registerCustomWidget(HLabel)
         _loader.registerCustomWidget(HTextBrowser)
         _loader.registerCustomWidget(HPushButton)

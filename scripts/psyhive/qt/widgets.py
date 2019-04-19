@@ -35,6 +35,10 @@ class HWidgetBase(object):
         return '<{}:{}>'.format(type(self).__name__, self.objectName())
 
 
+class HCheckBox(QtWidgets.QCheckBox, HWidgetBase):
+    """Override for QCheckBox widget."""
+
+
 class HLabel(QtWidgets.QLabel, HWidgetBase):
     """Override for QLabel widget."""
 

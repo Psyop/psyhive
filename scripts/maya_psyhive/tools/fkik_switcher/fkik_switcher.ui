@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>238</width>
+    <width>226</width>
     <height>206</height>
    </rect>
   </property>
@@ -17,52 +17,57 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <property name="spacing">
-      <number>2</number>
+      <number>5</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Key:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_4">
+        <widget class="QRadioButton" name="key_none">
          <property name="text">
-          <string>Key:</string>
+          <string>None</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="key_frame">
+         <property name="text">
+          <string>Current frame</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="key_timeline">
+         <property name="text">
+          <string>Timeline selection</string>
          </property>
         </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QRadioButton" name="key_none">
-       <property name="text">
-        <string>No key</string>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="key_on_switch">
+      <widget class="QCheckBox" name="switch_key">
        <property name="text">
-        <string>Key on switch</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="key_prev">
-       <property name="text">
-        <string>Key previous frame,
-switch and key</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="key_over_timeline">
-       <property name="text">
-        <string>Switch and key over
-timeline selection</string>
+        <string>Add switch key</string>
        </property>
       </widget>
      </item>
@@ -151,5 +156,54 @@ color: rgb(0, 0, 0);</string>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>key_none</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>switch_key</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>40</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>49</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>key_frame</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>switch_key</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>83</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>key_timeline</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>switch_key</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>64</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

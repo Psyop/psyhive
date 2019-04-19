@@ -1,27 +1,17 @@
 """Tools to be run on maya startup."""
 
-import time
+import logging
 
 from maya import cmds
 
 from psyhive import icons, refresh
-from psyhive.utils import dprint, TMP, touch
+from psyhive.utils import dprint, wrap_fn
 from maya_psyhive import ui
 from maya_psyhive.tools import fkik_switcher
 
 
-def _touch_path_in_tmp():
-    """Touch path in tmp dir."""
-    _path = '{}/log/launch_{}.log'.format(TMP, time.strftime('%H%M%S'))
-    dprint('TOUCH', _path)
-    touch(_path)
-
-
-def user_setup():
-    """User setup."""
-
-    dprint('PSYHIVE USER SETUP')
-
+def _build_psyhive_menu():
+    """Build psyhive menu."""
     _menu = ui.obtain_menu('PsyHive', replace=True)
 
     # Add FK/IK switcher
@@ -40,3 +30,16 @@ def user_setup():
     cmds.menuItem(
         label='Reload libs', command=_cmd,
         image=icons.EMOJI.find('Counterclockwise Arrows Button'))
+
+    return _menu
+
+
+def user_setup():
+    """User setup."""
+    dprint('Executing PsyHive user setup')
+
+    _build_psyhive_menu()
+
+    # Fix logging level (pymel sets to debug)
+    _fix_fn = wrap_fn(logging.getLogger().setLevel, logging.WARNING)
+    cmds.evalDeferred(_fix_fn, lowestPriority=True)

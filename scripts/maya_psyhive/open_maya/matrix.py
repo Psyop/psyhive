@@ -13,12 +13,22 @@ from maya_psyhive.open_maya.point import HPoint, ORIGIN
 class HMatrix(om.MMatrix):
     """Represents a 4x4 heterozygous transformation matrix."""
 
-    def apply_to(self, node):
+    def apply_to(self, node, use_constraint=False):
         """Apply this matrix to the given node.
 
         Args:
             node (str): node to apply to
+            use_constraint (bool): use constraints to apply move
         """
+        if use_constraint:
+            _loc = self.build_loc()
+            _parent_cons = cmds.parentConstraint(
+                _loc, node, maintainOffset=False)[0]
+            _scale_cons = cmds.scaleConstraint(
+                _loc, node, maintainOffset=False)[0]
+            cmds.delete(_loc, _parent_cons, _scale_cons)
+
+            return
         cmds.xform(node, matrix=self.to_tuple(), worldSpace=True)
 
     def build_geo(self, scale=1.0, name='HMatrix'):
@@ -46,6 +56,17 @@ class HMatrix(om.MMatrix):
         self.apply_to(_grp)
 
         return _grp
+
+    def build_loc(self, name=None):
+        """Build locator using this matrix.
+
+        Args:
+            name (str): override name
+        """
+        _name = name or type(self).__name__.strip('_')
+        _loc = cmds.spaceLocator(name=get_unique(_name))[0]
+        self.apply_to(_loc)
+        return _loc
 
     def lx_(self):
         """Get local x-axis."""
