@@ -22,7 +22,7 @@ def user_setup():
 
     dprint('PSYHIVE USER SETUP')
 
-    _menu = ui.obtain_menu('psyhive', replace=True)
+    _menu = ui.obtain_menu('PsyHive', replace=True)
 
     # Add FK/IK switcher
     _cmd = '\n'.join([

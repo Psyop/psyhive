@@ -1,3 +1,13 @@
+#### v0.10.0 ####
+
+qt tools: track usage of interface callbacks,
+
+maya_psyhive:
+    startup changed capitalisation of PsyHive menu,
+psyhive:
+    qt.interface added track usage to callbacks,
+
+
 #### v0.9.1 ####
 
 FK/IK switcher: fix error on import,

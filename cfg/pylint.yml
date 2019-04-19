@@ -61,6 +61,7 @@ ignore:
         psyhive/py_gui/install.py
         psyhive/py_gui/maya_.py
         psyhive/qt/dialog.py
+        psyhive/qt/interface.py
         psyhive/utils/cache.py
         psyhive/utils/misc.py
         psyhive/utils/path.py

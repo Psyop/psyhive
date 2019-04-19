@@ -19,13 +19,14 @@ class HUiDialog(QtWidgets.QDialog):
     """Base class for any interface."""
 
     def __init__(
-            self, ui_file, catch_error_=True, dialog_stack_key=None,
-            verbose=0):
+            self, ui_file, catch_error_=True, track_usage_=True,
+            dialog_stack_key=None, verbose=0):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
             catch_error_ (bool): apply catch error decorator to callbacks
+            track_usage_ (bool): apply track usage decorator to callbacks
             dialog_stack_key (str): override dialog stack key
             verbose (int): print process data
         """
@@ -51,7 +52,9 @@ class HUiDialog(QtWidgets.QDialog):
 
         # Setup widgets
         self.widgets = self.read_widgets()
-        self.connect_widgets(catch_error_=catch_error_, verbose=verbose)
+        self.connect_widgets(
+            catch_error_=catch_error_, track_usage_=track_usage_,
+            verbose=verbose)
 
         # Handle settings
         self.settings_file = '{}/psyhive/{}.ini'.format(
@@ -74,13 +77,15 @@ class HUiDialog(QtWidgets.QDialog):
             self.write_settings()
         return _result
 
-    def connect_widgets(self, catch_error_=False, verbose=0):
+    def connect_widgets(
+            self, catch_error_=False, track_usage_=True, verbose=0):
         """Connect widgets with redraw/callback methods.
 
         Only widgets with override types are linked.
 
         Args:
             catch_error_ (bool): apply catch error decorator to callbacks
+            track_usage_ (bool): apply track usage decorator to callbacks
             verbose (int): print process data
         """
         for _widget in self.widgets:
@@ -91,6 +96,9 @@ class HUiDialog(QtWidgets.QDialog):
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
+                if track_usage_:
+                    from psyhive.tools import track_usage
+                    _callback = track_usage(_callback)
                 if catch_error_:
                     from psyhive.tools import get_error_catcher
                     _catcher = get_error_catcher(exit_on_error=False)
