@@ -4,7 +4,8 @@ import tempfile
 import os
 import sys
 
-from psyhive.utils import wrap_fn, lprint
+from psyhive import host
+from psyhive.utils import wrap_fn, lprint, dprint
 
 from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.widgets import HLabel, HTextBrowser, HPushButton, HMenu
@@ -18,7 +19,7 @@ class HUiDialog(QtWidgets.QDialog):
     """Base class for any interface."""
 
     def __init__(
-            self, ui_file, catch_error_=False, dialog_stack_key=None,
+            self, ui_file, catch_error_=True, dialog_stack_key=None,
             verbose=0):
         """Constructor.
 
@@ -38,6 +39,8 @@ class HUiDialog(QtWidgets.QDialog):
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
         super(HUiDialog, self).__init__()
+
+        self.set_parenting()
 
         # Load ui file
         _loader = QtUiTools.QUiLoader()
@@ -89,8 +92,10 @@ class HUiDialog(QtWidgets.QDialog):
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
                 if catch_error_:
-                    from psyhive.tools import catch_error
-                    _callback = catch_error(_callback)
+                    from psyhive.tools import get_error_catcher
+                    _catcher = get_error_catcher(error_func=None)
+                    _callback = _catcher(_callback)
+                _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)
                 for _hook_name in ['clicked', 'textChanged']:
                     _hook = getattr(_widget, _hook_name, None)
@@ -129,6 +134,36 @@ class HUiDialog(QtWidgets.QDialog):
             except Exception:
                 lprint('FAILED TO EXEC', _fn, verbose=verbose)
 
+    def read_settings(self, verbose=0):
+        """Read settings from disk.
+
+        Args:
+            verbose (int): print process data
+        """
+        dprint('READ SETTINGS', verbose=verbose)
+
+        # Apply widget settings
+        for _widget in self.widgets:
+            _name = _widget.objectName()
+            _val = self.settings.value(_name)
+            if not _val:
+                continue
+            lprint(' - APPLY', _name, _val, verbose=verbose)
+            if isinstance(_widget, QtWidgets.QLineEdit):
+                _widget.setText(_val)
+            elif isinstance(_widget, (
+                    QtWidgets.QRadioButton,
+                    QtWidgets.QCheckBox)):
+                _widget.setChecked(_val)
+            else:
+                raise ValueError(_widget)
+
+        # Apply window settings
+        _pos = self.settings.value('window/pos')
+        if _pos:
+            lprint(' - APPLYING POS', _pos, verbose=verbose)
+            self.ui.move(_pos)
+
     def read_widgets(self):
         """Read widgets with overidden types from ui object."""
         _widgets = []
@@ -155,32 +190,6 @@ class HUiDialog(QtWidgets.QDialog):
             if _redraw:
                 _redraw()
 
-    def read_settings(self):
-        """Read settings from disk."""
-        print 'READ SETTINGS'
-
-        # Apply widget settings
-        for _widget in self.widgets:
-            _name = _widget.objectName()
-            _val = self.settings.value(_name)
-            if not _val:
-                continue
-            print ' - APPLY', _name, _val
-            if isinstance(_widget, QtWidgets.QLineEdit):
-                _widget.setText(_val)
-            elif isinstance(_widget, (
-                    QtWidgets.QRadioButton,
-                    QtWidgets.QCheckBox)):
-                _widget.setChecked(_val)
-            else:
-                raise ValueError(_widget)
-
-        # Apply window settings
-        _pos = self.settings.value('window/pos')
-        if _pos:
-            print ' - APPLYING POS', _pos
-            self.ui.move(_pos)
-
     def set_icon(self, icon):
         """Set icon for this interface.
 
@@ -190,9 +199,20 @@ class HUiDialog(QtWidgets.QDialog):
         _pix = get_pixmap(icon)
         self.setWindowIcon(_pix)
 
-    def write_settings(self):
-        """Write settings to disk."""
-        print 'SAVING SETTINGS', self.settings.fileName()
+    def set_parenting(self):
+        """Set parenting for host application."""
+        if host.NAME == 'maya':
+            from maya_psyhive import ui
+            _maya_win = ui.get_main_window_ptr()
+            self.setParent(_maya_win, QtCore.Qt.WindowStaysOnTopHint)
+
+    def write_settings(self, verbose=0):
+        """Write settings to disk.
+
+        Args:
+            verbose (int): print process data
+        """
+        dprint('SAVING SETTINGS', self.settings.fileName(), verbose=verbose)
 
         for _widget in self.widgets:
             if isinstance(_widget, QtWidgets.QLineEdit):
@@ -203,11 +223,11 @@ class HUiDialog(QtWidgets.QDialog):
                 _val = _widget.isChecked()
             else:
                 continue
-            print ' - SAVING', _widget.objectName(), _val
+            lprint(' - SAVING', _widget.objectName(), _val, verbose=verbose)
             self.settings.setValue(_widget.objectName(), _val)
 
         self.settings.setValue('window/pos', self.ui.pos())
-        print ' - SAVING POS', self.ui.pos()
+        lprint(' - SAVING POS', self.ui.pos(), verbose=verbose)
 
 
 def _get_context_fn(callback, widget):

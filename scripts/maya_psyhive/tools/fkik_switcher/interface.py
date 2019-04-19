@@ -2,8 +2,10 @@
 
 import os
 
+from maya import cmds
+
 from psyhive import qt
-from psyhive.utils import abs_path
+from psyhive.utils import abs_path, dev_mode, wrap_fn
 
 from maya_psyhive.tools.fkik_switcher import system
 
@@ -17,6 +19,9 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         """Constructor."""
         super(_FkIkSwitcherUi, self).__init__(ui_file=_UI_FILE)
 
+    def _redraw__build_tmp_geo(self, widget):
+        widget.setVisible(dev_mode())
+
     def _callback__fk_to_ik(self):
         print 'FK -> IK'
         self._execute_switch(mode='fk_to_ik')
@@ -24,6 +29,20 @@ class _FkIkSwitcherUi(qt.HUiDialog):
     def _callback__ik_to_fk(self):
         print 'IK -> FK'
         self._execute_switch(mode='ik_to_fk')
+
+    def _callback__keyframe(self):
+        _system = system.get_selected_system()
+        if not _system:
+            qt.notify_warning('No ik/fk controls selected')
+            return
+        cmds.setKeyframe(_system.get_key_attrs())
+
+    def _context__keyframe(self, menu):
+        menu.setStyleSheet('')
+        _system = system.get_selected_system()
+        if _system:
+            _nodes = _system.get_ctrls()
+            menu.add_action('Select nodes', wrap_fn(cmds.select, _nodes))
 
     def _execute_switch(self, mode):
         """Execute switch ik/fk mode.

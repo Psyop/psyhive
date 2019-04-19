@@ -128,3 +128,23 @@ def set_namespace(namespace, clean=False):
     if not cmds.namespace(exists=_namespace):
         cmds.namespace(addNamespace=_namespace)
     cmds.namespace(setNamespace=_namespace)
+
+
+def single_undo(func):
+    """Decorator to make a function only occuy one place in the undo list.
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _single_undo_fn(*args, **kwargs):
+        cmds.undoInfo(openChunk=True)
+        _result = func(*args, **kwargs)
+        cmds.undoInfo(closeChunk=True)
+        return _result
+
+    return _single_undo_fn

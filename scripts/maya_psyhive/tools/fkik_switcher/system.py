@@ -5,10 +5,11 @@ import copy
 from maya import cmds
 
 from psyhive import qt
-from psyhive.utils import get_single, str_to_ints
+from psyhive.utils import get_single, str_to_ints, store_result
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
+from maya_psyhive.utils import single_undo, restore_sel
 
 
 class _FkIkSystem(object):
@@ -166,6 +167,8 @@ class _FkIkSystem(object):
             cmds.setAttr(self.gimbal+'.FK_IK', 0)
             print 'SET', self.ik_, 'TO FK'
 
+    @single_undo
+    @restore_sel
     def exec_switch_and_key(
             self, switch_mode, key_mode, pole_vect_depth=10.0,
             build_tmp_geo=False, range_=None):
@@ -184,17 +187,15 @@ class _FkIkSystem(object):
 
         # Read fn + trg ctrls
         if switch_mode == 'fk_to_ik':
-            _trg_ctrls = self.get_ik_ctrls()
             _fn = self.apply_fk_to_ik
         elif switch_mode == 'ik_to_fk':
-            _trg_ctrls = self.get_fk_ctrls()
             _kwargs.pop('pole_vect_depth')
             _fn = self.apply_ik_to_fk
         else:
             raise ValueError(switch_mode)
 
         # Apply pre frame option
-        if key_mode in ['no', 'on_switch']:
+        if key_mode in ['none', 'on_switch']:
             pass
         elif key_mode == 'over_range':
             _kwargs['key_mode'] = 'on_switch'
@@ -203,6 +204,9 @@ class _FkIkSystem(object):
             if not _frames:
                 qt.notify_warning('No frame range found')
                 return
+            for _frame in [_frames[0]-1]+_frames+[_frames[-1]+1]:
+                cmds.currentTime(_frame)
+                cmds.setKeyframe(self.get_key_attrs())
             for _frame in _frames:
                 cmds.currentTime(_frame)
                 print 'UPDATING FRAME', _frame
@@ -210,9 +214,9 @@ class _FkIkSystem(object):
             return
         elif key_mode == 'prev':
             _frame = cmds.currentTime(query=True)
-            cmds.setKeyframe(_trg_ctrls)
+            cmds.setKeyframe(self.get_key_attrs())
             cmds.currentTime(_frame-1)
-            cmds.setKeyframe(_trg_ctrls)
+            cmds.setKeyframe(self.get_key_attrs())
             cmds.currentTime(_frame)
         else:
             raise ValueError(key_mode)
@@ -223,12 +227,20 @@ class _FkIkSystem(object):
         _fn(**_kwargs)
 
         # Apply post frame option
-        if key_mode in 'no':
+        if key_mode in 'none':
             pass
         elif key_mode in ['on_switch', 'prev']:
-            cmds.setKeyframe(_trg_ctrls)
+            cmds.setKeyframe(self.get_key_attrs())
         else:
             raise ValueError(key_mode)
+
+    def get_ctrls(self):
+        """Get all ctrls in this system.
+
+        Returns:
+            (str list): controls
+        """
+        return self.get_fk_ctrls() + [self.ik_, self.ik_pole, self.gimbal]
 
     def get_fk_ctrls(self):
         """Get list of fk ctrls in this system.
@@ -238,13 +250,18 @@ class _FkIkSystem(object):
         """
         return [self.fk1, self.fk2, self.fk3]
 
-    def get_ik_ctrls(self):
-        """Get list of ik ctrls in this system.
+    @store_result
+    def get_key_attrs(self):
+        """Get attrs to key for this system."""
+        _attrs = []
+        for _fk_ctrl in self.get_fk_ctrls():
+            _attrs += [_fk_ctrl+'.r'+_axis for _axis in 'xyz']
+        _attrs += [self.ik_pole+'.t'+_axis for _axis in 'xyz']
+        _attrs += [self.ik_+'.t'+_axis for _axis in 'xyz']
+        _attrs += [self.ik_+'.r'+_axis for _axis in 'xyz']
+        _attrs += [self.gimbal+'.FK_IK']
 
-        Returns:
-            (str list): ik ctrls
-        """
-        return [self.ik_, self.ik_pole]
+        return _attrs
 
     def toggle_ik_fk(self, build_tmp_geo=False, apply_=True):
         """Toggle between ik/fk.
@@ -277,7 +294,7 @@ def get_selected_system():
         return None
     _node = get_single(
         cmds.ls(selection=True),
-        verb='selected', name='node')
+        fail_message='no ik/fk system selected')
 
     _side = _node.split(":")[1][:2]
     if 'arm' in _node or 'wrist' in _node:

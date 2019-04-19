@@ -1,3 +1,22 @@
+#### v0.7.0 ####
+
+fkik switcher: added keyframe button + working key options,
+
+maya_psyhive:
+    tools.fkik_switcher working key options + added keyframe button,
+    ui.get_main_window_ptr added,
+    utils.single_undo added,
+psyhive:
+    host added,
+    qt.HUiDialog enabled catch errors,
+    qt.HUiDialog fix dialogs behind main maya window,
+    qt.HUiDialog read/write settings more quiet,
+    tools.get_error_catcher added,
+    tools.catch_error disabled email button in ui,
+    utils.Path.parent added,
+    utils.Dir.launch_browser added,
+
+
 #### v0.6.0 ####
 
 fkik switcher: working prototype

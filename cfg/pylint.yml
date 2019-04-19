@@ -3,6 +3,8 @@ ignore:
         hv_test/diary/
         psyhive/qt/interface.py
         psyhive/tools/err_catcher.py
+    c-extension-no-member:
+        maya_psyhive/ui.py
     global-statement:
         hv_test/diary/
         hv_test/tools/cod_bro.py
@@ -25,6 +27,9 @@ ignore:
         sanity_check/checks/maya/general/shotgun.py
     no-self-use:
         /tests/test_
+        maya_psyhive/tools/fkik_switcher/interface.py
+        psyhive/tools/err_catcher.py
+        hv_test/diary/
         hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         sanity_check/checks/maya/

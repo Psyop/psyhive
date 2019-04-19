@@ -1,11 +1,24 @@
 """Tools for managing maya interface."""
 
-from maya import cmds, mel
+from maya import cmds, mel, OpenMayaUI
+
+from psyhive import qt
 
 
 def get_main_window():
     """Get maya main window ui element name."""
     return mel.eval('$s=$gMainWindow', verbose=0)
+
+
+def get_main_window_ptr():
+    """Get pointer for main maya window.
+
+    Returns:
+        (QWidget): wrapped instance
+    """
+    import shiboken2
+    _maya_win = OpenMayaUI.MQtUtil.mainWindow()
+    return shiboken2.wrapInstance(long(_maya_win), qt.QtWidgets.QWidget)
 
 
 def obtain_menu(name, replace=False):

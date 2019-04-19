@@ -28,11 +28,6 @@ class _ErrDialog(qt.HUiDialog):
             ui_file=_UI_FILE, catch_error_=False)
         self.ui.setWindowTitle('Error')
 
-    def _callback__er_view_code(self):
-
-        _line = self.ui.er_traceback.currentItem().data(qt.QtCore.Qt.UserRole)
-        _line.edit()
-
     def _redraw__er_message(self, widget):
         _text = 'There has been an error'
         if not self.message:
@@ -41,6 +36,9 @@ class _ErrDialog(qt.HUiDialog):
             _text += ':\n\n{}'.format(self.message)
         widget.setText(_text)
 
+    def _redraw__er_send_email(self, widget):
+        widget.setEnabled(True)
+
     def _redraw__er_traceback(self, widget):
         widget.clear()
         for _line in reversed(self.traceback.lines):
@@ -48,6 +46,11 @@ class _ErrDialog(qt.HUiDialog):
             _item.setData(qt.QtCore.Qt.UserRole, _line)
             widget.addItem(_item)
         widget.setCurrentRow(0)
+
+    def _callback__er_view_code(self):
+
+        _line = self.ui.er_traceback.currentItem().data(qt.QtCore.Qt.UserRole)
+        _line.edit()
 
 
 class _TraceStep(object):
@@ -136,21 +139,11 @@ def catch_error(func):
 
     Args:
         func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
     """
-
-    @functools.wraps(func)
-    def _catch_error_fn(*args, **kwargs):
-        if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
-            return func(*args, **kwargs)
-        try:
-            _result = func(*args, **kwargs)
-        except Exception as _exc:
-            _handle_exception(_exc)
-            sys.exit()
-
-        return _result
-
-    return _catch_error_fn
+    return get_error_catcher()(func)
 
 
 def launch_err_catcher(traceback_, message):
@@ -163,6 +156,39 @@ def launch_err_catcher(traceback_, message):
     _traceback = _Traceback(traceback_)
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
     _dialog.ui.exec_()
+
+
+def get_error_catcher(error_func=None):
+    """Build an error catcher decorator.
+
+    Args:
+        error_func (fn): override exit function (default is sys.exit but
+            this disagrees with being executed from within a qt thread)
+    """
+    _error_func = error_func or sys.exit
+
+    def _error_catcher(func):
+
+        @functools.wraps(func)
+        def _catch_error_fn(*args, **kwargs):
+
+            if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
+                return func(*args, **kwargs)
+
+            try:
+                _result = func(*args, **kwargs)
+            except Exception as _exc:
+                print 'EXCEPTION', func, args, kwargs
+                _handle_exception(_exc)
+                if _error_func:
+                    _error_func()
+                return None
+
+            return _result
+
+        return _catch_error_fn
+
+    return _error_catcher
 
 
 def _pass_exception_to_sentry(exc):

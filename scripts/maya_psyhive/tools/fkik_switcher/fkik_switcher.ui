@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>295</width>
-    <height>206</height>
+    <height>215</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,140 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Key:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="keyframe">
+         <property name="maximumSize">
+          <size>
+           <width>70</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>Keyframe</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="key_none">
+       <property name="text">
+        <string>No key</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="key_on_switch">
+       <property name="text">
+        <string>Key on switch</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="key_prev">
+       <property name="text">
+        <string>Key prev frame, switch and key</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="key_over_range">
+       <property name="text">
+        <string>Switch and key across range</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>3</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Range:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="key_range">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QPushButton" name="fk_to_ik">
@@ -64,156 +198,6 @@ color: rgb(0, 0, 0);</string>
      </item>
     </layout>
    </item>
-   <item row="0" column="1">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Key:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="key_none">
-         <property name="text">
-          <string>No key</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="key_on_switch">
-         <property name="text">
-          <string>Key on switch</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="key_prev">
-         <property name="text">
-          <string>Key prev frame, switch and key</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="key_over_range">
-         <property name="text">
-          <string>Switch and key across range</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>50</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Range:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="key_range">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Pole vector depth:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="pole_vector_depth">
-         <property name="maximum">
-          <double>10000.000000000000000</double>
-         </property>
-         <property name="value">
-          <double>10.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="build_tmp_geo">
-         <property name="text">
-          <string>Build tmp geo</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <resources/>
@@ -225,12 +209,12 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>145</x>
-     <y>36</y>
+     <x>48</x>
+     <y>34</y>
     </hint>
     <hint type="destinationlabel">
-     <x>177</x>
-     <y>111</y>
+     <x>88</x>
+     <y>110</y>
     </hint>
    </hints>
   </connection>
@@ -241,11 +225,11 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>53</y>
+     <x>75</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
-     <x>198</x>
+     <x>96</x>
      <y>117</y>
     </hint>
    </hints>
@@ -257,11 +241,11 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>173</x>
-     <y>75</y>
+     <x>67</x>
+     <y>73</y>
     </hint>
     <hint type="destinationlabel">
-     <x>221</x>
+     <x>112</x>
      <y>115</y>
     </hint>
    </hints>
@@ -273,11 +257,11 @@ color: rgb(0, 0, 0);</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>134</x>
-     <y>94</y>
+     <x>49</x>
+     <y>89</y>
     </hint>
     <hint type="destinationlabel">
-     <x>194</x>
+     <x>95</x>
      <y>113</y>
     </hint>
    </hints>
@@ -289,12 +273,12 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
+     <x>134</x>
      <y>32</y>
     </hint>
     <hint type="destinationlabel">
-     <x>135</x>
-     <y>113</y>
+     <x>31</x>
+     <y>116</y>
     </hint>
    </hints>
   </connection>
@@ -305,12 +289,12 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>174</x>
-     <y>56</y>
+     <x>35</x>
+     <y>52</y>
     </hint>
     <hint type="destinationlabel">
-     <x>138</x>
-     <y>112</y>
+     <x>36</x>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -321,12 +305,12 @@ color: rgb(0, 0, 0);</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
+     <x>156</x>
      <y>74</y>
     </hint>
     <hint type="destinationlabel">
-     <x>141</x>
-     <y>113</y>
+     <x>40</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
@@ -337,12 +321,12 @@ color: rgb(0, 0, 0);</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
+     <x>118</x>
      <y>92</y>
     </hint>
     <hint type="destinationlabel">
-     <x>133</x>
-     <y>114</y>
+     <x>40</x>
+     <y>111</y>
     </hint>
    </hints>
   </connection>

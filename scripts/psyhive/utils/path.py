@@ -14,6 +14,23 @@ from psyhive.utils.filter_ import passes_filter
 TMP = 'W:/Temp'
 
 
+def restore_cwd(func):
+    """Decorator to restore cwd after executing a function.
+
+    Args:
+        func (fn): function to decorate
+    """
+
+    @functools.wraps(func)
+    def _restore_cwd_fn(*args, **kwargs):
+        _cwd = os.getcwd()
+        _result = func(*args, **kwargs)
+        os.chdir(_cwd)
+        return _result
+
+    return _restore_cwd_fn
+
+
 class FileError(RuntimeError):
     """Raises when a file causes an issue."""
 
@@ -66,6 +83,14 @@ class Path(object):
         """
         return os.path.getsize(self.path)
 
+    def parent(self):
+        """Get parent dir of this path.
+
+        Returns:
+            (Dir): parent
+        """
+        return Dir(os.path.dirname(self.path))
+
     def rel_path(self, path):
         """Get relative path of the given path from this path.
 
@@ -85,6 +110,13 @@ class Dir(Path):
             (str list): list of files
         """
         return find(self.path, **kwargs)
+
+    @restore_cwd
+    def launch_browser(self):
+        """Launch browser set to this dir."""
+        print 'LAUNCH BROWSER'
+        os.chdir(self.path)
+        system('explorer .', verbose=1)
 
 
 class File(Path):
@@ -321,23 +353,6 @@ def rel_path(path, root):
     if not _path.startswith(_root):
         raise ValueError
     return _path[len(_root):].lstrip('/')
-
-
-def restore_cwd(func):
-    """Decorator to restore cwd after executing a function.
-
-    Args:
-        func (fn): function to decorate
-    """
-
-    @functools.wraps(func)
-    def _restore_cwd_fn(*args, **kwargs):
-        _cwd = os.getcwd()
-        _result = func(*args, **kwargs)
-        os.chdir(_cwd)
-        return _result
-
-    return _restore_cwd_fn
 
 
 def search_files_for_text(
