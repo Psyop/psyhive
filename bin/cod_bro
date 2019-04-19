@@ -1,4 +1,4 @@
-#!/usr/bin/env pythonw.exe
+#!/usr/bin/env python
 
 from hv_test.tools import cod_bro
 cod_bro.launch()

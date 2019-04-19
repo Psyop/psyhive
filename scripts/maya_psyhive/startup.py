@@ -4,7 +4,7 @@ import time
 
 from maya import cmds
 
-from psyhive import icons
+from psyhive import icons, refresh
 from psyhive.utils import dprint, TMP, touch
 from maya_psyhive import ui
 from maya_psyhive.tools import fkik_switcher
@@ -26,9 +26,17 @@ def user_setup():
 
     # Add FK/IK switcher
     _cmd = '\n'.join([
-        'import {fkik} as _mod',
-        '_mod.launch_gui()',
-    ]).format(fkik=fkik_switcher.__name__)
+        'import {} as fkik_switcher'.format(fkik_switcher.__name__),
+        'fkik_switcher.launch_interface()'])
     cmds.menuItem(
         label='FK/IK switcher', command=_cmd,
-        image=icons.EMOJI.find('Flexed Biceps: Light Skin Tone'))
+        image=icons.EMOJI.find('Left-Right Arrow'))
+
+    # Add refresh
+    _cmd = '\n'.join([
+        'import {} as refresh'.format(refresh.__name__),
+        'refresh.reload_libs(verbose=2)',
+    ]).format()
+    cmds.menuItem(
+        label='Reload libs', command=_cmd,
+        image=icons.EMOJI.find('Counterclockwise Arrows Button'))

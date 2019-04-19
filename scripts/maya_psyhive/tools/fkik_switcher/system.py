@@ -2,10 +2,10 @@
 
 import copy
 
-from maya import cmds
+from maya import cmds, mel
 
-from psyhive import qt
-from psyhive.utils import get_single, str_to_ints, store_result
+from psyhive.utils import (
+    get_single, store_result, ints_to_str, lprint)
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
@@ -49,7 +49,8 @@ class _FkIkSystem(object):
             '{side}_{gimbal}Gimbal_Ctrl'.format(**_names))
 
     def apply_fk_to_ik(
-            self, pole_vect_depth=10.0, build_tmp_geo=False, apply_=True):
+            self, pole_vect_depth=10.0, build_tmp_geo=False, apply_=True,
+            verbose=1):
         """Apply fk to ik.
 
         First the pole vector is calculated by extending a line from the
@@ -60,8 +61,9 @@ class _FkIkSystem(object):
             pole_vect_depth (float): distance of pole vector from fk2
             build_tmp_geo (bool): build tmp geo
             apply_ (bool): apply the update to gimbal ctrl
+            verbose (int): print process data
         """
-        print 'APPLYING FK -> IK'
+        lprint('APPLYING FK -> IK', verbose=verbose)
 
         # Calculate pole pos
         _limb_v = hom.get_p(self.fk3) - hom.get_p(self.fk1)
@@ -94,16 +96,17 @@ class _FkIkSystem(object):
         _pole_p.apply_to(self.ik_pole, use_constraint=True)
         if apply_:
             cmds.setAttr(self.gimbal+'.FK_IK', 1)
-            print 'SET', self.ik_, 'TO IK'
+            lprint('SET', self.ik_, 'TO IK', verbose=verbose)
 
-    def apply_ik_to_fk(self, build_tmp_geo=False, apply_=True):
+    def apply_ik_to_fk(self, build_tmp_geo=False, apply_=True, verbose=1):
         """Apply ik to fk.
 
         Args:
             build_tmp_geo (bool): build tmp geo
             apply_ (bool): apply update to gimbal ctrl
+            verbose (int): print process data
         """
-        print 'APPLYING IK -> FK'
+        lprint('APPLYING IK -> FK', verbose=verbose)
 
         # Position fk1
         _upper_v = hom.get_p(self.fk2_jnt) - hom.get_p(self.fk1)
@@ -165,13 +168,13 @@ class _FkIkSystem(object):
                 forceOrderXYZ=True)
         if apply_:
             cmds.setAttr(self.gimbal+'.FK_IK', 0)
-            print 'SET', self.ik_, 'TO FK'
+            lprint('SET', self.ik_, 'TO FK', verbose=verbose)
 
     @single_undo
     @restore_sel
     def exec_switch_and_key(
             self, switch_mode, key_mode, pole_vect_depth=10.0,
-            build_tmp_geo=False, range_=None):
+            build_tmp_geo=False, range_=None, verbose=1):
         """Execute fk/ik switch and key option.
 
         Args:
@@ -180,6 +183,7 @@ class _FkIkSystem(object):
             pole_vect_depth (float): pole vector depth
             build_tmp_geo (bool): build temp geo
             range_ (str): frame range for key over range option
+            verbose (int): print process data
         """
         _kwargs = copy.copy(locals())
         _kwargs.pop('self')
@@ -197,20 +201,9 @@ class _FkIkSystem(object):
         # Apply pre frame option
         if key_mode in ['none', 'on_switch']:
             pass
-        elif key_mode == 'over_range':
-            _kwargs['key_mode'] = 'on_switch'
-            _kwargs['switch_mode'] = switch_mode
-            _frames = str_to_ints(range_)
-            if not _frames:
-                qt.notify_warning('No frame range found')
-                return
-            for _frame in [_frames[0]-1]+_frames+[_frames[-1]+1]:
-                cmds.currentTime(_frame)
-                cmds.setKeyframe(self.get_key_attrs())
-            for _frame in _frames:
-                cmds.currentTime(_frame)
-                print 'UPDATING FRAME', _frame
-                self.exec_switch_and_key(**_kwargs)
+        elif key_mode == 'over_timeline':
+            self._exec_switch_and_key_over_timeline(
+                kwargs=_kwargs, switch_mode=switch_mode)
             return
         elif key_mode == 'prev':
             _frame = cmds.currentTime(query=True)
@@ -233,6 +226,38 @@ class _FkIkSystem(object):
             cmds.setKeyframe(self.get_key_attrs())
         else:
             raise ValueError(key_mode)
+
+    def _exec_switch_and_key_over_timeline(self, kwargs, switch_mode):
+        """Exec switch and key over timeline selection.
+
+        Args:
+            kwargs (dict): args passed to exec_switch_and_key
+            switch_mode (str): fk/ik switch mode
+        """
+        kwargs['key_mode'] = 'on_switch'
+        kwargs['switch_mode'] = switch_mode
+        kwargs['verbose'] = max(kwargs['verbose']-1, 0)
+
+        # Read timeline range
+        _timeline = mel.eval('$tmpVar=$gPlayBackSlider')
+        _start, _end = [
+            int(_val) for _val in cmds.timeControl(
+                _timeline, query=True, rangeArray=True)]
+        print 'TIMELINE RANGE', _start, _end
+
+        # Key current state
+        _orig_frames = range(_start-1, _end+2)
+        print 'KEYING CURRENT STATE', ints_to_str(_orig_frames)
+        for _frame in _orig_frames:
+            cmds.currentTime(_frame)
+            cmds.setKeyframe(self.get_key_attrs())
+
+        # Key switch
+        _switch_frames = range(_start, _end+1)
+        print 'KEYING SWITCH', ints_to_str(_switch_frames)
+        for _frame in _switch_frames:
+            cmds.currentTime(_frame)
+            self.exec_switch_and_key(**kwargs)
 
     def get_ctrls(self):
         """Get all ctrls in this system.

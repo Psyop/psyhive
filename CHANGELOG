@@ -1,3 +1,17 @@
+#### v0.9.0 ####
+
+startup: fixed FK/IK option, 
+FK/IK switcher: use range from timeline,
+
+maya_psyhive:
+    startup fix fk/ik option,
+    startup added refresh option,
+    tools.fkik_switcher range from timeline,
+psyhive:
+    refresh added from hv-test,
+    usage fix error outside maya,
+
+
 #### v0.8.0 ####
 
 FK/IK switcher: working release

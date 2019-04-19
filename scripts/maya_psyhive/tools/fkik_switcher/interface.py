@@ -65,13 +65,11 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         """
         _system = system.get_selected_system(error=HandledError)
         _system.exec_switch_and_key(
-            switch_mode=mode,
-            key_mode=self._read_key_mode(),
-            range_=self.ui.key_range.text())
+            switch_mode=mode, key_mode=self._read_key_mode())
 
     def _read_key_mode(self):
         """Read current key mode from radio buttons."""
-        for _name in ['none', 'on_switch', 'prev', 'over_range']:
+        for _name in ['none', 'on_switch', 'prev', 'over_timeline']:
             _elem = getattr(self.ui, 'key_'+_name)
             if _elem.isChecked():
                 return _name

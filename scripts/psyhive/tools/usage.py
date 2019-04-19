@@ -8,9 +8,9 @@ import platform
 import tempfile
 import time
 
-from maya import cmds
 from elasticsearch import Elasticsearch
 
+from psyhive import host
 from psyhive.utils import dprint
 
 ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
@@ -46,13 +46,15 @@ def _write_usage_to_kibana(func, verbose=1):
     _start = time.time()
     _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
     _data = {
-        'filename': cmds.file(query=True, location=True),
         'function': func.__name__,
         'machine_name': platform.node(),
         'project': os.environ.get('PSYOP_PROJECT'),
         'timestamp': datetime.datetime.utcnow(),
         'username': os.environ.get('USER'),
     }
+    if host.NAME == 'maya':
+        from maya import cmds
+        _data['filename'] = cmds.file(query=True, location=True)
     if verbose > 1:
         print _index_name
         pprint.pprint(_data)
