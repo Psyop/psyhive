@@ -1,8 +1,7 @@
 """Tools for managing the legacy (py_gui) interface for fk/ik switcher."""
 
-from psyhive import py_gui, icons, qt
+from psyhive import py_gui, icons, qt, refresh
 from psyhive.utils import TMP, store_result
-from hv_test import refresh
 
 from maya_psyhive.utils import get_ns_cleaner, restore_sel
 from maya_psyhive.tools.fkik_switcher import system
