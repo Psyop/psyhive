@@ -5,6 +5,7 @@ import logging
 from maya import cmds
 
 from psyhive import icons, refresh
+from psyhive.tools import track_usage
 from psyhive.utils import dprint, wrap_fn, get_single, lprint
 from maya_psyhive import ui
 from maya_psyhive.tools import fkik_switcher
@@ -63,6 +64,7 @@ def _build_psyhive_menu():
     return _menu
 
 
+@track_usage
 def user_setup():
     """User setup."""
     dprint('Executing PsyHive user setup')

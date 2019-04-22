@@ -1,3 +1,11 @@
+#### v0.13.0 ####
+
+startup: added usage tracker
+
+maya_psyhive:
+    startup.user_setup added usage tracking,
+
+
 #### v0.12.0 ####
 
 FK/IK switcher: add to Psyop menu,
