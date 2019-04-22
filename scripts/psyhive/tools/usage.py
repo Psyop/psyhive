@@ -43,6 +43,12 @@ def _write_usage_to_kibana(func, verbose=1):
         func (fn): function that was executed
         verbose (int): print process data
     """
+
+    # Don't track farm usage
+    if os.environ.get('USER') == 'render':
+        return
+
+    # Build usage dict
     _start = time.time()
     _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
     _data = {
@@ -59,19 +65,16 @@ def _write_usage_to_kibana(func, verbose=1):
         print _index_name
         pprint.pprint(_data)
 
+    # Send to kibana
     _conn = Elasticsearch([ELASTIC_URL])
     if not _conn.ping():
         raise RuntimeError('Cannot connect to Elasticsearch database.')
-
     if not _conn.indices.exists(_index_name):
         _conn.indices.create(index=_index_name, body=INDEX_MAPPING)
-
     _res = _conn.index(
         index=_index_name, doc_type=ES_DATA_TYPE, body=_data,
         id=_data.pop('_id', None))
-
     _data['_id'] = _res['_id']
-
     _dur = time.time() - _start
     dprint('Wrote usage to kibana ({:.02f}s)'.format(_dur), verbose=verbose)
 

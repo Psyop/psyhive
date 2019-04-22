@@ -97,7 +97,7 @@ def get_cfg(namespace, verbose=0):
 
 
 def get_single(
-        items, catch=False, name='items', verb='found', fail_message=None,
+        items, catch=False, name='item', verb='found', fail_message=None,
         error=None, verbose=0):
     """Get single item from a list.
 

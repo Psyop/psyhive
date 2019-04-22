@@ -77,11 +77,16 @@ class PyFile(File, PyBase):
             print 'INDENTATION ERROR', self.path
             raise _exc
 
-    def get_module(self, verbose=0):
+    def get_module(self, catch=False, verbose=0):
         """Get the python module associated with this py file.
 
         Args:
+            catch (bool): no error if module fails to import
             verbose (int): print process data
+
+        Returns:
+            (mod): imported module
+            (None): if module failed to import and catch used
         """
         lprint("GET MODULE", self.path, verbose=verbose)
 
@@ -93,8 +98,14 @@ class PyFile(File, PyBase):
         _rel_path = rel_path(self.path, _sys_path)
         _mod_name = _rel_path.replace('.py', '').replace('/', '.')
 
+        # Try to import the module
         if _mod_name not in sys.modules:
-            __import__(_mod_name, fromlist=_mod_name.split('.'))
+            try:
+                __import__(_mod_name, fromlist=_mod_name.split('.'))
+            except ImportError as _exc:
+                if catch:
+                    return None
+                raise _exc
 
         return sys.modules[_mod_name]
 

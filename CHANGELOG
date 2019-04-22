@@ -1,3 +1,15 @@
+#### v0.14.0 ####
+
+FK/IK tools: removed import of legacy interface causing JD issues,
+
+maya_psyhive:
+    tools.fkik_switcher removed legacy ui import,
+psyhive:
+    tools.usage disable tracking of farm user,
+    utils.get_single fix multi error message,
+    utils.PyFile.get_module added catch arg,
+
+
 #### v0.13.0 ####
 
 startup: added usage tracker
