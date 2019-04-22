@@ -19,7 +19,10 @@ class FileRef(object):
     @property
     def _file(self):
         """Get this ref's file path (with copy number)."""
-        return cmds.referenceQuery(self.ref_node, filename=True)
+        try:
+            return cmds.referenceQuery(self.ref_node, filename=True)
+        except RuntimeError:
+            return None
 
     def get_attr(self, attr):
         """Get an attribute on this rig.

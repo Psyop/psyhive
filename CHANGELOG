@@ -1,196 +1,204 @@
-#### v0.14.0 ####
+#### v0.14.1 ####
 
-FK/IK tools: removed import of legacy interface causing JD issues,
+FK/IK tools: fix error due to unknown ref node in scene,
 
 maya_psyhive:
-    tools.fkik_switcher removed legacy ui import,
-psyhive:
-    tools.usage disable tracking of farm user,
-    utils.get_single fix multi error message,
-    utils.PyFile.get_module added catch arg,
+    ref.FileRef._file catch RuntimeError on query file,
+
+
+#### v0.14.0 ####
+
+    FK/IK tools: removed import of legacy interface causing JD issues,
+
+    maya_psyhive:
+        tools.fkik_switcher removed legacy ui import,
+    psyhive:
+        tools.usage disable tracking of farm user,
+        utils.get_single fix multi error message,
+        utils.PyFile.get_module added catch arg,
 
 
 #### v0.13.0 ####
 
-startup: added usage tracker
+    startup: added usage tracker
 
-maya_psyhive:
-    startup.user_setup added usage tracking,
+    maya_psyhive:
+        startup.user_setup added usage tracking,
 
 
 #### v0.12.0 ####
 
-FK/IK switcher: add to Psyop menu,
+    FK/IK switcher: add to Psyop menu,
 
-maya_psyhive:
-    startup add FK/IK switcher to Psyop menu,
+    maya_psyhive:
+        startup add FK/IK switcher to Psyop menu,
 
 
 #### v0.11.0 ####
 
-FK/IK switcher:
-    switch key as separate option,
-    reset Knee/Arm offset to switch to IK,
+    FK/IK switcher:
+        switch key as separate option,
+        reset Knee/Arm offset to switch to IK,
 
-maya_psyhive:
-    open_maya.HMatrix.apply_to added use constraint option,
-    open_maya.HMatrix.build_loc added,
-    startup added fix logging level,
-    tools.fkik_switcher separated switch key option from key modes,
-    tools.fkik_switcher working key range mode,
-    tools.fkik_switcher fix ik Knee/Arm offset on switch,
-psyhive:
-    qt.HCheckBox added,
+    maya_psyhive:
+        open_maya.HMatrix.apply_to added use constraint option,
+        open_maya.HMatrix.build_loc added,
+        startup added fix logging level,
+        tools.fkik_switcher separated switch key option from key modes,
+        tools.fkik_switcher working key range mode,
+        tools.fkik_switcher fix ik Knee/Arm offset on switch,
+    psyhive:
+        qt.HCheckBox added,
 
 
 #### v0.10.0 ####
 
-qt tools: track usage of interface callbacks,
+    qt tools: track usage of interface callbacks,
 
-maya_psyhive:
-    startup changed capitalisation of PsyHive menu,
-psyhive:
-    qt.interface added track usage to callbacks,
+    maya_psyhive:
+        startup changed capitalisation of PsyHive menu,
+    psyhive:
+        qt.interface added track usage to callbacks,
 
 
 #### v0.9.1 ####
 
-FK/IK switcher: fix error on import,
+    FK/IK switcher: fix error on import,
 
-maya_psyhive:
-    tools.fkik_switcher fix error on import legacy interface,
+    maya_psyhive:
+        tools.fkik_switcher fix error on import legacy interface,
 
 
 #### v0.9.0 ####
 
-startup: fixed FK/IK option, 
-FK/IK switcher: use range from timeline,
+    startup: fixed FK/IK option, 
+    FK/IK switcher: use range from timeline,
 
-maya_psyhive:
-    startup fix fk/ik option,
-    startup added refresh option,
-    tools.fkik_switcher range from timeline,
-psyhive:
-    refresh added from hv-test,
-    usage fix error outside maya,
+    maya_psyhive:
+        startup fix fk/ik option,
+        startup added refresh option,
+        tools.fkik_switcher range from timeline,
+    psyhive:
+        refresh added from hv-test,
+        usage fix error outside maya,
 
 
 #### v0.8.0 ####
 
-FK/IK switcher: working release
+    FK/IK switcher: working release
 
-maya_psyhive:
-    tools.fkik_switcher shared error for no/multi systems selected,
-    tools.fkik_switcher catch multiple systems selected,
-psyhive:
-    tools.get_error_catcher bugfix exit on error option,
-    tools.HandledError added,
-    tools.catch_error dialog shows error type,
-    tools.catch_error disabled make ticket option,
-    utils.get_single added error override option,
-    utils.get_single bugfix error message on multiple,
-    utils.get_plural bugfix multiple,
+    maya_psyhive:
+        tools.fkik_switcher shared error for no/multi systems selected,
+        tools.fkik_switcher catch multiple systems selected,
+    psyhive:
+        tools.get_error_catcher bugfix exit on error option,
+        tools.HandledError added,
+        tools.catch_error dialog shows error type,
+        tools.catch_error disabled make ticket option,
+        utils.get_single added error override option,
+        utils.get_single bugfix error message on multiple,
+        utils.get_plural bugfix multiple,
 
 
 #### v0.7.0 ####
 
-fkik switcher: added keyframe button + working key options,
+    fkik switcher: added keyframe button + working key options,
 
-maya_psyhive:
-    tools.fkik_switcher working key options + added keyframe button,
-    ui.get_main_window_ptr added,
-    utils.single_undo added,
-psyhive:
-    host added,
-    qt.HUiDialog enabled catch errors,
-    qt.HUiDialog fix dialogs behind main maya window,
-    qt.HUiDialog read/write settings more quiet,
-    tools.get_error_catcher added,
-    tools.catch_error disabled email button in ui,
-    utils.Path.parent added,
-    utils.Dir.launch_browser added,
+    maya_psyhive:
+        tools.fkik_switcher working key options + added keyframe button,
+        ui.get_main_window_ptr added,
+        utils.single_undo added,
+    psyhive:
+        host added,
+        qt.HUiDialog enabled catch errors,
+        qt.HUiDialog fix dialogs behind main maya window,
+        qt.HUiDialog read/write settings more quiet,
+        tools.get_error_catcher added,
+        tools.catch_error disabled email button in ui,
+        utils.Path.parent added,
+        utils.Dir.launch_browser added,
 
 
 #### v0.6.0 ####
 
-fkik switcher: working prototype
+    fkik switcher: working prototype
 
-maya_psyhive:
-    open_maya.HMatrix.__repr__ added,
-    open_maya.HArray3Base.__add__ bugfix,
-    open_maya.HArray3Base.apply_to added use_constraint arg,
-    ref.get_selected bugfix catch,
-    tools.fkik_switcher working prototype + added key options,
-    ui.read_option_menu use str as default type,
-psyhive:
-    icons.COPY added,
-    qt added set_maya_palette/HTreeWidgetItem/notify_warning/HMenu/HPushButton,
-    qt.HUiDialog added read_settings/write_settings,
-    qt.HUiDialog.connect_widgets added context options,
-    qt.HWidgetBase added set_pixmap/set_icon,
-    utils added to_camel/PyDef/PyClass/PyBase,
-    utils.Dir.find added,
-    utils.PyBase added clean_name/is_private/is_super_private/find_child,
-    utils.PyBase _get_ast/find_child added force,
+    maya_psyhive:
+        open_maya.HMatrix.__repr__ added,
+        open_maya.HArray3Base.__add__ bugfix,
+        open_maya.HArray3Base.apply_to added use_constraint arg,
+        ref.get_selected bugfix catch,
+        tools.fkik_switcher working prototype + added key options,
+        ui.read_option_menu use str as default type,
+    psyhive:
+        icons.COPY added,
+        qt added set_maya_palette/HTreeWidgetItem/notify_warning/HMenu/HPushButton,
+        qt.HUiDialog added read_settings/write_settings,
+        qt.HUiDialog.connect_widgets added context options,
+        qt.HWidgetBase added set_pixmap/set_icon,
+        utils added to_camel/PyDef/PyClass/PyBase,
+        utils.Dir.find added,
+        utils.PyBase added clean_name/is_private/is_super_private/find_child,
+        utils.PyBase _get_ast/find_child added force,
 
 
 #### v0.5.0 ####
 
-qt tools: added function to close all managed dialogs,
+    qt tools: added function to close all managed dialogs,
 
-maya_psyhive:
-    ref.get_attr added,
-    tools.fkik_switcher added wip,
-psyhive:
-    py_gui.get_exec_fn added functools.wraps,
-    qt.close_all_dialogs added,
-    qt.HUiDialog.connect_widgets added catch_error_ option,
-    tools.err_catcher remove QApplication.exec_ for stability,
-    usage.track_usage quieter,
+    maya_psyhive:
+        ref.get_attr added,
+        tools.fkik_switcher added wip,
+    psyhive:
+        py_gui.get_exec_fn added functools.wraps,
+        qt.close_all_dialogs added,
+        qt.HUiDialog.connect_widgets added catch_error_ option,
+        tools.err_catcher remove QApplication.exec_ for stability,
+        usage.track_usage quieter,
 
 
 #### v0.4.0 ####
 
-progress bar: bugfix stop iteration on cancel dialog,
+    progress bar: bugfix stop iteration on cancel dialog,
 
-psyhive:
-    qt.progress fixed no stop iteration on cancel dialog,
-    tools.err_catcher suppress write to sentry in dev mode,
-    utils.dev_mode added,
-    utils.check_heart replace heart on missing,
+    psyhive:
+        qt.progress fixed no stop iteration on cancel dialog,
+        tools.err_catcher suppress write to sentry in dev mode,
+        utils.dev_mode added,
+        utils.check_heart replace heart on missing,
 
 
 #### v0.3.0 ####
 
-added maya menu with fk/ik switcher
+    added maya menu with fk/ik switcher
 
-bin:
-    lsfp added,
-maya_psyhive:
-    startup added psyhive menu + fk/ik switcher,
-    ui added get_main_window/obtain_menu,
-    tools.fkik_switcher added,
-psyhive:
-    icons.EMOJI moved to global location,
-    py_gui.MayaPyGui added verbosity on init,
-    py_gui added usage_tracker,
-    tools.usage added,
-    tools.err_catcher send error to sentry,
-    utils.get_single added fail_message override,
-    utils.find added full_path option,
-    utils.PyBase.find_def added catch arg,
+    bin:
+        lsfp added,
+    maya_psyhive:
+        startup added psyhive menu + fk/ik switcher,
+        ui added get_main_window/obtain_menu,
+        tools.fkik_switcher added,
+    psyhive:
+        icons.EMOJI moved to global location,
+        py_gui.MayaPyGui added verbosity on init,
+        py_gui added usage_tracker,
+        tools.usage added,
+        tools.err_catcher send error to sentry,
+        utils.get_single added fail_message override,
+        utils.find added full_path option,
+        utils.PyBase.find_def added catch arg,
 
 
 #### v0.2.0 ####
 
-added psylaunch settings
+    added psylaunch settings
 
 
 #### v0.1.0 ####
 
-made some changes
+    made some changes
 
 
 #### v0.0.0 ####
 
-initial release
+    initial release
