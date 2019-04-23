@@ -3,7 +3,8 @@
 from maya import cmds
 from maya.api import OpenMaya as om
 
-from maya_psyhive.open_maya.utils import HArray3Base, cast_result
+from maya_psyhive.open_maya.utils import cast_result
+from maya_psyhive.open_maya.array3 import HArray3Base
 from maya_psyhive.utils import set_col
 
 
@@ -13,6 +14,18 @@ class HVector(HArray3Base, om.MVector):
     __mul__ = cast_result(om.MVector.__mul__)
     __neg__ = cast_result(om.MVector.__neg__)
     __xor__ = cast_result(om.MVector.__xor__)
+
+    def as_mtx(self):
+        """Get this vector as a transformation matrix.
+
+        Returns:
+            (HMatrix): matrix
+        """
+        from maya_psyhive import open_maya as hom
+        _vals = list(hom.HMatrix().to_tuple())
+        for _idx in range(3):
+            _vals[12+_idx] = self[_idx]
+        return hom.HMatrix(_vals)
 
     def build_crv(self, pos, col=None, name='HVector'):
         """Build a curve to display this vector.

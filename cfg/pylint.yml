@@ -46,6 +46,7 @@ ignore:
     too-few-public-methods:
         hv_test/diary/
         hv_test/tools/qube.py
+        maya_psyhive/open_maya/euler_rotation.py
         psyhive/py_gui/install.py
         psyhive/qt/widgets.py
         psyhive/tools/err_catcher.py

@@ -3,7 +3,7 @@
 from maya import cmds
 from maya.api import OpenMaya as om
 
-from maya_psyhive.open_maya.utils import HArray3Base
+from maya_psyhive.open_maya.array3 import HArray3Base
 
 
 class HPoint(HArray3Base, om.MPoint):

@@ -1,3 +1,22 @@
+#### v0.15.0 ####
+
+    Released: Tue 23rd Apr 2019
+
+    FK/IK tools: 
+        ik -> fk account for ik stretch,
+        fk -> ik reset foot offsets,
+    
+    maya_psyhive:
+        open_maya added HEulerRotation/get_r,
+        open_maya.HMatrix added mul/sub/inverse/pprint/eq,
+        open_maya.HMatrix.apply_to better accuracy,
+        open_maya.HArray3Base moved to separate module,
+        open_maya.cast_result added matrix handling,
+        open_maya.HVector.as_mtx added,
+        tools.fkik_switcher ik -> fk use ik joints + added stretch,
+        tools.fkik_switcher fk -> ik reset foot offsets on switch,
+
+
 #### v0.14.1 ####
 
 FK/IK tools: fix error due to unknown ref node in scene,

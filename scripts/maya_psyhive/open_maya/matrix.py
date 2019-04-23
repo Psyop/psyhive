@@ -6,12 +6,17 @@ from maya.api import OpenMaya as om
 from psyhive.utils import lprint
 from maya_psyhive.utils import get_unique
 
+from maya_psyhive.open_maya.utils import cast_result
 from maya_psyhive.open_maya.vector import HVector
 from maya_psyhive.open_maya.point import HPoint, ORIGIN
 
 
 class HMatrix(om.MMatrix):
     """Represents a 4x4 heterozygous transformation matrix."""
+
+    inverse = cast_result(om.MMatrix.inverse)
+    __mul__ = cast_result(om.MMatrix.__mul__)
+    __sub__ = cast_result(om.MMatrix.__sub__)
 
     def apply_to(self, node, use_constraint=False):
         """Apply this matrix to the given node.
@@ -27,9 +32,9 @@ class HMatrix(om.MMatrix):
             _scale_cons = cmds.scaleConstraint(
                 _loc, node, maintainOffset=False)[0]
             cmds.delete(_loc, _parent_cons, _scale_cons)
-
             return
-        cmds.xform(node, matrix=self.to_tuple(), worldSpace=True)
+
+        cmds.xform(node, matrix=self, worldSpace=True)
 
     def build_geo(self, scale=1.0, name='HMatrix'):
         """Build geo to display this matrix.
@@ -85,6 +90,21 @@ class HMatrix(om.MMatrix):
         _tm = om.MTransformationMatrix(self)
         return HPoint(_tm.translation(om.MSpace.kWorld))
 
+    def pprint(self, dp_=3):
+        """Print this matrix in a readable form.
+
+        Args:
+            dp_ (int): accuracy in decimal points
+        """
+        _fmt = '{{:8.0{:d}f}}'.format(dp_)
+        _str = ''
+        for _idx, _val in enumerate(self.to_tuple()):
+            _str += (_fmt+', ').format(_val)
+            if not (_idx + 1) % 4:
+                _str += '\n'
+
+        print _str
+
     def to_tuple(self):
         """Convert to tuple.
 
@@ -92,6 +112,12 @@ class HMatrix(om.MMatrix):
             (float tuple): 16 floats
         """
         return tuple([self[_idx] for _idx in range(16)])
+
+    def __eq__(self, other):
+        for _this_v, _other_v in zip(self, other):
+            if round(_this_v - _other_v, 12):
+                return False
+        return True
 
     def __str__(self):
         _vals = ''
