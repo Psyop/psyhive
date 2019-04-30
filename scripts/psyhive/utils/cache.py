@@ -3,7 +3,9 @@
 import cPickle
 import functools
 import inspect
+import operator
 import os
+import tempfile
 import time
 
 import six
@@ -14,7 +16,7 @@ from psyhive.utils.misc import lprint, dprint
 
 class Cacheable(object):
     """Base class for any cacheable object."""
-    cache_file = None
+    cache_fmt = None
 
 
 class ReadError(RuntimeError):
@@ -23,6 +25,26 @@ class ReadError(RuntimeError):
 
 class WriteError(RuntimeError):
     """Raised on fail to write cached object."""
+
+
+def build_cache_fmt(path, namespace):
+    """Build cache format string for the given namespace.
+
+    This maps the path to a location in tmp dir.
+
+    Args:
+        path (str): path of cacheable
+        namespace (str): namespace for cache
+
+    Returns:
+        (str): cache format path
+    """
+    from psyhive.utils.path import Path, abs_path
+    _path = Path(path)
+    return abs_path(
+        '{tmp}/{namespace}/cache/{dir}/{base}_{{}}.cache'.format(
+            tmp=tempfile.gettempdir(), dir=_path.dir, base=_path.basename,
+            namespace=namespace))
 
 
 def _depend_path_makes_cache_outdated(
@@ -247,12 +269,12 @@ def get_result_to_file_storer(
             _force = kwargs.get('force')
 
             # Get cache file path
-            if _obj.cache_file:
+            if _obj.cache_fmt:
                 try:
-                    _cache_file = _obj.cache_file.format(method.__name__)
+                    _cache_file = _obj.cache_fmt.format(method.__name__)
                 except TypeError:
                     raise TypeError(
-                        'Bad cache file path {}'.format(_obj.cache_file))
+                        'Bad cache file fmt {}'.format(_obj.cache_fmt))
             else:
                 _cache_file = None
             _cache_file_exists = None
@@ -326,12 +348,9 @@ def obj_write(obj, path, create_dir=True, verbose=0):
     if create_dir:
         test_path(os.path.dirname(_path))
 
-    # try:
     _file = open(_path, "w")
     cPickle.dump(obj, _file)
     _file.close()
-    # except Exception as _exc:
-    #     raise WriteError(obj)
 
     return _path
 
@@ -352,19 +371,41 @@ def store_result_on_obj(method):
 
     Args:
         method (fn): method to decorate
+
+    Returns:
+        (fn): decorated function
     """
     return get_result_storer(id_as_key=True)(method)
+
+
+def save_scene_file_result(method):
+    """Decorator to save result of a scene file analysis.
+
+    The result expires if the mtime of the scene file is higher than
+    the cache generation time.
+
+    Args:
+        method (fn): method to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+    return get_result_to_file_storer(
+        get_depend_path=operator.attrgetter('path'))(method)
 
 
 def store_result_to_file(method):
     """Decorator to the result of a function to a file.
 
     This must be applied to an object which inherits from Cachable. The
-    path to the cache file is reads from the obj.cache_file attribute.
+    path to the cache file is reads from the obj.cache_fmt attribute.
     This str should contain a {} format placeholder which will be
     replaced with the method name to give the cache file path.
 
     Args:
         method (fn): method to decorate
+
+    Returns:
+        (fn): decorated function
     """
     return get_result_to_file_storer()(method)

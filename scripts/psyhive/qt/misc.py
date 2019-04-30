@@ -50,6 +50,8 @@ def get_p(pos):
         return QtCore.QPoint(*pos)
     elif isinstance(pos, QtCore.QPoint):
         return pos
+    elif isinstance(pos, QtCore.QSize):
+        return QtCore.QPoint(pos.width(), pos.height())
     raise ValueError(pos)
 
 

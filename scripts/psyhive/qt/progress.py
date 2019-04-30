@@ -70,7 +70,7 @@ class ProgressBar(QtWidgets.QDialog):
         if not self._hidden and not self.isVisible():
             raise qt.DialogCancelled
 
-        _pc = 100.0 * self.counter / len(self.items)
+        _pc = 100.0 * self.counter / max(len(self.items), 1)
         self.progress_bar.setValue(_pc)
         get_application().processEvents()
 

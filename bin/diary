@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+import sys
+
+from hv_test import diary
+
+print 'DIARY', sys.argv[1]
+_entry = diary.find_entry(sys.argv[1])
+print 'ENTRY', _entry
+print _entry.get_module()
+print 'SEARCHING FOR DEF', sys.argv[2]
+_def = _entry.find_def(sys.argv[2], private=False)
+print 'DEF', _def
+
+getattr(_entry.get_module(), _def.name)()

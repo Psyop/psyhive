@@ -14,3 +14,5 @@ ANIMALS = Collection([
     EMOJI[_idx] for _idx in str_to_ints('1576-1672')])
 FRUIT = Collection([
     EMOJI[_idx] for _idx in str_to_ints('1696-1722')])
+CATS = Collection([
+    EMOJI[_idx] for _idx in str_to_ints('101-109,1585-1590')])

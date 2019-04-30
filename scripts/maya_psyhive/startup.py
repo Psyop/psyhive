@@ -69,6 +69,9 @@ def user_setup():
     """User setup."""
     dprint('Executing PsyHive user setup')
 
+    if cmds.about(batch=True):
+        return
+
     _build_psyhive_menu()
 
     # Fix logging level (pymel sets to debug)

@@ -41,6 +41,14 @@ class Seq(object):
         print self.path
         raise NotImplementedError
 
+    def get_paths(self):
+        """Get a list of paths to the frames of this seq.
+
+        Returns:
+            (str list): list of paths
+        """
+        return [self[_frame] for _frame in self.get_frames()]
+
     def set_frames(self, frames):
         """Set cached list of frames.
 
@@ -53,7 +61,7 @@ class Seq(object):
         return self.get_frame(idx)
 
     def __repr__(self):
-        return '<{}:"{}">'.format(type(self).__name__, self.path)
+        return '<{}|{}>'.format(type(self).__name__.strip('_'), self.path)
 
 
 class Collection(object):

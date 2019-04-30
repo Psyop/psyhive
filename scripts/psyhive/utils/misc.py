@@ -42,7 +42,8 @@ def chain_fns(*args):
     """
 
     def _get_chained_fn(args):
-        def _chained_fn():
+        def _chained_fn(*xargs):
+            del xargs
             for _fn in args:
                 _fn()
         return _chained_fn
@@ -307,6 +308,27 @@ def to_nice(text):
     """
     _text = text.strip('_')
     return _text[0].capitalize() + _text[1:].replace('_', ' ')
+
+
+def val_map(val, in_min=0.0, in_max=1.0, out_min=0.0, out_max=1.0):
+    """Map a float value from input range to output range.
+
+    This mimics the java map function.
+
+    Args:
+        val (float): value
+        in_min (float): input min
+        in_max (float): input max
+        out_min (float): output min
+        out_max (float): output max
+
+    Returns:
+        (float): mapped value
+    """
+    _in_span = in_max-in_min
+    _out_span = out_max-out_min
+    _val_scaled = float(val-in_min)/float(_in_span)
+    return out_min + (_val_scaled*_out_span)
 
 
 def wrap_fn(func, *args, **kwargs):

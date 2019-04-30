@@ -33,6 +33,8 @@ ignore:
         hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         sanity_check/checks/maya/
+    not-an-iterable:
+        psyhive/utils/seq.py
     pointless-statement:
         hv_test/diary/
     protected-access:
@@ -43,29 +45,8 @@ ignore:
         hv_test/diary/
     superfluous-parens:
         psyhive/utils/misc.py
-    too-few-public-methods:
-        hv_test/diary/
-        hv_test/tools/qube.py
-        maya_psyhive/open_maya/euler_rotation.py
-        psyhive/py_gui/install.py
-        psyhive/qt/widgets.py
-        psyhive/tools/err_catcher.py
-        psyhive/utils/cache.py
-        psyhive/utils/py_file/arg.py
-        psyhive/utils/py_file/docs.py
-        psyhive/utils/seq.py
-    too-many-arguments:
-        hv_test/diary/
-        hv_test/release/tools.py
-        maya_psyhive/tools/fkik_switcher/system.py
-        psyhive/py_gui/base.py
-        psyhive/py_gui/install.py
-        psyhive/py_gui/maya_.py
-        psyhive/qt/dialog.py
-        psyhive/qt/interface.py
-        psyhive/utils/cache.py
-        psyhive/utils/misc.py
-        psyhive/utils/path.py
+    too-few-public-methods: '*'
+    too-many-arguments: '*'
     too-many-branches:
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/filter_.py
@@ -76,6 +57,8 @@ ignore:
     too-many-instance-attributes:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
+        psyhive/pipe/asset.py
+        psyhive/pipe/work_file.py
         psyhive/py_gui/base.py
         psyhive/utils/py_file/docs.py
     too-many-locals:
@@ -94,6 +77,7 @@ ignore:
     unused-argument:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
+        psyhive/qt/gui.py
         psyhive/py_gui/base.py
         psyhive/utils/cache.py
         sanity_check/checks/

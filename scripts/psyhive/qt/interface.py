@@ -9,7 +9,7 @@ from psyhive.utils import wrap_fn, lprint, dprint
 
 from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.widgets import (
-    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu)
+    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget)
 from psyhive.qt.misc import get_pixmap
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
@@ -42,15 +42,16 @@ class HUiDialog(QtWidgets.QDialog):
 
         super(HUiDialog, self).__init__()
 
-        self.set_parenting()
-
         # Load ui file
         _loader = QtUiTools.QUiLoader()
         _loader.registerCustomWidget(HCheckBox)
         _loader.registerCustomWidget(HLabel)
-        _loader.registerCustomWidget(HTextBrowser)
+        _loader.registerCustomWidget(HListWidget)
         _loader.registerCustomWidget(HPushButton)
+        _loader.registerCustomWidget(HTextBrowser)
         self.ui = _loader.load(ui_file, self)
+
+        self.set_parenting()
 
         # Setup widgets
         self.widgets = self.read_widgets()
@@ -211,7 +212,8 @@ class HUiDialog(QtWidgets.QDialog):
 
     def set_parenting(self):
         """Set parenting for host application."""
-        if host.NAME == 'maya':
+
+        if host.NAME == 'maya' and not isinstance(self.ui, QtWidgets.QWidget):
             from maya_psyhive import ui
             _maya_win = ui.get_main_window_ptr()
             self.setParent(_maya_win, QtCore.Qt.WindowStaysOnTopHint)

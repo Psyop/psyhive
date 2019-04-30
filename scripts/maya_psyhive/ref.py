@@ -20,7 +20,7 @@ class FileRef(object):
     def _file(self):
         """Get this ref's file path (with copy number)."""
         try:
-            return cmds.referenceQuery(self.ref_node, filename=True)
+            return str(cmds.referenceQuery(self.ref_node, filename=True))
         except RuntimeError:
             return None
 
@@ -46,7 +46,14 @@ class FileRef(object):
     @property
     def namespace(self):
         """Get this ref's namespace."""
-        return cmds.file(self._file, query=True, namespace=True)
+        return str(cmds.file(self._file, query=True, namespace=True))
+
+    @property
+    def path(self):
+        """Get path to this ref's scene file (without copy number)."""
+        if not self._file:
+            return None
+        return self._file.split('{')[0]
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__, self.namespace)
@@ -90,11 +97,27 @@ def find_ref(namespace=None, catch=False):
     Args:
         namespace (str): namespace to match
         catch (bool): no error on fail to find matching ref
+
+    Returns:
+        (FileRef): matching ref
+    """
+    _refs = find_refs(namespace=namespace)
+    return get_single(_refs, catch=catch)
+
+
+def find_refs(namespace=None):
+    """Find reference with given namespace.
+
+    Args:
+        namespace (str): namespace to match
+
+    Returns:
+        (FileRef list): scene refs
     """
     _refs = _read_refs()
     if namespace:
         _refs = [_ref for _ref in _refs if _ref.namespace == namespace]
-    return get_single(_refs, catch=catch)
+    return _refs
 
 
 def get_selected(catch=False):

@@ -11,8 +11,8 @@ def _dummy():
 class HWidgetBase(object):
     """Base class for any override widget."""
 
-    def redraw(self):
-        """To be implemented in subclass to populate widget."""
+    def redraw(self, *args, **kwargs):
+        """To be implemented replaced with redraw method."""
 
     def set_pixmap(self, pixmap):
         """Set pixmap for this widget.
@@ -41,6 +41,49 @@ class HCheckBox(QtWidgets.QCheckBox, HWidgetBase):
 
 class HLabel(QtWidgets.QLabel, HWidgetBase):
     """Override for QLabel widget."""
+
+
+class HListWidget(QtWidgets.QListWidget, HWidgetBase):
+    """Override for QListWidget widget."""
+
+    def all_data(self):
+        """Get a list of all data stored in items.
+
+        Returns:
+            (any list): data list
+        """
+        return [
+            _item.data(QtCore.Qt.UserRole) for _item in self.all_items()]
+
+    def all_items(self):
+        """Get a list of all items.
+
+        Returns:
+            (QListWidgetItem list): list of items
+        """
+        return [
+            self.item(_idx) for _idx in range(self.count())]
+
+    def selected_data(self):
+        """Get data stored in selected items.
+
+        Returns:
+            (any list): list of data
+        """
+        return [
+            _item.data(QtCore.Qt.UserRole) for _item in self.selectedItems()]
+
+
+class HListWidgetItem(QtWidgets.QListWidgetItem):
+    """Wrapper for QListWidgetItem object."""
+
+    def set_data(self, data):
+        """Set data for this widget item.
+
+        Args:
+            data (any): data to apply
+        """
+        self.setData(QtCore.Qt.UserRole, data)
 
 
 class HMenu(QtWidgets.QMenu, HWidgetBase):

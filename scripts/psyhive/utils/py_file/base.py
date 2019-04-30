@@ -34,7 +34,9 @@ class PyBase(object):
         self.is_private = self.clean_name.startswith('_')
 
     def check_docs(self, recursive=False, verbose=0):
-        """Check this def's docstring.
+        """Check this object's docstring.
+
+        (To be implemented in subclass)
 
         Args:
             recursive (bool): recursively check child docs
@@ -45,7 +47,9 @@ class PyBase(object):
         """Open this component in a editor."""
         self.py_file.edit(line_n=self._ast.lineno)
 
-    def find_child(self, match=None, recursive=False, catch=False, type_=None):
+    def find_child(
+            self, match=None, recursive=False, catch=False, type_=None,
+            private=None):
         """Find child node of this object.
 
         Args:
@@ -53,11 +57,21 @@ class PyBase(object):
             recursive (bool): recurse into children's children
             catch (bool): no error on fail to find
             type_ (PyBase): filter by object type
+            private (bool): filter by private/non-private
+
+        Returns:
+            (PyBase): matching child object
+
+        Raises:
+            (ValueError): if search did not match exactly one child
         """
 
         # Try match as filter
-        _filtered = get_single(self.find_children(
-            filter_=match, recursive=recursive, type_=type_), catch=True)
+        _filtered = get_single(
+            self.find_children(
+                filter_=match, recursive=recursive, type_=type_,
+                private=private),
+            catch=True)
         if _filtered:
             return _filtered
 
@@ -79,7 +93,8 @@ class PyBase(object):
         raise ValueError(match)
 
     def find_children(
-            self, filter_=None, recursive=False, force=False, type_=None):
+            self, filter_=None, recursive=False, force=False, type_=None,
+            private=None):
         """Find children of this object.
 
         Args:
@@ -87,6 +102,7 @@ class PyBase(object):
             recursive (bool): also check children's children recursively
             force (bool): force reread ast from disk
             type_ (PyBase): filter by type
+            private (bool): filter by private/non-private
         """
         if not recursive:
             _children = self._read_children(force=force)
@@ -100,19 +116,24 @@ class PyBase(object):
             _children = [
                 _child for _child in _children if isinstance(_child, type_)]
 
+        if private is not None:
+            _children = [
+                _child for _child in _children if _child.is_private == private]
+
         if filter_:
             _children = apply_filter(
                 _children, filter_, key=operator.attrgetter('name'))
 
         return _children
 
-    def find_def(self, match=None, recursive=False, catch=False):
+    def find_def(self, match=None, recursive=False, catch=False, private=None):
         """Find child def.
 
         Args:
             match (str): def name to search for
             recursive (bool): also check children's children recursively
             catch (bool): no error on fail to find def
+            private (bool): filter by private/non-private
 
         Returns:
             (PyDef): matching def
@@ -123,18 +144,24 @@ class PyBase(object):
         """
         from psyhive.utils.py_file.def_ import PyDef
         return self.find_child(
-            match=match, recursive=recursive, catch=catch, type_=PyDef)
+            match=match, recursive=recursive, catch=catch, type_=PyDef,
+            private=private)
 
-    def find_defs(self, filter_=None, recursive=False):
+    def find_defs(self, filter_=None, recursive=False, private=None):
         """Find child defs of this object.
 
         Args:
             filter_ (str): apply filter to list of defs
             recursive (bool): also check children's children recursively
+            private (bool): filter by private/non-private
+
+        Returns:
+            (PyDef list): list of matching defs
         """
         from psyhive.utils.py_file.def_ import PyDef
         return self.find_children(
-            filter_=filter_, recursive=recursive, type_=PyDef)
+            filter_=filter_, recursive=recursive, type_=PyDef,
+            private=private)
 
     def fix_docs(self, recursive=True):
         """Fix docs of this object.

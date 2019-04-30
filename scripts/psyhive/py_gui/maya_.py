@@ -4,8 +4,9 @@ import os
 
 from maya import cmds
 
-from psyhive import icons, qt
-from psyhive.utils import wrap_fn, to_nice, copy_text, lprint, dprint
+from psyhive import icons, qt, refresh
+from psyhive.utils import (
+    wrap_fn, to_nice, copy_text, lprint, dprint, chain_fns)
 
 from psyhive.py_gui import base
 from psyhive.py_gui.misc import (
@@ -174,6 +175,9 @@ class MayaPyGui(base.BasePyGui):
         """
         _icon = icon or get_def_icon(def_.name, set_=self.icon_set)
         _help_icon = icons.EMOJI.find('Information')
+        _exec_fn = get_exec_fn(
+            def_=def_, read_arg_fns=self.read_arg_fns[def_.name])
+
         _btn_width = 10
         cmds.rowLayout(
             numberOfColumns=3,
@@ -188,8 +192,7 @@ class MayaPyGui(base.BasePyGui):
             label=label or to_nice(def_.name),
             height=depth,
             width=_btn_width,
-            command=get_exec_fn(
-                def_=def_, read_arg_fns=self.read_arg_fns[def_.name]),
+            command=_exec_fn,
             align='center', backgroundColor=_col.to_tuple(mode='float'))
         cmds.iconTextButton(
             image1=_help_icon, height=depth, width=depth,
@@ -210,6 +213,10 @@ class MayaPyGui(base.BasePyGui):
             'Lock button', parent=_menu,
             image=icons.EMOJI.find('Locked'),
             command=wrap_fn(cmds.button, _btn, edit=True, enable=False))
+        cmds.menuItem(
+            'Refresh and execute', parent=_menu,
+            image=icons.EMOJI.find('Robot'),
+            command=chain_fns(refresh.reload_libs, _exec_fn))
 
         # Add right-click options (code icon)
         _menu = cmds.popupMenu(parent=_icon)

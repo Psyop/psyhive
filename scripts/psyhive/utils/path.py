@@ -7,7 +7,7 @@ import shutil
 import six
 import yaml
 
-from psyhive.utils.misc import lprint, system, dprint
+from psyhive.utils.misc import lprint, system, dprint, bytes_to_str
 from psyhive.utils.heart import check_heart
 from psyhive.utils.filter_ import passes_filter
 
@@ -50,16 +50,21 @@ class FileError(RuntimeError):
 class Path(object):
     """Represents a path on disk."""
 
-    def __init__(self, path):
+    def __init__(self, path, extn=None):
         """Constructor.
 
         Args:
             path (str): path in file structure
+            extn (str): override extension (eg. tar.gz)
         """
         self.path = path
         self.dir = os.path.dirname(path)
         self.filename = os.path.basename(path)
-        if '.' in self.filename:
+        if extn:
+            assert self.filename.endswith('.'+extn)
+            self.extn = extn
+            self.basename = self.filename[:-len(extn)-1]
+        elif '.' in self.filename:
             _tokens = self.filename.split('.')
             self.extn = _tokens[-1]
             self.basename = '.'.join(_tokens[:-1])
@@ -98,6 +103,15 @@ class Path(object):
             path (str): path to compare
         """
         return rel_path(root=self.path, path=path)
+
+    def __cmp__(self, other):
+        return cmp(self.path, other.path)
+
+    def __hash__(self):
+        return hash(self.path)
+
+    def __repr__(self):
+        return '<{}|{}>'.format(type(self).__name__.strip('_'), self.path)
 
 
 class Dir(Path):
@@ -289,6 +303,19 @@ def find(
     return sorted(_results)
 
 
+def nice_size(path):
+    """Get the size on disk of the given path in a readable format.
+
+    Args:
+        path (str): path to read size of
+
+    Returns:
+        (str): size as a string
+    """
+    _size = os.path.getsize(path)
+    return bytes_to_str(_size)
+
+
 def read_file(file_):
     """Read the contents of the given file.
 
@@ -367,8 +394,11 @@ def search_files_for_text(
         edit (bool): open the first found instance in an editor and exit
         verbose (int): print process data
     """
+    from psyhive import qt
+
     _found_instance = False
-    for _file in files:
+    for _file in qt.ProgressBar(
+            files, 'Searching {:d} file{}', col='Aquamarine', show=not edit):
 
         dprint('CHECKING FILE', _file, verbose=verbose)
 
@@ -379,7 +409,8 @@ def search_files_for_text(
             _print_line = False
             if text and text in _line:
                 _print_line = True
-            elif passes_filter(_line, filter_, case_sensitive=True):
+            elif filter_ and passes_filter(
+                    _line, filter_, case_sensitive=True):
                 _print_line = True
 
             if _print_line:

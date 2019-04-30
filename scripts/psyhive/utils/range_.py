@@ -1,6 +1,81 @@
 """Tools for managing ranges of values."""
 
+import random
 import sys
+
+
+class ValueRange(object):
+    """Represents a range of values described by a string.
+
+    For example: 1.0-1.5, 1+-0.5, etc.
+    """
+
+    def __init__(self, rng_str):
+        """Constructor.
+
+        Args:
+            rng_str (str): range string
+        """
+        self.rng_str = rng_str
+
+        if "+/-" in rng_str or "+-" in rng_str:
+
+            _pm_token = "+/-" if "+/-" in rng_str else "+-"
+            _pm_token_pos = rng_str.rfind(_pm_token)
+            if not _pm_token_pos:
+                _root = 0.0
+            else:
+                _root = float(rng_str[: _pm_token_pos])
+            _ampl = float(rng_str[_pm_token_pos+len(_pm_token):])
+            self.min = _root-_ampl
+            self.max = _root+_ampl
+
+        else:
+
+            # Handle leading "-"
+            _min_mult = 1
+            if rng_str[0] == "-":
+                _min_mult = -1
+                rng_str = rng_str[1:]
+
+            # Handle negative max
+            _max_mult = 1
+            if "--" in rng_str:
+                _max_mult = -1
+                rng_str = rng_str.replace("--", "-")
+
+            # Parse str
+            if rng_str.endswith('-'):
+                self.min = float(rng_str[: -1])
+                self.max = float(sys.maxsize)
+
+            elif "-" in rng_str:
+
+                assert rng_str.count("-") == 1
+                _hyphen_pos = rng_str.rfind("-")
+                self.min = _min_mult*float(rng_str[: _hyphen_pos])
+                self.max = _max_mult*float(rng_str[_hyphen_pos+1:])
+
+            elif not rng_str:
+                self.min = self.max = 0.0
+
+            else:
+                self.min = self.max = _max_mult*_min_mult*float(rng_str)
+
+    def rand(self, random_=None):
+        """Get a random value from within the range.
+
+        Args:
+            random_ (Random): override random object
+
+        Returns:
+            (float): random value
+        """
+        _random = random_ or random
+        return self.min+_random.random()*(self.max-self.min)
+
+    def __repr__(self):
+        return '<%s:%s>' % (type(self).__name__, self.rng_str)
 
 
 def ints_to_str(values, rng_sep="-", chunk_sep=","):
@@ -97,6 +172,20 @@ def ints_to_str(values, rng_sep="-", chunk_sep=","):
         _val_str = _new_str.strip(chunk_sep)
 
     return _val_str
+
+
+def fr_range(count):
+    """Get a list of floating point value in the range 0 to 1.
+
+    The range is evenly broken into the number of results.
+
+    Args:
+        count (int): number of values to return
+
+    Returns:
+        (float list): list of floats
+    """
+    return [1.0*_idx/(count-1) for _idx in range(count)]
 
 
 def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):

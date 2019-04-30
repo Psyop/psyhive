@@ -8,7 +8,7 @@ import unittest
 from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
-    text_to_py_file, touch, get_single, find)
+    text_to_py_file, touch, get_single, find, Dir, File)
 from psyhive.utils.py_file.docs import MissingDocs
 
 
@@ -42,14 +42,8 @@ class TestPyFile(unittest.TestCase):
 
         _example = abs_path('example.py', root=os.path.dirname(__file__))
         _py_file = PyFile(_example)
-        # with self.assertRaises(MissingDocs):
-        #     _py_file.find_def('missing_docs').check_docs()
-        try:
+        with self.assertRaises(MissingDocs):
             _py_file.find_def('missing_docs').check_docs()
-        except MissingDocs:
-            pass
-        else:
-            assert False
         with self.assertRaises(MissingDocs):
             _py_file.find_def('missing_docs_args').check_docs()
         with self.assertRaises(MissingDocs):
@@ -83,11 +77,20 @@ class TestPyFile(unittest.TestCase):
         assert _def.find_arg('c').default == {'a': 1}
 
 
-class TestUtils(unittest.TestCase):
+class TestPath(unittest.TestCase):
 
-    def test_apply_filter(self):
+    def test(self):
 
-        assert apply_filter(['a', 'b'], None) == ['a', 'b']
+        # Test cmp/hash
+        _dir_a = Dir('/a/b/c')
+        _dir_b = Dir('/a/b/c')
+        assert _dir_a == _dir_b
+        assert len({_dir_a, _dir_b}) == 1
+
+        # Test override extn
+        _file = File('/tmp/blah.ass.gz', extn='ass.gz')
+        assert _file.extn == 'ass.gz'
+        assert _file.basename == 'blah'
 
     @restore_cwd
     def test_abs_path(self):
@@ -118,6 +121,13 @@ class TestUtils(unittest.TestCase):
         touch(_test_file)
         assert get_single(find(_test_dir)) == _test_file
         assert get_single(find(_test_dir, full_path=False)) == 'test.txt'
+
+
+class TestUtils(unittest.TestCase):
+
+    def test_apply_filter(self):
+
+        assert apply_filter(['a', 'b'], None) == ['a', 'b']
 
     def test_obj_write(self):
 

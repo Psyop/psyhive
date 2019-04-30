@@ -121,6 +121,10 @@ class _Traceback(object):
                 raise RuntimeError('Failed to parse traceback')
             self.lines.append(_trace_line)
 
+    def pprint(self):
+        """Print this traceback in maya format."""
+        print '# '+self.body.replace('\n', '\n# ')
+
 
 def _handle_exception(exc, verbose=0):
     """Handle the given exception.
@@ -154,6 +158,7 @@ def _handle_exception(exc, verbose=0):
     lprint('MSG', exc.message, verbose=verbose)
     lprint('TYPE', type(exc), verbose=verbose)
     _traceback = _Traceback()
+    _traceback.pprint()
     _app = qt.get_application()
     _dialog = _ErrDialog(
         traceback_=_traceback, message=exc.message,

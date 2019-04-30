@@ -1,3 +1,38 @@
+#### v0.16.0 ####
+
+    Released: Tue 30th Apr 2019
+
+    startup: fixed build ui error on farm (ccessaro)
+    
+    maya_psyhive:
+        ref namespace/_file unicode -> str,
+        ref.FileRef.path added,
+        ref.find_refs added,
+        startup.user_setup disable in batch mode,
+    psyhive:
+        icons.CATS added,
+        py_gui only load maya functionality inside maya,
+        py_gui added refresh + execute ctx option,
+        pipe added Project/Shot/AssetFile/WorkFile,
+        qt HListWidgetItem/get_p added,
+        qt.gui.HPainter added,
+        qt.HPixamp.add_text added,
+        qt.HPixamp.save_as catch zero size silent fail,
+        qt.interface added HListWidget/HTextBrowser,
+        qt.interface.set_parenting fixed for QWidget,
+        qt.get_p added handling for QSize,
+        qt.progress catch error on empty items list,
+        tools.err_catcher print err to terminal on raise,
+        utils save_scene_file_result/build_cache_fmt/val_map/nice_size/ValueRange/fr_range added,
+        utils.Cacheable cache_file -> cache_fmt,
+        utils.chain_fn allow args (discarded),
+        utils.Path allow extn override,
+        utils.Path added __hash__/__cmp__,
+        utils.search_files_for_text added progress bar,
+        utils.PyBase find_child/find_children/find_def/find_defs added private option,
+        utils.Seq.get_paths added,
+
+
 #### v0.15.0 ####
 
     Released: Tue 23rd Apr 2019
@@ -19,10 +54,10 @@
 
 #### v0.14.1 ####
 
-FK/IK tools: fix error due to unknown ref node in scene,
+    FK/IK tools: fix error due to unknown ref node in scene,
 
-maya_psyhive:
-    ref.FileRef._file catch RuntimeError on query file,
+    maya_psyhive:
+        ref.FileRef._file catch RuntimeError on query file,
 
 
 #### v0.14.0 ####
