@@ -10,7 +10,7 @@ INSTALL_GUI_DEFS = {}
 def install_gui(
         icon=None, choices=None, hide=None, section=None,
         label=None, label_width=None, col=None, update=None,
-        verbose=False):
+        disable_reload=False, verbose=False):
     """Build a decorator which installs a def into a py_gui inteface.
 
     Any decorated def will appear in the py_gui interface for that file.
@@ -25,6 +25,7 @@ def install_gui(
         col (str): button colour
         update (dict): dict of ArgUpdater objects for any args that need
             to be updated on the fly
+        disable_reload (bool): no reload when this def is executed
         verbose (int): print process data
     """
 
@@ -42,6 +43,7 @@ def install_gui(
             'label_width': label_width,
             'col': col,
             'update': update,
+            'disable_reload': disable_reload,
         }
         if func.__module__ not in INSTALL_GUI_DEFS:
             INSTALL_GUI_DEFS[func.__module__] = []

@@ -1,12 +1,37 @@
 """Tools for managing the progress bar dialog."""
 
 import collections
+import copy
 
 from psyhive.utils import get_plural, check_heart, lprint
 
 from psyhive.qt.misc import get_application
-from psyhive.qt.mgr import QtWidgets
+from psyhive.qt.mgr import QtWidgets, Y_AXIS
 from psyhive.qt.widgets import HProgressBar
+
+_PROGRESS_BARS = []
+
+
+def _get_next_pos(title):
+    """Get position for next progress bar.
+
+    This checks the existing progress bars, removing any ones which have
+    expired or have the same title as this bar, and then returns a position
+    below the last bar.
+
+    Args:
+        title (str): title of progress bar being positioned
+    """
+
+    # Flush out unused bars
+    for _bar in copy.copy(_PROGRESS_BARS):
+        if not _bar.isVisible() or _bar.windowTitle() == title:
+            _PROGRESS_BARS.remove(_bar)
+
+    if not _PROGRESS_BARS:
+        return None
+
+    return _PROGRESS_BARS[-1].pos() + Y_AXIS*100
 
 
 class ProgressBar(QtWidgets.QDialog):
@@ -30,10 +55,14 @@ class ProgressBar(QtWidgets.QDialog):
 
         super(ProgressBar, self).__init__()
 
-        _title = (title or 'Processing {:d} items').format(
+        _title = (title or 'Processing {:d} item{}').format(
             len(self.items), get_plural(self.items))
         self.setWindowTitle(_title)
         self.resize(408, 54)
+
+        _pos = _get_next_pos(title=_title)
+        if _pos:
+            self.move(_pos)
 
         # Build ui
         self.grid_lyt = QtWidgets.QGridLayout(self)
@@ -53,6 +82,7 @@ class ProgressBar(QtWidgets.QDialog):
         self._hidden = not show
         if show:
             self.show()
+        _PROGRESS_BARS.append(self)
 
     def __iter__(self):
         return self

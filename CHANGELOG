@@ -1,3 +1,27 @@
+#### v0.17.0 ####
+
+    Released: Tue 7th May 2019
+
+    fkik switcher: changes to allow tool to be sent to LittleZoo
+    
+    bin:
+        lsfp list dir if no arg passed,
+    maya_psyhive:
+        ref added is_loaded/load/swap_to,
+        ref.get_selected added multi + catch selected ref nodes,
+    psyhive:
+        icons.REFRESH added,
+        icons added $PSYHIVE_ICONS_EMOJI override,
+        py_gui.install_gui added disable_reload option,
+        qt.HUiDialog block signals on exec redraw,
+        qt.mgr revert Qt -> PySide for LittleZoo,
+        qt.mgr added X_AXIS/Y_AXIS,
+        qt.ProgressBar added positioning for multiple bars,
+        qt.HListWidget added select_text/selected_text,
+        tools.usage catch missing elasticsearch,
+        utils.path catch missing yaml,
+
+
 #### v0.16.0 ####
 
     Released: Tue 30th Apr 2019

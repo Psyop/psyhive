@@ -163,7 +163,9 @@ class MayaPyGui(base.BasePyGui):
         if not last_:
             cmds.separator(style='out', height=10, horizontal=True)
 
-    def add_execute(self, def_, depth=35, icon=None, label=None, col=None):
+    def add_execute(
+            self, def_, depth=35, icon=None, label=None, col=None,
+            disable_reload=False):
         """Add execute button for the given def.
 
         Args:
@@ -172,11 +174,13 @@ class MayaPyGui(base.BasePyGui):
             icon (str): path to icon to display
             label (str): override label from exec button
             col (str): colour for button
+            disable_reload (bool): no refresh on execute
         """
         _icon = icon or get_def_icon(def_.name, set_=self.icon_set)
         _help_icon = icons.EMOJI.find('Information')
         _exec_fn = get_exec_fn(
-            def_=def_, read_arg_fns=self.read_arg_fns[def_.name])
+            def_=def_, read_arg_fns=self.read_arg_fns[def_.name],
+            disable_reload=disable_reload)
 
         _btn_width = 10
         cmds.rowLayout(
@@ -207,7 +211,7 @@ class MayaPyGui(base.BasePyGui):
         ]).format(self.py_file.get_module().__name__, def_.name)
         cmds.menuItem(
             'Copy import statement', parent=_menu,
-            image=icons.EMOJI.find('Copy'),
+            image=icons.COPY,
             command=wrap_fn(copy_text, _cmd))
         cmds.menuItem(
             'Lock button', parent=_menu,
@@ -215,7 +219,7 @@ class MayaPyGui(base.BasePyGui):
             command=wrap_fn(cmds.button, _btn, edit=True, enable=False))
         cmds.menuItem(
             'Refresh and execute', parent=_menu,
-            image=icons.EMOJI.find('Robot'),
+            image=icons.REFRESH,
             command=chain_fns(refresh.reload_libs, _exec_fn))
 
         # Add right-click options (code icon)

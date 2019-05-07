@@ -8,8 +8,6 @@ import platform
 import tempfile
 import time
 
-from elasticsearch import Elasticsearch
-
 from psyhive import host
 from psyhive.utils import dprint
 
@@ -46,6 +44,11 @@ def _write_usage_to_kibana(func, verbose=1):
 
     # Don't track farm usage
     if os.environ.get('USER') == 'render':
+        return
+
+    try:
+        from elasticsearch import Elasticsearch
+    except ImportError:
         return
 
     # Build usage dict

@@ -1,8 +1,9 @@
 """Tools for managing qt interfaces."""
 
-import tempfile
 import os
 import sys
+import tempfile
+import types
 
 from psyhive import host
 from psyhive.utils import wrap_fn, lprint, dprint
@@ -117,13 +118,14 @@ class HUiDialog(QtWidgets.QDialog):
             _context = getattr(self, '_context__'+_name, None)
             if _context:
                 _widget.customContextMenuRequested.connect(
-                    _get_context_fn(_context, widget=_widget))
+                    _build_context_fn(_context, widget=_widget))
                 _widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
-            # Connect draw callback
+            # Connect redraw callback
             _redraw = getattr(self, '_redraw__'+_name, None)
             if _redraw:
-                _widget.redraw = wrap_fn(_redraw, widget=_widget)
+                _mthd = _build_redraw_method(_redraw)
+                _widget.redraw = types.MethodType(_mthd, _widget)
 
     def delete(self, verbose=0):
         """Delete this dialog.
@@ -242,7 +244,7 @@ class HUiDialog(QtWidgets.QDialog):
         lprint(' - SAVING POS', self.ui.pos(), verbose=verbose)
 
 
-def _get_context_fn(callback, widget):
+def _build_context_fn(callback, widget):
     """Build function connect widget right-click to the given callback.
 
     Args:
@@ -256,6 +258,33 @@ def _get_context_fn(callback, widget):
         _menu.exec_(widget.mapToGlobal(pos))
 
     return _context_fn
+
+
+def _build_redraw_method(redraw):
+    """Build redraw method from the given redraw function.
+
+    When the method called, signals are blocked from the widget, the
+    redraw is executed, signals are unblocked and the the changed
+    signal is triggered.
+
+    Args:
+        redraw (fn): redraw function
+    """
+
+    def _redraw_method(widget):
+        widget.blockSignals(True)
+        redraw(widget=widget)
+        widget.blockSignals(False)
+
+        # Emit changed signal
+        for _name in ['itemSelectionChanged', 'stateChanged']:
+            if not hasattr(widget, _name):
+                continue
+            _signal = getattr(widget, _name)
+            _signal.emit()
+            break
+
+    return _redraw_method
 
 
 def close_all_dialogs():

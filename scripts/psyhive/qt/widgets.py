@@ -61,8 +61,17 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
         Returns:
             (QListWidgetItem list): list of items
         """
-        return [
-            self.item(_idx) for _idx in range(self.count())]
+        return [self.item(_idx) for _idx in range(self.count())]
+
+    def select_text(self, items):
+        """The items with text matching the given list.
+
+        Args:
+            items (str list): list of text of items to select
+        """
+        for _item in self.all_items():
+            _text = _item.text()
+            _item.setSelected(_text in items)
 
     def selected_data(self):
         """Get data stored in selected items.
@@ -72,6 +81,14 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
         """
         return [
             _item.data(QtCore.Qt.UserRole) for _item in self.selectedItems()]
+
+    def selected_text(self):
+        """Get selected item as text.
+
+        Returns:
+            (str list): text of selected items
+        """
+        return [_item.text() for _item in self.selectedItems()]
 
 
 class HListWidgetItem(QtWidgets.QListWidgetItem):

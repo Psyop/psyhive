@@ -5,7 +5,6 @@ import functools
 import os
 import shutil
 import six
-import yaml
 
 from psyhive.utils.misc import lprint, system, dprint, bytes_to_str
 from psyhive.utils.heart import check_heart
@@ -187,7 +186,8 @@ def abs_path(path, win=False, root=None, verbose=0):
         replace('\\\\', '/').\
         replace('\\', '/').\
         replace('//', '/').\
-        replace('/./', '/')
+        replace('/./', '/').\
+        replace('c:/users/hvande~1', 'C:/users/hvanderbeek')
     lprint('CLEANED', _path, verbose=verbose)
 
     # Fix embedded relative dir up
@@ -334,6 +334,7 @@ def read_yaml(file_):
     Args:
         file_ (str): path to read
     """
+    import yaml
     if not os.path.exists(file_):
         raise OSError('Missing file '+file_)
     _body = read_file(file_)
@@ -479,6 +480,7 @@ def write_yaml(file_, data):
         file_ (str): path to yaml file
         data (dict): data to write to yaml
     """
+    import yaml
     test_path(os.path.dirname(file_))
     with open(file_, 'w') as _file:
         yaml.dump(data, _file, default_flow_style=False)

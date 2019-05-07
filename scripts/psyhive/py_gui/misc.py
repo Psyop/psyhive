@@ -36,7 +36,9 @@ def get_def_icon(name, set_):
     return _rand.choice(set_.get_paths())
 
 
-def get_exec_fn(def_, read_arg_fns, catch_error_=True, track_usage_=True):
+def get_exec_fn(
+        def_, read_arg_fns, catch_error_=True, track_usage_=True,
+        disable_reload=False):
     """Get execute command for the given def and read arg functions.
 
     Args:
@@ -44,6 +46,7 @@ def get_exec_fn(def_, read_arg_fns, catch_error_=True, track_usage_=True):
         read_arg_fns (dict): name/fn dict of functions to read def args
         catch_error_ (bool): apply catch_error decorator
         track_usage_ (bool): apply track usage decorator
+        disable_reload (bool): no reload on execute
     """
     _mod = def_.py_file.get_module()
     _fn = getattr(_mod, def_.name)
@@ -52,7 +55,8 @@ def get_exec_fn(def_, read_arg_fns, catch_error_=True, track_usage_=True):
     def _exec_fn(*xargs):
         print '############ Start {} ##############'.format(def_.name)
         del xargs
-        reload(_mod)
+        if not disable_reload:
+            reload(_mod)
         _kwargs = {}
         for _arg_name, _arg_fn in read_arg_fns.items():
             _kwargs[_arg_name] = _arg_fn()

@@ -1,8 +1,10 @@
 """Tools for managing references in maya."""
 
+import os
+
 from maya import cmds
 
-from psyhive.utils import File, get_single
+from psyhive.utils import File, get_single, lprint
 
 
 class FileRef(object):
@@ -43,6 +45,18 @@ class FileRef(object):
         """
         return '{}:{}'.format(self.namespace, name)
 
+    def is_loaded(self):
+        """Check if this reference is loaded.
+
+        Returns:
+            (bool): loaded state
+        """
+        return cmds.referenceQuery(self.ref_node, isLoaded=True)
+
+    def load(self):
+        """Load this reference."""
+        cmds.file(self._file, loadReference=True)
+
     @property
     def namespace(self):
         """Get this ref's namespace."""
@@ -54,6 +68,18 @@ class FileRef(object):
         if not self._file:
             return None
         return self._file.split('{')[0]
+
+    def swap_to(self, file_):
+        """Swap this reference file path.
+
+        Args:
+            file_ (str): new file path
+        """
+        if not os.path.exists(file_):
+            raise OSError("Missing file: {}".format(file_))
+        cmds.file(
+            file_, loadReference=self.ref_node, ignoreVersion=True,
+            options="v=0", force=True)
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__, self.namespace)
@@ -120,11 +146,13 @@ def find_refs(namespace=None):
     return _refs
 
 
-def get_selected(catch=False):
+def get_selected(catch=False, multi=False, verbose=0):
     """Get selected ref.
 
     Args:
         catch (bool): no error on None
+        multi (bool): allow multiple selections
+        verbose (int): print process data
 
     Returns:
         (FileRef): selected file ref
@@ -136,11 +164,21 @@ def get_selected(catch=False):
     _nss = sorted(set([
         _node.split(":")[0] for _node in cmds.ls(selection=True)
         if ":" in _node]))
-    _ns = get_single(
-        _nss, fail_message='No reference selected', catch=catch)
-    if not _ns:
+    lprint('SEL NAMESPACES', _nss, verbose=verbose)
+    _refs = [find_ref(_ns) for _ns in _nss]
+    _sel_ref_nodes = [
+        FileRef(_ref_node) for _ref_node in cmds.ls(
+            selection=True, type='reference')]
+    lprint('SEL REF NODES', _sel_ref_nodes, verbose=verbose)
+    _refs += _sel_ref_nodes
+    lprint('REFS', _refs, verbose=verbose)
+    if multi:
+        return _refs
+    _ref = get_single(
+        _refs, fail_message='No reference selected', catch=catch)
+    if not _ref:
         return None
-    return find_ref(_ns)
+    return _ref
 
 
 def obtain_ref(file_, namespace):

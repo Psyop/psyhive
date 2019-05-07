@@ -3,11 +3,12 @@
 import os
 import sys
 
-from psyhive.utils import abs_path
+from psyhive.utils import abs_path, find
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        _path = sys.argv[1]
+        _paths = [abs_path(sys.argv[1])]
     else:
-        _path = os.getcwd()
-    print abs_path(_path)
+        _paths = find(depth=1)
+    for _path in _paths:
+        print _path

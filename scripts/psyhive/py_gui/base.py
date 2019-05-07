@@ -95,6 +95,7 @@ class BasePyGui(object):
         _update = opts.get('update') or {}
         _choices = opts.get('choices') or {}
         _hide = opts.get('hide') or []
+        _disable_reload = opts.get('disable_reload') or False
 
         self.read_arg_fns[def_.name] = {}
         self.set_arg_fns[def_.name] = {}
@@ -128,9 +129,12 @@ class BasePyGui(object):
             icon=opts.get('icon'),
             label=opts.get('label'),
             col=opts.get('col') or self.base_col,
+            disable_reload=_disable_reload,
         )
 
-    def add_execute(self, def_, depth=35, icon=None, label=None, col=None):
+    def add_execute(
+            self, def_, depth=35, icon=None, label=None, col=None,
+            disable_reload=False):
         """Add execute button for the given def.
 
         Args:
@@ -138,7 +142,8 @@ class BasePyGui(object):
             depth (int): size in pixels of def
             icon (str): path to icon to display
             label (str): override label from exec button
-            col (str): colour for this button
+            col (str): colour for button
+            disable_reload (bool): no refresh on execute
         """
 
     def close_event(self, verbose=0):

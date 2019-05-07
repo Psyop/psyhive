@@ -5,6 +5,8 @@ ignore:
         psyhive/tools/err_catcher.py
     c-extension-no-member:
         maya_psyhive/ui.py
+    eval-used:
+        hv_test/diary/
     global-statement:
         hv_test/diary/
         hv_test/tools/cod_bro.py
@@ -33,15 +35,19 @@ ignore:
         hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         sanity_check/checks/maya/
+    no-value-for-parameter:
+        hv_test/diary/y19/d0425/tk_tools.py
     not-an-iterable:
         psyhive/utils/seq.py
     pointless-statement:
         hv_test/diary/
     protected-access:
         hv_test/diary/
+    redefined-outer-name:
+        hv_test/diary/
     reimported:
         hv_test/diary/
-    redefined-outer-name:
+    relative-import:
         hv_test/diary/
     superfluous-parens:
         psyhive/utils/misc.py
@@ -61,13 +67,7 @@ ignore:
         psyhive/pipe/work_file.py
         psyhive/py_gui/base.py
         psyhive/utils/py_file/docs.py
-    too-many-locals:
-        hv_test/diary/
-        hv_test/release/pylint.py
-        hv_test/release/tools.py
-        psyhive/utils/path.py
-        psyhive/utils/range_.py
-        sanity_check/checks/
+    too-many-locals: '*'
     too-many-statements:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py

@@ -22,6 +22,7 @@ _RELOAD_ORDER = [
     'psyhive.utils',
     'psyhive.icons.set_',
     'psyhive.icons',
+    'psyhive.qt.mgr',
     'psyhive.qt.widgets',
     'psyhive.qt',
     'psyhive.py_gui',
