@@ -37,6 +37,13 @@ def get_col(col):
     return _col
 
 
+def get_icon(icon):
+
+    if isinstance(icon, QtGui.QPixmap):
+        return QtGui.QIcon(icon)
+    raise ValueError(icon)
+
+
 def get_p(pos):
     """Get a point object from the given data.
 

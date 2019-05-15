@@ -1,5 +1,7 @@
 """Qt widget overrides."""
 
+from psyhive.utils import lprint
+
 from psyhive.qt.mgr import QtWidgets, QtGui, QtCore
 from psyhive.qt.misc import get_col, get_pixmap
 
@@ -63,6 +65,18 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
         """
         return [self.item(_idx) for _idx in range(self.count())]
 
+    def select_data(self, items, verbose=0):
+        """The items with text matching the given list.
+
+        Args:
+            items (str list): list of text of items to select
+        """
+        lprint("SELECTING", self, items, verbose=verbose)
+        for _item in self.all_items():
+            _data = _item.get_data()
+            lprint(" - TESTING", _data, _data in items, verbose=verbose)
+            _item.setSelected(_data in items)
+
     def select_text(self, items):
         """The items with text matching the given list.
 
@@ -94,6 +108,13 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
 class HListWidgetItem(QtWidgets.QListWidgetItem):
     """Wrapper for QListWidgetItem object."""
 
+    def get_data(self):
+        return self.data(QtCore.Qt.UserRole)
+
+    def set_col(self, col):
+        _brush = QtGui.QBrush(get_col(col))
+        self.setForeground(_brush)
+
     def set_data(self, data):
         """Set data for this widget item.
 
@@ -102,11 +123,15 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
         """
         self.setData(QtCore.Qt.UserRole, data)
 
+    def set_icon(self, image):
+        _icon = QtGui.QIcon(get_pixmap(image))
+        self.setIcon(_icon)
+
 
 class HMenu(QtWidgets.QMenu, HWidgetBase):
     """Override for QMenu widget."""
 
-    def add_action(self, text, func, icon=None):
+    def add_action(self, text, func, icon=None, verbose=0):
         """Add an action to the menu.
 
         Args:
@@ -117,6 +142,7 @@ class HMenu(QtWidgets.QMenu, HWidgetBase):
         _args = [text, func]
         if icon:
             _args = [get_pixmap(icon)] + _args
+        lprint("ADD ACTION", _args, verbose=verbose)
         return self.addAction(*_args)
 
     def add_label(self, text, icon=None):

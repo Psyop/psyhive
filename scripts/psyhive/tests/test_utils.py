@@ -8,7 +8,8 @@ import unittest
 from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
-    text_to_py_file, touch, get_single, find, Dir, File)
+    text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
+    get_owner)
 from psyhive.utils.py_file.docs import MissingDocs
 
 
@@ -122,12 +123,24 @@ class TestPath(unittest.TestCase):
         assert get_single(find(_test_dir)) == _test_file
         assert get_single(find(_test_dir, full_path=False)) == 'test.txt'
 
+    def test_get_owner(self):
+
+        _path = '{}/psyhive/testing/owner_test.txt'.format(tempfile.gettempdir())
+        touch(_path)
+        assert get_owner(_path) == os.environ['USER']
+
+
 
 class TestUtils(unittest.TestCase):
 
     def test_apply_filter(self):
 
         assert apply_filter(['a', 'b'], None) == ['a', 'b']
+
+    def test_get_time_t(self):
+
+        get_time_t(time.time())
+        get_time_t(time.localtime())
 
     def test_obj_write(self):
 

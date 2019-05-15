@@ -180,6 +180,15 @@ def get_ord(idx):
     return 'th'
 
 
+def get_time_t(val):
+
+    if isinstance(val, float):
+        return time.localtime(val)
+    elif isinstance(val, time.struct_time):
+        return val
+    raise ValueError(val)
+
+
 def last(items):
     """Mark the last item of a list.
 

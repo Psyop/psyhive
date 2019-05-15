@@ -20,14 +20,6 @@ class Seq(object):
         if frames:
             self.set_frames(frames)
 
-    def get_frame(self, idx):
-        """Get the path to a frame of the sequence.
-
-        Args:
-            idx (int): frame number
-        """
-        return self.path % idx
-
     @store_result_on_obj
     def get_frames(self, frames=None, force=False):
         """Get a list of frame indices from disk.
@@ -40,6 +32,14 @@ class Seq(object):
             return frames
         print self.path
         raise NotImplementedError
+
+    def get_path(self, idx):
+        """Get the path to a frame of the sequence.
+
+        Args:
+            idx (int): frame number
+        """
+        return self.path % idx
 
     def get_paths(self):
         """Get a list of paths to the frames of this seq.
@@ -58,7 +58,7 @@ class Seq(object):
         self.get_frames(force=True, frames=frames)
 
     def __getitem__(self, idx):
-        return self.get_frame(idx)
+        return self.get_path(idx)
 
     def __repr__(self):
         return '<{}|{}>'.format(type(self).__name__.strip('_'), self.path)
@@ -75,6 +75,15 @@ class Collection(object):
         """
         self._paths = paths
 
+    def get_path(self, idx):
+        return self.get_paths()[idx]
+
     def get_paths(self):
         """Get a list of file paths in this collection."""
         return self._paths
+
+    def __getitem__(self, idx):
+        return self.get_path(idx)
+
+    def __len__(self):
+        return len(self.get_paths())

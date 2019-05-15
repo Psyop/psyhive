@@ -161,7 +161,7 @@ class EmojiSet(Seq):
         _parser = self._read_html()
         for _name, _idx in _parser.names.items():
             _url = _parser.urls[_name]
-            _emoji = _Emoji(path_=self.get_frame(_idx), name=_name, url=_url)
+            _emoji = _Emoji(path_=self[_idx], name=_name, url=_url)
             _emojis.append(_emoji)
 
         return _emojis

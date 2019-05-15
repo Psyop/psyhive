@@ -1,12 +1,15 @@
 """Tools for managing paths in a file structure."""
 
+import ctypes
 import filecmp
 import functools
 import os
 import shutil
 import six
 
-from psyhive.utils.misc import lprint, system, dprint, bytes_to_str
+from ctypes import wintypes
+
+from psyhive.utils.misc import lprint, system, dprint, bytes_to_str, copy_text
 from psyhive.utils.heart import check_heart
 from psyhive.utils.filter_ import passes_filter
 
@@ -104,7 +107,9 @@ class Path(object):
         return rel_path(root=self.path, path=path)
 
     def __cmp__(self, other):
-        return cmp(self.path, other.path)
+        if hasattr(other, 'path'):
+            return cmp(self.path, other.path)
+        return cmp(self.path, other)
 
     def __hash__(self):
         return hash(self.path)
@@ -154,6 +159,9 @@ class File(Path):
     def read(self):
         """Read the text contents of this file."""
         return read_file(self.path)
+
+    def touch(self):
+        touch(self.path)
 
 
 def abs_path(path, win=False, root=None, verbose=0):
@@ -301,6 +309,113 @@ def find(
             _result.replace(_dir+'/', '') for _result in _results]
 
     return sorted(_results)
+
+
+def get_copy_path_fn(path):
+
+    def _copy_path_fn():
+        from psyhive import qt
+        _mods = qt.get_application().keyboardModifiers()
+        _shift = _mods == qt.QtCore.Qt.ShiftModifier
+        _path = abs_path(path, win=_shift)
+        copy_text(_path)
+
+    return _copy_path_fn
+
+
+def get_owner(path):
+    """Get owner of the given path.
+
+    Args:
+        path (str): path to check
+
+    Returns:
+        (str): path owner
+    """
+
+    def get_file_security(filename, request):
+        length = wintypes.DWORD()
+        _GetFileSecurity(filename, request, None, 0, ctypes.byref(length))
+
+        if length.value:
+            _sd = (wintypes.BYTE * length.value)()
+            if _GetFileSecurity(
+                    filename, request, _sd, length, ctypes.byref(length)):
+                return _sd
+
+    def get_security_descriptor_owner(sd_):
+        if sd_ is not None:
+            sid = _psid()
+            sid_defaulted = wintypes.BOOL()
+            if _GetSecurityDescriptorOwner(
+                    sd_, ctypes.byref(sid), ctypes.byref(sid_defaulted)):
+                return sid
+
+    def look_up_account_sid(sid):
+        if sid is not None:
+            size = 256
+            name = ctypes.create_unicode_buffer(size)
+            domain = ctypes.create_unicode_buffer(size)
+            cch_name = wintypes.DWORD(size)
+            cch_domain = wintypes.DWORD(size)
+            sid_type = wintypes.DWORD()
+            if _LookupAccountSid(
+                    None, sid, name, ctypes.byref(cch_name), domain,
+                    ctypes.byref(cch_domain), ctypes.byref(sid_type)):
+                return name.value, domain.value, sid_type.value
+
+        return None, None, None
+
+    _descriptor = ctypes.POINTER(wintypes.BYTE)
+    _psid = ctypes.POINTER(wintypes.BYTE)
+    _lpd_word = ctypes.POINTER(wintypes.DWORD)
+    _lpd_bool = ctypes.POINTER(wintypes.BOOL)
+
+    _OWNER_SECURITY_INFORMATION = 0X00000001
+    _SID_TYPES = dict(enumerate(
+        "User Group Domain Alias WellKnownGroup DeletedAccount "
+        "Invalid Unknown Computer Label".split(), 1))
+
+    _advapi32 = ctypes.windll.advapi32
+
+    # MSDN windows/desktop/aa446639
+    _GetFileSecurity = _advapi32.GetFileSecurityW
+    _GetFileSecurity.restype = wintypes.BOOL
+    _GetFileSecurity.argtypes = [
+        wintypes.LPCWSTR,  # File Name (in)
+        wintypes.DWORD,  # Requested Information (in)
+        _descriptor,  # Security Descriptor (out_opt)
+        wintypes.DWORD,  # Length (in)
+        _lpd_word, ]  # Length Needed (out)
+
+    # MSDN windows/desktop/aa446651
+    _GetSecurityDescriptorOwner = _advapi32.GetSecurityDescriptorOwner
+    _GetSecurityDescriptorOwner.restype = wintypes.BOOL
+    _GetSecurityDescriptorOwner.argtypes = [
+        _descriptor,  # Security Descriptor (in)
+        ctypes.POINTER(_psid),  # Owner (out)
+        _lpd_bool, ]  # Owner Exists (out)
+
+    # MSDN windows/desktop/aa379166
+    _LookupAccountSid = _advapi32.LookupAccountSidW
+    _LookupAccountSid.restype = wintypes.BOOL
+    _LookupAccountSid.argtypes = [
+        wintypes.LPCWSTR,  # System Name (in)
+        _psid,  # SID (in)
+        wintypes.LPCWSTR,  # Name (out)
+        _lpd_word,  # Name Size (inout)
+        wintypes.LPCWSTR,  # Domain(out_opt)
+        _lpd_word,  # Domain Size (inout)
+        _lpd_word, ]  # SID Type (out)
+
+    request = _OWNER_SECURITY_INFORMATION
+
+    _path = os.path.abspath(path)
+    sd = get_file_security(_path, request)
+    sid = get_security_descriptor_owner(sd)
+    name, domain, sid_type = look_up_account_sid(sid)
+
+    return name
 
 
 def nice_size(path):

@@ -22,6 +22,8 @@ def _read_ast_default(default):
             _default = False
         elif default.id == 'None':
             _default = None
+        elif default.id == 'str':
+            _default = str
         else:
             raise ValueError(default.id)
     elif default is None:

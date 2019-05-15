@@ -10,9 +10,13 @@ EMOJI = EmojiSet(
     'P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.%04d.png',
     frames=str_to_ints('0-2775'))
 
+# Named icons
 COPY = EMOJI.find('Spiral Notepad')
+EDIT = EMOJI.find('Pencil')
+FILTER = EMOJI.find('Potable Water')
 REFRESH = EMOJI.find('Counterclockwise Arrows Button')
 
+# Collections
 ANIMALS = Collection([
     EMOJI[_idx] for _idx in str_to_ints('1576-1672')])
 FRUIT = Collection([

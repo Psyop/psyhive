@@ -11,16 +11,11 @@ import time
 from psyhive import host
 from psyhive.utils import dprint
 
-ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
-DATA_FILE = os.path.join(tempfile.gettempdir(), 'psyhive.json')
-PROCESS_NAMES = None
-GLOBAL_LOCK = None
-OPEN_PROCS = dict()
-
-ES_DATA_TYPE = 'data'
-INDEX_MAPPING = {
+_ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
+_ES_DATA_TYPE = 'data'
+_INDEX_MAPPING = {
     'mappings': {
-        ES_DATA_TYPE: {
+        _ES_DATA_TYPE: {
             'properties': {
                 'filename': {'type': 'string', 'index': 'not_analyzed'},
                 'function': {'type': 'string', 'index': 'not_analyzed'},
@@ -34,7 +29,7 @@ INDEX_MAPPING = {
 }
 
 
-def _write_usage_to_kibana(func, verbose=1):
+def _write_usage_to_kibana(func, verbose=0):
     """Write usage data to kibana index.
 
     Args:
@@ -69,13 +64,13 @@ def _write_usage_to_kibana(func, verbose=1):
         pprint.pprint(_data)
 
     # Send to kibana
-    _conn = Elasticsearch([ELASTIC_URL])
+    _conn = Elasticsearch([_ELASTIC_URL])
     if not _conn.ping():
         raise RuntimeError('Cannot connect to Elasticsearch database.')
     if not _conn.indices.exists(_index_name):
-        _conn.indices.create(index=_index_name, body=INDEX_MAPPING)
+        _conn.indices.create(index=_index_name, body=_INDEX_MAPPING)
     _res = _conn.index(
-        index=_index_name, doc_type=ES_DATA_TYPE, body=_data,
+        index=_index_name, doc_type=_ES_DATA_TYPE, body=_data,
         id=_data.pop('_id', None))
     _data['_id'] = _res['_id']
     _dur = time.time() - _start

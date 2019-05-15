@@ -4,7 +4,7 @@ import os
 
 from maya import cmds
 
-from psyhive import qt
+from psyhive import qt, icons
 from psyhive.tools import HandledError
 from psyhive.utils import abs_path, wrap_fn
 
@@ -12,6 +12,7 @@ from maya_psyhive.tools.fkik_switcher import system
 
 _DIALOG = None
 _UI_FILE = abs_path('fkik_switcher.ui', root=os.path.dirname(__file__))
+ICON = icons.EMOJI.find('Left-Right Arrow')
 
 
 class _NoSystemSelected(HandledError):
@@ -31,6 +32,7 @@ class _FkIkSwitcherUi(qt.HUiDialog):
     def __init__(self):
         """Constructor."""
         super(_FkIkSwitcherUi, self).__init__(ui_file=_UI_FILE)
+        self.set_icon(ICON)
 
     def _callback__fk_to_ik(self):
         print 'FK -> IK'

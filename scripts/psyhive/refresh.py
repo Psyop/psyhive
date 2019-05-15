@@ -33,6 +33,8 @@ _RELOAD_ORDER = [
     'psyhive',
     'maya_psyhive.utils',
     'maya_psyhive.open_maya',
+    'maya_psyhive.tools',
+    'maya_psyhive.startup',
     'maya_psyhive',
     'hv_test.diary.entry',
     'hv_test.diary',
@@ -118,7 +120,8 @@ def get_mod_sort(order):
 
 
 def reload_libs(
-        mod_names=None, sort=None, execute=True, filter_=None, verbose=1):
+        mod_names=None, sort=None, execute=True, filter_=None,
+        close_dialogs=True, verbose=1):
     """Reload libraries.
 
     Args:
@@ -129,7 +132,8 @@ def reload_libs(
         filter_ (str): filter the list of modules
         verbose (int): print process data
     """
-    qt.close_all_dialogs()
+    if close_dialogs:
+        qt.close_all_dialogs()
 
     # Get list of mod names to sort
     if not mod_names:

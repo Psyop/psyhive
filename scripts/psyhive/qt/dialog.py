@@ -6,7 +6,7 @@ from psyhive import icons
 from psyhive.utils import lprint
 
 from psyhive.qt.mgr import QtWidgets, QtCore, QtGui
-from psyhive.qt.misc import get_application
+from psyhive.qt.misc import get_application, get_p
 
 
 class DialogCancelled(RuntimeError):
@@ -128,7 +128,7 @@ class _HMessageBox(QtWidgets.QMessageBox):
         return _result
 
 
-def ok_cancel(msg, title='Confirm', icon=None):
+def ok_cancel(msg, title='Confirm', icon=None, pos=None):
     """Show a simple dialog with Ok and Cancel buttons.
 
     If ok is selected the code continues, otherwise an error is raised.
@@ -142,10 +142,10 @@ def ok_cancel(msg, title='Confirm', icon=None):
         (DialogCancelled): if cancel is pressed
     """
     _icon = icon or icons.EMOJI.find('Thinking')
-    raise_dialog(msg=msg, title=title, icon=_icon)
+    raise_dialog(msg=msg, title=title, icon=_icon, pos=pos)
 
 
-def notify(msg, title='Notification', icon=None, icon_size=None):
+def notify(msg, title='Notification', icon=None, icon_size=None, pos=None):
     """Raise a notification dialog.
 
     Args:
@@ -156,7 +156,8 @@ def notify(msg, title='Notification', icon=None, icon_size=None):
     """
     raise_dialog(
         msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
-        icon=icon or icons.EMOJI.find('Slightly Smiling Face'))
+        icon=icon or icons.EMOJI.find('Slightly Smiling Face'),
+        pos=pos)
 
 
 def notify_warning(msg, title='Warning', icon=None):
@@ -174,7 +175,7 @@ def notify_warning(msg, title='Warning', icon=None):
 
 def raise_dialog(
         msg="No message", title="Dialog", buttons=("Ok", "Cancel"),
-        icon=None, icon_size=None, verbose=1):
+        icon=None, icon_size=None, pos=None, verbose=1):
     """Raise a simple message box dialog.
 
     Args:
@@ -193,4 +194,7 @@ def raise_dialog(
         lprint(msg, verbose=verbose)
     else:
         lprint('[dialog] '+msg, verbose=verbose)
+    if pos:
+        _box.show()  # To calculate size
+        _box.move(pos-get_p(_box.size())/2)
     return _box.get_result()

@@ -5,7 +5,7 @@ import copy
 
 from psyhive.utils import get_plural, check_heart, lprint
 
-from psyhive.qt.misc import get_application
+from psyhive.qt.misc import get_application, get_p
 from psyhive.qt.mgr import QtWidgets, Y_AXIS
 from psyhive.qt.widgets import HProgressBar
 
@@ -37,7 +37,9 @@ def _get_next_pos(title):
 class ProgressBar(QtWidgets.QDialog):
     """Simple dialog for showing progress of an interation."""
 
-    def __init__(self, items, title=None, col=None, show=True):
+    def __init__(
+            self, items, title=None, col=None, show=True, pos=None,
+            parent=None):
         """Constructor.
 
         Args:
@@ -53,14 +55,18 @@ class ProgressBar(QtWidgets.QDialog):
         self.items = _items
         self.counter = 0
 
-        super(ProgressBar, self).__init__()
+        _args = [parent] if parent else []
+        super(ProgressBar, self).__init__(*_args)
 
         _title = (title or 'Processing {:d} item{}').format(
             len(self.items), get_plural(self.items))
         self.setWindowTitle(_title)
         self.resize(408, 54)
 
-        _pos = _get_next_pos(title=_title)
+        if pos:
+            _pos = pos - get_p(self.size())/2
+        else:
+            _pos = _get_next_pos(title=_title)
         if _pos:
             self.move(_pos)
 

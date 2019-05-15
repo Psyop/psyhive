@@ -16,7 +16,7 @@ _BUTTONS = {
             'import {} as fkik_switcher'.format(fkik_switcher.__name__),
             'fkik_switcher.launch_interface()']),
         'label': 'FK/IK switcher',
-        'image': icons.EMOJI.find('Left-Right Arrow')},
+        'image': fkik_switcher.ICON},
 }
 
 

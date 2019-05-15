@@ -6,12 +6,12 @@ import tempfile
 import types
 
 from psyhive import host
-from psyhive.utils import wrap_fn, lprint, dprint
+from psyhive.utils import wrap_fn, lprint, dprint, abs_path, File
 
 from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.widgets import (
     HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget)
-from psyhive.qt.misc import get_pixmap
+from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
     sys.QT_DIALOG_STACK = {}
@@ -36,7 +36,7 @@ class HUiDialog(QtWidgets.QDialog):
             raise OSError('Missing ui file '+ui_file)
 
         # Remove any existing widgets
-        _dialog_stack_key = dialog_stack_key or ui_file
+        _dialog_stack_key = dialog_stack_key or abs_path(ui_file)
         if _dialog_stack_key in sys.QT_DIALOG_STACK:
             sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
@@ -61,8 +61,8 @@ class HUiDialog(QtWidgets.QDialog):
             verbose=verbose)
 
         # Handle settings
-        self.settings_file = '{}/psyhive/{}.ini'.format(
-            tempfile.gettempdir(), _dialog_stack_key)
+        self.settings_file = abs_path('{}/psyhive/{}.ini'.format(
+            tempfile.gettempdir(), File(ui_file).basename))
         self.settings = QtCore.QSettings(
             self.settings_file, QtCore.QSettings.IniFormat)
         self.read_settings()
@@ -76,6 +76,7 @@ class HUiDialog(QtWidgets.QDialog):
         Args:
             event (QEvent): triggered event
         """
+        print 'CLOSE EVENT'
         _result = QtWidgets.QDialog.closeEvent(self, event)
         if hasattr(self, 'write_settings'):
             self.write_settings()
@@ -147,19 +148,22 @@ class HUiDialog(QtWidgets.QDialog):
             except Exception:
                 lprint('FAILED TO EXEC', _fn, verbose=verbose)
 
-    def read_settings(self, verbose=0):
+    def get_c(self):
+        return get_p(self.ui.pos()) + get_p(self.ui.size()/2)
+
+    def read_settings(self, verbose=1):
         """Read settings from disk.
 
         Args:
             verbose (int): print process data
         """
-        dprint('READ SETTINGS', verbose=verbose)
+        dprint('READ SETTINGS', self.settings.fileName(), verbose=verbose)
 
         # Apply widget settings
         for _widget in self.widgets:
             _name = _widget.objectName()
             _val = self.settings.value(_name)
-            if not _val:
+            if _val is None:
                 continue
             lprint(' - APPLY', _name, _val, verbose=verbose)
             if isinstance(_widget, QtWidgets.QLineEdit):
@@ -167,7 +171,19 @@ class HUiDialog(QtWidgets.QDialog):
             elif isinstance(_widget, (
                     QtWidgets.QRadioButton,
                     QtWidgets.QCheckBox)):
-                _widget.setChecked(_val)
+                if isinstance(_val, bool):
+                    _widget.setChecked(_val)
+                else:
+                    print 'FAILED TO APPLY:', _val
+            elif isinstance(_widget, QtWidgets.QListWidget):
+                for _row in range(_widget.count()):
+                    _item = _widget.item(_row)
+                    _item.setSelected(_item.text() in _val)
+            elif isinstance(_widget, QtWidgets.QTabWidget):
+                try:
+                    _widget.setCurrentIndex(_val)
+                except TypeError:
+                    print 'FAILED TO APPLY TAB', _val
             else:
                 raise ValueError(_widget)
 
@@ -210,23 +226,27 @@ class HUiDialog(QtWidgets.QDialog):
             icon (str|QPixmap): icon to apply
         """
         _pix = get_pixmap(icon)
+        _icon = get_icon(_pix)
         self.setWindowIcon(_pix)
+        self.ui.setWindowIcon(_pix)
 
     def set_parenting(self):
         """Set parenting for host application."""
 
-        if host.NAME == 'maya' and not isinstance(self.ui, QtWidgets.QWidget):
+        if host.NAME == 'maya' and isinstance(self.ui, (
+                QtWidgets.QDialog, QtWidgets.QMainWindow)):
+            print 'PARENTING TO MAIN WINDOW'
             from maya_psyhive import ui
             _maya_win = ui.get_main_window_ptr()
             self.setParent(_maya_win, QtCore.Qt.WindowStaysOnTopHint)
 
-    def write_settings(self, verbose=0):
+    def write_settings(self, verbose=1):
         """Write settings to disk.
 
         Args:
             verbose (int): print process data
         """
-        dprint('SAVING SETTINGS', self.settings.fileName(), verbose=verbose)
+        dprint('WRITING SETTINGS', self.settings.fileName(), verbose=verbose)
 
         for _widget in self.widgets:
             if isinstance(_widget, QtWidgets.QLineEdit):
@@ -235,6 +255,11 @@ class HUiDialog(QtWidgets.QDialog):
                     QtWidgets.QRadioButton,
                     QtWidgets.QCheckBox)):
                 _val = _widget.isChecked()
+            elif isinstance(_widget, QtWidgets.QListWidget):
+                _val = [
+                    str(_item.text()) for _item in _widget.selectedItems()]
+            elif isinstance(_widget, QtWidgets.QTabWidget):
+                _val = _widget.currentIndex()
             else:
                 continue
             lprint(' - SAVING', _widget.objectName(), _val, verbose=verbose)

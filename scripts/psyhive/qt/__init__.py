@@ -10,3 +10,4 @@ from psyhive.qt.interface import HUiDialog, close_all_dialogs
 from psyhive.qt.misc import get_application, get_col, get_p
 from psyhive.qt.gui import HPixmap, HColor
 from psyhive.qt.constants import COLS
+from psyhive.qt.input_ import read_input
