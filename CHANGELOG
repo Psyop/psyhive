@@ -1,3 +1,38 @@
+#### v0.18.0 ####
+
+    Released: Wed 15th May 2019
+
+    recacher tool: added
+    
+    maya_psyhive:
+        startup added recacher to PsyHive menu,
+        tools.fkik_switcher.ICON added,
+        tools.recacher added,
+    psyhive:
+        host.cur_scene added,
+        icons added EDIT/FILTER,
+        icons.set_.EmojiSet._read_emojis fix reference to deprecated method,
+        qt.read_input added,
+        qt.dialog added pos option to dialogs,
+        qt.HUiDialog better naming for settings file,
+        qt.HUiDialog.get_c added,
+        qt.HUiDialog.read_settings added QListWidget/QTabWidget handling,
+        qt.HUiDialog.set_icon fixed for QDialog,
+        qt.get_icon added,
+        qt.ProgressBar added pos/parent args,
+        qt.HListWidget.select_data added,
+        qt.HListWidgetItem added get_data/set_col/set_icon,
+        refresh.reload_libs added close_dialogs arg,
+        tk added template tools,
+        tools.hive_bro working prototype,
+        tools.usage stripped unused globals,
+        utils added get_time_t/get_copy_path_fn/get_owner,
+        utils.File.touch added,
+        utils.Seq.get_frame removed,
+        utils.Seq.get_path added,
+        utils.Collection added get_path/__getitem__/__len__,
+
+
 #### v0.17.0 ####
 
     Released: Tue 7th May 2019

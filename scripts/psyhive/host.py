@@ -1,11 +1,13 @@
 """Tools for managing executing host across multiple host applications."""
 
+from psyhive.utils import wrap_fn
+
 NAME = None
 
 try:
-    import maya
+    from maya import cmds
 except ImportError:
     pass
 else:
-    del maya
     NAME = 'maya'
+    cur_scene = wrap_fn(cmds.file, query=True, location=True)

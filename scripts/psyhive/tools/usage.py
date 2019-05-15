@@ -5,7 +5,6 @@ import functools
 import os
 import pprint
 import platform
-import tempfile
 import time
 
 from psyhive import host

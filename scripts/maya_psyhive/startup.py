@@ -8,7 +8,7 @@ from psyhive import icons, refresh
 from psyhive.tools import track_usage
 from psyhive.utils import dprint, wrap_fn, get_single, lprint
 from maya_psyhive import ui
-from maya_psyhive.tools import fkik_switcher
+from maya_psyhive.tools import fkik_switcher, recacher
 
 _BUTTONS = {
     'IKFK': {
@@ -47,12 +47,19 @@ def _build_psyhive_menu():
     """Build psyhive menu."""
     _menu = ui.obtain_menu('PsyHive', replace=True)
 
-    # Add FK/IK switcher
+    # Add shared buttons
     for _name, _data in _BUTTONS.items():
         cmds.menuItem(
             command=_data['cmd'], image=_data['image'], label=_data['label'])
 
+    # Add recacher
+    _cmd = '\n'.join([
+        'import {} as recacher',
+        'recacher.launch()']).format(recacher.__name__)
+    cmds.menuItem(command=_cmd, image=recacher.ICON, label='Recacher')
+
     # Add refresh
+    cmds.menuItem(divider=True)
     _cmd = '\n'.join([
         'import {} as refresh'.format(refresh.__name__),
         'refresh.reload_libs(verbose=2)',

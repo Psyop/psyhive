@@ -130,6 +130,7 @@ def reload_libs(
         execute (bool): execute the reload (otherwise just print
             the sorted list)
         filter_ (str): filter the list of modules
+        close_dialogs (bool): close dialogs before refresh
         verbose (int): print process data
     """
     if close_dialogs:

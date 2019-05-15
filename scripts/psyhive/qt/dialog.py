@@ -137,6 +137,7 @@ def ok_cancel(msg, title='Confirm', icon=None, pos=None):
         msg (str): message for dialog
         title (str): title for dialog
         icon (str): path to icon to display
+        pos (QPoint): dialog position
 
     Raises:
         (DialogCancelled): if cancel is pressed
@@ -153,6 +154,7 @@ def notify(msg, title='Notification', icon=None, icon_size=None, pos=None):
         title (str): dialog title
         icon (str): path to dialog icon
         icon_size (int): icon size in pixels
+        pos (QPoint): dialog position
     """
     raise_dialog(
         msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
@@ -184,6 +186,7 @@ def raise_dialog(
         buttons (str list): list of buttons to display
         icon (str): path to icon to display
         icon_size (int): icon size in pixels
+        pos (QPoint): dialog position
         verbose (int): print process data
     """
     get_application()

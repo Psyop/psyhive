@@ -38,7 +38,14 @@ def get_col(col):
 
 
 def get_icon(icon):
+    """Build an icon based on the given input.
 
+    Args:
+        icon (QPixmap): input icon
+
+    Returns:
+        (QIcon): icon
+    """
     if isinstance(icon, QtGui.QPixmap):
         return QtGui.QIcon(icon)
     raise ValueError(icon)

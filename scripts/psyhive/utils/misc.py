@@ -181,7 +181,14 @@ def get_ord(idx):
 
 
 def get_time_t(val):
+    """Get time tuple based on the given value.
 
+    Args:
+        val (float|stuct_time): value to convert
+
+    Returns:
+        (stuct_time): time tuple
+    """
     if isinstance(val, float):
         return time.localtime(val)
     elif isinstance(val, time.struct_time):

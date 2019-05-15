@@ -47,6 +47,8 @@ class ProgressBar(QtWidgets.QDialog):
             title (str): title for interface
             col (str): progress bar colour
             show (bool): show the dialog
+            pos (QPoint): override progress bar position (applied to centre)
+            parent (QDialog): parent dialog
         """
         _items = items
         if isinstance(_items, (enumerate, collections.Iterable)):

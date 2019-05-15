@@ -70,6 +70,7 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
 
         Args:
             items (str list): list of text of items to select
+            verbose (int): print process data
         """
         lprint("SELECTING", self, items, verbose=verbose)
         for _item in self.all_items():
@@ -109,9 +110,19 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
     """Wrapper for QListWidgetItem object."""
 
     def get_data(self):
+        """Get stored data from this item.
+
+        Returns:
+            (any): stored data
+        """
         return self.data(QtCore.Qt.UserRole)
 
     def set_col(self, col):
+        """Set text colour of this item.
+
+        Args:
+            col (str|QColor): colour to apply
+        """
         _brush = QtGui.QBrush(get_col(col))
         self.setForeground(_brush)
 
@@ -124,6 +135,11 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
         self.setData(QtCore.Qt.UserRole, data)
 
     def set_icon(self, image):
+        """Set icon for this item.
+
+        Args:
+            image (str|QPixmap): icon to apply
+        """
         _icon = QtGui.QIcon(get_pixmap(image))
         self.setIcon(_icon)
 
@@ -138,6 +154,7 @@ class HMenu(QtWidgets.QMenu, HWidgetBase):
             text (str): action text
             func (fn): action function
             icon (str|QPixmap): action icon
+            verbose (int): print process data
         """
         _args = [text, func]
         if icon:

@@ -7,6 +7,7 @@ ignore:
         maya_psyhive/ui.py
     eval-used:
         hv_test/diary/
+        maya_psyhive/tools/recacher/misc.py
     global-statement:
         hv_test/diary/
         hv_test/tools/cod_bro.py
@@ -21,6 +22,7 @@ ignore:
         hv_test/diary/
     invalid-name:
         sanity_check/checks/
+        psyhive/host.py
     invalid-unary-operand-type:
         maya_psyhive/tools/fkik_switcher/system.py
     missing-docstring: '*'
@@ -39,6 +41,8 @@ ignore:
         hv_test/diary/y19/d0425/tk_tools.py
     not-an-iterable:
         psyhive/utils/seq.py
+    not-callable:
+        psyhive/tk/templates/base.py
     pointless-statement:
         hv_test/diary/
     protected-access:

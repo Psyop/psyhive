@@ -76,6 +76,14 @@ class Collection(object):
         self._paths = paths
 
     def get_path(self, idx):
+        """Get path for the given frame of this collection.
+
+        Args:
+            idx (int): frame index
+
+        Returns:
+            (str): path to frame
+        """
         return self.get_paths()[idx]
 
     def get_paths(self):

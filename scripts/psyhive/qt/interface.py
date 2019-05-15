@@ -76,7 +76,6 @@ class HUiDialog(QtWidgets.QDialog):
         Args:
             event (QEvent): triggered event
         """
-        print 'CLOSE EVENT'
         _result = QtWidgets.QDialog.closeEvent(self, event)
         if hasattr(self, 'write_settings'):
             self.write_settings()
@@ -149,6 +148,11 @@ class HUiDialog(QtWidgets.QDialog):
                 lprint('FAILED TO EXEC', _fn, verbose=verbose)
 
     def get_c(self):
+        """Get centre point of this interface.
+
+        Returns:
+            (QPoint): centre point
+        """
         return get_p(self.ui.pos()) + get_p(self.ui.size()/2)
 
     def read_settings(self, verbose=1):
