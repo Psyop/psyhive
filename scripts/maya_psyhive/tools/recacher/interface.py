@@ -3,7 +3,8 @@
 import os
 
 from psyhive import qt, pipe, icons
-from psyhive.tools import catch_error
+from psyhive.tools import catch_error, get_usage_tracker
+
 from psyhive.utils import abs_path, dprint, get_plural, lprint, wrap_fn
 
 from maya_psyhive.tools.recacher.misc import CacheDataShot
@@ -244,6 +245,7 @@ class _RecacherUi(qt.HUiDialog):
 
 
 @catch_error
+@get_usage_tracker(name='launch_fkik_switcher')
 def launch():
     """Launch RecacherUi interface."""
     from maya_psyhive.tools import recacher

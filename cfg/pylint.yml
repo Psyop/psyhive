@@ -43,6 +43,7 @@ ignore:
         psyhive/utils/seq.py
     not-callable:
         psyhive/tk/templates/base.py
+        hv_test/diary/
     pointless-statement:
         hv_test/diary/
     protected-access:
@@ -58,6 +59,7 @@ ignore:
     too-few-public-methods: '*'
     too-many-arguments: '*'
     too-many-branches:
+        hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py

@@ -68,7 +68,7 @@ def _exec_recache(namespaces, confirm, new_scene, farm):
         cmds.file(new=True, force=True)
 
 
-def _recache_work_file(
+def recache_work_file(
         work_file, namespaces, confirm=False, new_scene=False, farm=True,
         parent=None):
     """Recache the given work file.
@@ -145,7 +145,7 @@ def recache_work_files(data, farm=True, parent=None):
         print 'RECACHE', _work_file.path
         print _namespaces
         print
-        _recache_work_file(
+        recache_work_file(
             work_file=_work_file, namespaces=sorted(_namespaces),
             farm=farm, parent=parent)
 

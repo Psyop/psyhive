@@ -28,11 +28,12 @@ _INDEX_MAPPING = {
 }
 
 
-def _write_usage_to_kibana(func, verbose=0):
+def _write_usage_to_kibana(func, name=None, verbose=0):
     """Write usage data to kibana index.
 
     Args:
         func (fn): function that was executed
+        name (str): override function name
         verbose (int): print process data
     """
 
@@ -49,7 +50,7 @@ def _write_usage_to_kibana(func, verbose=0):
     _start = time.time()
     _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
     _data = {
-        'function': func.__name__,
+        'function': name or func.__name__,
         'machine_name': platform.node(),
         'project': os.environ.get('PSYOP_PROJECT'),
         'timestamp': datetime.datetime.utcnow(),
@@ -76,6 +77,29 @@ def _write_usage_to_kibana(func, verbose=0):
     dprint('Wrote usage to kibana ({:.02f}s)'.format(_dur), verbose=verbose)
 
 
+def get_usage_tracker(name=None, verbose=0):
+    """Build usage tracker decorator.
+
+    Args:
+        name (str): override function name
+        verbose (int): print process data
+
+    Returns:
+        (fn): usage tracker decorator
+    """
+
+    def _track_usage(func):
+
+        @functools.wraps(func)
+        def _usage_tracked_fn(*args, **kwargs):
+            _write_usage_to_kibana(func, name=name, verbose=verbose)
+            return func(*args, **kwargs)
+
+        return _usage_tracked_fn
+
+    return _track_usage
+
+
 def track_usage(func):
     """Decorator which writes to kibana each time a function is executed.
 
@@ -85,10 +109,4 @@ def track_usage(func):
     Returns:
         (fn): decorated function
     """
-
-    @functools.wraps(func)
-    def _usage_tracked_fn(*args, **kwargs):
-        _write_usage_to_kibana(func)
-        return func(*args, **kwargs)
-
-    return _usage_tracked_fn
+    return get_usage_tracker()(func)

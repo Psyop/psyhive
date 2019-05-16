@@ -2,6 +2,9 @@
 
 import copy
 
+from psyhive import pipe
+from psyhive.utils import find
+
 from psyhive.tk.templates.base import (
     TTBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
     TTRootBase, TTStepRootBase)
@@ -86,3 +89,17 @@ class TTAssetOutputFile(TTBase):
             (bool): latest status
         """
         return self.get_latest() == self
+
+
+def find_asset_roots():
+    """Read asset roots."""
+    _root = pipe.cur_project().path+'/assets'
+    _roots = []
+    for _dir in find(_root, depth=3, type_='d'):
+        try:
+            _asset = TTAssetRoot(_dir)
+        except ValueError:
+            continue
+        _roots.append(_asset)
+
+    return _roots

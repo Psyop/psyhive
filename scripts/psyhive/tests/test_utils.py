@@ -128,7 +128,7 @@ class TestPath(unittest.TestCase):
 
         _path = '{}/psyhive/testing/owner_test.txt'.format(tempfile.gettempdir())
         touch(_path)
-        assert get_owner(_path) == os.environ['USER']
+        self.assertEqual(get_owner(_path), os.environ['USER'])
 
 
 

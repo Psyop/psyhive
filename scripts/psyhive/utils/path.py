@@ -345,10 +345,10 @@ def get_owner(path):
 
     def _get_file_security(filename, request):
         length = wintypes.DWORD()
-        _get_file_security(filename, request, None, 0, ctypes.byref(length))
+        _get_file_security_w(filename, request, None, 0, ctypes.byref(length))
         if length.value:
             _sd = (wintypes.BYTE * length.value)()
-            if _get_file_security(
+            if _get_file_security_w(
                     filename, request, _sd, length, ctypes.byref(length)):
                 return _sd
         return None
@@ -389,9 +389,9 @@ def get_owner(path):
     _advapi32 = ctypes.windll.advapi32
 
     # MSDN windows/desktop/aa446639
-    _get_file_security = _advapi32.GetFileSecurityW
-    _get_file_security.restype = wintypes.BOOL
-    _get_file_security.argtypes = [
+    _get_file_security_w = _advapi32.GetFileSecurityW
+    _get_file_security_w.restype = wintypes.BOOL
+    _get_file_security_w.argtypes = [
         wintypes.LPCWSTR,  # File Name (in)
         wintypes.DWORD,  # Requested Information (in)
         _descriptor,  # Security Descriptor (out_opt)

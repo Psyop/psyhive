@@ -1,3 +1,18 @@
+#### v0.19.0 ####
+
+    Released: Wed 15th May 2019
+
+    FK/IK Switcher + Recacher: added usage track on launch
+    
+    maya_psyhive:
+        tools fkik_switcher/recacher added usage tracker,
+        tools.recacher.recache_work_file made public,
+    psyhive:
+        tk.find_asset_roots added,
+        tools.get_usage_tracker added,
+        utils.get_owner bugfix overlapping fn names,
+
+
 #### v0.18.0 ####
 
     Released: Wed 15th May 2019

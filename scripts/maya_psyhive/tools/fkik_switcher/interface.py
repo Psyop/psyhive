@@ -5,7 +5,7 @@ import os
 from maya import cmds
 
 from psyhive import qt, icons
-from psyhive.tools import HandledError
+from psyhive.tools import HandledError, get_usage_tracker
 from psyhive.utils import abs_path, wrap_fn
 
 from maya_psyhive.tools.fkik_switcher import system
@@ -77,6 +77,7 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         raise ValueError("Failed to read key mode")
 
 
+@get_usage_tracker(name='launch_fkik_switcher')
 def launch_interface():
     """Launch FK/IK switcher interface."""
     global _DIALOG
