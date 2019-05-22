@@ -6,7 +6,7 @@ import tempfile
 import time
 import unittest
 
-from psyhive.tools.err_catcher import _Traceback
+from psyhive.tools.err_catcher import Traceback
 from psyhive.utils.py_file.docs import MissingDocs
 
 _TRACEBACK_1 = r"""
@@ -68,7 +68,7 @@ class TestErrCatcher(unittest.TestCase):
 
     def test(self):
         for _tb in [_TRACEBACK_1, _TRACEBACK_2]:
-            _Traceback(_tb)
+            Traceback(_tb)
 
 
 if __name__ == '__main__':

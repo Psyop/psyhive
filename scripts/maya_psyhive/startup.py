@@ -61,8 +61,11 @@ def _build_psyhive_menu():
     # Add refresh
     cmds.menuItem(divider=True)
     _cmd = '\n'.join([
+        'from maya import cmds',
         'import {} as refresh'.format(refresh.__name__),
+        'import {} as startup'.format(__name__),
         'refresh.reload_libs(verbose=2)',
+        'cmds.evalDeferred(startup.user_setup)',
     ]).format()
     cmds.menuItem(
         label='Reload libs', command=_cmd,
