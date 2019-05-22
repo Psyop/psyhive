@@ -88,14 +88,18 @@ class PyFile(File, PyBase):
             (mod): imported module
             (None): if module failed to import and catch used
         """
-        lprint("GET MODULE", self.path, verbose=verbose)
+        _path = abs_path(self.path)
+        lprint("GET MODULE", _path, verbose=verbose)
 
         _sys_paths = sorted(set([
-            abs_path(_path) for _path in sys.path
-            if self.path.startswith(abs_path(_path))]))
+            abs_path(_spath) for _spath in sys.path
+            if _path.startswith(abs_path(_spath))]))
         _sys_paths.sort(key=len)
+        if not _sys_paths:
+            raise RuntimeError('Failed to find sys path '+_path)
         _sys_path = _sys_paths[-1]
-        _rel_path = rel_path(self.path, _sys_path)
+        lprint('ROOT', _sys_path, verbose=verbose)
+        _rel_path = rel_path(path=_path, root=_sys_path)
         _mod_name = _rel_path.replace('.py', '').replace('/', '.')
 
         # Try to import the module

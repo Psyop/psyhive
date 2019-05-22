@@ -6,8 +6,7 @@ import copy
 from psyhive.utils import get_plural, check_heart, lprint
 
 from psyhive.qt.misc import get_application, get_p
-from psyhive.qt.mgr import QtWidgets, Y_AXIS
-from psyhive.qt.widgets import HProgressBar
+from psyhive.qt.wrapper import QtWidgets, Y_AXIS, HProgressBar
 
 _PROGRESS_BARS = []
 

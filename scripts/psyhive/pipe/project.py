@@ -79,8 +79,11 @@ def cur_project():
 
 
 @store_result
-def find_projects():
+def find_projects(filter_=None):
     """Find projects on disk.
+
+    Args:
+        filter_ (str): filter projects by name
 
     Returns:
         (Project list): projects
@@ -90,6 +93,8 @@ def find_projects():
         try:
             _project = Project(_path)
         except ValueError:
+            continue
+        if not passes_filter(_project.name, filter_):
             continue
         _projects.append(_project)
 

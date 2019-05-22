@@ -5,7 +5,7 @@ import sys
 import six
 
 from psyhive.utils import store_result
-from psyhive.qt.mgr import QtWidgets, QtCore, QtGui
+from psyhive.qt.wrapper.mgr import QtWidgets, QtCore, QtGui
 
 
 @store_result
@@ -29,7 +29,7 @@ def get_col(col):
     Returns:
         (HColor): match qt colour object
     """
-    from psyhive.qt.gui import HColor
+    from psyhive.qt.wrapper import HColor
     if isinstance(col, six.string_types):
         _col = HColor(col)
     else:
@@ -67,6 +67,22 @@ def get_p(pos):
     elif isinstance(pos, QtCore.QSize):
         return QtCore.QPoint(pos.width(), pos.height())
     raise ValueError(pos)
+
+
+def get_size(size):
+    """Get a size from the given object.
+
+    Args:
+        size (QSize|QPoint): object to convert
+
+    Returns:
+        (QSize): size object
+    """
+    if isinstance(size, QtCore.QSize):
+        return size
+    elif isinstance(size, QtCore.QPoint):
+        return QtCore.QSize(size.x(), size.y())
+    raise ValueError(size)
 
 
 def get_pixmap(pix):

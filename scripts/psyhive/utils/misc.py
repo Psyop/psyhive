@@ -51,6 +51,20 @@ def chain_fns(*args):
     return _get_chained_fn(args)
 
 
+def clamp(val, min_, max_):
+    """Clamp the value in the given range.
+
+    Args:
+        val (float): value to clamp
+        min_ (float): min value
+        max_ (float): max value
+
+    Returns:
+        (float): clamped value
+    """
+    return min(max(val, min_), max_)
+
+
 def copy_text(text, verbose=1):
     """Copy the given text to the clipboard.
 

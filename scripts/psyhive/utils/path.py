@@ -4,6 +4,7 @@ import filecmp
 import functools
 import os
 import shutil
+import time
 
 import ctypes
 from ctypes import wintypes
@@ -76,12 +77,28 @@ class Path(object):
             self.basename = self.filename
 
     def abs_path(self):
-        """Get absolute value of this path."""
+        """Get absolute value of this path.
+
+        Returns:
+            (str): abs path
+        """
         return abs_path(self.path)
 
     def exists(self):
-        """Check whether this path exists."""
+        """Check whether this path exists.
+
+        Returns:
+            (bool): whether file exists
+        """
         return os.path.exists(self.path)
+
+    def get_mtime(self):
+        """Get mtime of this path.
+
+        Returns:
+            (float): mtime
+        """
+        return os.path.getmtime(self.path)
 
     def get_size(self):
         """Get size of this path.
@@ -177,7 +194,7 @@ def abs_path(path, win=False, root=None, verbose=0):
     """
     if not isinstance(path, six.string_types):
         raise ValueError(path)
-    _path = path
+    _path = str(path)
     lprint('USING PATH', _path, verbose=verbose)
 
     # Handle file:/// prefix
@@ -577,6 +594,9 @@ def touch(file_):
     if not os.path.exists(_path):
         test_path(os.path.dirname(_path))
         write_file(file_=_path, text='')
+    else:
+        _time = time.time()
+        os.utime(file_, (_time, _time))
 
 
 def write_file(file_, text, force=False):

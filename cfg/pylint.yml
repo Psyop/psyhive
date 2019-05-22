@@ -1,4 +1,6 @@
 ignore:
+    anomalous-unicode-escape-in-string:
+        hv_test/diary/y19/d0517/pinterest_rip.py
     broad-except:
         hv_test/diary/
         psyhive/qt/interface.py
@@ -27,13 +29,14 @@ ignore:
         maya_psyhive/tools/fkik_switcher/system.py
     missing-docstring: '*'
     no-member:
-        psyhive/qt/widgets.py
+        psyhive/qt/wrapper/widgets.py
         sanity_check/checks/maya/general/shotgun.py
     no-self-use:
         /tests/test_
         maya_psyhive/tools/fkik_switcher/interface.py
         psyhive/tools/err_catcher.py
         hv_test/diary/
+        hv_test/release/misc.py
         hv_test/tools/cod_bro.py
         hv_test/tools/qube.py
         sanity_check/checks/maya/
@@ -57,10 +60,13 @@ ignore:
     superfluous-parens:
         psyhive/utils/misc.py
     too-few-public-methods: '*'
+    too-many-ancestors:
+        hv_test/diary/y19/d0516/batch_cache_test.py
     too-many-arguments: '*'
     too-many-branches:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
+        psyhive/qt/interface.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
         psyhive/utils/path.py
@@ -83,16 +89,20 @@ ignore:
     unused-argument:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
-        psyhive/qt/gui.py
+        psyhive/qt/wrapper/gui.py
         psyhive/py_gui/base.py
         psyhive/utils/cache.py
         sanity_check/checks/
     unused-import:
-        psyhive/qt/mgr.py
+        psyhive/qt/wrapper/mgr.py
+    unused-variable:
+        hv_test/diary/
 allowed_names:
     closeEvent
     keyPressEvent
+    mouseMoveEvent
     mousePressEvent
     objectName
+    timerEvent
     ui
     userSetup

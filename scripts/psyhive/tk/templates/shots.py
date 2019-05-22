@@ -25,6 +25,12 @@ class TTShotRoot(TTRootBase):
     """Represents a tank template shot root."""
 
     hint = 'shot_root'
+    shot = None
+
+    @property
+    def name(self):
+        """Get step type."""
+        return self.shot
 
     @property
     def step_type(self):
@@ -48,6 +54,22 @@ class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotChildBase):
     """Represents a tank template shot work area for maya."""
 
     hint = 'shot_work_area_maya'
+
+    def find_work_files(self):
+        """Find work files in this shot area.
+
+        Returns:
+            (TTMayaShotWork list): list of work files
+        """
+        _work_files = []
+        for _file in self.find(depth=2, type_='f'):
+            try:
+                _work = TTMayaShotWork(_file)
+            except ValueError:
+                continue
+            _work_files.append(_work)
+
+        return _work_files
 
 
 class TTMayaShotWork(TTWorkFileBase, _TTShotChildBase):
@@ -100,17 +122,21 @@ class TTShotOutputVersion(TTOutputVerBase, _TTShotChildBase):
             self.get_status())
 
 
-def find_shots():
+def find_shots(class_=None):
     """Find shots in the current job.
+
+    Args:
+        class_ (class): override shot root class
 
     Returns:
         (TTShotRoot): list of shots
     """
     _seq_path = pipe.cur_project().path+'/sequences'
     _shots = []
+    _class = class_ or TTShotRoot
     for _path in find(_seq_path, depth=2):
         try:
-            _shot = TTShotRoot(_path)
+            _shot = _class(_path)
         except ValueError:
             continue
         _shots.append(_shot)

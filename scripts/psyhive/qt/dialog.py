@@ -5,7 +5,7 @@ import six
 from psyhive import icons
 from psyhive.utils import lprint
 
-from psyhive.qt.mgr import QtWidgets, QtCore, QtGui
+from psyhive.qt.wrapper.mgr import QtWidgets, QtCore, QtGui
 from psyhive.qt.misc import get_application, get_p
 
 
@@ -16,7 +16,9 @@ class DialogCancelled(RuntimeError):
 class _HMessageBox(QtWidgets.QMessageBox):
     """Simple message box interface."""
 
-    def __init__(self, text, title, buttons, icon=None, icon_size=None):
+    def __init__(
+            self, text, title, buttons, icon=None, icon_size=None,
+            parent=None):
         """Constructor.
 
         Args:
@@ -26,7 +28,8 @@ class _HMessageBox(QtWidgets.QMessageBox):
             icon (str): path to icon to displau
             icon_size (int): icon size in pixels
         """
-        super(_HMessageBox, self).__init__()
+        _args = [parent] if parent else []
+        super(_HMessageBox, self).__init__(*_args)
         self.setWindowTitle(title)
         self.setText(text)
 
@@ -128,7 +131,9 @@ class _HMessageBox(QtWidgets.QMessageBox):
         return _result
 
 
-def ok_cancel(msg, title='Confirm', icon=None, pos=None):
+def ok_cancel(
+        msg, title='Confirm', icon=None, pos=None, parent=None,
+        verbose=1):
     """Show a simple dialog with Ok and Cancel buttons.
 
     If ok is selected the code continues, otherwise an error is raised.
@@ -143,10 +148,14 @@ def ok_cancel(msg, title='Confirm', icon=None, pos=None):
         (DialogCancelled): if cancel is pressed
     """
     _icon = icon or icons.EMOJI.find('Thinking')
-    raise_dialog(msg=msg, title=title, icon=_icon, pos=pos)
+    raise_dialog(
+        msg=msg, title=title, icon=_icon, pos=pos, verbose=verbose,
+        parent=parent)
 
 
-def notify(msg, title='Notification', icon=None, icon_size=None, pos=None):
+def notify(
+        msg, title='Notification', icon=None, icon_size=None, pos=None,
+        parent=None):
     """Raise a notification dialog.
 
     Args:
@@ -159,7 +168,7 @@ def notify(msg, title='Notification', icon=None, icon_size=None, pos=None):
     raise_dialog(
         msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
         icon=icon or icons.EMOJI.find('Slightly Smiling Face'),
-        pos=pos)
+        pos=pos, parent=parent)
 
 
 def notify_warning(msg, title='Warning', icon=None):
@@ -177,7 +186,7 @@ def notify_warning(msg, title='Warning', icon=None):
 
 def raise_dialog(
         msg="No message", title="Dialog", buttons=("Ok", "Cancel"),
-        icon=None, icon_size=None, pos=None, verbose=1):
+        icon=None, icon_size=None, pos=None, parent=None, verbose=1):
     """Raise a simple message box dialog.
 
     Args:
@@ -191,7 +200,8 @@ def raise_dialog(
     """
     get_application()
     _box = _HMessageBox(
-        title=title, text=msg, buttons=buttons, icon=icon, icon_size=icon_size)
+        title=title, text=msg, buttons=buttons, icon=icon, icon_size=icon_size,
+        parent=parent)
     if '\n' in msg:
         lprint('[dialog]', verbose=verbose)
         lprint(msg, verbose=verbose)
@@ -201,3 +211,26 @@ def raise_dialog(
         _box.show()  # To calculate size
         _box.move(pos-get_p(_box.size())/2)
     return _box.get_result()
+
+
+def yes_no_cancel(msg, title='Confirm', icon=None, pos=None):
+    """Show a simple dialog with Yes/No/Cancel buttons.
+
+    If ok is selected the code continues, otherwise an error is raised.
+
+    Args:
+        msg (str): message for dialog
+        title (str): title for dialog
+        icon (str): path to icon to display
+        pos (QPoint): dialog position
+
+    Returns:
+        (str): dialog result
+
+    Raises:
+        (DialogCancelled): if cancel is pressed
+    """
+    _icon = icon or icons.EMOJI.find('Thinking')
+    return raise_dialog(
+        msg=msg, title=title, icon=_icon, pos=pos,
+        buttons=['Yes', 'No', 'Cancel'])

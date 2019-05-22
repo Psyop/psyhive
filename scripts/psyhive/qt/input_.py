@@ -1,6 +1,6 @@
 """Tools for reading user input."""
 
-from psyhive.qt.mgr import QtWidgets
+from psyhive.qt.wrapper import QtWidgets
 from psyhive.qt.dialog import notify_warning, DialogCancelled
 
 

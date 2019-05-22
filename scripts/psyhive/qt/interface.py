@@ -8,8 +8,8 @@ import types
 from psyhive import host
 from psyhive.utils import wrap_fn, lprint, dprint, abs_path, File
 
-from psyhive.qt.mgr import QtWidgets, QtUiTools, QtCore
-from psyhive.qt.widgets import (
+from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
+from psyhive.qt.wrapper.widgets import (
     HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget)
 from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
@@ -22,7 +22,7 @@ class HUiDialog(QtWidgets.QDialog):
 
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
-            dialog_stack_key=None, verbose=0):
+            dialog_stack_key=None, connect_widgets=True, show=True):
         """Constructor.
 
         Args:
@@ -30,7 +30,8 @@ class HUiDialog(QtWidgets.QDialog):
             catch_error_ (bool): apply catch error decorator to callbacks
             track_usage_ (bool): apply track usage decorator to callbacks
             dialog_stack_key (str): override dialog stack key
-            verbose (int): print process data
+            connect_widgets (bool): connect widget callbacks
+            show (bool): show interface
         """
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
@@ -51,14 +52,15 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
         self.ui = _loader.load(ui_file, self)
+        self.ui.rejected.connect(self.closeEvent)
 
         self.set_parenting()
 
         # Setup widgets
         self.widgets = self.read_widgets()
-        self.connect_widgets(
-            catch_error_=catch_error_, track_usage_=track_usage_,
-            verbose=verbose)
+        if connect_widgets:
+            self.connect_widgets(
+                catch_error_=catch_error_, track_usage_=track_usage_)
 
         # Handle settings
         self.settings_file = abs_path('{}/psyhive/{}.ini'.format(
@@ -68,17 +70,25 @@ class HUiDialog(QtWidgets.QDialog):
         self.read_settings()
 
         self.redraw_ui()
-        self.ui.show()
+        if show:
+            self.ui.show()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event=None, verbose=0):
         """Triggered on close dialog.
 
         Args:
             event (QEvent): triggered event
+            verbose (int): print process data
         """
-        _result = QtWidgets.QDialog.closeEvent(self, event)
+        lprint("EXECUTING CLOSE EVENT", verbose=verbose)
+
+        _result = None
+        if event:
+            _result = QtWidgets.QDialog.closeEvent(self, event)
+
         if hasattr(self, 'write_settings'):
             self.write_settings()
+
         return _result
 
     def connect_widgets(
@@ -95,7 +105,7 @@ class HUiDialog(QtWidgets.QDialog):
         for _widget in self.widgets:
 
             _name = _widget.objectName()
-            lprint('CHECKING', _name, verbose=verbose)
+            lprint('CHECKING', _name, verbose=verbose > 1)
 
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
@@ -109,7 +119,11 @@ class HUiDialog(QtWidgets.QDialog):
                     _callback = _catcher(_callback)
                 _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)
-                for _hook_name in ['clicked', 'textChanged']:
+                for _hook_name in [
+                        'clicked',
+                        'currentTextChanged',
+                        'textChanged',
+                ]:
                     _hook = getattr(_widget, _hook_name, None)
                     if _hook:
                         _hook.connect(_callback)
@@ -155,7 +169,7 @@ class HUiDialog(QtWidgets.QDialog):
         """
         return get_p(self.ui.pos()) + get_p(self.ui.size()/2)
 
-    def read_settings(self, verbose=1):
+    def read_settings(self, verbose=0):
         """Read settings from disk.
 
         Args:
@@ -196,6 +210,10 @@ class HUiDialog(QtWidgets.QDialog):
         if _pos:
             lprint(' - APPLYING POS', _pos, verbose=verbose)
             self.ui.move(_pos)
+        _size = self.settings.value('window/size')
+        if _size:
+            lprint(' - APPLYING SIZE', _size, verbose=verbose)
+            self.ui.resize(_size)
 
     def read_widgets(self):
         """Read widgets with overidden types from ui object."""
@@ -234,17 +252,20 @@ class HUiDialog(QtWidgets.QDialog):
         self.setWindowIcon(_pix)
         self.ui.setWindowIcon(_pix)
 
-    def set_parenting(self):
-        """Set parenting for host application."""
+    def set_parenting(self, verbose=0):
+        """Set parenting for host application.
 
+        Args:
+            verbose (int): print process data
+        """
         if host.NAME == 'maya' and isinstance(self.ui, (
                 QtWidgets.QDialog, QtWidgets.QMainWindow)):
-            print 'PARENTING TO MAIN WINDOW'
+            lprint('PARENTING TO MAIN WINDOW', verbose=verbose)
             from maya_psyhive import ui
             _maya_win = ui.get_main_window_ptr()
             self.setParent(_maya_win, QtCore.Qt.WindowStaysOnTopHint)
 
-    def write_settings(self, verbose=1):
+    def write_settings(self, verbose=0):
         """Write settings to disk.
 
         Args:
@@ -271,6 +292,8 @@ class HUiDialog(QtWidgets.QDialog):
 
         self.settings.setValue('window/pos', self.ui.pos())
         lprint(' - SAVING POS', self.ui.pos(), verbose=verbose)
+        self.settings.setValue('window/size', self.ui.size())
+        lprint(' - SAVING SIZE', self.ui.size(), verbose=verbose)
 
 
 def _build_context_fn(callback, widget):
@@ -316,11 +339,63 @@ def _build_redraw_method(redraw):
     return _redraw_method
 
 
-def close_all_dialogs():
+def close_all_interfaces():
     """Close all mayanged psyhive dialogs.
 
     This is used to avoid instability when reloading modules.
     """
-    for _dialog in sys.QT_DIALOG_STACK.values():
+    for _key, _dialog in sys.QT_DIALOG_STACK.items():
         print 'CLOSING', _dialog
         _dialog.delete()
+        del sys.QT_DIALOG_STACK[_key]
+
+
+def get_list_redrawer(default_selection='first'):
+    """Build a decorator for redrawing lists.
+
+    This will empty the list before redrawing, and attempt to maintain
+    the current selection. If nothing is selected, it will then apply the
+    default selection behaviour.
+
+    Args:
+        default_selection (str): default selection policy (first or all)
+
+    Returns:
+        (fn): redraw decorator
+    """
+
+    def _list_redrawer(func):
+
+        def _redraw_list(self, widget):
+
+            _sel = widget.selected_text()
+            widget.clear()
+
+            func(self, widget)
+
+            # Apply selection
+            if not widget.selectedItems():
+                widget.select_text(_sel)
+            if not widget.selectedItems():
+                if default_selection == 'first':
+                    widget.setCurrentRow(0)
+                elif default_selection == 'all':
+                    widget.selectAll()
+                else:
+                    raise ValueError(default_selection)
+
+        return _redraw_list
+
+    return _list_redrawer
+
+
+def list_redrawer(func):
+    """Decorator to redraw a list widget.
+
+    Args:
+        func (fn): redraw function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+    return get_list_redrawer()(func)

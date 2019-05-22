@@ -4,6 +4,7 @@ import sys
 import time
 
 from psyhive import qt
+from psyhive.tools.err_catcher import Traceback
 from psyhive.utils import (
     abs_path, lprint, passes_filter, apply_filter, dprint)
 
@@ -22,8 +23,11 @@ _RELOAD_ORDER = [
     'psyhive.utils',
     'psyhive.icons.set_',
     'psyhive.icons',
-    'psyhive.qt.mgr',
-    'psyhive.qt.widgets',
+    'psyhive.qt.wrapper.mgr',
+    'psyhive.qt.wrapper.widgets',
+    'psyhive.qt.wrapper',
+    'psyhive.qt.misc',
+    'psyhive.qt.interface',
     'psyhive.qt',
     'psyhive.py_gui',
     'psyhive.pipe.project',
@@ -33,6 +37,10 @@ _RELOAD_ORDER = [
     'psyhive',
     'maya_psyhive.utils',
     'maya_psyhive.open_maya',
+    'maya_psyhive.tools.batch_cache.tmpl_cache',
+    'maya_psyhive.tools.batch_cache.disk_handler',
+    'maya_psyhive.tools.batch_cache.sg_handler',
+    'maya_psyhive.tools.batch_cache',
     'maya_psyhive.tools',
     'maya_psyhive.startup',
     'maya_psyhive',
@@ -121,7 +129,8 @@ def get_mod_sort(order):
 
 def reload_libs(
         mod_names=None, sort=None, execute=True, filter_=None,
-        close_dialogs=True, verbose=1):
+        close_interfaces=True, catch=False, check_root=None,
+        verbose=1):
     """Reload libraries.
 
     Args:
@@ -130,11 +139,18 @@ def reload_libs(
         execute (bool): execute the reload (otherwise just print
             the sorted list)
         filter_ (str): filter the list of modules
-        close_dialogs (bool): close dialogs before refresh
+        close_interfaces (bool): close interfaces before refresh
+        catch (bool): no error on fail to reload
+        check_root (str): compare module locations to this root - this
+            is used to check if a location has been successfully changed
         verbose (int): print process data
+
+    Returns:
+        (bool): whether all module were successfully reloaded and
+            their paths updated the root (if applicable)
     """
-    if close_dialogs:
-        qt.close_all_dialogs()
+    if close_interfaces:
+        qt.close_all_interfaces()
 
     # Get list of mod names to sort
     if not mod_names:
@@ -146,8 +162,10 @@ def reload_libs(
         _mod_names = apply_filter(_mod_names, filter_)
     _mod_names.sort(key=_sort)
 
+    # Reload the modules
     _count = 0
     _start = time.time()
+    _fails = 0
     for _mod_name in _mod_names:
 
         _mod = sys.modules[_mod_name]
@@ -160,12 +178,15 @@ def reload_libs(
             try:
                 reload(_mod)
             except ImportError as _exc:
-                print 'FILE:', abs_path(_mod.__file__)
-                print 'ERROR:', _exc.message
-                qt.ok_cancel(
-                    'Failed to reload "{}".\n\nRemove from sys.path?'.format(
-                        _mod_name))
-                del sys.modules[_mod_name]
+                # print 'FILE:', abs_path(_mod.__file__)
+                # print 'ERROR:', _exc.message
+                Traceback().pprint()
+                if not catch:
+                    qt.ok_cancel(
+                        'Failed to reload "{}".\n\nRemove from '
+                        'sys.path?'.format(_mod_name), 
+                        verbose=0)
+                    del sys.modules[_mod_name]
                 continue
             _dur = time.time() - _start
 
@@ -179,6 +200,32 @@ def reload_libs(
                 _sort(_mod_name), _name, _dur, abs_path(_file)),
             verbose=verbose > 1)
 
-    dprint(
-        'Reloaded {:d} libs in {:.02f}s'.format(_count, time.time()-_start),
-        verbose=verbose)
+        if check_root and not abs_path(_file).startswith(check_root):
+            _fails += 1
+
+    # Print summary
+    _msg = 'Reloaded {:d} libs in {:.02f}s'.format(
+        _count, time.time()-_start)
+    if check_root:
+        _msg += ' ({:d} fails)'.format(_fails)
+    dprint(_msg, verbose=verbose)
+
+    return not _fails
+
+
+def update_libs(check_root, mod_names=None, sort=None):
+    """Update a list of modules to a new location.
+
+    Args:
+        check_root (str): location to check paths match to
+        mod_names (str list): list of modules to update
+        sort (fn): module sort function
+    """
+    for _idx in range(6):
+        dprint('Updating modules - attempt', _idx+1)
+        _result = reload_libs(
+            catch=True, check_root=check_root, mod_names=mod_names,
+            sort=sort)
+        dprint('Updating modules:', 'success' if _result else 'failed')
+        if _result:
+            break

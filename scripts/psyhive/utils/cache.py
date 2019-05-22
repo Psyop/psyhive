@@ -48,13 +48,14 @@ def build_cache_fmt(path, namespace):
 
 
 def _depend_path_makes_cache_outdated(
-        cache_file, depend_path, cache_file_exists=None):
+        cache_file, depend_path, cache_file_exists=None, verbose=0):
     """Check of a depend path makes a cache outdated.
 
     Args:
         cache_file (str): path to cache file
         depend_path (str): path to depend path
         cache_file_exists (bool): whether cache file exists
+        verbose (int): print process data
     """
     if not depend_path:
         return False
@@ -66,6 +67,9 @@ def _depend_path_makes_cache_outdated(
         _cache_file_exists = cache_file_exists
     if not _cache_file_exists:
         return False
+
+    if verbose:
+        print ' - DEPEND PATH', os.path.exists(depend_path), depend_path
 
     return (
         os.path.exists(depend_path) and
@@ -108,7 +112,7 @@ def get_result_storer(
         _read_time = {}
         _result_cache = {}
         _arg_spec = inspect.getargspec(func)
-        dprint('Reset results cache', func, verbose=verbose)
+        dprint('Reset results cache', func.__name__, verbose=verbose)
 
         def _depend_path_forces_recache(args, read_time):
 
@@ -139,7 +143,7 @@ def get_result_storer(
         @functools.wraps(func)
         def _fn_wrapper(*args, **kwargs):
 
-            dprint('Executing', func, verbose=verbose)
+            dprint('Executing', func.__name__, verbose=verbose)
 
             # Catch bad kwarg provided
             for _kwarg in kwargs:
@@ -155,6 +159,8 @@ def get_result_storer(
                 _arg_idx = _idx-len(_arg_spec.args)
                 if _arg_name in ['force', 'verbose']:
                     continue
+                elif args_filter and not passes_filter(_arg_name, args_filter):
+                    continue
                 elif _idx < len(args):
                     _val = args[_idx]
                 elif _arg_name in kwargs:
@@ -163,8 +169,6 @@ def get_result_storer(
                     raise TypeError(
                         'It looks like some of the required args are '
                         'missing {}'.format(func.__name__))
-                elif args_filter and not passes_filter(_arg_name, args_filter):
-                    continue
                 else:
                     _val = _arg_spec.defaults[_arg_idx]
                 _args_key.append((_arg_name, _val))
@@ -248,6 +252,7 @@ def get_result_to_file_storer(
                         pass
 
             # Calculate result
+            lprint(' - CALCULATING RESULT', verbose=verbose)
             _result = method(*args, **kwargs)
 
             # Write to file
@@ -263,6 +268,10 @@ def get_result_to_file_storer(
         @functools.wraps(method)
         def _result_writer(*args, **kwargs):
 
+            from psyhive.utils import abs_path
+
+            dprint('READING RESULT', method.__name__, verbose=verbose)
+
             # Read object/key/force
             _obj = args[0]
             _key = _obj, id(_obj), method.__name__
@@ -271,13 +280,15 @@ def get_result_to_file_storer(
             # Get cache file path
             if _obj.cache_fmt:
                 try:
-                    _cache_file = _obj.cache_fmt.format(method.__name__)
+                    _cache_file = abs_path(
+                        _obj.cache_fmt.format(method.__name__))
                 except TypeError:
                     raise TypeError(
                         'Bad cache file fmt {}'.format(_obj.cache_fmt))
             else:
                 _cache_file = None
             _cache_file_exists = None
+            lprint(' - READ CACHE FILE', _cache_file, verbose=verbose)
 
             # Read depend path
             if not _force and _cache_file and get_depend_path:
@@ -285,8 +296,14 @@ def get_result_to_file_storer(
                 _cache_file_exists = os.path.exists(_cache_file)
                 if _depend_path_makes_cache_outdated(
                         cache_file=_cache_file, depend_path=_depend_path,
-                        cache_file_exists=_cache_file_exists):
+                        cache_file_exists=_cache_file_exists,
+                        verbose=verbose):
+                    lprint(' - DEPEND PATH OUTDATED CACHE', verbose=verbose)
                     _force = True
+                else:
+                    lprint(
+                        ' - DEPEND PATH DID NOT OUTDATE CACHE',
+                        verbose=verbose)
 
             # Apply min mtime
             if not _force and _cache_file and min_mtime:
@@ -378,7 +395,7 @@ def store_result_on_obj(method):
     return get_result_storer(id_as_key=True)(method)
 
 
-def save_scene_file_result(method):
+def store_result_content_dependent(method):
     """Decorator to save result of a scene file analysis.
 
     The result expires if the mtime of the scene file is higher than

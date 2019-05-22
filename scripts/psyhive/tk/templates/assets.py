@@ -7,7 +7,7 @@ from psyhive.utils import find
 
 from psyhive.tk.templates.base import (
     TTBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
-    TTRootBase, TTStepRootBase)
+    TTRootBase, TTStepRootBase, TTDirBase)
 
 
 class TTAssetRoot(TTRootBase):
@@ -46,6 +46,12 @@ class TTMayaAssetWork(TTWorkFileBase):
     work_area_type = TTAssetWorkAreaMaya
 
 
+class TTAssetOutputName(TTDirBase):
+    """Represents a tank asset output name."""
+
+    hint = 'asset_output_name'
+
+
 class TTAssetOutputVersion(TTOutputVerBase):
     """Represents an tank asset output version."""
 
@@ -62,6 +68,14 @@ class TTAssetOutputVersion(TTOutputVerBase):
         return (
             self.sg_asset_type, self.step, self.task, self.asset,
             self.get_status())
+
+    def get_name(self):
+        """Get parent asset output name object.
+
+        Returns:
+            (TTAssetOutputName): parent output name
+        """
+        return TTAssetOutputName(self.path)
 
 
 class TTAssetOutputFile(TTBase):

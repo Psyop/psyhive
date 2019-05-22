@@ -39,7 +39,7 @@ class _ErrDialog(qt.HUiDialog):
         """Constructor.
 
         Args:
-            traceback_ (_Traceback): traceback object
+            traceback_ (Traceback): traceback object
             message (str): error message
             type_ (str): name of error type
         """
@@ -97,7 +97,7 @@ class _TraceStep(object):
         File(self.file_).edit(line_n=self.line_n)
 
 
-class _Traceback(object):
+class Traceback(object):
     """Represents a traceback."""
 
     def __init__(self, traceback_=None):
@@ -108,18 +108,18 @@ class _Traceback(object):
                 (otherwise read from traceback module)
         """
         self.body = (traceback_ or traceback.format_exc()).strip()
-        self.lines = []
         _lines = self.body.split('\n')
         assert _lines.pop(0) == 'Traceback (most recent call last):'
-        while len(_lines) > 2:
+
+        _file_lines = []
+        while _lines and _lines[0] and _lines[0].startswith(' '):
             check_heart()
-            try:
-                _trace_line = _TraceStep([_lines.pop(0), _lines.pop(0)])
-            except IndexError:
-                print '[traceback]'
-                print self.body
-                raise RuntimeError('Failed to parse traceback')
-            self.lines.append(_trace_line)
+            _file_lines.append(_lines.pop(0))
+        _file_text = '\n'.join(_file_lines)
+        _splitter = '  File "'
+        self.lines = [
+            _TraceStep((_splitter+_item).strip().split('\n'))
+            for _item in _file_text.split(_splitter)[1:]]
 
     def pprint(self):
         """Print this traceback in maya format."""
@@ -157,7 +157,7 @@ def _handle_exception(exc, verbose=0):
     lprint('HANDLING EXCEPTION', exc, verbose=verbose)
     lprint('MSG', exc.message, verbose=verbose)
     lprint('TYPE', type(exc), verbose=verbose)
-    _traceback = _Traceback()
+    _traceback = Traceback()
     _traceback.pprint()
     _app = qt.get_application()
     _dialog = _ErrDialog(
@@ -184,9 +184,8 @@ def launch_err_catcher(traceback_, message):
         traceback_ (str): traceback
         message (str): error message
     """
-    _traceback = _Traceback(traceback_)
+    _traceback = Traceback(traceback_)
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
-    _dialog.ui.exec_()
 
 
 def get_error_catcher(exit_on_error=True, verbose=1):
@@ -232,8 +231,11 @@ def _pass_exception_to_sentry(exc):
         exc (Exception): exception that was raised
     """
     print 'PASSING EXCEPTION TO SENTRY', exc
-
-    import psyop.utils
+    try:
+        import psyop.utils
+    except ImportError:
+        print 'FAILED TO CREATE PSYOP LOGGER'
+        return
     _logger = psyop.utils.get_logger('psyhive')
     _logger.exception(str(exc))
 

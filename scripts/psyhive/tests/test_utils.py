@@ -10,8 +10,34 @@ from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
-    get_owner)
+    get_owner, Cacheable, get_result_storer)
 from psyhive.utils.py_file.docs import MissingDocs
+
+class TestCache(unittest.TestCase):
+
+    def test_get_result_storer(self):
+
+        class _Test(Cacheable):
+            @get_result_storer()
+            def get_rand(self, arg):
+                return random.random()
+            def __repr__(self):
+                return '<Test:{}>'.format(id(self))
+        _test = _Test()
+        _val = _test.get_rand(1)
+        assert _val == _test.get_rand(1)
+        assert _val != _test.get_rand(2)
+        assert _val != _Test().get_rand(1)
+
+    def test_store_result(self):
+
+        @store_result
+        def _test():
+            return random.random()
+
+        _result = _test()
+        assert _test() == _result
+
 
 
 class TestPyFile(unittest.TestCase):
@@ -174,15 +200,6 @@ class TestUtils(unittest.TestCase):
 
         # Test quotes
         assert passes_filter('this is text', '"This is"')
-
-    def test_store_result(self):
-
-        @store_result
-        def _test():
-            return random.random()
-
-        _result = _test()
-        assert _test() == _result
 
     def test_to_nice(self):
 
