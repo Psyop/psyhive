@@ -1,3 +1,17 @@
+#### v0.21.0 ####
+
+    Released: Wed 22nd May 2019
+
+    qt interface: check settings file writable on init,
+    
+    psyhive:
+        qt.HUiDialog touch settings file on init,
+        tk.TTWorkFileBase.find_next added,
+        tk.TTWorkFileBase.find_vers match base class,
+        tk.TTWorkFileBase.get_metadata warn on inefficent read,
+        utils.File.nice_size added,
+
+
 #### v0.20.1 ####
 
     Released: Wed 22nd May 2019

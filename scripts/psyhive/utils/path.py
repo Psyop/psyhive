@@ -108,6 +108,14 @@ class Path(object):
         """
         return os.path.getsize(self.path)
 
+    def nice_size(self):
+        """Get size of this path as a readable str.
+
+        Returns
+            (str): readable size of path
+        """
+        return nice_size(self.path)
+
     def parent(self):
         """Get parent dir of this path.
 

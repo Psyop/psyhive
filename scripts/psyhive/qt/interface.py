@@ -6,7 +6,7 @@ import tempfile
 import types
 
 from psyhive import host
-from psyhive.utils import wrap_fn, lprint, dprint, abs_path, File
+from psyhive.utils import wrap_fn, lprint, dprint, abs_path, File, touch
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import (
@@ -65,6 +65,7 @@ class HUiDialog(QtWidgets.QDialog):
         # Handle settings
         self.settings_file = abs_path('{}/psyhive/{}.ini'.format(
             tempfile.gettempdir(), File(ui_file).basename))
+        touch(self.settings_file)  # Check settings writable
         self.settings = QtCore.QSettings(
             self.settings_file, QtCore.QSettings.IniFormat)
         self.read_settings()

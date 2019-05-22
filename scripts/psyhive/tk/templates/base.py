@@ -12,7 +12,7 @@ from tank.platform import current_engine
 
 from psyhive import pipe
 from psyhive.utils import (
-    get_single, Dir, abs_path, find, Path,
+    get_single, Dir, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff)
 
 from psyhive.tk.templates.misc import get_template
@@ -180,13 +180,32 @@ class TTWorkFileBase(TTBase):
         self.ver_fmt = self.path.replace(
             'v{:03d}'.format(self.version), 'v{:03d}')
 
-    def find_latest(self):
+    def find_latest(self, vers=None):
         """Find latest version of this work file stream.
+
+        Args:
+            vers (TTWorkFileBase list): override versions list
 
         Returns:
             (TTWorkFileBase): latest version
         """
-        return self.find_vers()[-1]
+        _vers = vers or self.find_vers()
+        return _vers[-1]
+
+    def find_next(self, vers=None):
+        """Find next version.
+
+        Args:
+            vers (TTWorkFileBase list): override versions list
+
+        Returns:
+            (TTWorkFileBase): next version
+        """
+        _latest = self.find_latest(vers=vers)
+        _data = copy.copy(_latest.data)
+        _data['version'] = _latest.version + 1
+        _path = get_template(_latest.hint).apply_fields(_data)
+        return self.__class__(_path)
 
     def find_vers(self):
         """Find other versions of this workfile.
@@ -194,11 +213,10 @@ class TTWorkFileBase(TTBase):
         Returns:
             (TTWorkFileBase list): versions
         """
-        from psyhive import tk
         _vers = []
         for _file in find(self.dir, extn=self.extn, type_='f', depth=1):
             try:
-                _work = tk.TTMayaShotWork(_file)
+                _work = self.__class__(_file)
             except ValueError:
                 continue
             if not _work.task == self.task:
@@ -218,7 +236,11 @@ class TTWorkFileBase(TTBase):
             verbose (int): print process data
         """
         _work_area = self.get_work_area()
-        _data = data or _work_area.get_metadata()
+        if data:
+            _data = data
+        else:
+            dprint('Reading work area metadata', _work_area.path)
+            _data = _work_area.get_metadata()
         if not _data:
             return {}
 
