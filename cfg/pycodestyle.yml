@@ -1,0 +1,4 @@
+ignore:
+    E501:  // Line too long
+        diary/y19/d0517/pinterest_rip.py
+        sanity_check/
