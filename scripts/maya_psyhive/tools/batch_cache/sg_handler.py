@@ -1,21 +1,9 @@
-import copy
-import operator
-import os
-import pprint
+"""Tools for managing reading caches from shotgun."""
 
-from maya import cmds
+from psyhive import tk, qt
+from psyhive.utils import lprint, store_result, get_result_storer
 
-import tank
-
-from psyhive import tk, refresh, qt, icons, pipe, py_gui
-from psyhive.utils import (
-    get_result_to_file_storer, Cacheable, check_heart, lprint,
-    store_result_on_obj, store_result, dprint, abs_path,
-    get_result_storer)
-from maya_psyhive import ref
-
-from maya_psyhive.tools.batch_cache.tmpl_cache import (
-    CTTShotRoot, CTTAssetOutputVersion, CTTMayaShotWork)
+from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 
 
 class ShotgunHandler(object):
@@ -211,5 +199,3 @@ class ShotgunHandler(object):
             verbose (int): print process data
         """
         self._read_cache_data(force=force, dialog=dialog)
-
-

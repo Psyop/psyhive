@@ -8,7 +8,7 @@ from psyhive import icons, refresh
 from psyhive.tools import track_usage
 from psyhive.utils import dprint, wrap_fn, get_single, lprint
 from maya_psyhive import ui
-from maya_psyhive.tools import fkik_switcher, recacher
+from maya_psyhive.tools import fkik_switcher, batch_cache
 
 _BUTTONS = {
     'IKFK': {
@@ -52,11 +52,11 @@ def _build_psyhive_menu():
         cmds.menuItem(
             command=_data['cmd'], image=_data['image'], label=_data['label'])
 
-    # Add recacher
+    # Add batch cache
     _cmd = '\n'.join([
-        'import {} as recacher',
-        'recacher.launch()']).format(recacher.__name__)
-    cmds.menuItem(command=_cmd, image=recacher.ICON, label='Recacher')
+        'import {} as batch_cache',
+        'batch_cache.launch()']).format(batch_cache.__name__)
+    cmds.menuItem(command=_cmd, image=batch_cache.ICON, label='Batch cache')
 
     # Add refresh
     cmds.menuItem(divider=True)

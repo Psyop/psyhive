@@ -27,6 +27,7 @@ class _HMessageBox(QtWidgets.QMessageBox):
             buttons (str list): buttons to show
             icon (str): path to icon to displau
             icon_size (int): icon size in pixels
+            parent (QDialog): parent dialog
         """
         _args = [parent] if parent else []
         super(_HMessageBox, self).__init__(*_args)
@@ -143,6 +144,8 @@ def ok_cancel(
         title (str): title for dialog
         icon (str): path to icon to display
         pos (QPoint): dialog position
+        parent (QDialog): parent dialog
+        verbose (int): print process data
 
     Raises:
         (DialogCancelled): if cancel is pressed
@@ -164,6 +167,7 @@ def notify(
         icon (str): path to dialog icon
         icon_size (int): icon size in pixels
         pos (QPoint): dialog position
+        parent (QDialog): parent dialog
     """
     raise_dialog(
         msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
@@ -196,6 +200,7 @@ def raise_dialog(
         icon (str): path to icon to display
         icon_size (int): icon size in pixels
         pos (QPoint): dialog position
+        parent (QDialog): parent dialog
         verbose (int): print process data
     """
     get_application()

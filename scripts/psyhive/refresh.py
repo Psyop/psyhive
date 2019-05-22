@@ -178,13 +178,11 @@ def reload_libs(
             try:
                 reload(_mod)
             except ImportError as _exc:
-                # print 'FILE:', abs_path(_mod.__file__)
-                # print 'ERROR:', _exc.message
                 Traceback().pprint()
                 if not catch:
                     qt.ok_cancel(
                         'Failed to reload "{}".\n\nRemove from '
-                        'sys.path?'.format(_mod_name), 
+                        'sys.path?'.format(_mod_name),
                         verbose=0)
                     del sys.modules[_mod_name]
                 continue

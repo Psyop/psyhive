@@ -1,22 +1,11 @@
+"""Tools for managing reading work file dependencies from disk."""
+
 import copy
-import operator
-import os
-import pprint
 
-from maya import cmds
+from psyhive import tk, qt, pipe
+from psyhive.utils import check_heart, lprint, dprint, get_result_storer
 
-import tank
-
-from psyhive import tk, refresh, qt, icons, pipe, py_gui
-from psyhive.utils import (
-    get_result_to_file_storer, Cacheable, check_heart, lprint,
-    store_result_on_obj, store_result, dprint, abs_path,
-    get_result_storer)
-from maya_psyhive import ref
-from maya_psyhive.tools import recacher
-
-from maya_psyhive.tools.batch_cache.tmpl_cache import (
-    CTTShotRoot, CTTAssetOutputVersion, CTTMayaShotWork)
+from maya_psyhive.tools.batch_cache.tmpl_cache import CTTMayaShotWork
 
 
 class DiskHandler(object):
@@ -188,5 +177,3 @@ class DiskHandler(object):
             force=force, confirm=confirm, dialog=dialog)
         dprint(
             'READ {:d} WORK FILES'.format(len(_work_files)), verbose=verbose)
-
-

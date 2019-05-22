@@ -1,17 +1,16 @@
-import copy
+"""Tools for allow data to be cached on tk template objects."""
+
 import operator
-import os
 import pprint
 
 from maya import cmds
 
 import tank
 
-from psyhive import tk, refresh, qt, icons, pipe, py_gui
+from psyhive import tk, qt, pipe
 from psyhive.utils import (
-    get_result_to_file_storer, Cacheable, check_heart, lprint,
-    store_result_on_obj, store_result, dprint, abs_path,
-    get_result_storer)
+    get_result_to_file_storer, Cacheable,
+    store_result_on_obj, store_result, dprint, abs_path)
 from maya_psyhive import ref
 
 
@@ -125,6 +124,11 @@ class CTTMayaShotWork(tk.TTMayaShotWork, Cacheable):
         return sorted(set(self.get_cacheable_refs().values()))
 
     def get_dependencies(self):
+        """Get dependencies for this work file.
+
+        Returns:
+            (dict): dependencies data
+        """
         return self.read_dependencies()[0]
 
     @store_result_on_obj
@@ -201,5 +205,3 @@ class CTTMayaShotWork(tk.TTMayaShotWork, Cacheable):
             cmds.file(new=True, force=True)
 
         return _deps, _replaced_scene
-
-

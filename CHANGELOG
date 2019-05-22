@@ -1,3 +1,37 @@
+#### v0.20.0 ####
+
+    Released: Wed 22nd May 2019
+
+    batch cache tool: added,
+    
+    maya_psyhive:
+        tools recacher -> batch_cache,
+    psyhive:
+        pipe.find_projects added filter,
+        qt moved mgr/gui/widgets -> wrapper,
+        qt.multi_select added,
+        qt.raise_dialog added parent arg,
+        qt.yes_no_cancel added,
+        qt.HUiDialog added connect_widgets/show args,
+        qt.HUiDialog.connect_widgets added QComboBox handling,
+        qt.HUiDialog read/write settings store/apply size,
+        qt close_all_dialogs -> close_all_interfaces,
+        qt list_redrawer/get_list_redrawer added,
+        qt.get_size added,
+        refresh.update_libs added,
+        tk TTAssetOutputName/TTShotRoot added,
+        tk.TTAssetOutputVersion.get_name added,
+        tk.TTShotWorkAreaMaya.find_work_files added,
+        tk.find_shots added class override arg,
+        tools.err_catcher.Traceback made public,
+        tools.err_catcher.Traceback better traceback parsing,
+        utils save_scene_file_result -> store_result_content_dependent,
+        utils.get_result_storer bugfix args_filter,
+        utils.clamp added,
+        utils.Path.get_mtime added,
+        utils.abs_path clean unicode,
+
+
 #### v0.19.0 ####
 
     Released: Wed 15th May 2019

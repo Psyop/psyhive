@@ -120,7 +120,7 @@ def recache_work_file(
     _fileops = _engine.apps['psy-multi-fileops']
     _fileops.version_up_workfile()
     maya.utils.processIdleEvents()
-    tk.cur_work().set_comment('Versioned up by recacher tool')
+    tk.cur_work().set_comment('Versioned up by batch cache tool')
 
     _exec_recache(
         namespaces=namespaces, new_scene=new_scene, confirm=confirm,

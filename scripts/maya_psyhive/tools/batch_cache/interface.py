@@ -1,18 +1,10 @@
-import copy
-import operator
+"""Tools for managing the batch cache interface."""
+
 import os
 import pprint
 
-from maya import cmds
-
-import tank
-
-from psyhive import tk, refresh, qt, icons, pipe, py_gui
-from psyhive.utils import (
-    get_result_to_file_storer, Cacheable, check_heart, lprint,
-    store_result_on_obj, store_result, dprint, abs_path,
-    get_result_storer)
-from maya_psyhive import ref
+from psyhive import qt, icons
+from psyhive.utils import dprint
 
 from maya_psyhive.tools.batch_cache.disk_handler import DiskHandler
 from maya_psyhive.tools.batch_cache.sg_handler import ShotgunHandler
@@ -121,7 +113,7 @@ class _BatchCacheUi(qt.HUiDialog):
             _item.set_data(_asset)
             widget.addItem(_item)
 
-    def _redraw__info(self, widget, verbose=0):
+    def _redraw__info(self, widget):
 
         _shots = self.ui.shots.selected_data()
         _steps = self.ui.steps.selected_text()
@@ -188,7 +180,7 @@ class _BatchCacheUi(qt.HUiDialog):
                 _work_file.basename, self._exports[_work_file])
 
 
-def launch(mode='Disk', confirm=True):
+def launch(mode=None, confirm=True):
     """Launch batch cache interface.
 
     Args:
@@ -208,5 +200,3 @@ def launch(mode='Disk', confirm=True):
         buttons=["Shotgun", "Disk", "Cancel"])
 
     _DIALOG = _BatchCacheUi(mode=_mode, confirm=confirm)
-
-
