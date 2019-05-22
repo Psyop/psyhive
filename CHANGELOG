@@ -1,3 +1,18 @@
+#### v0.21.1 ####
+
+    Released: Wed 22nd May 2019
+
+    multi select: store dialog in global for kcassidy deleted c++ issue
+    
+    maya_psyhive:
+        tools.batch_cache pass dialog to progress/multi_select children,
+        tools.batch_cache added usage tracker,
+    psyhive:
+        qt.HUiDialog added parent arg,
+        qt.multi_select store interface as global,
+        qt.multi_select added parent arg,
+
+
 #### v0.21.0 ####
 
     Released: Wed 22nd May 2019

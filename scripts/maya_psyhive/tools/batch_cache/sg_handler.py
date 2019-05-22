@@ -25,7 +25,7 @@ class ShotgunHandler(object):
         _pos = dialog.get_c() if dialog else None
         for _shot in qt.ProgressBar(
                 _shots, 'Reading {:d} shots', col='SeaGreen',
-                show=progress, pos=_pos):
+                show=progress, pos=_pos, parent=dialog):
             _shot.read_cache_data(force=force)
 
     def _find_cache_data(

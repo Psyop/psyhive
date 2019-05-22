@@ -4,6 +4,7 @@ import os
 import pprint
 
 from psyhive import qt, icons
+from psyhive.tools import get_usage_tracker
 from psyhive.utils import dprint
 
 from maya_psyhive.tools.batch_cache.disk_handler import DiskHandler
@@ -155,7 +156,7 @@ class _BatchCacheUi(qt.HUiDialog):
             data=_data, farm=_farm, parent=self)
 
     def _callback__refresh(self):
-        self._get_handler().read_data(force=True)
+        self._get_handler().read_data(force=True, dialog=self)
         self._redraw__shots(self.ui.shots)
 
     def _context__cache(self, menu):
@@ -180,6 +181,7 @@ class _BatchCacheUi(qt.HUiDialog):
                 _work_file.basename, self._exports[_work_file])
 
 
+@get_usage_tracker(name='launch_batch_cache')
 def launch(mode=None, confirm=True):
     """Launch batch cache interface.
 

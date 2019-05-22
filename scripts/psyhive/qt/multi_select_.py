@@ -9,12 +9,15 @@ from psyhive.qt.wrapper.widgets import HListWidgetItem
 from psyhive.qt.misc import get_application
 from psyhive.qt.interface import HUiDialog, list_redrawer
 
+_DIALOG = None
+
 
 class _MultiSelectDialog(HUiDialog):
     """Dialog allowing the user to select items from a list."""
 
     def __init__(
-            self, items, multi, msg, select, title, default, width=None):
+            self, items, multi, msg, select, title, default, width=None,
+            parent=None):
         """Constructor.
 
         Args:
@@ -26,13 +29,15 @@ class _MultiSelectDialog(HUiDialog):
             title (str): dialog title
             default (any): default value
             width (int): override dialog width
+            parent (QDialog): parent dialog
         """
         self.items = items
         self.result = None
         self.multi = multi
 
         _ui_file = "{}/multi_select_.ui".format(os.path.dirname(__file__))
-        super(_MultiSelectDialog, self).__init__(ui_file=_ui_file)
+        super(_MultiSelectDialog, self).__init__(
+            ui_file=_ui_file, parent=parent)
 
         self.ui.setWindowTitle(title)
         self.ui.message.setText(msg)
@@ -62,7 +67,8 @@ class _MultiSelectDialog(HUiDialog):
 
 def multi_select(
         items, msg='Select items:', title="Select", multi=True,
-        default=None, select='Select', width=None, pos=None):
+        default=None, select='Select', width=None, pos=None,
+        parent=None):
     """Raise a dialog requesting selection from a list of items.
 
     Args:
@@ -75,22 +81,24 @@ def multi_select(
         select (str): label for select button
         width (int): override dialog width
         pos (QPoint): position for dialog
+        parent (QDialog): parent dialog
     """
     from psyhive import qt
+    global _DIALOG
 
     if not items:
         raise RuntimeError('No items')
     get_application()
 
     # Raise dialog
-    _dialog = _MultiSelectDialog(
+    _DIALOG = _MultiSelectDialog(
         items=items, multi=multi, msg=msg, select=select, title=title,
-        width=width, default=default)
+        width=width, default=default, parent=parent)
     if pos:
-        _pos = pos - qt.get_p(_dialog.ui.size()/2)
-        _dialog.ui.move(_pos)
-    _dialog.ui.exec_()
-    if _dialog.result is None:
+        _pos = pos - qt.get_p(_DIALOG.ui.size()/2)
+        _DIALOG.ui.move(_pos)
+    _DIALOG.ui.exec_()
+    if _DIALOG.result is None:
         raise qt.DialogCancelled
 
-    return _dialog.result
+    return _DIALOG.result

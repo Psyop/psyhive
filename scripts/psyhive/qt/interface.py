@@ -22,7 +22,8 @@ class HUiDialog(QtWidgets.QDialog):
 
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
-            dialog_stack_key=None, connect_widgets=True, show=True):
+            dialog_stack_key=None, connect_widgets=True, show=True,
+            parent=None):
         """Constructor.
 
         Args:
@@ -32,6 +33,7 @@ class HUiDialog(QtWidgets.QDialog):
             dialog_stack_key (str): override dialog stack key
             connect_widgets (bool): connect widget callbacks
             show (bool): show interface
+            parent (QDialog): parent dialog
         """
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
@@ -42,7 +44,8 @@ class HUiDialog(QtWidgets.QDialog):
             sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
-        super(HUiDialog, self).__init__()
+        _args = [parent] if parent else []
+        super(HUiDialog, self).__init__(*_args)
 
         # Load ui file
         _loader = QtUiTools.QUiLoader()

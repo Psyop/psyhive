@@ -31,7 +31,8 @@ class DiskHandler(object):
         _work_files = []
         _steps = set()
         for _shot in qt.ProgressBar(
-                _all_shots, 'Reading {:d} shot{}', col='Thistle'):
+                _all_shots, 'Reading {:d} shot{}', col='Thistle',
+                parent=dialog):
             for _step in _shot.find_steps():
                 _work_area = _step.get_work_area()
                 _task_work_files = {}
@@ -52,7 +53,8 @@ class DiskHandler(object):
                 title='Select steps',
                 items=sorted(_steps), default=sorted(_steps),
                 select='Check work files',
-                pos=dialog.get_c() if dialog else None)
+                pos=dialog.get_c() if dialog else None,
+                parent=dialog)
             _work_files = [
                 _work_file for _work_file in _work_files
                 if _work_file.step in _steps]
@@ -60,7 +62,8 @@ class DiskHandler(object):
         # Read work file dependencies
         _force = force
         for _work_file in qt.ProgressBar(
-                copy.copy(_work_files), 'Reading {:d} work file{}', col='Plum'):
+                copy.copy(_work_files), 'Reading {:d} work file{}', col='Plum',
+                parent=dialog):
 
             # Read deps
             check_heart()
