@@ -10,7 +10,8 @@ from psyhive.qt.misc import (
 from psyhive.qt.constants import COLS
 
 from psyhive.qt.interface import (
-    HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer)
+    HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
+    reset_interface_settings)
 
 from psyhive.qt.dialog import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,

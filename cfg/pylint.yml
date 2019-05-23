@@ -10,6 +10,8 @@ ignore:
     eval-used:
         hv_test/diary/
         maya_psyhive/tools/batch_cache/tmpl_cache.py
+    expression-not-assigned:
+        psyhive/qt/interface.py
     global-statement: '*'
     inconsistent-return-statements:
         hv_test/diary/

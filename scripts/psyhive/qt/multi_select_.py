@@ -37,7 +37,7 @@ class _MultiSelectDialog(HUiDialog):
 
         _ui_file = "{}/multi_select_.ui".format(os.path.dirname(__file__))
         super(_MultiSelectDialog, self).__init__(
-            ui_file=_ui_file, parent=parent)
+            ui_file=_ui_file, parent=parent, save_settings=False)
 
         self.ui.setWindowTitle(title)
         self.ui.message.setText(msg)
@@ -62,7 +62,7 @@ class _MultiSelectDialog(HUiDialog):
         self.result = self.ui.items.selected_data()
         if not self.multi:
             self.result = get_single(self.result)
-        self.ui.close()
+        self.close()
 
 
 def multi_select(
@@ -95,9 +95,9 @@ def multi_select(
         items=items, multi=multi, msg=msg, select=select, title=title,
         width=width, default=default, parent=parent)
     if pos:
-        _pos = pos - qt.get_p(_DIALOG.ui.size()/2)
-        _DIALOG.ui.move(_pos)
-    _DIALOG.ui.exec_()
+        _pos = pos - qt.get_p(_DIALOG.size()/2)
+        _DIALOG.move(_pos)
+    _DIALOG.exec_()
     if _DIALOG.result is None:
         raise qt.DialogCancelled
 

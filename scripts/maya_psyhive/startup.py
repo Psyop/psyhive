@@ -4,7 +4,7 @@ import logging
 
 from maya import cmds
 
-from psyhive import icons, refresh
+from psyhive import icons, refresh, qt
 from psyhive.tools import track_usage
 from psyhive.utils import dprint, wrap_fn, get_single, lprint
 from maya_psyhive import ui
@@ -58,8 +58,17 @@ def _build_psyhive_menu():
         'batch_cache.launch()']).format(batch_cache.__name__)
     cmds.menuItem(command=_cmd, image=batch_cache.ICON, label='Batch cache')
 
-    # Add refresh
+    # Add reset settings
     cmds.menuItem(divider=True)
+    _cmd = '\n'.join([
+        'import {} as qt'.format(qt.__name__),
+        'qt.reset_interface_settings()',
+    ]).format()
+    cmds.menuItem(
+        label='Reset interface settings', command=_cmd,
+        image=icons.EMOJI.find('Shower'))
+
+    # Add refresh
     _cmd = '\n'.join([
         'from maya import cmds',
         'import {} as refresh'.format(refresh.__name__),

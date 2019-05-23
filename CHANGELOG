@@ -1,3 +1,18 @@
+#### v0.21.3 ####
+
+    Released: Wed 22nd May 2019
+
+    multi select: use QWidget not QDialog for stability for kcassidy deleted c++ issue
+    
+    maya_psyhive:
+        startup added reset interface settings option,
+    psyhive:
+        qt.reset_interface_settings added,
+        qt.HUiDialog added save_settings option,
+        qt.HUiDialog added handling/fixes for QWidget ui dialogs,
+        qt.multi_select uses QWidget + don't save settings,
+
+
 #### v0.21.2 ####
 
     Released: Wed 22nd May 2019

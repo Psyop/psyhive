@@ -6,7 +6,8 @@ import tempfile
 import types
 
 from psyhive import host
-from psyhive.utils import wrap_fn, lprint, dprint, abs_path, File, touch
+from psyhive.utils import (
+    wrap_fn, lprint, dprint, abs_path, File, touch, find)
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import (
@@ -16,6 +17,8 @@ from psyhive.qt.misc import get_pixmap, get_icon, get_p
 if not hasattr(sys, 'QT_DIALOG_STACK'):
     sys.QT_DIALOG_STACK = {}
 
+_SETTINGS_DIR = abs_path('{}/psyhive/settings'.format(tempfile.gettempdir()))
+
 
 class HUiDialog(QtWidgets.QDialog):
     """Base class for any interface."""
@@ -23,7 +26,7 @@ class HUiDialog(QtWidgets.QDialog):
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
             dialog_stack_key=None, connect_widgets=True, show=True,
-            parent=None):
+            parent=None, save_settings=True):
         """Constructor.
 
         Args:
@@ -34,6 +37,7 @@ class HUiDialog(QtWidgets.QDialog):
             connect_widgets (bool): connect widget callbacks
             show (bool): show interface
             parent (QDialog): parent dialog
+            save_settings (bool): read/write settings on open/close
         """
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
@@ -55,10 +59,13 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
         self.ui = _loader.load(ui_file, self)
-        if hasattr(self.ui, 'rejected'):
-            self.ui.rejected.connect(self.closeEvent)
-        if hasattr(self.ui, 'closeEvent'):
+        _widget_ui = type(self.ui) is QtWidgets.QWidget
+        if _widget_ui:
+            # Fix maya margins override
+            self.ui.layout().setContentsMargins(9, 9, 9, 9)
             self.ui.closeEvent = self.closeEvent
+        else:
+            self.ui.rejected.connect(self.closeEvent)
 
         self.set_parenting()
 
@@ -69,23 +76,20 @@ class HUiDialog(QtWidgets.QDialog):
                 catch_error_=catch_error_, track_usage_=track_usage_)
 
         # Handle settings
-        self.settings_file = abs_path('{}/psyhive/{}.ini'.format(
-            tempfile.gettempdir(), File(ui_file).basename))
-        touch(self.settings_file)  # Check settings writable
-        self.settings = QtCore.QSettings(
-            self.settings_file, QtCore.QSettings.IniFormat)
-        self.read_settings()
+        if save_settings:
+            _settings_file = abs_path('{}/{}.ini'.format(
+                _SETTINGS_DIR, File(ui_file).basename))
+            touch(_settings_file)  # Check settings writable
+            self.settings = QtCore.QSettings(
+                _settings_file, QtCore.QSettings.IniFormat)
+            self.read_settings()
+        else:
+            self.settings = None
 
         self.redraw_ui()
-        if show:
-            self.ui.show()
 
-        # Special handling for QWidget - use type check rather than
-        # isinstance otherwise this will run on QDialog/QMainWindow
-        if type(self.ui) is QtWidgets.QWidget:
-            # Fix maya margins override
-            self.ui.layout().setContentsMargins(9, 9, 9, 9)
-            self.show()
+        if show:
+            self.show() if _widget_ui else self.ui.show()
 
     def closeEvent(self, event=None, verbose=0):
         """Triggered on close dialog.
@@ -189,6 +193,8 @@ class HUiDialog(QtWidgets.QDialog):
         Args:
             verbose (int): print process data
         """
+        if not self.settings:
+            return
         dprint('READ SETTINGS', self.settings.fileName(), verbose=verbose)
 
         # Apply widget settings
@@ -285,6 +291,8 @@ class HUiDialog(QtWidgets.QDialog):
         Args:
             verbose (int): print process data
         """
+        if not self.settings:
+            return
         dprint('WRITING SETTINGS', self.settings.fileName(), verbose=verbose)
 
         for _widget in self.widgets:
@@ -413,3 +421,11 @@ def list_redrawer(func):
         (fn): decorated function
     """
     return get_list_redrawer()(func)
+
+
+def reset_interface_settings():
+    """Reset interface settings."""
+    dprint('RESET SETTINGS', _SETTINGS_DIR)
+    for _ini in find(_SETTINGS_DIR, depth=1, type_='f', extn='ini'):
+        print ' - REMOVING', _ini
+        os.remove(_ini)

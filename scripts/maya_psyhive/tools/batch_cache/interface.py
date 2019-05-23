@@ -60,7 +60,6 @@ class _BatchCacheUi(qt.HUiDialog):
             self.ui.info.redraw)
 
         self.redraw_ui()
-        self.ui.show()
 
     def _redraw__mode_info(self, widget):
 
