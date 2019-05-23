@@ -33,7 +33,7 @@ class _BatchCacheUi(qt.HUiDialog):
             'Shotgun': ShotgunHandler()}
         self.handlers[mode].read_data(confirm=confirm, verbose=1)
 
-        # # Init ui
+        # Init ui
         _ui_file = os.path.dirname(__file__)+'/batch_cache.ui'
         super(_BatchCacheUi, self).__init__(
             ui_file=_ui_file, connect_widgets=False,
@@ -60,6 +60,7 @@ class _BatchCacheUi(qt.HUiDialog):
             self.ui.info.redraw)
 
         self.redraw_ui()
+        self.show()
 
     def _redraw__mode_info(self, widget):
 

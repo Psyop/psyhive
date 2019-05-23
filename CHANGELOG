@@ -1,3 +1,15 @@
+#### v0.21.4 ####
+
+    Released: Wed 22nd May 2019
+
+    batch cache: bugfix dialog no show after read data
+    
+    maya_psyhive:
+        tools.batch_cache bugfix missing show after read data,
+    psyhive:
+        tools.track_usage catch fail + disable usage tracking,
+
+
 #### v0.21.3 ####
 
     Released: Wed 22nd May 2019

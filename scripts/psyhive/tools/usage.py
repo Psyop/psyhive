@@ -28,12 +28,13 @@ _INDEX_MAPPING = {
 }
 
 
-def _write_usage_to_kibana(func, name=None, verbose=0):
+def _write_usage_to_kibana(func, name=None, catch=True, verbose=0):
     """Write usage data to kibana index.
 
     Args:
         func (fn): function that was executed
         name (str): override function name
+        catch (bool): on fail continue and disable usage tracking
         verbose (int): print process data
     """
 
@@ -66,6 +67,10 @@ def _write_usage_to_kibana(func, name=None, verbose=0):
     # Send to kibana
     _conn = Elasticsearch([_ELASTIC_URL])
     if not _conn.ping():
+        if catch:
+            dprint('Failed to make connection to Elasticsearch')
+            os.environ['PSYHIVE_DISABLE_USAGE'] = '1'
+            return
         raise RuntimeError('Cannot connect to Elasticsearch database.')
     if not _conn.indices.exists(_index_name):
         _conn.indices.create(index=_index_name, body=_INDEX_MAPPING)
@@ -92,7 +97,8 @@ def get_usage_tracker(name=None, verbose=0):
 
         @functools.wraps(func)
         def _usage_tracked_fn(*args, **kwargs):
-            _write_usage_to_kibana(func, name=name, verbose=verbose)
+            if not os.environ.get('PSYHIVE_DISABLE_USAGE'):
+                _write_usage_to_kibana(func, name=name, verbose=verbose)
             return func(*args, **kwargs)
 
         return _usage_tracked_fn
