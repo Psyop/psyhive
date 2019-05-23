@@ -1,3 +1,16 @@
+#### v0.21.2 ####
+
+    Released: Wed 22nd May 2019
+
+    batch cache: use QWidget not QDialog for stability for kcassidy deleted c++ issue
+    
+    maya_psyhive:
+        tools.batch_cache use QWidget not QDialog for stability,
+    psyhive:
+        qt.HUiInterface added QWidget handling,
+        qt.HUiInterface.read_setting bugfix apply QCheckBox setting,
+
+
 #### v0.21.1 ####
 
     Released: Wed 22nd May 2019

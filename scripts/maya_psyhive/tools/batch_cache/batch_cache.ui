@@ -1,23 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RecacherUi</class>
- <widget class="QDialog" name="RecacherUi">
+ <class>BatchCacheUi</class>
+ <widget class="QWidget" name="BatchCacheUi">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>590</width>
-    <height>392</height>
+    <width>597</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Batch cache</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="spacing">
-    <number>10</number>
-   </property>
-   <item row="2" column="0">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_7">
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>80</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Mode</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mode">
+       <property name="minimumSize">
+        <size>
+         <width>77</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>77</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Shotgun</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Disk</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="mode_info">
+       <property name="text">
+        <string>The list of assets has been found by opening the latest version of each scene.</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -215,57 +262,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_7">
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>80</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Mode</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="mode">
-       <property name="minimumSize">
-        <size>
-         <width>77</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>77</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <item>
-        <property name="text">
-         <string>Shotgun</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Disk</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="mode_info">
-       <property name="text">
-        <string>The list of assets has been found by opening the latest version of each scene.</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
       <string>Cache the selected work files by opening them, updating the assets to the latested version and then caching</string>

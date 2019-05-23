@@ -33,11 +33,12 @@ class _BatchCacheUi(qt.HUiDialog):
             'Shotgun': ShotgunHandler()}
         self.handlers[mode].read_data(confirm=confirm, verbose=1)
 
-        # Init ui
+        # # Init ui
         _ui_file = os.path.dirname(__file__)+'/batch_cache.ui'
         super(_BatchCacheUi, self).__init__(
             ui_file=_ui_file, connect_widgets=False,
             show=False)
+        self.setWindowTitle('Batch cache')
         self.ui.mode.setCurrentText(mode)
         self._callback__mode()
         self._callback__hide_omitted()
@@ -202,3 +203,4 @@ def launch(mode=None, confirm=True):
         buttons=["Shotgun", "Disk", "Cancel"])
 
     _DIALOG = _BatchCacheUi(mode=_mode, confirm=confirm)
+    return _DIALOG

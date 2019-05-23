@@ -55,7 +55,10 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
         self.ui = _loader.load(ui_file, self)
-        self.ui.rejected.connect(self.closeEvent)
+        if hasattr(self.ui, 'rejected'):
+            self.ui.rejected.connect(self.closeEvent)
+        if hasattr(self.ui, 'closeEvent'):
+            self.ui.closeEvent = self.closeEvent
 
         self.set_parenting()
 
@@ -76,6 +79,13 @@ class HUiDialog(QtWidgets.QDialog):
         self.redraw_ui()
         if show:
             self.ui.show()
+
+        # Special handling for QWidget - use type check rather than
+        # isinstance otherwise this will run on QDialog/QMainWindow
+        if type(self.ui) is QtWidgets.QWidget:
+            # Fix maya margins override
+            self.ui.layout().setContentsMargins(9, 9, 9, 9)
+            self.show()
 
     def closeEvent(self, event=None, verbose=0):
         """Triggered on close dialog.
@@ -193,10 +203,10 @@ class HUiDialog(QtWidgets.QDialog):
             elif isinstance(_widget, (
                     QtWidgets.QRadioButton,
                     QtWidgets.QCheckBox)):
-                if isinstance(_val, bool):
+                if isinstance(_val, (bool, str)):
                     _widget.setChecked(_val)
                 else:
-                    print 'FAILED TO APPLY:', _val
+                    print ' - FAILED TO APPLY:', _widget, _val
             elif isinstance(_widget, QtWidgets.QListWidget):
                 for _row in range(_widget.count()):
                     _item = _widget.item(_row)
@@ -205,7 +215,7 @@ class HUiDialog(QtWidgets.QDialog):
                 try:
                     _widget.setCurrentIndex(_val)
                 except TypeError:
-                    print 'FAILED TO APPLY TAB', _val
+                    print ' - FAILED TO APPLY TAB', _val
             else:
                 raise ValueError(_widget)
 

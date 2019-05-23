@@ -80,6 +80,8 @@ ignore:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/range_.py
+    unidiomatic-typecheck:
+        psyhive/qt/interface.py
     unreachable:
         hv_test/diary/
     unused-argument:
