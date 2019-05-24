@@ -39,7 +39,7 @@ class _MultiSelectDialog(HUiDialog):
         super(_MultiSelectDialog, self).__init__(
             ui_file=_ui_file, parent=parent, save_settings=False)
 
-        self.ui.setWindowTitle(title)
+        self.setWindowTitle(title)
         self.ui.message.setText(msg)
         self.ui.select.setText(select)
         if not self.multi:

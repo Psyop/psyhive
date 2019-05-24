@@ -1,6 +1,7 @@
 """Tools recaching a work file."""
 
 import collections
+import pprint
 import sys
 
 import maya
@@ -12,8 +13,12 @@ from psyhive import qt, tk
 from psyhive.utils import dprint, get_plural, lprint, check_heart
 from maya_psyhive import ref
 
+from maya_psyhive.tools.batch_cache.tmpl_cache import CTTMayaShotWork
 
-def _exec_recache(namespaces, confirm, new_scene, farm):
+
+def _exec_cache(
+        namespaces, confirm=True, new_scene=False, farm=True,
+        verbose=1):
     """Execute a recache on the current workfile.
 
     Args:
@@ -21,6 +26,7 @@ def _exec_recache(namespaces, confirm, new_scene, farm):
         confirm (bool): confirm before execute
         new_scene (bool): new scene after recache
         farm (bool): submit recache to farm
+        verbose (int): print process data
     """
 
     class _FakeResolver(object):
@@ -31,45 +37,63 @@ def _exec_recache(namespaces, confirm, new_scene, farm):
 
     class _FakeConflict(object):
 
-        def __init__(self, namespace, cache):
+        def __init__(self, id_, cache):
             _user_data = collections.namedtuple('UserData', ['id'])
-            self.user_data = _user_data(id=namespace)
+            self.id_ = id_
+            self.user_data = _user_data(id=self.id_)
             self.resolution = None if cache else _skip
 
+        def __repr__(self):
+            return '<Conflict:{}>'.format(self.id_)
+
     _engine = tank.platform.current_engine()
-    _cache = _engine.apps['psy-multi-cache']
+    _cache_app = _engine.apps['psy-multi-cache']
     check_heart()
 
     # Use resolver to limit items to cache
-    _cache.init_app()
-    _mod = sys.modules[_cache.cache_controller.__module__]
+    _cache_app.init_app()
+    _mod = sys.modules[_cache_app.cache_controller.__module__]
     _skip = _mod.PublishConflictResolution.SKIP
-    _model = _cache.cache_controller.model
+    _model = _cache_app.cache_controller.model
     _all_items = [
         _item.item_data
         for _item in _model.cache_list.selected_items]
-    _conflicts = [
-        _FakeConflict(namespace=_item.id, cache=_item.id in namespaces)
-        for _item in _all_items]
+    lprint(
+        ' - ALL ITEMS', len(_all_items), pprint.pformat(_all_items),
+        verbose=verbose > 1)
+    _conflicts = []
+    for _item in _all_items:
+        _cache = _item.id.replace(":renderCamShape", "") in namespaces
+        _conflict = _FakeConflict(id_=_item.id, cache=_cache)
+        _conflicts.append(_conflict)
+    lprint(
+        ' - CONFLICTS', len(_conflicts), pprint.pformat(_conflicts),
+        verbose=verbose > 1)
     _resolver = _FakeResolver(
         all_items=_all_items, conflicts=_conflicts, version=_model.version)
 
-    # Version up and cache
+    # Check cache
+    _to_cache = [
+        _conflict for _conflict in _conflicts if not _conflict.resolution]
+    if not _to_cache:
+        raise RuntimeError("Nothing found to cache")
+    lprint(' - FOUND {:d} ITEMS TO CACHE'.format(len(_to_cache)))
     if confirm:
-        qt.ok_cancel('Submit re-cache to farm?')
+        qt.ok_cancel('Submit {:d} cache{} to farm?'.format(
+            len(_to_cache), get_plural(_to_cache)))
 
+    # Execute cache
     if farm:
-        _cache.cache_controller.model.cache_on_farm(resolver=_resolver)
+        _cache_app.cache_controller.model.cache_on_farm(resolver=_resolver)
     else:
-        _cache.cache_controller.model.cache(resolver=_resolver)
-
+        _cache_app.cache_controller.model.cache(resolver=_resolver)
     dprint('{} {:d}/{:d} REFS'.format(
         'SUBMITTED' if farm else 'CACHED', len(namespaces), len(_all_items)))
     if new_scene:
         cmds.file(new=True, force=True)
 
 
-def recache_work_file(
+def cache_work_file(
         work_file, namespaces, confirm=False, new_scene=False, farm=True,
         parent=None):
     """Recache the given work file.
@@ -120,9 +144,11 @@ def recache_work_file(
     _fileops = _engine.apps['psy-multi-fileops']
     _fileops.version_up_workfile()
     maya.utils.processIdleEvents()
-    tk.cur_work().set_comment('Versioned up by batch cache tool')
+    _cur_work = tk.cur_work(class_=CTTMayaShotWork)
+    _cur_work.set_comment('Versioned up by batch cache tool')
+    _cur_work.read_dependencies(new_scene=False)
 
-    _exec_recache(
+    _exec_cache(
         namespaces=namespaces, new_scene=new_scene, confirm=confirm,
         farm=farm)
     cmds.file(new=True, force=True)
@@ -138,16 +164,16 @@ def cache_work_files(data, farm=True, parent=None):
     """
     _pos = parent.get_c() if parent else None
     qt.ok_cancel(
-        'Re-cache {:d} work file{}?'.format(len(data), get_plural(data)),
+        'Cache {:d} work file{}?'.format(len(data), get_plural(data)),
         pos=_pos, parent=parent)
 
     for _work_file, _namespaces in qt.ProgressBar(
-            data, "Re-caching {:d} work file{}", col="DeepSkyBlue", pos=_pos,
+            data, "Caching {:d} work file{}", col="DeepSkyBlue", pos=_pos,
             parent=parent):
-        print 'RECACHE', _work_file.path
+        print 'CACHE', _work_file.path
         print _namespaces
         print
-        recache_work_file(
+        cache_work_file(
             work_file=_work_file, namespaces=sorted(_namespaces),
             farm=farm, parent=parent)
 

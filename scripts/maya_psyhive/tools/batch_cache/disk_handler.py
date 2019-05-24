@@ -74,6 +74,7 @@ class DiskHandler(object):
             lprint('   -', _work_file.basename, _deps, verbose=verbose)
             _assets = _work_file.get_cacheable_assets()
             if not _assets:
+                lprint('     - NO CACHEABLE ASSETS', _work_file, verbose=verbose)
                 _work_files.remove(_work_file)
 
         return _work_files

@@ -132,10 +132,11 @@ class CTTMayaShotWork(tk.TTMayaShotWork, Cacheable):
         return self.read_dependencies()[0]
 
     @store_result_on_obj
-    def get_cacheable_refs(self, show_unhandled=False):
+    def get_cacheable_refs(self, force=False, show_unhandled=False):
         """Get dict of cacheable refs.
 
         Args:
+            force (bool): reread data
             show_unhandled (bool): print out unhandled references
 
         Returns:

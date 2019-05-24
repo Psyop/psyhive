@@ -49,7 +49,7 @@ class _ErrDialog(qt.HUiDialog):
 
         super(_ErrDialog, self).__init__(
             ui_file=_UI_FILE, catch_error_=False)
-        self.ui.setWindowTitle('Error')
+        self.setWindowTitle('Error')
 
     def _redraw__er_make_ticket(self, widget):
         widget.setEnabled(False)

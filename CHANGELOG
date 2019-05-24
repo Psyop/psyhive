@@ -1,3 +1,19 @@
+#### v0.22.0 ####
+
+    Released: Fri 24th May 2019
+
+    batch cache: added handling for cameras
+    
+    maya_psyhive:
+        tools.batch_cache added handling for cams,
+        tools.batch_cache catch no namespace matches found,
+        tools.batch_cache write deps cache on version up,
+    psyhive:
+        qt.multi_select fix bad title,
+        tk get_work/cur_work added class override arg,
+        tools.err_catcher converted to QWidget,
+
+
 #### v0.21.5 ####
 
     Released: Fri 24th May 2019
