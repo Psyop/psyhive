@@ -5,9 +5,11 @@ import sys
 import tempfile
 import types
 
+import six
+
 from psyhive import host
 from psyhive.utils import (
-    wrap_fn, lprint, dprint, abs_path, File, touch, find)
+    wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode)
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import (
@@ -48,7 +50,8 @@ class HUiDialog(QtWidgets.QDialog):
             sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
-        _args = [parent] if parent else []
+        _parent = parent or _get_default_parent()
+        _args = [_parent] if _parent else []
         super(HUiDialog, self).__init__(*_args)
 
         # Load ui file
@@ -59,15 +62,15 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
         self.ui = _loader.load(ui_file, self)
-        _widget_ui = type(self.ui) is QtWidgets.QWidget
-        if _widget_ui:
+        self._is_widget_ui = type(self.ui) is QtWidgets.QWidget
+        if self._is_widget_ui:
             # Fix maya margins override
             self.ui.layout().setContentsMargins(9, 9, 9, 9)
             self.ui.closeEvent = self.closeEvent
         else:
             self.ui.rejected.connect(self.closeEvent)
-
-        self.set_parenting()
+            if dev_mode() and isinstance(self.ui, QtWidgets.QDialog):
+                dprint("WARNING: QDialog is unstable in maya")
 
         # Setup widgets
         self.widgets = self.read_widgets()
@@ -89,7 +92,7 @@ class HUiDialog(QtWidgets.QDialog):
         self.redraw_ui()
 
         if show:
-            self.show() if _widget_ui else self.ui.show()
+            self.show() if self._is_widget_ui else self.ui.show()
 
     def closeEvent(self, event=None, verbose=0):
         """Triggered on close dialog.
@@ -106,6 +109,23 @@ class HUiDialog(QtWidgets.QDialog):
 
         if hasattr(self, 'write_settings'):
             self.write_settings()
+
+        return _result
+
+    def resizeEvent(self, event, verbose=0):
+        """Triggered by resize.
+
+        Args:
+            event (QEvent): triggered event
+            verbose (int): print process data
+        """
+        lprint("RESIZE", self, verbose=verbose)
+
+        _result = super(HUiDialog, self).resizeEvent(event)
+
+        # Fix maya QWidget resize bug
+        if self._is_widget_ui:
+            self.ui.resize(self.size())
 
         return _result
 
@@ -185,7 +205,11 @@ class HUiDialog(QtWidgets.QDialog):
         Returns:
             (QPoint): centre point
         """
-        return get_p(self.ui.pos()) + get_p(self.ui.size()/2)
+        if self._is_widget_ui:
+            _dialog = self
+        else:
+            _dialog = self.ui
+        return _dialog.pos() + get_p(_dialog.size()/2)
 
     def read_settings(self, verbose=0):
         """Read settings from disk.
@@ -209,10 +233,12 @@ class HUiDialog(QtWidgets.QDialog):
             elif isinstance(_widget, (
                     QtWidgets.QRadioButton,
                     QtWidgets.QCheckBox)):
-                if isinstance(_val, (bool, str)):
+                if isinstance(_val, six.string_types):
+                    _val = {'true': True, 'false': False}[_val]
+                if isinstance(_val, bool):
                     _widget.setChecked(_val)
                 else:
-                    print ' - FAILED TO APPLY:', _widget, _val
+                    print ' - FAILED TO APPLY:', _widget, _val, type(_val)
             elif isinstance(_widget, QtWidgets.QListWidget):
                 for _row in range(_widget.count()):
                     _item = _widget.item(_row)
@@ -271,19 +297,6 @@ class HUiDialog(QtWidgets.QDialog):
         _icon = get_icon(_pix)
         self.setWindowIcon(_pix)
         self.ui.setWindowIcon(_pix)
-
-    def set_parenting(self, verbose=0):
-        """Set parenting for host application.
-
-        Args:
-            verbose (int): print process data
-        """
-        if host.NAME == 'maya' and isinstance(self.ui, (
-                QtWidgets.QDialog, QtWidgets.QMainWindow)):
-            lprint('PARENTING TO MAIN WINDOW', verbose=verbose)
-            from maya_psyhive import ui
-            _maya_win = ui.get_main_window_ptr()
-            self.setParent(_maya_win, QtCore.Qt.WindowStaysOnTopHint)
 
     def write_settings(self, verbose=0):
         """Write settings to disk.
@@ -370,6 +383,19 @@ def close_all_interfaces():
         print 'CLOSING', _dialog
         _dialog.delete()
         del sys.QT_DIALOG_STACK[_key]
+
+
+def _get_default_parent():
+    """Get default parent based on current dcc.
+
+    Returns:
+        (QWidget): default parent
+    """
+    _parent = None
+    if host.NAME == 'maya':
+        from maya_psyhive import ui
+        _parent = ui.get_main_window_ptr()
+    return _parent
 
 
 def get_list_redrawer(default_selection='first'):

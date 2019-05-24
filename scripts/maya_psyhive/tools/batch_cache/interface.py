@@ -12,7 +12,6 @@ from maya_psyhive.tools.batch_cache.sg_handler import ShotgunHandler
 from maya_psyhive.tools.batch_cache.cache import cache_work_files
 
 ICON = icons.EMOJI.find('Funeral Urn')
-_DIALOG = None
 
 
 class _BatchCacheUi(qt.HUiDialog):
@@ -43,7 +42,7 @@ class _BatchCacheUi(qt.HUiDialog):
         self._callback__mode()
         self._callback__hide_omitted()
         self._callback__stale_only()
-        self.connect_widgets(verbose=1)
+        self.connect_widgets()
         self.set_icon(ICON)
 
         self.ui.mode.currentTextChanged.connect(
@@ -190,7 +189,7 @@ def launch(mode=None, confirm=True):
         mode (str): where to read data from
         confirm (bool): show confirmation dialogs
     """
-    global _DIALOG
+    from maya_psyhive.tools import batch_cache
 
     _mode = mode or qt.raise_dialog(
         'Which scenes do you want to cache?\n\n'
@@ -202,5 +201,5 @@ def launch(mode=None, confirm=True):
         icon=icons.EMOJI.find("Funeral urn"),
         buttons=["Shotgun", "Disk", "Cancel"])
 
-    _DIALOG = _BatchCacheUi(mode=_mode, confirm=confirm)
-    return _DIALOG
+    batch_cache.DIALOG = _BatchCacheUi(mode=_mode, confirm=confirm)
+    return batch_cache.DIALOG

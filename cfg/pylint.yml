@@ -104,6 +104,7 @@ allowed_names:
     mouseMoveEvent
     mousePressEvent
     objectName
+    resizeEvent
     timerEvent
     ui
     userSetup

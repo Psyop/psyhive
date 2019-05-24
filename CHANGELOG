@@ -1,3 +1,16 @@
+#### v0.21.5 ####
+
+    Released: Fri 24th May 2019
+
+    batch cache: fix issues with maya QWidget ui
+    
+    psyhive:
+        qt.HUiDialog fix maya parenting for widget ui,
+        qt.HUiDialog fix maya resizing issue,
+        qt.HUiDialog.get_c fix widget ui centre issue,
+        qt.multi_select fix missing dialog issue,
+
+
 #### v0.21.4 ####
 
     Released: Wed 22nd May 2019

@@ -98,7 +98,7 @@ def multi_select(
         _pos = pos - qt.get_p(_DIALOG.size()/2)
         _DIALOG.move(_pos)
     _DIALOG.exec_()
-    if _DIALOG.result is None:
+    if _DIALOG and _DIALOG.result is None:
         raise qt.DialogCancelled
 
-    return _DIALOG.result
+    return _DIALOG and _DIALOG.result
