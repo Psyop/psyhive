@@ -165,7 +165,7 @@ class MayaPyGui(base.BasePyGui):
 
     def add_execute(
             self, def_, depth=35, icon=None, label=None, col=None,
-            disable_reload=False):
+            disable_reload=False, catch_error_=True):
         """Add execute button for the given def.
 
         Args:
@@ -175,12 +175,13 @@ class MayaPyGui(base.BasePyGui):
             label (str): override label from exec button
             col (str): colour for button
             disable_reload (bool): no refresh on execute
+            catch_error_ (bool): apply error catch decorator
         """
         _icon = icon or get_def_icon(def_.name, set_=self.icon_set)
         _help_icon = icons.EMOJI.find('Information')
         _exec_fn = get_exec_fn(
             def_=def_, read_arg_fns=self.read_arg_fns[def_.name],
-            disable_reload=disable_reload)
+            disable_reload=disable_reload, catch_error_=catch_error_)
 
         _btn_width = 10
         cmds.rowLayout(

@@ -1,3 +1,23 @@
+#### v0.23.0 ####
+
+    Released: Tue 28th May 2019
+
+    batch cache: allow selection of shots/workfiles to cache
+    
+    maya_psyhive:
+        tools.batch_cache added refresh levels to allow select shots to cache,
+        utils.use_tmp_ns added,
+    psyhive:
+        py_gui.install_gui working catch_error_ arg,
+        qt.ProgressBar added stack_key arg,
+        qt.HPixmap.add_circle added,
+        tk.find_sequences added,
+        tk.get_shot_data bugfix difference disk/sg shot names,
+        tk.TTRootBase.find_steps added class_ override,
+        tk.TTSequenceRoot added,
+        utils.PyFile.get_module catch SyntaxError,
+
+
 #### v0.22.0 ####
 
     Released: Fri 24th May 2019

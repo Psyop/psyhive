@@ -148,3 +148,15 @@ def single_undo(func):
         return _result
 
     return _single_undo_fn
+
+
+def use_tmp_ns(func):
+    """Decorator which executes function in a temporary namespace.
+
+    Args:
+        func (fn): function to execute
+
+    Returns:
+        (fn): decorated function
+    """
+    return get_ns_cleaner(':tmp')(func)

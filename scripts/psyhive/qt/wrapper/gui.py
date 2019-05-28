@@ -95,6 +95,29 @@ class HPainter(QtGui.QPainter):
 class HPixmap(QtGui.QPixmap):
     """Override for QPixmap object."""
 
+    def add_circle(self, pos, col='black', radius=10):
+        """Draw a circle on this pixmap.
+
+        Args:
+            pos (QPoint): centre point
+            col (str): line colour
+            radius (int): circle radius
+        """
+        from psyhive import qt
+
+        _pos = qt.get_p(pos)
+        _col = qt.get_col(col)
+        _pen = QtGui.QPen(_col)
+        _rect = QtCore.QRect(
+            _pos.x()-radius, _pos.y()-radius, radius*2, radius*2)
+
+        _pnt = HPainter()
+        _pnt.begin(self)
+        _pnt.setRenderHint(HPainter.Antialiasing, 1)
+        _pnt.setPen(_pen)
+        _pnt.drawArc(_rect, 0, 360*16)
+        _pnt.end()
+
     def add_dot(self, pos, col='black', radius=1.0):
         """Draw a circle on this pixmap.
 

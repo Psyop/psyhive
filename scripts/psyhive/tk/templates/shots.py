@@ -21,6 +21,37 @@ class _TTShotChildBase(object):
         return TTShotRoot(self.path)
 
 
+class TTSequenceRoot(TTDirBase):
+    """Represents a tank template sequence root."""
+
+    hint = 'sequence_root'
+    sequence = None
+
+    def find_shots(self, class_=None):
+        """Find shots in this sequence.
+
+        Args:
+            class_ (TTShotRoot): override shot class
+
+        Returns:
+            (TTShotRoot list): list of shots
+        """
+        _shots = []
+        _class = class_ or TTShotRoot
+        for _path in self.find(depth=1):
+            try:
+                _shot = _class(_path)
+            except ValueError:
+                continue
+            _shots.append(_shot)
+        return _shots
+
+    @property
+    def name(self):
+        """Get step type."""
+        return self.sequence
+
+
 class TTShotRoot(TTRootBase):
     """Represents a tank template shot root."""
 
@@ -122,6 +153,20 @@ class TTShotOutputVersion(TTOutputVerBase, _TTShotChildBase):
             self.get_status())
 
 
+def find_sequences():
+    """Find sequences in the current project.
+
+    Returns:
+        (TTSequenceRoot): list of sequences
+    """
+    _seq_path = pipe.cur_project().path+'/sequences'
+    _seqs = []
+    for _path in find(_seq_path, depth=1):
+        _seq = TTSequenceRoot(_path)
+        _seqs.append(_seq)
+    return _seqs
+
+
 def find_shots(class_=None):
     """Find shots in the current job.
 
@@ -131,13 +176,6 @@ def find_shots(class_=None):
     Returns:
         (TTShotRoot): list of shots
     """
-    _seq_path = pipe.cur_project().path+'/sequences'
-    _shots = []
-    _class = class_ or TTShotRoot
-    for _path in find(_seq_path, depth=2):
-        try:
-            _shot = _class(_path)
-        except ValueError:
-            continue
-        _shots.append(_shot)
-    return _shots
+    return sum([
+        _seq.find_shots(class_=class_)
+        for _seq in find_sequences()], [])

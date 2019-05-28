@@ -106,7 +106,7 @@ class PyFile(File, PyBase):
         if _mod_name not in sys.modules:
             try:
                 __import__(_mod_name, fromlist=_mod_name.split('.'))
-            except ImportError as _exc:
+            except (ImportError, SyntaxError) as _exc:
                 if catch:
                     return None
                 raise _exc

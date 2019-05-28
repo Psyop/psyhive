@@ -1,6 +1,7 @@
 """Tools for installing a def into a py_gui inteface."""
 
 import functools
+import pprint
 
 from psyhive.utils import lprint, to_nice
 
@@ -10,7 +11,7 @@ INSTALL_GUI_DEFS = {}
 def install_gui(
         icon=None, choices=None, hide=None, section=None,
         label=None, label_width=None, col=None, update=None,
-        disable_reload=False, verbose=False):
+        disable_reload=False, catch_error_=True, verbose=0):
     """Build a decorator which installs a def into a py_gui inteface.
 
     Any decorated def will appear in the py_gui interface for that file.
@@ -26,6 +27,7 @@ def install_gui(
         update (dict): dict of ArgUpdater objects for any args that need
             to be updated on the fly
         disable_reload (bool): no reload when this def is executed
+        catch_error_ (bool): apply error catch decorator
         verbose (int): print process data
     """
 
@@ -44,11 +46,13 @@ def install_gui(
             'col': col,
             'update': update,
             'disable_reload': disable_reload,
+            'catch_error_': catch_error_,
         }
         if func.__module__ not in INSTALL_GUI_DEFS:
             INSTALL_GUI_DEFS[func.__module__] = []
         INSTALL_GUI_DEFS[func.__module__].append((func, _opts))
-        lprint(' - INSTALLING GUI', func, INSTALL_GUI_DEFS, verbose=verbose)
+        lprint(' - INSTALLING GUI', func.__name__, verbose=verbose)
+        lprint(pprint.pformat(_opts), verbose=verbose)
 
         @functools.wraps(func)
         def _install_gui_func(*args, **kwargs):

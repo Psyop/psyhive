@@ -130,11 +130,12 @@ class BasePyGui(object):
             label=opts.get('label'),
             col=opts.get('col') or self.base_col,
             disable_reload=_disable_reload,
+            catch_error_=opts.get('catch_error_'),
         )
 
     def add_execute(
             self, def_, depth=35, icon=None, label=None, col=None,
-            disable_reload=False):
+            disable_reload=False, catch_error_=True):
         """Add execute button for the given def.
 
         Args:
@@ -144,6 +145,7 @@ class BasePyGui(object):
             label (str): override label from exec button
             col (str): colour for button
             disable_reload (bool): no refresh on execute
+            catch_error_ (bool): apply error catch decorator
         """
 
     def close_event(self, verbose=0):

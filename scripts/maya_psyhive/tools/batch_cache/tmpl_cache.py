@@ -1,6 +1,7 @@
 """Tools for allow data to be cached on tk template objects."""
 
 import operator
+import os
 import pprint
 
 from maya import cmds
@@ -9,13 +10,25 @@ import tank
 
 from psyhive import tk, qt, pipe
 from psyhive.utils import (
-    get_result_to_file_storer, Cacheable,
+    get_result_to_file_storer, Cacheable, lprint,
     store_result_on_obj, store_result, dprint, abs_path)
 from maya_psyhive import ref
 
 
 class CTTShotRoot(tk.TTShotRoot):
     """Used to stored cache shotgun request data for a shot."""
+
+    @store_result
+    def find_steps(self, class_=None):
+        """Find steps in this shot.
+
+        Args:
+            class_ (TTShotStepRoot): override step root class
+
+        Returns:
+            (TTShotStepRoot list): list of steps
+        """
+        return super(CTTShotRoot, self).find_steps(class_=class_)
 
     @store_result
     def read_cache_data(self, force=False):
@@ -88,6 +101,24 @@ class CTTShotRoot(tk.TTShotRoot):
 
         return sorted(_cache_data.values())
 
+    @store_result
+    def read_work_files(self, force=False):
+        """Read work files in this shot.
+
+        Args:
+            force (bool): force reread data from disk
+        """
+        _work_files = []
+        for _step in self.find_steps():
+            _work_area = _step.get_work_area()
+            _task_work_files = {}
+            for _work_file in _work_area.find_work_files():
+                _task_work_files[_work_file.task] = _work_file
+            _work_files += [
+                CTTMayaShotWork(_file.path)
+                for _file in sorted(_task_work_files.values())]
+        return _work_files
+
 
 class CTTAssetOutputVersion(tk.TTAssetOutputVersion, Cacheable):
     """Asset with built in caching."""
@@ -156,6 +187,30 @@ class CTTMayaShotWork(tk.TTMayaShotWork, Cacheable):
 
         return _refs
 
+    def has_cache_available(self, verbose=0):
+        """Check if this work file has cached assets data available.
+
+        This is only the case if a cache file exists and its mtime is
+        greater than the work file mtime.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (bool): whether assets cache is available
+        """
+        _cache_file = self.cache_fmt.format('read_dependencies')
+        if not os.path.exists(_cache_file):
+            lprint('MISSING CACHE FILE', _cache_file, verbose=verbose)
+            return False
+
+        if os.path.getmtime(_cache_file) < os.path.getmtime(self.path):
+            lprint('STALE CACHE FILE', _cache_file, verbose=verbose)
+            return False
+
+        lprint('AVAILABLE CACHE FILE', _cache_file, verbose=verbose)
+        return True
+
     @get_result_to_file_storer(
         get_depend_path=operator.attrgetter('path'), min_mtime=1558543997)
     def read_dependencies(
@@ -178,7 +233,8 @@ class CTTMayaShotWork(tk.TTMayaShotWork, Cacheable):
             if confirm:
                 qt.ok_cancel(
                     'Open scene to read contents?\n\n{}\n\n'
-                    'Current scene will be lost.'.format(self.path))
+                    'Current scene will be lost.'.format(self.path),
+                    title='Replace current scene')
             cmds.file(
                 self.path, open=True, prompt=False, force=True,
                 loadReferenceDepth='none')

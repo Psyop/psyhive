@@ -129,7 +129,8 @@ class EmojiSet(Seq):
 
         pprint.pprint(sorted([
             str(_emoji.name) for _emoji in _filter_matches]))
-        raise ValueError('Matched {:d} emojis'.format(len(_filter_matches)))
+        raise ValueError('Filter {} matched {:d} emojis'.format(
+            match, len(_filter_matches)))
 
     def find_emojis(self, filter_=None, name=None, index=None):
         """Search for emojis in this set.

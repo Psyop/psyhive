@@ -29,8 +29,7 @@ ignore:
     no-self-use:
         /tests/test_
         maya_psyhive/tools/fkik_switcher/interface.py
-        maya_psyhive/tools/batch_cache/disk_handler.py
-        maya_psyhive/tools/batch_cache/sg_handler.py
+        maya_psyhive/tools/batch_cache/
         psyhive/tools/err_catcher.py
         hv_test/diary/
         hv_test/release/misc.py

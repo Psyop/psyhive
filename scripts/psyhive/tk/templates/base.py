@@ -84,16 +84,20 @@ class TTRootBase(TTDirBase):
 
     step_type = None
 
-    def find_steps(self):
-        """Find steps inside this root.
+    def find_steps(self, class_=None):
+        """Find steps in this shot.
+
+        Args:
+            class_ (TTShotStepRoot): override step root class
 
         Returns:
-            (TTStepRootBase list): list of steps
+            (TTShotStepRoot list): list of steps
         """
+        _class = class_ or self.step_type
         _steps = []
         for _path in self.find(depth=1, type_='d'):
             try:
-                _step = self.step_type(_path)
+                _step = _class(_path)
             except ValueError:
                 continue
             _steps.append(_step)
@@ -106,6 +110,15 @@ class TTStepRootBase(TTDirBase):
 
     work_area_maya_hint = None
     work_area_maya_type = None
+
+    def __init__(self, path):
+        """Constructor.
+
+        Args:
+            path (str): path within step root
+        """
+        super(TTStepRootBase, self).__init__(path)
+        self.name = self.step
 
     def get_work_area(self, dcc='maya'):
         """Get work area in this step for the given dcc.
@@ -286,8 +299,9 @@ class TTWorkFileBase(TTBase):
         """Load this work file."""
         _engine = tank.platform.current_engine()
         _fileops = _engine.apps['psy-multi-fileops']
+        _work_file = _fileops.get_workfile_from_path(self.path)
         _fileops.open_file(
-            self.path, open=True, force=True, change_context=True)
+            _work_file, open=True, force=True, change_context=True)
 
     def set_comment(self, comment):
         """Set comment for this work file.

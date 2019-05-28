@@ -1,9 +1,7 @@
 """Tools for managing reading caches from shotgun."""
 
-from psyhive import tk, qt
-from psyhive.utils import lprint, store_result, get_result_storer
-
-from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
+from psyhive import qt
+from psyhive.utils import lprint
 
 
 class ShotgunHandler(object):
@@ -11,31 +9,33 @@ class ShotgunHandler(object):
 
     hide_omitted = True
     stale_only = True
+    cached_shots = set()
 
-    @get_result_storer(id_as_key=True)
-    def _read_cache_data(self, progress=True, force=False, dialog=None):
+    def _read_cache_data(self, shots, progress=True, force=False, dialog=None):
         """Read all cache data.
 
         Args:
+            shots (TTShotRoot list): shots to check
             progress (bool): show progress bar
             force (bool): force reread data from shotgun
             dialog (QDialog): parent dialog
         """
-        _shots = self._get_shots(force=force)
+        print 'READING CACHE DATA', force
         _pos = dialog.get_c() if dialog else None
         for _shot in qt.ProgressBar(
-                _shots, 'Reading {:d} shots', col='SeaGreen',
+                shots, 'Reading {:d} shot{}', col='SeaGreen',
                 show=progress, pos=_pos, parent=dialog):
             _shot.read_cache_data(force=force)
+            self.cached_shots.add(_shot)
 
     def _find_cache_data(
-            self, shots=None, steps=None, tasks=None, assets=None,
+            self, shots, steps=None, tasks=None, assets=None,
             hide_omitted=None, stale_only=None, progress=False, force=False,
             dialog=None, verbose=0):
         """Search cache data.
 
         Args:
-            shots (TTShotRoot list): return only data from these shots
+            shots (TTShotRoot list): shots to check
             steps (str list): return only data with these steps
             tasks (str list): return only data with these tasks
             assets (TTAssetOutputName list): return only data with these
@@ -66,7 +66,7 @@ class ShotgunHandler(object):
         _cache_data = []
         _pos = dialog.ui.get_c() if dialog else None
         for _shot in qt.ProgressBar(
-                self._get_shots(), 'Reading {:d} shots', col='SeaGreen',
+                shots, 'Reading {:d} shots', col='SeaGreen',
                 show=progress, pos=_pos):
             if shots and _shot not in shots:
                 continue
@@ -96,24 +96,11 @@ class ShotgunHandler(object):
 
         return _cache_data
 
-    def find_shots(self, verbose=0):
-        """Find shots.
-
-        Args:
-            verbose (int): print process data
-
-        Returns:
-            (TTShotRoot list): list of shots
-        """
-        _cache_data = self._find_cache_data(verbose=verbose)
-        return sorted(set([
-            _data['shot'] for _data in _cache_data]))
-
     def find_steps(self, shots, verbose=0):
         """Find steps.
 
         Args:
-            shots (TTShotRoot list): apply shots filter
+            shots (TTShotRoot list): shots to check
             verbose (int): print process data
 
         Returns:
@@ -127,7 +114,7 @@ class ShotgunHandler(object):
         """Find tasks.
 
         Args:
-            shots (TTShotRoot list): apply shots filter
+            shots (TTShotRoot list): shots to check
             steps (str list): apply steps filter
 
         Returns:
@@ -141,7 +128,7 @@ class ShotgunHandler(object):
         """Find available assets.
 
         Args:
-            shots (TTShotRoot list): apply shots filter
+            shots (TTShotRoot list): shots to check
             steps (str list): apply steps filter
             tasks (str list): apply tasks filter
 
@@ -157,7 +144,7 @@ class ShotgunHandler(object):
         """Get list of potential exports.
 
         Args:
-            shots (TTShotRoot list): apply shots filter
+            shots (TTShotRoot list): shots to check
             steps (str list): apply steps filter
             tasks (str list): apply tasks filter
             assets (TTAssetOutputName list): apply asset filter
@@ -177,25 +164,33 @@ class ShotgunHandler(object):
                 _exports[_work_file].append(_ns)
         return _exports
 
-    @store_result
-    def _get_shots(self, force=False):
-        """Read list of shots.
+    def find_work_files(self, shots, steps, tasks, cached=None):
+        """Find relevant work files.
 
         Args:
-            force (bool): force rebuild shot objects
+            shots (TTShotRoot list): shots to check
+            steps (str list): apply steps filter
+            tasks (str list): apply tasks filter
+            cached (bool): filter by cached status
 
         Returns:
-            (CTTShotRoot list): list of shots
+            (TTMayaWorkFile list): matching work files
         """
-        return tk.find_shots(class_=CTTShotRoot)
+        del cached  # Provided for symmetry
+        return self.find_exports(
+            shots=shots, steps=steps, tasks=tasks).keys()
 
-    def read_data(self, force=False, confirm=True, dialog=None, verbose=0):
+    def read_tasks(
+            self, shots, force=False, dialog=None, progress=False,
+            verbose=0):
         """Read all data required to populate interface.
 
         Args:
+            shots (TTShotRoot list): shots to check
             force (bool): force reread data
-            confirm (bool): show confirmation dialogs
             dialog (QDialog): parent dialog
+            progress (bool): show progress bar
             verbose (int): print process data
         """
-        self._read_cache_data(force=force, dialog=dialog)
+        self._read_cache_data(
+            shots, force=force, dialog=dialog, progress=progress)

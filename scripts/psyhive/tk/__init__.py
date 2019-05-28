@@ -7,5 +7,5 @@ from psyhive.tk.templates.assets import (
     TTMayaAssetWork, find_asset_roots, TTAssetOutputName)
 from psyhive.tk.templates.shots import (
     TTShotOutputName, TTShotOutputVersion, TTMayaShotWork,
-    TTMayaShotIncrement, find_shots, TTShotRoot)
+    TTMayaShotIncrement, find_shots, find_sequences, TTShotRoot)
 from psyhive.tk.templates.tools import get_work, cur_work

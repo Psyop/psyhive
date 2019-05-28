@@ -165,7 +165,7 @@ def cache_work_files(data, farm=True, parent=None):
     _pos = parent.get_c() if parent else None
     qt.ok_cancel(
         'Cache {:d} work file{}?'.format(len(data), get_plural(data)),
-        pos=_pos, parent=parent)
+        pos=_pos, parent=parent, title='Confirm cache')
 
     for _work_file, _namespaces in qt.ProgressBar(
             data, "Caching {:d} work file{}", col="DeepSkyBlue", pos=_pos,

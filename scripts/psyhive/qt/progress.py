@@ -11,7 +11,7 @@ from psyhive.qt.wrapper import QtWidgets, Y_AXIS, HProgressBar
 _PROGRESS_BARS = []
 
 
-def _get_next_pos(title):
+def _get_next_pos(title, stack_key):
     """Get position for next progress bar.
 
     This checks the existing progress bars, removing any ones which have
@@ -20,11 +20,15 @@ def _get_next_pos(title):
 
     Args:
         title (str): title of progress bar being positioned
+        stack_key (str): identifier for this progress bar
     """
 
     # Flush out unused bars
     for _bar in copy.copy(_PROGRESS_BARS):
-        if not _bar.isVisible() or _bar.windowTitle() == title:
+        if (
+                not _bar.isVisible() or
+                _bar.windowTitle() == title or
+                _bar.stack_key == stack_key):
             _PROGRESS_BARS.remove(_bar)
 
     if not _PROGRESS_BARS:
@@ -38,7 +42,7 @@ class ProgressBar(QtWidgets.QDialog):
 
     def __init__(
             self, items, title=None, col=None, show=True, pos=None,
-            parent=None):
+            parent=None, stack_key='progress'):
         """Constructor.
 
         Args:
@@ -48,11 +52,15 @@ class ProgressBar(QtWidgets.QDialog):
             show (bool): show the dialog
             pos (QPoint): override progress bar position (applied to centre)
             parent (QDialog): parent dialog
+            stack_key (str): override identifier for this dialog - if an
+                existing progress bar has the same stack key then this
+                will replace it
         """
         _items = items
         if isinstance(_items, (enumerate, collections.Iterable)):
             _items = list(_items)
 
+        self.stack_key = stack_key
         self.items = _items
         self.counter = 0
 
@@ -67,7 +75,7 @@ class ProgressBar(QtWidgets.QDialog):
         if pos:
             _pos = pos - get_p(self.size())/2
         else:
-            _pos = _get_next_pos(title=_title)
+            _pos = _get_next_pos(title=_title, stack_key=stack_key)
         if _pos:
             self.move(_pos)
 
