@@ -148,19 +148,15 @@ class MayaPyGui(base.BasePyGui):
 
         cmds.setParent('..')
 
-    def add_def(self, def_, opts, last_, verbose=0):
+    def add_def(self, def_, **kwargs):
         """Add a def to the interface.
 
         Args:
             def_ (PyDef): def to add
-            opts (dict): display options
-            last_ (bool): whether this is last def in interface
-            verbose (int): print process data
         """
-        _kwargs = locals()
-        _kwargs.pop('self')
-        super(MayaPyGui, self).add_def(**_kwargs)
-        if not last_:
+        super(MayaPyGui, self).add_def(def_, **kwargs)
+        _last = kwargs.get('last_')
+        if not _last:
             cmds.separator(style='out', height=10, horizontal=True)
 
     def add_execute(
@@ -275,3 +271,18 @@ class MayaPyGui(base.BasePyGui):
         base.BasePyGui.reset_settings(self)  # Avoid super for reload
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=False)
+
+    def _set_section(self, section):
+        """Set current section (implemented in subclass).
+
+        Args:
+            section (_Section): section to apply
+        """
+        _col = qt.HColor(self.base_col).blacken(0.5)
+        _col = qt.HColor(self.base_col).whiten(1)
+        _col = qt.HColor(self.base_col)
+        cmds.frameLayout(
+            collapsable=True, label=section.label, collapse=section.collapse,
+        )
+        cmds.separator(style='none', height=1, horizontal=True)
+        print 'SETTING SECTION', section

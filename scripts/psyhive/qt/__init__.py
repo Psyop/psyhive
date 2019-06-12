@@ -1,9 +1,9 @@
 """Tools for managing qt."""
 
 from psyhive.qt.wrapper import (
-    QtCore, QtGui, QtWidgets, QtUiTools,
+    QtCore, QtGui, QtWidgets, QtUiTools, HPushButton,
     HLabel, HTreeWidgetItem, HListWidgetItem,
-    HPixmap, HColor, X_AXIS, Y_AXIS)
+    HPixmap, HColor, X_AXIS, Y_AXIS, Qt)
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (
     get_application, get_col, get_p, get_size, get_pixmap)

@@ -2,8 +2,10 @@
 
 import collections
 import copy
+import time
 
-from psyhive.utils import get_plural, check_heart, lprint
+from psyhive.utils import (
+    get_plural, check_heart, lprint, dprint, get_time_t)
 
 from psyhive.qt.misc import get_application, get_p
 from psyhive.qt.wrapper import QtWidgets, Y_AXIS, HProgressBar
@@ -63,6 +65,8 @@ class ProgressBar(QtWidgets.QDialog):
         self.stack_key = stack_key
         self.items = _items
         self.counter = 0
+        self.last_update = time.time()
+        self.durs = []
 
         _args = [parent] if parent else []
         super(ProgressBar, self).__init__(*_args)
@@ -99,6 +103,20 @@ class ProgressBar(QtWidgets.QDialog):
             self.show()
         _PROGRESS_BARS.append(self)
 
+    def print_eta(self):
+        """Print expected time remaining."""
+        _n_remaining = len(self.items) - self.counter + 1
+        _durs = self.durs[-5:]
+        _avg_dur = sum(_durs) / len(_durs)
+        _etr = _avg_dur * _n_remaining
+        _eta = time.time() + _etr
+        print _n_remaining, _avg_dur
+        dprint(
+            'Beginning {}/{}, frame_t={:.02f}s, etr={:.00f}s, '
+            'eta={}'.format(
+                self.counter, len(self.items), _avg_dur, _etr,
+                time.strftime('%H:%M:%S', get_time_t(_eta))))
+
     def __iter__(self):
         return self
 
@@ -125,6 +143,10 @@ class ProgressBar(QtWidgets.QDialog):
         except IndexError:
             self.close()
             raise StopIteration
+
+        _dur = time.time() - self.last_update
+        self.durs.append(_dur)
+        self.last_update = time.time()
 
         return _result
 

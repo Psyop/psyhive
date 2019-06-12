@@ -3,7 +3,10 @@
 from psyhive import host
 from psyhive.utils import File
 
-from psyhive.tk.templates.shots import TTMayaShotIncrement, TTMayaShotWork
+from psyhive.tk.templates.assets import (
+    TTMayaAssetIncrement, TTMayaAssetWork)
+from psyhive.tk.templates.shots import (
+    TTMayaShotIncrement, TTMayaShotWork, get_shot)
 
 
 def get_work(file_, class_=None):
@@ -20,11 +23,15 @@ def get_work(file_, class_=None):
     """
     _file = File(file_)
     _inc = not _file.basename.split("_")[-1].startswith('v')
+    _shot = get_shot(file_)
 
     if class_:
         _class = class_
-    elif _file.extn == 'ma':
-        _class = TTMayaShotIncrement if _inc else TTMayaShotWork
+    elif _file.extn in ['ma', 'mb']:
+        if _shot:
+            _class = TTMayaShotIncrement if _inc else TTMayaShotWork
+        else:
+            _class = TTMayaAssetIncrement if _inc else TTMayaAssetWork
     else:
         raise ValueError(file_)
 

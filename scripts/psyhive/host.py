@@ -11,3 +11,14 @@ except ImportError:
 else:
     NAME = 'maya'
     cur_scene = wrap_fn(cmds.file, query=True, location=True)
+    t_start = wrap_fn(cmds.playbackOptions, query=True, minTime=True)
+    t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
+
+
+def t_range():
+    """Get timeline range.
+
+    Returns:
+        (tuple): start/end time
+    """
+    return t_start(), t_end()

@@ -13,7 +13,7 @@ def _rand_m():
     return hom.HMatrix(_vals)
 
 
-class Test(unittest.TestCase):
+class TestOpenMaya(unittest.TestCase):
 
     def test(self):
 

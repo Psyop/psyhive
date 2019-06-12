@@ -1,6 +1,10 @@
 ignore:
+    anomalous-backslash-in-string:
+        hv_test/diary/y19/d0528/bro_tools_tests.py
     anomalous-unicode-escape-in-string:
         hv_test/diary/y19/d0517/pinterest_rip.py
+    arguments-differ:
+        hv_test/diary/entry.py
     broad-except:
         hv_test/diary/
         psyhive/qt/interface.py
@@ -24,8 +28,11 @@ ignore:
         maya_psyhive/tools/fkik_switcher/system.py
     missing-docstring: '*'
     no-member:
+        hv_test/diary/
         psyhive/qt/wrapper/widgets.py
         sanity_check/checks/maya/general/shotgun.py
+    no-name-in-module:
+        hv_test/tools/qube/__init__.py
     no-self-use:
         /tests/test_
         maya_psyhive/tools/fkik_switcher/interface.py
@@ -34,7 +41,7 @@ ignore:
         hv_test/diary/
         hv_test/release/misc.py
         hv_test/tools/cod_bro.py
-        hv_test/tools/qube.py
+        hv_test/tools/qube/hive_qube.py
         sanity_check/checks/maya/
     no-value-for-parameter:
         hv_test/diary/y19/d0425/tk_tools.py
@@ -47,6 +54,7 @@ ignore:
         hv_test/diary/
     protected-access:
         hv_test/diary/
+        psyhive/tk/templates/base.py
     redefined-outer-name:
         hv_test/diary/
     reimported:
@@ -75,6 +83,7 @@ ignore:
         psyhive/pipe/asset.py
         psyhive/pipe/work_file.py
         psyhive/py_gui/base.py
+        psyhive/qt/progress.py
         psyhive/utils/py_file/docs.py
     too-many-locals: '*'
     too-many-statements:
@@ -99,6 +108,7 @@ ignore:
         hv_test/diary/
 allowed_names:
     closeEvent
+    eventFilter
     keyPressEvent
     mouseMoveEvent
     mousePressEvent
@@ -107,3 +117,13 @@ allowed_names:
     timerEvent
     ui
     userSetup
+no_member_libs:
+    cv2
+    email
+    maya.cmds
+    maya.mel
+    maya.api.OpenMaya
+    maya.api.OpenMayaAnim
+    maya.utils
+    pymel.core
+    PySide2.QtWidgets

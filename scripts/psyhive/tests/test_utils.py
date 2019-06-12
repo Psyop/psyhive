@@ -13,6 +13,9 @@ from psyhive.utils import (
     get_owner, Cacheable, get_result_storer)
 from psyhive.utils.py_file.docs import MissingDocs
 
+_TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
+
+
 class TestCache(unittest.TestCase):
 
     def test_get_result_storer(self):
@@ -156,6 +159,18 @@ class TestPath(unittest.TestCase):
         touch(_path)
         self.assertEqual(get_owner(_path), os.environ['USER'])
 
+    def test_set_writable(self):
+        _test = File('{}/test.txt'.format(_TEST_DIR))
+        print "TEST FILE", _test
+        if _test.exists():
+            _test.set_writable(True)
+            _test.delete(force=True)
+        _test.touch()
+        assert _test.is_writable()
+        print _test.set_writable(False)
+        assert not _test.is_writable()
+        _test.set_writable(True)
+        _test.delete(force=True)
 
 
 class TestUtils(unittest.TestCase):

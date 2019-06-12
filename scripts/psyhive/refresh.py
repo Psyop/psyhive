@@ -1,5 +1,6 @@
 """Tools for refresh code within a python session."""
 
+import copy
 import sys
 import time
 
@@ -33,9 +34,16 @@ _RELOAD_ORDER = [
     'psyhive.pipe.project',
     'psyhive.pipe.shot',
     'psyhive.pipe',
+    'psyhive.tk.misc',
+    'psyhive.tk.templates',
+    'psyhive.tk',
     'psyhive.tools',
     'psyhive',
+
     'maya_psyhive.utils',
+    'maya_psyhive.open_maya.utils',
+    'maya_psyhive.open_maya.plug',
+    'maya_psyhive.open_maya.dag_path',
     'maya_psyhive.open_maya',
     'maya_psyhive.tools.batch_cache.tmpl_cache',
     'maya_psyhive.tools.batch_cache.disk_handler',
@@ -44,6 +52,13 @@ _RELOAD_ORDER = [
     'maya_psyhive.tools',
     'maya_psyhive.startup',
     'maya_psyhive',
+
+    'hv_test.tools.qube.qb_subjob',
+    'hv_test.tools.qube.qb_task',
+    'hv_test.tools.qube.qb_job',
+    'hv_test.tools.qube.qb_core',
+    'hv_test.tools.qube.hive_qube',
+    'hv_test.tools.qube',
     'hv_test.diary.entry',
     'hv_test.diary',
     'hv_test.tools',
@@ -51,7 +66,7 @@ _RELOAD_ORDER = [
 ]
 
 
-def add_sys_path(path):
+def add_sys_path(path, mode='prepend'):
     """Add a path to sys.path list.
 
     Any existing instances are removed and then the path is inserted
@@ -63,7 +78,13 @@ def add_sys_path(path):
     _path = abs_path(path)
     while _path in sys.path:
         sys.path.remove(_path)
-    sys.path.insert(0, _path)
+    
+    if mode == 'prepend':
+        sys.path.insert(0, _path)
+    elif mode == 'append':
+        sys.path.append(_path)
+    else:
+        raise ValueError(mode)
 
 
 def find_mods(filter_=None, file_filter=None):
@@ -209,6 +230,15 @@ def reload_libs(
     dprint(_msg, verbose=verbose)
 
     return not _fails
+
+
+def remove_sys_path(path):
+
+    _path = abs_path(path)
+    for _sys_path in copy.copy(sys.path):
+        if abs_path(_sys_path) == _path:
+            print 'REMOVING', _sys_path
+            sys.path.remove(_sys_path)
 
 
 def update_libs(check_root, mod_names=None, sort=None):

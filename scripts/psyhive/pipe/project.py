@@ -1,9 +1,11 @@
 """Tools for managing projects."""
 
+import operator
 import os
 
 from psyhive.utils import (
-    find, store_result, Dir, get_single, lprint, passes_filter)
+    find, store_result, Dir, get_single, lprint, passes_filter,
+    apply_filter)
 
 PROJECTS_ROOT = 'P:/projects'
 
@@ -110,8 +112,15 @@ def find_project(name):
     Returns:
         (Project): matching project
     """
-    return get_single([
-        _project for _project in find_projects() if _project.name == name])
+    _projs = find_projects()
+    _ematch = get_single(
+        [_project for _project in _projs if _project.name == name],
+        catch=True)
+    if _ematch:
+        return _ematch
+    _fmatch = get_single(
+        apply_filter(_projs, name, key=operator.attrgetter('name')))
+    return _fmatch
 
 
 def get_project(name):

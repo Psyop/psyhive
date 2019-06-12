@@ -36,6 +36,7 @@ class BasePyGui(object):
         self.label_width = 70
         self.height = 400
         self.all_defs = all_defs
+        self.section = None
 
         _mod = self.py_file.get_module()
 
@@ -86,6 +87,10 @@ class BasePyGui(object):
     def add_def(self, def_, opts, last_, verbose=0):
         """Add a def to the interface.
 
+        The opts dict will be empty in the case of adding all defs
+        (ie. not using the install_gui decorator) - so the defaults
+        here need to be applied.
+
         Args:
             def_ (PyDef): def to add
             opts (dict): display options
@@ -96,6 +101,11 @@ class BasePyGui(object):
         _choices = opts.get('choices') or {}
         _hide = opts.get('hide') or []
         _disable_reload = opts.get('disable_reload') or False
+        _section = opts.get('section')
+        _catch_error = opts.get('catch_error_', True)
+
+        if _section:
+            self._set_section(_section)
 
         self.read_arg_fns[def_.name] = {}
         self.set_arg_fns[def_.name] = {}
@@ -103,7 +113,7 @@ class BasePyGui(object):
         # Add args
         for _arg in def_.find_args():
 
-            if _arg.name in _hide:
+            if _hide == '*' or _arg.name in _hide:
                 continue
             lprint('  ADDING ARG', _arg, verbose=verbose)
 
@@ -121,8 +131,7 @@ class BasePyGui(object):
                 label=to_nice(_arg.name),
                 choices=_arg_choices,
                 label_width=opts.get('label_width'),
-                update=_arg_update,
-            )
+                update=_arg_update)
 
         self.add_execute(
             def_=def_,
@@ -130,8 +139,7 @@ class BasePyGui(object):
             label=opts.get('label'),
             col=opts.get('col') or self.base_col,
             disable_reload=_disable_reload,
-            catch_error_=opts.get('catch_error_'),
-        )
+            catch_error_=_catch_error)
 
     def add_execute(
             self, def_, depth=35, icon=None, label=None, col=None,
@@ -260,3 +268,10 @@ class BasePyGui(object):
             pprint.pprint(_settings)
         dprint('Saved settings', self.settings_file, verbose=verbose)
         write_yaml(file_=self.settings_file, data=_settings)
+
+    def _set_section(self, section):
+        """Set current section (implemented in subclass).
+
+        Args:
+            section (_Section): section to apply
+        """

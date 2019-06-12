@@ -184,6 +184,26 @@ class PyBase(object):
             for _child in self.find_children():
                 _child.fix_docs()
 
+    def get_code(self):
+        """Get code for this object.
+
+        Returns:
+            (str): python code
+        """
+        _this = self.py_file.find_def(self.name, recursive=True)
+        _children = [
+            _child for _child in self.py_file.find_children(recursive=True)
+            if not _child.name.startswith(_this.name+'.')]
+        assert _this in _children
+        _start = _this.get_ast().lineno - 1
+        if _this == _children[-1]:
+            _end = -1
+        else:
+            _next = _children[_children.index(_this)+1]
+            assert not _next.name.startswith(_this.name+'.')
+            _end = _next.get_ast().lineno - 1
+        return '\n'.join(self.py_file.read().split('\n')[_start: _end])
+
     def get_docs_suggestion(self, verbose=0):
         """Get suggestion for this def's docstring.
 
@@ -191,7 +211,7 @@ class PyBase(object):
             verbose (int): print process data
         """
 
-    def _get_ast(self, force=False):
+    def get_ast(self, force=False):
         """Get this objects associated absract syntax tree object.
 
         Args:
@@ -214,7 +234,7 @@ class PyBase(object):
         from psyhive.utils.py_file.def_ import PyDef
         from psyhive.utils.py_file.file_ import PyFile
 
-        _ast = self._get_ast(force=force)
+        _ast = self.get_ast(force=force)
         _objs = []
 
         for _item in _ast.body:

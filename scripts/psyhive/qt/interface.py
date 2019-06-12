@@ -28,7 +28,7 @@ class HUiDialog(QtWidgets.QDialog):
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
             dialog_stack_key=None, connect_widgets=True, show=True,
-            parent=None, save_settings=True):
+            parent=None, save_settings=True, verbose=0):
         """Constructor.
 
         Args:
@@ -40,6 +40,7 @@ class HUiDialog(QtWidgets.QDialog):
             show (bool): show interface
             parent (QDialog): parent dialog
             save_settings (bool): read/write settings on open/close
+            verbose (int): print process data
         """
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
@@ -61,12 +62,15 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HListWidget)
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
+        assert os.path.exists(ui_file)
         self.ui = _loader.load(ui_file, self)
         self._is_widget_ui = type(self.ui) is QtWidgets.QWidget
         if self._is_widget_ui:
-            # Fix maya margins override
-            self.ui.layout().setContentsMargins(9, 9, 9, 9)
+            _layout = self.ui.layout()
+            if _layout:  # Fix maya margins override
+                _layout.setContentsMargins(9, 9, 9, 9)
             self.ui.closeEvent = self.closeEvent
+            self.setWindowTitle(self.ui.windowTitle())
         else:
             self.ui.rejected.connect(self.closeEvent)
             if dev_mode() and isinstance(self.ui, QtWidgets.QDialog):
@@ -76,7 +80,8 @@ class HUiDialog(QtWidgets.QDialog):
         self.widgets = self.read_widgets()
         if connect_widgets:
             self.connect_widgets(
-                catch_error_=catch_error_, track_usage_=track_usage_)
+                catch_error_=catch_error_, track_usage_=track_usage_,
+                verbose=verbose)
 
         # Handle settings
         if save_settings:
@@ -85,7 +90,7 @@ class HUiDialog(QtWidgets.QDialog):
             touch(_settings_file)  # Check settings writable
             self.settings = QtCore.QSettings(
                 _settings_file, QtCore.QSettings.IniFormat)
-            self.read_settings()
+            self.read_settings(verbose=verbose)
         else:
             self.settings = None
 
@@ -148,13 +153,14 @@ class HUiDialog(QtWidgets.QDialog):
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
-                if track_usage_:
-                    from psyhive.tools import track_usage
-                    _callback = track_usage(_callback)
-                if catch_error_:
-                    from psyhive.tools import get_error_catcher
-                    _catcher = get_error_catcher(exit_on_error=False)
-                    _callback = _catcher(_callback)
+                if isinstance(_widget, QtWidgets.QPushButton):
+                    if track_usage_:
+                        from psyhive.tools import track_usage
+                        _callback = track_usage(_callback)
+                    if catch_error_:
+                        from psyhive.tools import get_error_catcher
+                        _catcher = get_error_catcher(exit_on_error=False)
+                        _callback = _catcher(_callback)
                 _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)
                 for _hook_name in [
@@ -176,6 +182,7 @@ class HUiDialog(QtWidgets.QDialog):
             # Connect redraw callback
             _redraw = getattr(self, '_redraw__'+_name, None)
             if _redraw:
+                lprint(' - CONNECTING REDRAW', _widget, verbose=verbose)
                 _mthd = _build_redraw_method(_redraw)
                 _widget.redraw = types.MethodType(_mthd, _widget)
 
@@ -221,6 +228,16 @@ class HUiDialog(QtWidgets.QDialog):
             return
         dprint('READ SETTINGS', self.settings.fileName(), verbose=verbose)
 
+        # Apply window settings
+        _pos = self.settings.value('window/pos')
+        if _pos:
+            lprint(' - APPLYING POS', _pos, verbose=verbose)
+            self.ui.move(_pos)
+        _size = self.settings.value('window/size')
+        if _size:
+            lprint(' - APPLYING SIZE', _size, verbose=verbose)
+            self.ui.resize(_size)
+
         # Apply widget settings
         for _widget in self.widgets:
             _name = _widget.objectName()
@@ -239,6 +256,9 @@ class HUiDialog(QtWidgets.QDialog):
                     _widget.setChecked(_val)
                 else:
                     print ' - FAILED TO APPLY:', _widget, _val, type(_val)
+            elif isinstance(_widget, QtWidgets.QPushButton):
+                if _val:
+                    _widget.setChecked(_val)
             elif isinstance(_widget, QtWidgets.QListWidget):
                 for _row in range(_widget.count()):
                     _item = _widget.item(_row)
@@ -248,18 +268,12 @@ class HUiDialog(QtWidgets.QDialog):
                     _widget.setCurrentIndex(_val)
                 except TypeError:
                     print ' - FAILED TO APPLY TAB', _val
+            elif isinstance(_widget, QtWidgets.QSplitter):
+                _val = [int(_item) for _item in _val]
+                print 'SET SIZE', _val
+                _widget.setSizes(_val)
             else:
                 raise ValueError(_widget)
-
-        # Apply window settings
-        _pos = self.settings.value('window/pos')
-        if _pos:
-            lprint(' - APPLYING POS', _pos, verbose=verbose)
-            self.ui.move(_pos)
-        _size = self.settings.value('window/size')
-        if _size:
-            lprint(' - APPLYING SIZE', _size, verbose=verbose)
-            self.ui.resize(_size)
 
     def read_widgets(self):
         """Read widgets with overidden types from ui object."""
@@ -320,6 +334,8 @@ class HUiDialog(QtWidgets.QDialog):
                     str(_item.text()) for _item in _widget.selectedItems()]
             elif isinstance(_widget, QtWidgets.QTabWidget):
                 _val = _widget.currentIndex()
+            elif isinstance(_widget, QtWidgets.QSplitter):
+                _val = _widget.sizes()
             else:
                 continue
             lprint(' - SAVING', _widget.objectName(), _val, verbose=verbose)

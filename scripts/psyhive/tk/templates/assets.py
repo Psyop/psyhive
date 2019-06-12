@@ -46,6 +46,12 @@ class TTMayaAssetWork(TTWorkFileBase):
     work_area_type = TTAssetWorkAreaMaya
 
 
+class TTMayaAssetIncrement(TTWorkFileBase):
+    """Represents a tank asset work file for maya."""
+
+    hint = 'maya_asset_increment'
+
+
 class TTAssetOutputName(TTDirBase):
     """Represents a tank asset output name."""
 

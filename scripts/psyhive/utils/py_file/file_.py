@@ -14,19 +14,18 @@ from psyhive.utils.py_file.base import PyBase
 class PyFile(File, PyBase):
     """Represents a python file."""
 
-    def __init__(self, path, body=None):
+    def __init__(self, path, body=None, check_extn=True):
         """Constructor.
 
         Args:
             path (str): path to python file
             body (str): override body of python file (advanced)
+            check_extn (bool): check file has py extn
         """
         self.body = body
         super(PyFile, self).__init__(path)
-
-        if not self.extn == 'py':
+        if check_extn and not self.extn == 'py':
             raise ValueError(path)
-
         PyBase.__init__(self, ast_=None, py_file=self, name=self.basename)
 
     def check_docs(self, recursive=True, verbose=0):
@@ -36,8 +35,8 @@ class PyFile(File, PyBase):
             recursive (bool): recursively check child objects docs
             verbose (int): print process data
         """
-        _docs = ast.get_docstring(self._get_ast())
-        if self._get_ast().body and not _docs:
+        _docs = ast.get_docstring(self.get_ast())
+        if self.get_ast().body and not _docs:
             raise MissingDocs('No module docs')
 
         if recursive:
@@ -61,7 +60,7 @@ class PyFile(File, PyBase):
         dprint('FIX DOCS COMPLETE')
 
     @store_result_on_obj
-    def _get_ast(self, force=False):
+    def get_ast(self, force=False):
         """Get this py file's ast object.
 
         Args:

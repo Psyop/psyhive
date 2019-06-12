@@ -3,6 +3,7 @@
 from maya import cmds, mel, OpenMayaUI
 
 from psyhive import qt
+from psyhive.utils import lprint
 
 
 def get_main_window():
@@ -21,21 +22,25 @@ def get_main_window_ptr():
     return shiboken2.wrapInstance(long(_maya_win), qt.QtWidgets.QWidget)
 
 
-def obtain_menu(name, replace=False):
+def obtain_menu(name, replace=False, verbose=0):
     """Find a menu element with the given name.
 
     If it doesn't exist, it is create.
 
     Args:
-        name (name): name of menu element to search for
+        name (str): name of menu element to search for
         replace (bool): replace any existing element
     """
+    lprint('SEARCHING FOR', name, verbose=verbose)
 
     # Find parent menu
     for _menu in cmds.lsUI(menus=True):
         _label = cmds.menu(_menu, query=True, label=True)
+        lprint(' - TESTING', _menu, _label, verbose=verbose)
         if _label == name:
+            lprint(' - MATCHED', verbose=verbose)
             if replace:
+                lprint(' - DELETING', _menu, verbose=verbose)
                 cmds.deleteUI(_menu)
                 break
             else:

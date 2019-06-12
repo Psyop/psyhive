@@ -1,0 +1,221 @@
+"""Tools for managing texturing and shading."""
+
+from maya import cmds
+
+from psyhive import qt
+from psyhive.utils import get_single
+
+
+class _BaseShader(object):
+    """Base class for any shader."""
+
+    col_attr = None
+    out_col_attr = None
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. lambert1)
+        """
+        self.shd = shd
+
+    def apply_texture(self, path):
+        """Apply a texture file to this shader's main col attr.
+
+        Args:
+            path (str): texture file to apply
+        """
+        assert not cmds.listConnections(self.col_attr, destination=False)
+        _file = cmds.shadingNode('file', asShader=True)
+        cmds.connectAttr(_file+'.outColor', self.col_attr)
+        cmds.setAttr(_file+'.fileTextureName', path, type='string')
+
+    def assign_to(self, geo):
+        """Assign this shader to the given geo transform.
+
+        Args:
+            geo (str): geo transform
+        """
+        _shp = get_single(cmds.listRelatives(geo, shapes=True))
+        _se = self.get_se()
+        if not _se:
+            _se = self.create_se()
+        print "SE", _se
+        cmds.sets(_shp, edit=True, forceElement=_se)
+
+    def create_se(self):
+        """Create shading engine for this shader.
+
+        Returns:
+            (str): shading engine node
+        """
+        _name = self.shd.split(":")[-1]+"SG"
+        _se = cmds.sets(
+            name=_name, renderable=True, noSurfaceShader=True,
+            empty=True)
+        cmds.connectAttr(self.out_col_attr, _se+'.surfaceShader')
+        return _se
+
+    def get_se(self):
+        """Get this shader's shading engine node.
+
+        Returns:
+            (str): shading engine node
+        """
+        return get_single(cmds.listConnections(
+            self.shd, type='objectSet', source=False), catch=True)
+
+    def read_texture(self):
+        """Read the path to this shader's file texture (if any).
+
+        Returns:
+            (str|None): texture path
+        """
+        _file = get_single(cmds.listConnections(
+            self.col_attr, type='file', destination=False), catch=True)
+        if _file:
+            return cmds.getAttr(_file+'.fileTextureName')
+        return None
+
+    def set_col(self, col):
+        """Set this node's main col attr.
+
+        Args:
+            col (str|tuple|QColor): colour to apply
+        """
+        _col = qt.get_col(col)
+        cmds.setAttr(
+            self.col_attr, *_col.to_tuple(mode='float'), type='double3')
+
+    def __repr__(self):
+        return '<{}:{}>'.format(type(self).__name__.strip('_'), self.shd)
+
+
+class _AiAmbientOcclusion(_BaseShader):
+    """Represents an aiAmbientOcclusion shader."""
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. lambert1)
+        """
+        super(_AiAmbientOcclusion, self).__init__(shd)
+        self.col_attr = self.shd+'.white'
+        self.out_col_attr = self.shd+'.outColor'
+
+
+class _Lambert(_BaseShader):
+    """Represents an lambert shader."""
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. lambert1)
+        """
+        super(_Lambert, self).__init__(shd)
+        self.col_attr = self.shd+'.color'
+        self.out_col_attr = self.shd+'.outColor'
+
+
+class _SurfaceShader(_BaseShader):
+    """Represents an surface shader."""
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. lambert1)
+        """
+        super(_SurfaceShader, self).__init__(shd)
+        self.col_attr = self.shd+'.outColor'
+        self.out_col_attr = self.shd+'.outColor'
+
+
+def ai_ambient_occlusion(name='aiAmbientOcclusion'):
+    """Create an aiAmbientOcclusion shader.
+
+    Args:
+        name (str): node name
+
+    Returns:
+        (_AiAmbientOcclusion): shader
+    """
+    _shd = _AiAmbientOcclusion(cmds.shadingNode(
+        'aiAmbientOcclusion', asShader=True, name=name))
+    return _shd
+
+
+def find_shd(shd):
+    """Build shader object from the given node name.
+
+    Args:
+        shd (str): node to search for
+
+    Returns:
+        (_BaseShader): shader object
+    """
+    _type = cmds.objectType(shd)
+    if _type == 'lambert':
+        return _Lambert(shd)
+    elif _type == 'aiAmbientOcclusion':
+        return _AiAmbientOcclusion(shd)
+    elif _type == 'surfaceShader':
+        return _SurfaceShader(shd)
+    raise ValueError(shd)
+
+
+def lambert(name='lambert', col=None):
+    """Create a lambert shader.
+
+    Args:
+        name (str): node name
+        col (str|tuple|QColor): colour to apply
+
+    Returns:
+        (_Lambert): shader
+    """
+    _shd = _Lambert(cmds.shadingNode(
+        'lambert', asShader=True, name=name))
+    if col:
+        _shd.set_col(col)
+    return _shd
+
+
+def read_shd(shp):
+    """Read shader from the given geo shape node.
+
+    Args:
+        shp (str): shape node to read
+
+    Returns:
+        (_BaseShader): shader object
+    """
+    _se = get_single(cmds.listConnections(
+        shp, source=False, type='shadingEngine'), catch=True)
+    if not _se:
+        return None
+    _shd = get_single(cmds.listConnections(
+        _se+'.surfaceShader', destination=False), catch=True)
+    if not _shd:
+        return None
+    return find_shd(_shd)
+
+
+def surface_shader(name='surfaceShader', col=None):
+    """Create a surface shader.
+
+    Args:
+        name (str): node name
+        col (str|tuple|QColor): colour to apply
+
+    Returns:
+        (_SurfaceShader): shader
+    """
+    _shd = _SurfaceShader(cmds.shadingNode(
+        'surfaceShader', asShader=True, name=name))
+    if col:
+        _shd.set_col(col)
+    return _shd

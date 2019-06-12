@@ -3,7 +3,7 @@
 from psyhive.utils import lprint
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, QtCore
-from psyhive.qt.misc import get_col, get_pixmap
+from psyhive.qt.misc import get_col, get_pixmap, get_p
 
 
 def _dummy():
@@ -12,6 +12,14 @@ def _dummy():
 
 class HWidgetBase(object):
     """Base class for any override widget."""
+
+    def get_c(self):
+        """Get centre of this widget.
+
+        Returns:
+            (QPoint): centre
+        """
+        return self.pos() + get_p(self.size())/2
 
     def redraw(self, *args, **kwargs):
         """To be implemented replaced with redraw method."""

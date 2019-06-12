@@ -8,7 +8,7 @@ from maya_psyhive.utils import get_unique
 
 from maya_psyhive.open_maya.utils import cast_result
 from maya_psyhive.open_maya.vector import HVector
-from maya_psyhive.open_maya.point import HPoint, ORIGIN
+from maya_psyhive.open_maya.point import ORIGIN
 
 
 class HMatrix(om.MMatrix):
@@ -87,8 +87,9 @@ class HMatrix(om.MMatrix):
 
     def pos(self):
         """Get translation."""
+        from maya_psyhive import open_maya as hom
         _tm = om.MTransformationMatrix(self)
-        return HPoint(_tm.translation(om.MSpace.kWorld))
+        return hom.HPoint(_tm.translation(om.MSpace.kWorld))
 
     def pprint(self, dp_=3):
         """Print this matrix in a readable form.
@@ -104,6 +105,12 @@ class HMatrix(om.MMatrix):
                 _str += '\n'
 
         print _str
+
+    def scale(self):
+        """Get translation."""
+        from maya_psyhive import open_maya as hom
+        _tm = om.MTransformationMatrix(self)
+        return hom.HPoint(_tm.scale(om.MSpace.kWorld))
 
     def to_tuple(self):
         """Convert to tuple.

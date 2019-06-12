@@ -1,10 +1,11 @@
 """Base class for any 3d array (ie. point/vector)."""
 
 from maya import cmds
+from psyhive.utils import get_single
 from maya_psyhive.utils import get_unique
 
 
-class HArray3Base(object):
+class BaseArray3(object):
     """Base class for any 3d array object."""
 
     def apply_to(self, node, use_constraint=False):
@@ -26,19 +27,36 @@ class HArray3Base(object):
         cmds.xform(
             node, translation=self.to_tuple(), worldSpace=True)
 
-    def build_loc(self, name=None):
+    def build_loc(self, name=None, scale=None, col=None):
         """Build locator at this array's position.
 
         Args:
             name (str): name for locator
+            scale (str): locator scale
+            col (str): locator colour
 
         Returns:
             (str): locator name
         """
+        from maya_psyhive import open_maya as hom
+        from maya_psyhive.utils import set_col
+
         _name = name or type(self).__name__.strip('_')
         _loc = cmds.spaceLocator(name=get_unique(_name))[0]
         self.apply_to(_loc)
-        return _loc
+
+        # Apply scale
+        _scale = scale or hom.LOC_SCALE
+        if _scale != 1.0:
+            _shp = get_single(cmds.listRelatives(_loc, shapes=True))
+            cmds.setAttr(
+                _shp+'.localScale', _scale, _scale, _scale)
+
+        # Apply colour
+        _col = col or hom.LOC_COL
+        set_col(_loc, _col)
+
+        return hom.HFnTransform(_loc)
 
     def to_tuple(self):
         """Convert this array to a tuple.

@@ -4,7 +4,7 @@ import functools
 
 from psyhive import icons, qt
 from psyhive.tools import catch_error, track_usage
-from psyhive.utils import PyFile, str_to_seed, to_nice
+from psyhive.utils import PyFile, str_to_seed, to_nice, dprint
 
 NICE_COLS = [
     'salmon', 'tomato', 'darksalmon', 'coral', 'orangered', 'lightsalmon',
@@ -53,7 +53,7 @@ def get_exec_fn(
 
     @functools.wraps(_fn)
     def _exec_fn(*xargs):
-        print '############ Start {} ##############'.format(def_.name)
+        dprint('############ Start {} ##############'.format(def_.name))
         del xargs
         if not disable_reload:
             reload(_mod)
@@ -66,7 +66,7 @@ def get_exec_fn(
         if track_usage_:
             _fn = track_usage(_fn)
         _fn(**_kwargs)
-        print '############ Complete {} ############'.format(def_.name)
+        dprint('############ Complete {} ############'.format(def_.name))
 
     return _exec_fn
 

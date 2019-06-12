@@ -1,7 +1,10 @@
 """Tools for managing sequences of files."""
 
+import os
+
 from psyhive.utils.cache import store_result_on_obj
-from psyhive.utils.path import File, abs_path
+from psyhive.utils.path import File, abs_path, find
+from psyhive.utils.misc import system
 
 
 class Seq(object):
@@ -15,10 +18,37 @@ class Seq(object):
             frames (int list): force list of frames
         """
         self.path = abs_path(path)
-        self.dir = File(self.path).dir
-        assert '%' in self.path
+        _file = File(self.path)
+        self.dir = _file.dir
+        self.extn = _file.extn
+        assert '%04d' in self.path
+        self.frame_expr = '%04d'
         if frames:
             self.set_frames(frames)
+
+    def delete(self, wording='Remove', force=False):
+        """Delete this sequence's frames.
+
+        The user is asked to confirm before deletion.
+
+        Args:
+            wording (str): wording for confirmation dialog
+            force (bool): force delete with no confirmation
+        """
+        from psyhive import qt
+        from psyhive.utils import ints_to_str, get_plural
+
+        _frames = self.get_frames(force=True)
+        if not _frames:
+            return
+        if not force:
+            qt.ok_cancel(
+                '{} existing frame{} {} of seq?\n\n{}'.format(
+                    wording, get_plural(_frames), ints_to_str(_frames),
+                    self.path))
+        for _path in self.get_paths():
+            os.remove(_path)
+        self.get_frames(force=True)
 
     @store_result_on_obj
     def get_frames(self, frames=None, force=False):
@@ -30,8 +60,20 @@ class Seq(object):
         """
         if frames:
             return frames
-        print self.path
-        raise NotImplementedError
+        _frames = set()
+        _head, _tail = self.path.split(self.frame_expr)
+        for _file in find(self.dir, depth=1, extn=self.extn):
+            if (
+                    not _file.startswith(_head) or
+                    not _file.endswith(_tail)):
+                continue
+            _frame_str = _file[len(_head): -len(_tail)]
+            if not _frame_str.isdigit():
+                continue
+            _frame = int(_frame_str)
+            _frames.add(_frame)
+
+        return sorted(_frames)
 
     def get_path(self, idx):
         """Get the path to a frame of the sequence.
@@ -56,6 +98,11 @@ class Seq(object):
             frames (int list): list of frames to store
         """
         self.get_frames(force=True, frames=frames)
+
+    def view(self):
+        """View this image sequence."""
+        _path = self.path.replace("%04d", "#")
+        system('djv_view {}'.format(_path), verbose=1, result=False)
 
     def __getitem__(self, idx):
         return self.get_path(idx)

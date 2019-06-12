@@ -205,9 +205,13 @@ def get_error_catcher(exit_on_error=True, verbose=1):
 
             # Handle catcher disabled
             if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
+                lprint(' - ERROR CATCHER DISABLED', verbose=verbose)
                 return func(*args, **kwargs)
 
             # Catch function fails
+            lprint(
+                ' - EXECUTING FUNCTION', func.__name__,
+                verbose=verbose > 1)
             try:
                 _result = func(*args, **kwargs)
             except Exception as _exc:
@@ -216,6 +220,9 @@ def get_error_catcher(exit_on_error=True, verbose=1):
                 if exit_on_error:
                     sys.exit()
                 return None
+            lprint(
+                ' - EXECUTED FUNCTION', func.__name__,
+                verbose=verbose > 1)
 
             return _result
 
@@ -230,6 +237,8 @@ def _pass_exception_to_sentry(exc):
     Args:
         exc (Exception): exception that was raised
     """
+    if os.environ.get('EXC_DISABLE_SENTRY'):
+        return
     print 'PASSING EXCEPTION TO SENTRY', exc
     try:
         import psyop.utils

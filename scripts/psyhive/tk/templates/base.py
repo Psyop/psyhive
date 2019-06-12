@@ -10,12 +10,13 @@ import tank
 
 from tank.platform import current_engine
 
-from psyhive import pipe
+from psyhive import pipe, host
 from psyhive.utils import (
-    get_single, Dir, abs_path, find, Path, dprint,
+    get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff)
 
 from psyhive.tk.templates.misc import get_template
+from psyhive.tk.misc import find_tank_mod
 
 
 class TTBase(Path):
@@ -24,13 +25,15 @@ class TTBase(Path):
     step = None
     hint = None
 
-    def __init__(self, path, hint=None, tmpl=None, verbose=0):
+    def __init__(
+            self, path, hint=None, tmpl=None, data=None, verbose=0):
         """Constructor.
 
         Args:
             path (str): path to object
             hint (str): template name
             tmpl (TemplatePath): override template object
+            data (dict): override data dict
             verbose (int): print process data
         """
         _path = abs_path(path)
@@ -44,7 +47,7 @@ class TTBase(Path):
             raise ValueError('Not current project '+self.path)
 
         try:
-            self.data = self.tmpl.get_fields(self.path)
+            self.data = data or self.tmpl.get_fields(self.path)
         except tank.TankError as _exc:
             lprint('TANK ERROR', _exc.message, verbose=verbose)
             raise ValueError("Tank rejected {} {}".format(
@@ -55,6 +58,12 @@ class TTBase(Path):
             if getattr(self, _key, None) is not None:
                 continue
             setattr(self, _key, _val)
+
+    # def __hash__(self):
+    #     return hash(self.path)
+
+    # def __cmp__(self, other):
+    #     return cmp(self.path, other.path)
 
 
 class TTDirBase(Dir, TTBase):
@@ -174,7 +183,7 @@ class TTWorkAreaBase(TTDirBase):
         return '{}/metadata.yml'.format(self.path)
 
 
-class TTWorkFileBase(TTBase):
+class TTWorkFileBase(TTBase, File):
     """Base class for any work file template."""
 
     task = None
@@ -237,7 +246,18 @@ class TTWorkFileBase(TTBase):
             _vers.append(_work)
         return _vers
 
-    def get_metadata(self, data=None, catch=True, verbose=0):
+    def get_comment(self, verbose=1):
+        """Get this work file's comment.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (str): comment
+        """
+        return self.get_metadata(verbose=verbose).get('comment')
+
+    def get_metadata(self, data=None, catch=True, verbose=1):
         """Get metadata for this work file.
 
         This can be expensive - it should read at work area level and
@@ -252,7 +272,9 @@ class TTWorkFileBase(TTBase):
         if data:
             _data = data
         else:
-            dprint('Reading work area metadata', _work_area.path)
+            dprint(
+                'Reading work area metadata (slow)', _work_area.path,
+                verbose=verbose)
             _data = _work_area.get_metadata()
         if not _data:
             return {}
@@ -302,6 +324,50 @@ class TTWorkFileBase(TTBase):
         _work_file = _fileops.get_workfile_from_path(self.path)
         _fileops.open_file(
             _work_file, open=True, force=True, change_context=True)
+
+    def save(self, comment):
+        """Save this version.
+
+        Args:
+            comment (str): comment for version
+        """
+        _fileops = tank.platform.current_engine().apps['psy-multi-fileops']
+        _handler = _fileops._fileops_handler
+        _mod = find_tank_mod('workspace', app='psy-multi-fileops')
+
+        # Build tk objects
+        if not self.exists():  # Version up
+
+            # Get prev workfile
+            _prev = self.find_vers()[-1]
+            assert _prev.version == self.version - 1
+            _tk_workspace = _mod.get_workspace_from_path(
+                app=_fileops, path=_prev.path)
+            _tk_workfile = _mod.WorkfileModel(
+                workspace=_tk_workspace, template=_prev.tmpl,
+                path=_prev.path)
+            _tk_workfile = _tk_workfile.get_next_version()
+
+            # Save
+            _tk_workfile.save()
+
+        elif self.path == host.cur_scene():  # Save over
+            raise NotImplementedError
+            # _metadata = {'comment': self.get_comment()}
+            # print _handler.save_increment_file(metadata=_metadata)
+            # _tk_workspace = _mod.get_workspace_from_path(
+            #     app=_fileops, path=self.path)
+            # _tk_workfile = _mod.WorkfileModel(
+            #     workspace=_tk_workspace, template=self.tmpl,
+            #     path=self.path)
+
+        else:
+            raise ValueError("Unhandled")
+
+        # Save metadata
+        _tk_workfile.metadata.comment = comment
+        _tk_workfile.metadata.save()
+        _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
 
     def set_comment(self, comment):
         """Set comment for this work file.

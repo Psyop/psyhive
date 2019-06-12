@@ -1,6 +1,7 @@
 """General tools for open_maya module."""
 
 from maya.api import OpenMaya as om
+
 from psyhive.utils import lprint
 
 

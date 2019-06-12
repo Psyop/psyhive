@@ -32,6 +32,16 @@ def get_col(col):
     from psyhive.qt.wrapper import HColor
     if isinstance(col, six.string_types):
         _col = HColor(col)
+    elif isinstance(col, HColor):
+        _col = col
+    elif isinstance(col, QtGui.QColor):
+        _col = HColor(col)
+    elif isinstance(col, (list, tuple)):
+        assert len(col) == 3
+        if isinstance(col[0], float):
+            _col = HColor(QtGui.QColor.fromRgbF(*col))
+        else:
+            raise ValueError(col)
     else:
         raise ValueError(col)
     return _col
@@ -62,7 +72,7 @@ def get_p(pos):
     """
     if isinstance(pos, (tuple, list)) and len(pos) == 2:
         return QtCore.QPoint(*pos)
-    elif isinstance(pos, QtCore.QPoint):
+    elif isinstance(pos, (QtCore.QPoint, QtCore.QPointF)):
         return pos
     elif isinstance(pos, QtCore.QSize):
         return QtCore.QPoint(pos.width(), pos.height())
@@ -82,6 +92,8 @@ def get_size(size):
         return size
     elif isinstance(size, QtCore.QPoint):
         return QtCore.QSize(size.x(), size.y())
+    elif isinstance(size, (tuple, list)):
+        return QtCore.QSize(size[0], size[1])
     raise ValueError(size)
 
 

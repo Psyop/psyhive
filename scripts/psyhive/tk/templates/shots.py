@@ -1,10 +1,13 @@
 """Tools relating to tank templates within shots."""
 
+import tank
+
 from tank.platform import current_engine
 
 from psyhive import pipe
-from psyhive.utils import find
+from psyhive.utils import find, Seq, abs_path
 
+from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import (
     TTBase, TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
     TTRootBase, TTStepRootBase)
@@ -75,6 +78,27 @@ class TTShotStepRoot(TTStepRootBase, _TTShotChildBase):
     hint = 'shot_step_root'
     work_area_maya_hint = 'shot_work_area_maya'
 
+    def find_output_vers(self):
+        """Find output versions in this shot.
+
+        Returns:
+            (TTShotOutputVersion list): list of output versions
+        """
+        _tmpl = get_template('shot_output_root')
+        _out_root = TTShotOutputRoot(_tmpl.apply_fields(self.data))
+        _vers = []
+        for _dir in _out_root.find(depth=1, type_='d'):
+            _type = TTShotOutputType(_dir)
+            for _dir in _type.find(depth=1, type_='d'):
+                try:
+                    _name = TTShotOutputName(_dir)
+                except ValueError:
+                    continue
+                for _dir in _name.find(depth=1, type_='d'):
+                    _ver = TTShotOutputVersion(_dir)
+                    _vers.append(_ver)
+        return _vers
+
     @property
     def work_area_maya_type(self):
         """Get work area type."""
@@ -126,6 +150,18 @@ class TTMayaShotIncrement(TTBase, _TTShotChildBase):
         return TTMayaShotWork(_path)
 
 
+class TTShotOutputRoot(TTDirBase, _TTShotChildBase):
+    """Represents a shot output root tank template path."""
+
+    hint = 'shot_output_root'
+
+
+class TTShotOutputType(TTDirBase, _TTShotChildBase):
+    """Represents a shot output type tank template path."""
+
+    hint = 'shot_output_type'
+
+
 class TTShotOutputName(TTDirBase, _TTShotChildBase):
     """Represents a shot output name tank template path.
 
@@ -151,6 +187,37 @@ class TTShotOutputVersion(TTOutputVerBase, _TTShotChildBase):
         return (
             self.output_type, self.step, self.task, self.output_name,
             self.get_status())
+
+
+class TTShotOutputFileSeq(TTBase, _TTShotChildBase, Seq):
+    """Represents a shout output file seq tank template path."""
+
+    hint = 'shot_output_file_seq'
+
+    def __init__(self, path):
+        """Constructor.
+
+        Args:
+            path (str): file seq path
+        """
+        _tmpl = get_template(self.hint)
+        try:
+            _data = _tmpl.get_fields(path)
+        except tank.TankError:
+            raise ValueError
+        _data["SEQ"] = "%04d"
+        _path = abs_path(_tmpl.apply_fields(_data))
+        super(TTShotOutputFileSeq, self).__init__(
+            path=_path, data=_data, tmpl=_tmpl)
+        Seq.__init__(self, _path)
+
+
+def get_shot(path):
+
+    try:
+        return TTShotRoot(path)
+    except ValueError:
+        return None
 
 
 def find_sequences():

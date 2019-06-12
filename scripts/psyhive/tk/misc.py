@@ -2,8 +2,21 @@
 
 import tank
 
-from psyhive import pipe
+from psyhive import pipe, refresh
 from psyhive.utils import store_result, get_single
+
+
+def find_tank_mod(name, app=None):
+    """Find a tank mod in sys.modules dict.
+
+    Args:
+        name (str): mod name search
+        app (str): filename search
+    """
+    _mods = [
+        _mod for _mod in refresh.find_mods(filter_=name, file_filter=app)
+        if _mod.__name__.endswith(name)]
+    return _mods[0]
 
 
 @store_result

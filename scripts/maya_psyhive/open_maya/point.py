@@ -3,10 +3,10 @@
 from maya import cmds
 from maya.api import OpenMaya as om
 
-from maya_psyhive.open_maya.array3 import HArray3Base
+from maya_psyhive.open_maya.base_array3 import BaseArray3
 
 
-class HPoint(HArray3Base, om.MPoint):
+class HPoint(BaseArray3, om.MPoint):
     """Represents a point in 3d space."""
 
 

@@ -108,11 +108,11 @@ class PyDef(PyBase):
 
         _docs = '{}"""{}'.format(_indent, _header)
 
+        # Add args
         _args = [_arg for _arg in self.find_args() if not _arg.name == 'self']
         if _args:
             _docs += '\n\n{}Args:\n'.format(_indent)
             for _arg in _args:
-
                 lprint(' - ADDING ARG', _arg, _arg.type_, verbose=verbose)
                 _arg_docs = _arg.get_docs()
                 if _arg_docs:
@@ -126,8 +126,14 @@ class PyDef(PyBase):
                     _desc = ''
                 _docs += '{}    {} ({}): {}\n'.format(
                     _indent, _arg.name, _type, _desc)
-
             _docs += _indent
+
+        # Add returns
+        if 'return ' in self.get_code():
+            _docs = _docs.rstrip()
+            _docs += (
+                '\n\n{indent}Returns:\n{indent}    (): \n{indent}'.format(
+                    indent=_indent))
 
         _docs += '"""\n'
 

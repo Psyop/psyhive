@@ -4,7 +4,9 @@ import functools
 import os
 import random
 import subprocess
+import tempfile
 import time
+import urllib2
 
 import six
 
@@ -147,6 +149,7 @@ def get_single(
         if catch:
             lprint(_err_msg, verbose=verbose)
             return None
+        lprint(items, verbose=verbose > 1)
         _error = error or ValueError
         raise _error(_err_msg)
 
@@ -245,6 +248,42 @@ def lprint(*args, **kwargs):
     print(' '.join([str(_arg) for _arg in args]))
 
 
+def read_url(url, edit=False):
+    """Read url contents.
+
+    Args:
+        url (str): url to read
+        edit (bool): save html and open in editor
+
+    Returns:
+        (str): url response
+    """
+    from psyhive.utils import write_file, File, abs_path
+
+    # Attempt to read data 5 times
+    _data = None
+    for _idx in range(5):
+        try:
+            _response = urllib2.urlopen(url)
+            _data = _response.read()
+        except urllib2.HTTPError as _exc:
+            print 'FAILED({}) - {:d}'.format(type(_exc).__name__, _idx+1)
+            time.sleep(2)
+        else:
+            break
+
+    if not _data:
+        raise RuntimeError('Failed to read '+url)
+
+    if edit:
+        _tmp_html = abs_path(tempfile.gettempdir()+'/tmp.html')
+        write_file(file_=_tmp_html, text=_data, force=True)
+        File(_tmp_html).edit()
+        print 'Saved tmp html', _tmp_html
+
+    return _data
+
+
 def safe_zip(list_a, list_b):
     """Zip two lists together, erroring if they don't have the same length.
 
@@ -265,18 +304,19 @@ def safe_zip(list_a, list_b):
     return [(_itema, _itemb) for _itema, _itemb in zip(list_a, list_b)]
 
 
-def str_to_seed(string):
+def str_to_seed(string, offset=0):
     """Create a unique seeded random object based on a string.
 
     Args:
         string (str): string for seed
+        offset (int): apply offset to seed
 
     Returns:
         (random.Random): seeded random object
     """
     _random = random.Random()
     assert isinstance(string, six.string_types)
-    _total = 0
+    _total = offset
     for _idx, _chr in enumerate(string):
         _random.seed(ord(_chr)*(_idx+1))
         _total += int(_random.random()*100000)
@@ -284,19 +324,19 @@ def str_to_seed(string):
     return _random
 
 
-def system(cmd, verbose=0):
+def system(cmd, result=True, verbose=0):
     """Execute a system command.
 
     This supresses the windows shell window and pipes the reads the output.
 
     Args:
         cmd (str|list): commands to execute
+        result (bool): wait for and return cmd result
         verbose (int): print process data
 
     Returns:
         (str): command output
     """
-
     if isinstance(cmd, list):
         _cmds = cmd
     else:
@@ -312,6 +352,8 @@ def system(cmd, verbose=0):
         stderr=subprocess.PIPE,
         startupinfo=_si)
 
+    if not result:
+        return None
     return _pipe.communicate()[0]
 
 

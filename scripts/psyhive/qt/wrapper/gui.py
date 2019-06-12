@@ -1,6 +1,8 @@
 """Overrides for QtGui module."""
 
 import os
+import tempfile
+import time
 
 from psyhive.utils import File, lprint, test_path, abs_path
 from psyhive.qt.wrapper.mgr import QtGui, QtCore
@@ -8,6 +10,17 @@ from psyhive.qt.wrapper.mgr import QtGui, QtCore
 
 class HColor(QtGui.QColor):
     """Override for QColor."""
+
+    def blacken(self, val):
+        """Whiten this colour by the given fraction (1 returns white).
+
+        Args:
+            val (float): whiten fraction
+
+        Returns:
+            (HColor): whitened colour
+        """
+        return self*(1-val) + HColor('black')*val
 
     def to_tuple(self, mode='int'):
         """Get this colour's RGB data as a tuple.
@@ -24,14 +37,39 @@ class HColor(QtGui.QColor):
             return self.red()/255.0, self.green()/255.0, self.blue()/255.0
         raise ValueError(mode)
 
+    def whiten(self, val):
+        """Whiten this colour by the given fraction (1 returns white).
+
+        Args:
+            val (float): whiten fraction
+
+        Returns:
+            (HColor): whitened colour
+        """
+        return self*(1-val) + HColor('white')*val
+
+    def __add__(self, other):
+        return HColor(
+            self.red() + other.red(),
+            self.green() + other.green(),
+            self.blue() + other.blue())
+
     def __mul__(self, value):
         return HColor(
-            self.red()*value, self.green()*value, self.blue()*value)
+            self.red() * value,
+            self.green() * value,
+            self.blue() * value)
 
     def __str__(self):
         return '<{}:({})>'.format(
             type(self).__name__,
             ', '.join(['{:d}'.format(_val) for _val in self.to_tuple()]))
+
+    def __sub__(self, other):
+        return HColor(
+            self.red() - other.red(),
+            self.green() - other.green(),
+            self.blue() - other.blue())
 
 
 class HPainter(QtGui.QPainter):
@@ -39,7 +77,7 @@ class HPainter(QtGui.QPainter):
 
     def add_text(
             self, text, pos=(0, 0), anchor='TL', col='white', font=None,
-            verbose=0):
+            size=None, verbose=0):
         """Write text to the image.
 
         Args:
@@ -48,6 +86,7 @@ class HPainter(QtGui.QPainter):
             anchor (str): text anchor
             col (str|QColor): text colour
             font (QFont): text font
+            size (int): apply font size
             verbose (int): print process data
         """
         from psyhive.qt import get_p, get_col
@@ -86,33 +125,70 @@ class HPainter(QtGui.QPainter):
 
         if font:
             self.setFont(font)
+        elif size is not None:
+            _font = QtGui.QFont()
+            _font.setPointSize(size)
+            self.setFont(_font)
 
         # Draw text
         self.setPen(get_col(col or 'white'))
         self.drawText(_rect, _align, text)
 
+    def set_operation(self, operation):
+        """Set compositing operation.
+
+        Args:
+            operation (str): operation to apply
+        """
+        if operation is None:
+            return
+        elif operation in ['add', 'plus']:
+            _mode = self.CompositionMode.CompositionMode_Plus
+        elif operation == 'darken':
+            _mode = self.CompositionMode.CompositionMode_Darken
+        elif operation == 'lighten':
+            _mode = self.CompositionMode.CompositionMode_Lighten
+        elif operation in ['multiply', 'mult']:
+            _mode = self.CompositionMode.CompositionMode_Multiply
+        elif operation == 'over':
+            _mode = self.CompositionMode.CompositionMode_SourceOver
+        elif operation == 'soft':
+            _mode = self.CompositionMode.CompositionMode_SoftLight
+        elif operation == 'source':
+            _mode = self.CompositionMode.CompositionMode_Source
+        else:
+            raise ValueError(operation)
+        self.setCompositionMode(_mode)
+
 
 class HPixmap(QtGui.QPixmap):
     """Override for QPixmap object."""
 
-    def add_circle(self, pos, col='black', radius=10):
+    def add_circle(
+            self, pos, col='black', radius=10, thickness=None,
+            operation=None):
         """Draw a circle on this pixmap.
 
         Args:
             pos (QPoint): centre point
             col (str): line colour
             radius (int): circle radius
+            thickness (float): line thickness
+            operation (str): compositing operation
         """
         from psyhive import qt
 
         _pos = qt.get_p(pos)
         _col = qt.get_col(col)
         _pen = QtGui.QPen(_col)
+        if thickness:
+            _pen.setWidthF(thickness)
         _rect = QtCore.QRect(
             _pos.x()-radius, _pos.y()-radius, radius*2, radius*2)
 
         _pnt = HPainter()
         _pnt.begin(self)
+        _pnt.set_operation(operation)
         _pnt.setRenderHint(HPainter.Antialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.drawArc(_rect, 0, 360*16)
@@ -143,7 +219,8 @@ class HPixmap(QtGui.QPixmap):
             _pos.x()-radius, _pos.y()-radius, radius*2, radius*2)
         _pnt.end()
 
-    def add_line(self, pt1, pt2, col='black', thickness=None):
+    def add_line(
+            self, pt1, pt2, col='black', thickness=None, operation=None):
         """Draw a straight line on this pixmap.
 
         Args:
@@ -151,25 +228,28 @@ class HPixmap(QtGui.QPixmap):
             pt2 (QPoint): end point
             col (str): line colour
             thickness (float): line thickness
+            operation (str): compositing operation
         """
         from psyhive import qt
 
+        _pt1 = qt.get_p(pt1)
+        _pt2 = qt.get_p(pt2)
         _col = qt.get_col(col)
-        _brush = QtGui.QBrush(_col)
-        _brush.setStyle(QtCore.Qt.NoBrush)
         _pen = QtGui.QPen(_col)
+        _pen.setCapStyle(QtCore.Qt.RoundCap)
+        _pen.setJoinStyle(QtCore.Qt.RoundJoin)
         if thickness:
             _pen.setWidthF(thickness)
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.Antialiasing, 1)
-        _pnt.setBrush(_brush)
+        _pnt.set_operation(operation)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
-        _pnt.drawLine(pt1.x(), pt1.y(), pt2.x(), pt2.y())
+        _pnt.drawLine(_pt1.x(), _pt1.y(), _pt2.x(), _pt2.y())
         _pnt.end()
 
-    def add_overlay(self, pix, pos, anchor='TL', operation=None):
+    def add_overlay(self, pix, pos=None, anchor='TL', operation=None):
         """Add overlay to this pixmap.
 
         Args:
@@ -180,8 +260,7 @@ class HPixmap(QtGui.QPixmap):
         """
         from psyhive import qt
         _pix = qt.get_pixmap(pix)
-        _pos = qt.get_p(pos)
-        _pnt = HPainter()
+        _pos = qt.get_p(pos) if pos else QtCore.QPoint()
 
         # Set offset
         if anchor == 'C':
@@ -197,27 +276,13 @@ class HPixmap(QtGui.QPixmap):
         else:
             raise ValueError(anchor)
 
+        _pnt = HPainter()
         _pnt.begin(self)
-
-        # Set operation mode
-        if operation is not None:
-            _comp_mode = HPainter.CompositionMode
-            if operation == 'over':
-                _mode = _comp_mode.CompositionMode_SourceOver
-            elif operation == 'add':
-                _mode = _comp_mode.CompositionMode_Plus
-            elif operation == 'mult':
-                _mode = _comp_mode.CompositionMode_Multiply
-            else:
-                raise ValueError(operation)
-            _pnt.setCompositionMode(_mode)
-
-        # Apply image
+        _pnt.set_operation(operation)
         _pnt.drawPixmap(_pos.x(), _pos.y(), _pix)
-
         _pnt.end()
 
-    def add_rect(self, pos, size, col, outline='black'):
+    def add_rect(self, pos, size, col, outline='black', operation=None):
         """Draw a rectangle on this pixmap.
 
         Args:
@@ -225,6 +290,7 @@ class HPixmap(QtGui.QPixmap):
             size (QSize): rectangle size
             col (str): rectangle colour
             outline (str): outline colour
+            operation (str): overlay mode
         """
         from psyhive.qt import get_p, get_size, get_col
 
@@ -242,7 +308,39 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.Antialiasing, 1)
+        _pnt.set_operation(operation)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
+        _pnt.setPen(_pen)
+        _pnt.setBrush(_brush)
+        _pnt.drawRect(_rect)
+        _pnt.end()
+
+        return _rect
+
+    def add_square(self, pos, size, col='black', thickness=None):
+        """Draw a square.
+
+        Args:
+            pos (QPoint): square position
+            size (QSize): square size
+            col (str): square colour
+            thickness (float): line thickness
+        """
+        from psyhive.qt import get_p, get_size, get_col
+
+        _pos = get_p(pos)
+        _size = get_size(size)
+        _rect = QtCore.QRect(_pos, _size)
+
+        _brush = QtGui.QBrush(HColor(0, 0, 0, 0))
+        _col = get_col(col)
+        _pen = QtGui.QPen(_col)
+        if thickness:
+            _pen.setWidthF(thickness)
+
+        _pnt = HPainter()
+        _pnt.begin(self)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
         _pnt.drawRect(_rect)
@@ -251,7 +349,8 @@ class HPixmap(QtGui.QPixmap):
         return _rect
 
     def add_text(
-            self, text, pos=(0, 0), anchor='TL', col='black', font=None):
+            self, text, pos=(0, 0), anchor='TL', col='black', font=None,
+            size=None):
         """Add text to pixmap.
 
         Args:
@@ -260,24 +359,44 @@ class HPixmap(QtGui.QPixmap):
             anchor (str): text anchor
             col (str|QColor): text colour
             font (QFont): text font
+            size (int): font size
         """
         _kwargs = locals()
         del _kwargs['self']
 
         _pnt = HPainter()
         _pnt.begin(self)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.add_text(**_kwargs)
         _pnt.end()
 
-    def resize(self, width, height):
+    def get_c(self):
+        """Get centre point of this pixmap.
+
+        Returns:
+            (QPoint): centre
+        """
+        from psyhive import qt
+        return qt.get_p(self.size())/2
+
+    def resize(self, width, height=None):
         """Return a resized version of this pixmap.
 
         Args:
             width (int): width in pixels
             height (int): height in pixels
         """
+        if isinstance(width, int):
+            _width = width
+            _height = height or width
+        elif isinstance(width, QtCore.QSize):
+            _width = width.width()
+            _height = width.height()
+        else:
+            raise ValueError(width)
         _pix = QtGui.QPixmap.scaled(
-            self, width, height, transformMode=QtCore.Qt.SmoothTransformation)
+            self, _width, _height,
+            transformMode=QtCore.Qt.SmoothTransformation)
         return HPixmap(_pix)
 
     def save_as(self, path, force=False, verbose=0):
@@ -303,3 +422,11 @@ class HPixmap(QtGui.QPixmap):
 
         self.save(abs_path(path, win=True), format=_fmt, quality=100)
         assert _file.exists()
+
+    def save_test(self):
+        """Save test image and copy it to pictures dir."""
+        _tmp_file = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
+        _pics_file = abs_path(time.strftime(
+            '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
+        self.save_as(_tmp_file, verbose=1, force=True)
+        self.save_as(_pics_file, verbose=1, force=True)

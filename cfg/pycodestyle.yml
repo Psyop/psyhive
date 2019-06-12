@@ -2,3 +2,7 @@ ignore:
     E501:  // Line too long
         diary/y19/d0517/pinterest_rip.py
         sanity_check/
+    E731:  // Lambda
+        hv_test/diary/y19/d0531/colour_bro.py
+    W605:  // Redundant escape char
+        hv_test/diary/y19/d0528/bro_tools_tests.py

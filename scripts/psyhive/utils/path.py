@@ -166,6 +166,17 @@ class Dir(Path):
 class File(Path):
     """Represents a file on disk."""
 
+    def delete(self, force=False):
+        """Delete this file.
+
+        Args:
+            force (bool): delete with no confirmation
+        """
+        if not force:
+            from psyhive import qt
+            qt.ok_cancel("Delete file?\n\n"+self.path)
+        os.remove(self.path)
+
     def edit(self, line_n=None, verbose=0):
         """Edit this file in a text editor.
 
@@ -182,9 +193,26 @@ class File(Path):
 
         system(_cmds, verbose=verbose)
 
+    def is_writable(self):
+        """Check if this path is writable.
+
+        Returns:
+            (bool): writable status
+        """
+        return os.access(self.path, os.W_OK)
+
     def read(self):
         """Read the text contents of this file."""
         return read_file(self.path)
+
+    def set_writable(self, writable=True):
+        """Set writable state of this path.
+
+        Args:
+            writable (bool): writable state
+        """
+        _perms = 0o777 if writable else 0o444
+        os.chmod(self.path, _perms)
 
     def touch(self):
         """Touch this path."""
@@ -255,7 +283,7 @@ def diff(left, right):
 
 def find(
         dir_=None, type_=None, extn=None, filter_=None, base=None, depth=-1,
-        name=None, full_path=True, verbose=0):
+        name=None, full_path=True, class_=None, verbose=0):
     """Find files/dirs in a given path.
 
     Args:
@@ -267,12 +295,17 @@ def find(
         depth (int): max dir depth to traverse (-1 means unlimited)
         name (str): match exact file/dir name
         full_path (bool): return full path to file
+        class_ (type): cast results to this type
         verbose (int): print process data
+
+    Returns:
+        (str list): paths found
     """
     _kwargs = locals()
     _kwargs.pop('dir_')
     _kwargs.pop('depth')
     _kwargs.pop('full_path')
+    _kwargs.pop('class_')
 
     _results = []
     _dir = abs_path(dir_ or os.getcwd())
@@ -334,6 +367,8 @@ def find(
     if not full_path:
         _results = [
             _result.replace(_dir+'/', '') for _result in _results]
+    if class_:
+        _results = [class_(_result) for _result in _results]
 
     return sorted(_results)
 
@@ -556,9 +591,14 @@ def search_files_for_text(
         _printed_path = False
         for _idx, _line in enumerate(read_file(_file).split('\n')):
 
+            try:
+                _text_in_line = text and text in _line
+            except UnicodeDecodeError:
+                continue
+
             # Check if this line should be printed
             _print_line = False
-            if text and text in _line:
+            if _text_in_line:
                 _print_line = True
             elif filter_ and passes_filter(
                     _line, filter_, case_sensitive=True):
@@ -621,6 +661,7 @@ def write_file(file_, text, force=False):
             qt.ok_cancel('Overwrite file?\n\n'+file_)
         os.remove(file_)
 
+    test_path(os.path.dirname(file_))
     _file = open(file_, 'w')
     _file.write(text)
     _file.close()

@@ -4,11 +4,11 @@ from maya import cmds
 from maya.api import OpenMaya as om
 
 from maya_psyhive.open_maya.utils import cast_result
-from maya_psyhive.open_maya.array3 import HArray3Base
+from maya_psyhive.open_maya.base_array3 import BaseArray3
 from maya_psyhive.utils import set_col
 
 
-class HVector(HArray3Base, om.MVector):
+class HVector(BaseArray3, om.MVector):
     """Represents a 3d vector."""
 
     __mul__ = cast_result(om.MVector.__mul__)
@@ -27,7 +27,7 @@ class HVector(HArray3Base, om.MVector):
             _vals[12+_idx] = self[_idx]
         return hom.HMatrix(_vals)
 
-    def build_crv(self, pos, col=None, name='HVector'):
+    def build_crv(self, pos=None, col=None, name='HVector'):
         """Build a curve to display this vector.
 
         Args:
@@ -35,13 +35,15 @@ class HVector(HArray3Base, om.MVector):
             col (str): vector colour
             name (str): name for vector geo
         """
-        _end = pos+self
+        from maya_psyhive import open_maya as hom
+        _pos = pos or HVector()
+        _end = _pos+self
         _crv = cmds.curve(
-            point=[pos.to_tuple(), _end.to_tuple()],
+            point=[_pos.to_tuple(), _end.to_tuple()],
             degree=1, name=name)
         if col:
             set_col(_crv, col)
-        return _crv
+        return hom.HFnNurbsCurve(_crv)
 
     def normalized(self):
         """Get the normalized version of this vector."""
