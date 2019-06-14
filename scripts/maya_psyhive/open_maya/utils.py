@@ -1,8 +1,40 @@
 """General tools for open_maya module."""
 
+from maya import cmds
 from maya.api import OpenMaya as om
 
-from psyhive.utils import lprint
+from psyhive.utils import lprint, get_single
+from maya_psyhive.utils import get_unique
+
+
+def build_loc(name='locator', scale=None, col=None):
+    """Build locator at this array's position.
+
+    Args:
+        name (str): name for locator
+        scale (str): locator scale
+        col (str): locator colour
+
+    Returns:
+        (str): locator name
+    """
+    from maya_psyhive import open_maya as hom
+    from maya_psyhive.utils import set_col
+
+    _loc = cmds.spaceLocator(name=get_unique(name))[0]
+
+    # Apply scale
+    _scale = scale or hom.LOC_SCALE
+    if _scale != 1.0:
+        _shp = get_single(cmds.listRelatives(_loc, shapes=True))
+        cmds.setAttr(
+            _shp+'.localScale', _scale, _scale, _scale)
+
+    # Apply colour
+    _col = col or hom.LOC_COL
+    set_col(_loc, _col)
+
+    return hom.HFnTransform(_loc)
 
 
 def cast_result(func, verbose=0):

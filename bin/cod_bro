@@ -1,4 +1,6 @@
 #!/usr/bin/env python
 
+"""Launcher for CodBro - tool for browsing directories of python code."""
+
 from hv_test.tools import cod_bro
 cod_bro.launch()

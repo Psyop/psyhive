@@ -42,6 +42,7 @@ def add_attr(attr, value, keyable=True, update=True):
         attr (str): attr name (eg. persp1.blah)
         value (any): attribute value to apply
         keyable (bool): keyable state of attribute
+        update (bool): update attribute to value provided (if it exists)
 
     Returns:
         (str): full attribute name (eg. persp.blah)
@@ -127,7 +128,7 @@ def cycle_check():
         cmds.cycleCheck(evaluation=False)
 
 
-def divide_node(input1, input2, output, force=False, name='divide'):
+def divide_node(input1, input2, output=None, force=False, name='divide'):
     """Create a divide node and use it to perform attr maths.
 
     Args:
@@ -136,6 +137,7 @@ def divide_node(input1, input2, output, force=False, name='divide'):
         output (str): output node
         force (bool): force connect output (avoid already
             connected error)
+        name (str): override node name
 
     Returns:
         (str): output attr
@@ -166,7 +168,6 @@ def divide_node(input1, input2, output, force=False, name='divide'):
         cmds.connectAttr(_output, output, force=force)
 
     return _output
-
 
 
 def get_attr(attr):
@@ -283,6 +284,7 @@ def multiply_node(input1, input2, output, force=False, name='multiply'):
         output (str): output node
         force (bool): force connect output (avoid already
             connected error)
+        name (str): override attribute name
 
     Returns:
         (str): output attr
@@ -291,7 +293,6 @@ def multiply_node(input1, input2, output, force=False, name='multiply'):
         input1=input1, input2=input2, output=output, force=False,
         name=name)
     _out_node = _out.split('.')[0]
-    # print 'OUT NODE', _out_node, cmds.objExists(_out_node), type(_out_node)
     cmds.setAttr(_out_node+'.operation', 1)
     return _out
 

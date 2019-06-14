@@ -29,18 +29,23 @@ def _add_elements_to_psyop_menu(verbose=0):
     dprint('ADDING {:d} TO PSYOP MENU'.format(len(_BUTTONS)), verbose=verbose)
     _menu = ui.obtain_menu('Psyop')
 
-    _anim = get_single([
-        _child for _child in cmds.menu(_menu, query=True, itemArray=True)
-        if cmds.menuItem(_child, query=True, label=True) == 'Animation'])
+    _children = cmds.menu(_menu, query=True, itemArray=True) or []
+    _anim = get_single(
+        [
+            _child for _child in _children
+            if cmds.menuItem(_child, query=True, label=True) == 'Animation'],
+        catch=True)
 
-    for _name, _data in _BUTTONS.items():
-        _mi_name = 'HIVE_'+_name
-        if cmds.menuItem(_mi_name, query=True, exists=True):
-            cmds.deleteUI(_mi_name)
-        lprint(' - ADDING', _mi_name, verbose=verbose)
-        cmds.menuItem(
-            _mi_name, parent=_anim,
-            command=_data['cmd'], image=_data['image'], label=_data['label'])
+    if _anim:
+        for _name, _data in _BUTTONS.items():
+            _mi_name = 'HIVE_'+_name
+            if cmds.menuItem(_mi_name, query=True, exists=True):
+                cmds.deleteUI(_mi_name)
+            lprint(' - ADDING', _mi_name, verbose=verbose)
+            cmds.menuItem(
+                _mi_name, parent=_anim,
+                command=_data['cmd'], image=_data['image'],
+                label=_data['label'])
 
 
 def _build_psyhive_menu():

@@ -1,3 +1,38 @@
+#### v0.24.0 ####
+
+    Released: Fri 14th Jun 2019
+
+    batch cache: fix error on launch
+    
+    bin:
+        applying linting,
+    maya_psyhive:
+        open_maya added HFnDependencyNode/HFnTransform/HPlug/HFnAnimCurve,
+        startup catch missing pysop menu,
+        tools.batch_cache fix error on launch w/o mode,
+        tools.batch_cache better handling of cancel read scene contents,
+        utils added restore_ns/add_attr/add_to_grp/add_to_set/break_conns/cycle_check/divide_node/get_attr/get_shp/multiply_node,
+    psyhive:
+        host added t_range/t_frames,
+        py_gui added section handling,
+        qt added HPushButton,
+        qt.HUiInterface only track usage on buttons,
+        qt.HUiInterface store push button + splitter settings,
+        qt.ProgressBar.print_eta added,
+        qt.HColor added blacken/whiten,
+        qt.HPixmap added add_circle/add_path/add_square/get_c/save_test,
+        tk added TTShotOutputFileSeq/TTShotStepRoot/TTShotOutputRoot/get_shot,
+        tk.TTWorkFile base added get_comment/save,
+        tk.get_work added maya asset handling,
+        tools.err_catcher added disable env EXC_DISABLE_SENTRY,
+        utils added read_url/safe_zip,
+        utils.File added delete/is_writable/set_writable,
+        utils.PyBase.get_code added,
+        utils.PyDef.get_docs_suggestion added returns,
+        utils.PyFile added check_extn flag on init,
+        utils.Seq added delete/get_frames/view,
+
+
 #### v0.23.0 ####
 
     Released: Tue 28th May 2019

@@ -25,11 +25,15 @@ def get_main_window_ptr():
 def obtain_menu(name, replace=False, verbose=0):
     """Find a menu element with the given name.
 
-    If it doesn't exist, it is create.
+    If it doesn't exist, it is created.
 
     Args:
         name (str): name of menu element to search for
         replace (bool): replace any existing element
+        verbose (int): print process data
+
+    Returns:
+        (str): menu ui element object name
     """
     lprint('SEARCHING FOR', name, verbose=verbose)
 

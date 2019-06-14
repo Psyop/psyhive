@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 
-import os
+"""List a directory using full (absolute) paths."""
+
 import sys
 
 from psyhive.utils import abs_path, find
 
-if __name__ == '__main__':
+
+def _main():
+    """Execute lsfp."""
     if len(sys.argv) > 1:
         _paths = [abs_path(sys.argv[1])]
     else:
         _paths = find(depth=1)
     for _path in _paths:
         print _path
+
+
+if __name__ == '__main__':
+    _main()

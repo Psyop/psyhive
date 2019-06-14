@@ -34,7 +34,19 @@ class BaseTransform(BaseNode):
                 _plug = HPlug(self.node+'.'+_attr)
                 setattr(self, _attr, _plug)
         self.translate = HPlug(self.node+'.translate')
+        self.rotate = HPlug(self.node+'.rotate')
+        self.scale = HPlug(self.node+'.scale')
         self.visibility = HPlug(self.node+'.visibility')
+
+    def add_u_scale(self):
+        """Add uniform scale attribute to control scale xyz atts.
+
+        Returns:
+            (HPlug): uniform scale
+        """
+        _u_scale = self.add_attr('uScale', 1.0)
+        _u_scale.connect(self.scale, axes='XYZ')
+        return _u_scale
 
     def add_to_grp(self, grp):
         """Add this node to a group, creating it if required.
@@ -61,7 +73,7 @@ class BaseTransform(BaseNode):
             (HBoundingBox): bounding box
         """
         from maya_psyhive import open_maya as hom
-        return hom.get_bbox(self)
+        return hom.get_bbox(str(self))
 
     def delete_history(self):
         """Delete this node's history."""
@@ -104,6 +116,7 @@ class BaseTransform(BaseNode):
         return hom.get_m(self)
 
     def parent(self, *args, **kwargs):
+        """Wrapper for cmds.parent command."""
         cmds.parent(self, *args, **kwargs)
 
     def parent_constraint(self, *args, **kwargs):
@@ -126,13 +139,17 @@ class BaseTransform(BaseNode):
         _constr = cmds.pointConstraint(self, *args, **kwargs)[0]
         return hom.HFnTransform(_constr)
 
-    def set_pivot(self, pos=None):
+    def set_pivot(self, pos=None, scale=True, rotate=True):
         """Set this node's scale/rotate pivot.
 
         Args:
             pos (HPoint): position (if not origin)
+            scale (bool): apply to scale pivot
+            rotate (bool): apply to rotate pivot
         """
         _pos = pos or ORIGIN
-        cmds.move(
-            _pos[0], _pos[1], _pos[2],
-            str(self)+".scalePivot", str(self)+".rotatePivot")
+        for _tgl, _plug in [
+                (scale, self.plug('scalePivot')),
+                (rotate, self.plug('rotatePivot'))]:
+            if _tgl:
+                cmds.move(_pos[0], _pos[1], _pos[2], _plug)

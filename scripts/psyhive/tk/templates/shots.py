@@ -213,7 +213,14 @@ class TTShotOutputFileSeq(TTBase, _TTShotChildBase, Seq):
 
 
 def get_shot(path):
+    """Get a shot object from the given path.
 
+    Args:
+        path (str): path to test
+
+    Returns:
+        (TTShotRoot|None): shot root (if any)
+    """
     try:
         return TTShotRoot(path)
     except ValueError:

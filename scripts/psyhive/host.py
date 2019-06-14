@@ -22,3 +22,12 @@ def t_range():
         (tuple): start/end time
     """
     return t_start(), t_end()
+
+
+def t_frames():
+    """Get a list of frames in the timeline.
+
+    Returns:
+        (int list): timeline frames
+    """
+    return range(int(t_start()), int(t_end())+1)

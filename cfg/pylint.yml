@@ -21,6 +21,7 @@ ignore:
         hv_test/diary/
     import-error:
         hv_test/diary/
+        hv-test/python/hv_test/startup.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py

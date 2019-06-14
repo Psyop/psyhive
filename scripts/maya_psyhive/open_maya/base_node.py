@@ -4,7 +4,7 @@ from maya import cmds
 
 import six
 
-from maya_psyhive.utils import add_attr, get_unique
+from maya_psyhive.utils import add_attr, get_unique, add_to_set
 from maya_psyhive.open_maya.plug import HPlug
 
 
@@ -36,7 +36,19 @@ class BaseNode(object):
         """
         return HPlug(add_attr(self.node+'.'+name, *args, **kwargs))
 
-    def duplicate(self, name=None):
+    def add_to_set(self, set_):
+        """Add this node to a set, creating it if required.
+
+        Args:
+            set_ (str): set to add to
+        """
+        add_to_set(self, set_)
+
+    def delete(self):
+        """Delete this object."""
+        cmds.delete(self)
+
+    def duplicate(self, name=None, **kwargs):
         """Duplicate this node.
 
         Args:
@@ -46,10 +58,15 @@ class BaseNode(object):
             (BaseNode): new node
         """
         _name = get_unique(name or self.node)
-        _node = cmds.duplicate(self, name=_name)[0]
+        _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
     def list_connections(self, **kwargs):
+        """Wrapper for cmds.listConnections command.
+
+        Returns:
+            (list): connections
+        """
         return cmds.listConnections(self, **kwargs)
 
     def plug(self, attr):

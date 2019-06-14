@@ -74,11 +74,12 @@ def add_sys_path(path, mode='prepend'):
 
     Args:
         path (str): path to add
+        mode (str): how to add the path (append or prepend)
     """
     _path = abs_path(path)
     while _path in sys.path:
         sys.path.remove(_path)
-    
+
     if mode == 'prepend':
         sys.path.insert(0, _path)
     elif mode == 'append':
@@ -233,7 +234,13 @@ def reload_libs(
 
 
 def remove_sys_path(path):
+    """Remove a path from sys.path list.
 
+    Paths are compared in their absolute form.
+
+    Args:
+        path (str): path to remove
+    """
     _path = abs_path(path)
     for _sys_path in copy.copy(sys.path):
         if abs_path(_sys_path) == _path:

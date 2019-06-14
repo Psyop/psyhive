@@ -106,6 +106,9 @@ class _CmdsMapper(object):
         elif name in ['createNode', 'pathAnimation']:
             return _get_result_mapper(
                 _fn, class_=hom.HFnDependencyNode)
+        elif name in ['polyCube', 'polyCylinder']:
+            return _get_result_mapper(
+                _fn, list_idx=0, class_=hom.HFnTransform)
         raise ValueError(name)
 
 

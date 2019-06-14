@@ -13,7 +13,8 @@ class ArgUpdater(object):
     """Container to allow arg default/choices to be updated interactively."""
 
     def __init__(
-            self, get_default=None, get_choices=None, label='Update', width=50):
+            self, get_default=None, get_choices=None, label='Update',
+            width=50):
         """Constructor.
 
         Args:

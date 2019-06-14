@@ -59,12 +59,6 @@ class TTBase(Path):
                 continue
             setattr(self, _key, _val)
 
-    # def __hash__(self):
-    #     return hash(self.path)
-
-    # def __cmp__(self, other):
-    #     return cmp(self.path, other.path)
-
 
 class TTDirBase(Dir, TTBase):
     """Base class for any tank template directoy object."""

@@ -1,8 +1,6 @@
 """Base class for any 3d array (ie. point/vector)."""
 
 from maya import cmds
-from psyhive.utils import get_single
-from maya_psyhive.utils import get_unique
 
 
 class BaseArray3(object):
@@ -39,24 +37,10 @@ class BaseArray3(object):
             (str): locator name
         """
         from maya_psyhive import open_maya as hom
-        from maya_psyhive.utils import set_col
-
         _name = name or type(self).__name__.strip('_')
-        _loc = cmds.spaceLocator(name=get_unique(_name))[0]
+        _loc = hom.build_loc(name=_name, scale=scale, col=col)
         self.apply_to(_loc)
-
-        # Apply scale
-        _scale = scale or hom.LOC_SCALE
-        if _scale != 1.0:
-            _shp = get_single(cmds.listRelatives(_loc, shapes=True))
-            cmds.setAttr(
-                _shp+'.localScale', _scale, _scale, _scale)
-
-        # Apply colour
-        _col = col or hom.LOC_COL
-        set_col(_loc, _col)
-
-        return hom.HFnTransform(_loc)
+        return _loc
 
     def to_tuple(self):
         """Convert this array to a tuple.

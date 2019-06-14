@@ -4,7 +4,7 @@ from maya import cmds
 from maya.api import OpenMaya as om
 
 from psyhive.utils import lprint, store_result
-from maya_psyhive.utils import get_unique, set_col, multiply_node
+from maya_psyhive.utils import get_unique, set_col, multiply_node, get_single
 
 from maya_psyhive.open_maya.base_transform import BaseTransform
 from maya_psyhive.open_maya.dag_path import HDagPath
@@ -86,6 +86,7 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
 
         Args:
             trg (str|HFnTransform): transform to attach
+            add_u_length (bool): add uLength attr to get abs uValue
 
         Returns:
             (MFnDependencyNode): motion path node
@@ -170,7 +171,8 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
             (HMatrix): matrix
         """
         _pos = self.p_at_param(
-            param, turn_on_percentage=turn_on_percentage, world_space=world_space)
+            param, turn_on_percentage=turn_on_percentage,
+            world_space=world_space)
         _lz = self.t_at_param(
             param, turn_on_percentage=turn_on_percentage)
         if up_:
@@ -184,12 +186,18 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
 
     @store_result
     def obtain_curve_info(self):
+        """Get a curve info node from this curve, creating if needed.
+
+        If one already exists, the existing node is returned.
+
+        Returns:
+            (HFnDependencyNode): curve info
+        """
         from maya_psyhive import open_maya as hom
-
-        _cis = self.world_space.list_connections(type='curveInfo')
+        _cis = self.world_space.list_connections(
+            type='curveInfo', source=False)
         if _cis:
-            return asdasdas
-
+            return hom.HFnDependencyNode(get_single(_cis))
         _ci = hom.CMDS.createNode('curveInfo')
         self.world_space.connect(_ci.plug('inputCurve'))
         return _ci

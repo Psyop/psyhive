@@ -165,14 +165,19 @@ class DiskHandler(object):
 
         # Read work file dependencies
         _force = force
-        for _work_file in qt.ProgressBar(
-                _work_files, 'Reading {:d} work file{}', col=_COL,
-                parent=dialog):
+        _progress = qt.ProgressBar(
+            _work_files, 'Reading {:d} work file{}', col=_COL, parent=dialog)
+        for _work_file in _progress:
+
+            check_heart()
 
             # Read deps
-            check_heart()
-            _deps, _replaced_scene = _work_file.read_dependencies(
-                confirm=not _force)
+            try:
+                _deps, _replaced_scene = _work_file.read_dependencies(
+                    confirm=not _force)
+            except qt.DialogCancelled:
+                _progress.close()
+                return None
             if _replaced_scene:
                 _force = True
             lprint('   -', _work_file.basename, _deps, verbose=verbose)

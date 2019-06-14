@@ -41,7 +41,7 @@ class _BatchCacheUi(qt.HUiDialog):
         if mode:
             self.ui.mode.setCurrentText(mode)
         else:
-            self.ui.mode.redraw()
+            self._callback__mode()
         self._callback__hide_omitted()
         self._callback__stale_only()
 

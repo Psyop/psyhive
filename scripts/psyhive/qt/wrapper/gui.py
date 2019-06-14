@@ -220,7 +220,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.end()
 
     def add_line(
-            self, pt1, pt2, col='black', thickness=None, operation=None):
+            self, pt1, pt2, col='black', thickness=None, operation=None,
+            pen=None):
         """Draw a straight line on this pixmap.
 
         Args:
@@ -229,17 +230,23 @@ class HPixmap(QtGui.QPixmap):
             col (str): line colour
             thickness (float): line thickness
             operation (str): compositing operation
+            pen (QPen): override pen (ignores all other pen attrs)
         """
         from psyhive import qt
 
         _pt1 = qt.get_p(pt1)
         _pt2 = qt.get_p(pt2)
-        _col = qt.get_col(col)
-        _pen = QtGui.QPen(_col)
-        _pen.setCapStyle(QtCore.Qt.RoundCap)
-        _pen.setJoinStyle(QtCore.Qt.RoundJoin)
-        if thickness:
-            _pen.setWidthF(thickness)
+
+        # Get pen
+        if pen:
+            _pen = pen
+        else:
+            _col = qt.get_col(col)
+            _pen = QtGui.QPen(_col)
+            _pen.setCapStyle(QtCore.Qt.RoundCap)
+            _pen.setJoinStyle(QtCore.Qt.RoundJoin)
+            if thickness:
+                _pen.setWidthF(thickness)
 
         _pnt = HPainter()
         _pnt.begin(self)
@@ -280,6 +287,44 @@ class HPixmap(QtGui.QPixmap):
         _pnt.begin(self)
         _pnt.set_operation(operation)
         _pnt.drawPixmap(_pos.x(), _pos.y(), _pix)
+        _pnt.end()
+
+    def add_path(self, pts, col='black', thickness=None, pen=None):
+        """Draw a path on this pixmap.
+
+        Args:
+            pts (QPoint list): list of points in path
+            col (str): path colour
+            thickness (float): line thickness
+            pen (QPen): override pen (ignores all other pen attrs)
+        """
+        from psyhive import qt
+
+        # Set pen
+        if pen:
+            _pen = pen
+        else:
+            _col = qt.get_col(col)
+            _pen = pen or QtGui.QPen(_col)
+            _pen.setCapStyle(QtCore.Qt.RoundCap)
+            if thickness:
+                _pen.setWidthF(thickness)
+
+        _brush = QtGui.QBrush()
+        _brush.setStyle(QtCore.Qt.NoBrush)
+
+        # Make path object
+        _path = QtGui.QPainterPath()
+        _path.moveTo(qt.get_p(pts[0]))
+        for _pt in pts[1:]:
+            _path.lineTo(qt.get_p(_pt))
+
+        _pnt = HPainter()
+        _pnt.begin(self)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
+        _pnt.setPen(_pen)
+        _pnt.setBrush(_brush)
+        _pnt.drawPath(_path)
         _pnt.end()
 
     def add_rect(self, pos, size, col, outline='black', operation=None):

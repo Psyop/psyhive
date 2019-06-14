@@ -7,7 +7,7 @@ from maya import cmds
 from maya.api import OpenMaya as om
 
 from psyhive.utils import get_single, lprint
-from maya_psyhive.utils import get_attr
+from maya_psyhive.utils import get_attr, multiply_node, divide_node
 
 
 def _nice_runtime_error(func):
@@ -77,7 +77,21 @@ class HPlug(om.MPlug):
         lprint('BREAK CONN', _src, _dest, verbose=verbose)
         cmds.disconnectAttr(_src, _dest)
 
-    def connect(self, other, **kwargs):
+    def connect(self, other, force=False, axes=None):
+        """Connect this plug to another one.
+
+        Args:
+            other (str|HPlug): target for connection
+            force (bool): break any existing connections
+            axes (list): apply connect to list of suffixes (eg. xyz)
+        """
+        if axes:
+            for _axis in axes:
+                self.connect(str(other)+_axis, force=force)
+            return
+        cmds.connectAttr(self, other, force=force)
+
+    def connect_attr(self, other, **kwargs):
         """Connect this plug to another one.
 
         Args:
@@ -85,7 +99,24 @@ class HPlug(om.MPlug):
         """
         cmds.connectAttr(self, other, **kwargs)
 
+    def divide_node(self, input_, output=None):
+        """Connect this plug as the first input in a divide node.
+
+        Args:
+            input_ (HPlug): second input
+            output (HPlug): plug to connect output to
+
+        Returns:
+            (HPlug): ouptut channel
+        """
+        return HPlug(divide_node(self, input_, output))
+
     def get_attr(self):
+        """Get the value of this attribute.
+
+        Returns:
+            (any): attribute value
+        """
         return get_attr(self.name)
 
     def find_anim(self):
@@ -102,7 +133,24 @@ class HPlug(om.MPlug):
         return hom.HFnAnimCurve(_anim) if _anim else None
 
     def list_connections(self, **kwargs):
+        """Wrapper for cmds.listConnections command.
+
+        Returns:
+            (str list): connections
+        """
         return cmds.listConnections(self, **kwargs)
+
+    def multiply_node(self, input_, output=None):
+        """Connect this plug as the first input to a multiply node.
+
+        Args:
+            input_ (HPlug): second input
+            output (HPlug): plug to connect output to
+
+        Returns:
+            (HPlug): output plug
+        """
+        return multiply_node(self, input_, output)
 
     def set_attr(self, val):
         """Set the value of this attribute.
@@ -110,7 +158,12 @@ class HPlug(om.MPlug):
         Args:
             val (any): attribute value
         """
-        cmds.setAttr(self.name, val)
+        from maya_psyhive import open_maya as hom
+        if isinstance(val, hom.BaseArray3):
+            _vals = val.to_tuple()
+        else:
+            _vals = [val]
+        cmds.setAttr(self.name, *_vals)
 
     def set_keyframe(self, **kwargs):
         """Set keyframe on this attr."""
