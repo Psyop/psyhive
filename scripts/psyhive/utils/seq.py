@@ -26,6 +26,31 @@ class Seq(object):
         if frames:
             self.set_frames(frames)
 
+    def contains(self, file_):
+        """Test if the given file is contained in this seq.
+
+        ie. it matches the format string.
+
+        Args:
+            file_ (str): path to test
+
+        Returns:
+            (bool): whether file is member of this seq
+        """
+        _file = abs_path(file_)
+        _head, _tail = self.path.split(self.frame_expr)
+        if not (
+                _file.startswith(_head) and
+                _file.endswith(_tail)):
+            return False
+        _frame_str = _file[len(_head): -len(_tail)]
+        if not _frame_str.isdigit():
+            return False
+        _frame = int(_frame_str)
+        if self.frame_expr % _frame != _frame_str:
+            return False
+        return True
+
     def delete(self, wording='Remove', force=False):
         """Delete this sequence's frames.
 

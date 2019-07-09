@@ -6,8 +6,3 @@ class TestTools(unittest.TestCase):
 
         # Want to check missing yaml/elasticsearch/Qt
         from maya_psyhive.tools import fkik_switcher
-
-
-
-if __name__ == '__main__':
-    unittest.main()

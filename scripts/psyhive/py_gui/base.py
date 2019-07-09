@@ -1,5 +1,6 @@
 """Tools for managing the base class of any py_gui interface."""
 
+import ast
 import copy
 import os
 import pprint
@@ -8,7 +9,7 @@ import sys
 from psyhive import icons
 from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
-    read_yaml, dprint, Collection, str_to_seed)
+    read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase)
 from psyhive.py_gui import install
 from psyhive.py_gui.misc import NICE_COLS
 
@@ -16,7 +17,8 @@ from psyhive.py_gui.misc import NICE_COLS
 class BasePyGui(object):
     """Base class for any py_gui interface."""
 
-    def __init__(self, path, title=None, all_defs=False, verbose=0):
+    def __init__(
+            self, path, title=None, all_defs=False, base_col=None, verbose=0):
         """Constructor.
 
         Args:
@@ -25,6 +27,7 @@ class BasePyGui(object):
             all_defs (bool): force all defs into interface (by default
                 only defs decorated with the py_gui.install decorator
                 are added)
+            base_col (QColor|str): override base colour for this interface
             verbose (int): print process data
         """
 
@@ -38,7 +41,7 @@ class BasePyGui(object):
         self.all_defs = all_defs
         self.section = None
 
-        _mod = self.py_file.get_module()
+        _mod = self.py_file.get_module(verbose=1)
 
         self.mod_name = _mod.__name__
         self.title = title or self.mod_name
@@ -50,7 +53,7 @@ class BasePyGui(object):
         # Read attrs from module
         self.icon_set = getattr(_mod, 'PYGUI_ICON_SET', icons.FRUIT)
         self.width = getattr(_mod, 'PYGUI_WIDTH', 300)
-        self.base_col = getattr(
+        self.base_col = base_col or getattr(
             _mod, 'PYGUI_COL', str_to_seed(self.mod_name).choice(NICE_COLS))
         assert isinstance(self.icon_set, Collection)
 
@@ -172,26 +175,16 @@ class BasePyGui(object):
         """
 
         # Get list of defs to add
-        _installed_data = install.get_installed_data(self.py_file)
+        _defs_data, _sections, _hidden = install.get_installed_data(
+            self.py_file)
         _mod = self.py_file.get_module()
 
         if not self.all_defs:
-            return _installed_data
+            return _defs_data
 
-        # Read file to get defs ordering
-        _data = []
-        for _py_def in self.py_file.find_defs():
-            if _py_def.is_private:
-                continue
-            _def_data = get_single([
-                (_in_def, _in_opts) for _in_def, _in_opts in _installed_data
-                if _in_def.__name__ == _py_def.name], catch=True)
-            if not _def_data:
-                _def = getattr(_mod, _py_def.name)
-                _def_data = _def, {}
-            _data.append(_def_data)
-
-        return _data
+        return _read_all_defs(
+            py_file=self.py_file, mod=_mod, defs_data=_defs_data,
+            sections=_sections, hidden=_hidden)
 
     def finalise_ui(self):
         """Finalise ui (implemented in subclass)."""
@@ -249,7 +242,7 @@ class BasePyGui(object):
     def reset_settings(self):
         """Reset current settings to defaults."""
         print 'RESETTING SETTINGS'
-        for _fn, _ in self._get_defs_data():
+        for _fn, _, _ in self._get_defs_data():
             _py_def = self.py_file.find_def(_fn.__name__)
             print _fn
             for _py_arg in _py_def.find_args():
@@ -275,3 +268,85 @@ class BasePyGui(object):
         Args:
             section (_Section): section to apply
         """
+
+
+def _read_all_defs(py_file, mod, defs_data, sections, hidden, verbose=1):
+    """Read all defs data from the given file.
+
+    This is complicated as any information installed to defs needs to
+    still be applied, but any section information needs to also be
+    applied to defs which haven't been installed.
+
+    The PyFile subclass is used which matches section objects and
+    combines this with the def information as it read the ast.
+
+    Args:
+        py_file (PyFile): file to read defs from
+        mod (module): module from this py file
+        defs_data (list): installed py_gui def data (def/opts)
+        sections (dict): installed section data (label/section)
+        hidden (str list): list of functions to hide
+        verbose (int): print process data
+
+    Returns:
+        (dict): defs data (list of def/opts data)
+    """
+
+    class _AstSectionMatcher(PyBase):
+        """Represents a py_gui section."""
+
+        def __init__(self, expr_, py_file):
+            super(_AstSectionMatcher, self).__init__(
+                expr_, py_file=py_file, name='SectionExpr', read_docs=False)
+            if (
+                    not isinstance(expr_, ast.Expr) or
+                    not hasattr(expr_.value, 'func') or
+                    not expr_.value.func.attr == 'set_section' or
+                    not expr_.value.func.value.id == 'py_gui'):
+                raise ValueError
+            self.label = expr_.value.args[0].s
+
+        def __repr__(self):
+            return '<{}:{}>'.format(
+                type(self).__name__.strip('_'), self.label)
+
+    class _PyFileParser(PyFile):
+        """PyFile subclass that finds py_gui sections within the py code."""
+
+        def _read_child(self, ast_item, verbose=0):
+            _obj = super(_PyFileParser, self)._read_child(ast_item)
+            if not _obj:
+                try:
+                    _obj = _AstSectionMatcher(ast_item, py_file=self)
+                except ValueError:
+                    pass
+            return _obj
+
+    # Read file to get defs ordering
+    # The section data is managed internally - section data from the
+    # install is ignored
+    lprint("READING ALL DEFS", verbose=verbose)
+    _section = None
+    _data = []
+    for _child in _PyFileParser(py_file.path).find_children():
+
+        # Add def
+        if isinstance(_child, PyDef):
+            if _child.is_private or _child.clean_name in hidden:
+                continue
+            _defs_data = get_single([
+                (_in_def, _in_opts) for _in_def, _in_opts in defs_data
+                if _in_def.__name__ == _child.name], catch=True)
+            if not _defs_data:
+                _def = getattr(mod, _child.name)
+                _defs_data = _def, {'section': _section}
+            _defs_data[1]['section'] = _section
+            _data.append(_defs_data)
+            _section = None
+
+        # Add section
+        elif isinstance(_child, _AstSectionMatcher):
+            print " - SECTION", _child, sections
+            _section = sections[_child.label]
+
+    return _data

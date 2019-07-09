@@ -1,7 +1,9 @@
+import math
+import unittest
+
 from maya import cmds
 
 from maya_psyhive import open_maya as hom
-import unittest
 
 
 def _rand_m():

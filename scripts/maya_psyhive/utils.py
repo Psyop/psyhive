@@ -1,12 +1,14 @@
 """General utilties for maya."""
 
 import functools
+import os
+import traceback
 
 from maya import cmds
 import six
 
-from psyhive.utils import get_single
-
+from psyhive import qt
+from psyhive.utils import get_single, lprint
 
 COLS = (
     "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
@@ -35,14 +37,52 @@ def restore_ns(func):
     return _restore_ns_fn
 
 
-def add_attr(attr, value, keyable=True, update=True):
+def add_node(input1, input2, output=None, name='add', force=False):
+    """Create an add node.
+
+    Args:
+        input1 (str|HPlug): first input
+        input2 (str|HPlug|float): second input or value
+        output (str|HPlug): output
+        name (str): node name
+        force (bool): force replace any existing connection on output
+
+    Returns:
+        (str): add node name
+    """
+    from maya_psyhive import open_maya as hom
+
+    # Create node
+    _add = cmds.createNode('plusMinusAverage', name=name)
+
+    # Connect input 1
+    cmds.connectAttr(input1, _add+'.input1D[0]')
+
+    # Connect/set input 2
+    _connect_types = tuple(list(six.string_types)+[hom.HPlug])
+    if isinstance(input2, _connect_types):
+        cmds.connectAttr(input2, _add+'.input1D[1]')
+    else:
+        cmds.setAttr(_add+'.input1D[1]', input2)
+
+    # Connect output
+    _output = _add+'.output1D'
+    if output:
+        cmds.connectAttr(_output, output, force=force)
+
+    return _output
+
+
+def create_attr(attr, value, keyable=True, update=True, verbose=0):
     """Add an attribute.
 
     Args:
         attr (str): attr name (eg. persp1.blah)
         value (any): attribute value to apply
         keyable (bool): keyable state of attribute
-        update (bool): update attribute to value provided (if it exists)
+        update (bool): update attribute to value provided
+            (default is true)
+        verbose (int): print process data
 
     Returns:
         (str): full attribute name (eg. persp.blah)
@@ -50,33 +90,44 @@ def add_attr(attr, value, keyable=True, update=True):
     _node, _attr = attr.split('.')
 
     # Create attr
-    _type = None
+    _type = _class = None
     _created = False
     if not cmds.attributeQuery(_attr, node=_node, exists=True):
-        _kwargs = {
-            'longName': _attr,
-            'keyable': keyable,
-        }
-        if isinstance(value, six.string_types):
-            _kwargs['dataType'] = 'string'
-            _type = 'string'
-        elif isinstance(value, float):
-            _kwargs['attributeType'] = 'float'
-            _kwargs['defaultValue'] = value
-        elif isinstance(value, int):
-            _kwargs['attributeType'] = 'long'
-            _kwargs['defaultValue'] = value
+        if isinstance(value, qt.HColor):
+            cmds.addAttr(
+                _node, longName=_attr, attributeType='float3',
+                usedAsColor=True)
+            for _chan in 'RGB':
+                print 'ADDING', _attr+_chan
+                cmds.addAttr(
+                    _node, longName=_attr+_chan, attributeType='float',
+                    parent=_attr)
+            _class = qt.HColor
         else:
-            raise ValueError(value)
-        cmds.addAttr(_node, **_kwargs)
+            _kwargs = {
+                'longName': _attr,
+                'keyable': keyable,
+            }
+            if isinstance(value, six.string_types):
+                _kwargs['dataType'] = 'string'
+                _type = 'string'
+            elif isinstance(value, float):
+                _kwargs['attributeType'] = 'float'
+                _kwargs['defaultValue'] = value
+            elif isinstance(value, int):
+                _kwargs['attributeType'] = 'long'
+                _kwargs['defaultValue'] = value
+            else:
+                raise ValueError(value)
+            lprint("ADDING ATTR", _node, _kwargs, verbose=verbose)
+            cmds.addAttr(_node, **_kwargs)
         _created = True
 
-    # Set attr
-    if not get_attr(attr) == value and (_created or update):
+    # Apply value
+    _cur_val = get_val(attr, type_=_type, class_=_class)
+    if not _cur_val == value and (_created or update):
         _kwargs = {}
-        if isinstance(value, six.string_types):
-            _kwargs['type'] = 'string'
-        cmds.setAttr(attr, value, **_kwargs)
+        set_val(attr, value)
 
     return attr
 
@@ -170,7 +221,54 @@ def divide_node(input1, input2, output=None, force=False, name='divide'):
     return _output
 
 
-def get_attr(attr):
+def freeze_viewports_on_exec(func, verbose=0):
+    """Decorator to freeze viewports on execute.
+
+    Viewports are frozen before execute and then unfrozen on completion.
+    If an error occurs, it's caught, the viewports are unfrozen, and the
+    the exception is raised.
+
+    Args:
+        func (fn): function to decorate
+        verbose (int): print process data
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _freeze_viewport_fn(*arg, **kwargs):
+        if (
+                os.environ.get('PSYHIVE_DISABLE_FREEZE_VIEWPORTS') or
+                cmds.about(batch=True)):
+            return func(*arg, **kwargs)
+
+        # Freeze panels
+        _panels = cmds.getPanel(type='modelPanel') or []
+        for _panel in _panels:
+            cmds.isolateSelect(_panel, state=True)
+
+        # Run the function
+        _exc = None
+        try:
+            _result = func(*arg, **kwargs)
+        except Exception as _exc:
+            _traceback = traceback.format_exc().strip()
+            lprint('TRACEBACK', _traceback, verbose=verbose)
+
+        # Unfreeze panels
+        for _panel in _panels:
+            cmds.isolateSelect(_panel, state=False)
+
+        if _exc:
+            raise _exc
+
+        return _result
+
+    return _freeze_viewport_fn
+
+
+def get_val(attr, type_=None, class_=None, verbose=0):
     """Read an attribute value.
 
     This handles different attribute types without requiring extra flags.
@@ -178,22 +276,32 @@ def get_attr(attr):
 
     Args:
         attr (str): attr to read
+        type_ (str): attribute type name (if known)
+        class_ (any): cast result to this type
+        verbose (int): print process data
 
     Returns:
         (any): attribute value
     """
     _node, _attr = attr.split('.')
-    _type = cmds.attributeQuery(_attr, node=_node, attributeType=True)
+    _type = type_ or cmds.attributeQuery(_attr, node=_node, attributeType=True)
 
     _kwargs = {}
-    if _type == 'typed':
+    if _type in ('typed', 'string'):
         _kwargs['asString'] = True
-    elif _type in ['float', 'long', 'doubleLinear']:
+    elif _type in ['float', 'long', 'doubleLinear', 'float3']:
         pass
     else:
         raise ValueError(_type)
 
-    return cmds.getAttr(attr, **_kwargs)
+    _result = cmds.getAttr(attr, **_kwargs)
+    lprint('RESULT:', _result, verbose=verbose)
+    if class_:
+        if class_ is qt.HColor:
+            _result = class_(*get_single(_result))
+        else:
+            _result = class_(_result)
+    return _result
 
 
 def get_shp(node):
@@ -205,10 +313,26 @@ def get_shp(node):
     Returns:
         (str): shape node
     """
-    return get_single(cmds.listRelatives(node, shapes=True))
+    _shps = cmds.listRelatives(node, shapes=True, noIntermediate=True)
+    if not len(_shps) == 1:
+        raise ValueError("Multiple shapes found on {} - {}".format(
+            node, ', '.join(_shps)))
+    return get_single(_shps)
 
 
-def get_unique(name):
+def get_parent(node):
+    """Get parent of the given node.
+
+    Args:
+        node (str): node to read
+
+    Returns:
+        (str): parent node
+    """
+    return get_single(cmds.listRelatives(node, parent=True) or [], catch=True)
+
+
+def get_unique(name, verbose=0):
     """Get unique version of the given node name.
 
     This is strip any trailing digits from the name provided, and then
@@ -216,13 +340,15 @@ def get_unique(name):
 
     Args:
         name (str): node name to check
+        verbose (int): print process data
 
     Returns:
         (str): unique node name
     """
     _clean_name = str(name).split("|")[-1].split(":")[-1]
     _cur_ns = cmds.namespaceInfo(currentNamespace=True).rstrip(":")
-    _trg_node = "%s:%s" % (_cur_ns, _clean_name)
+    _trg_node = "%s:%s" % (_cur_ns, _clean_name) if _cur_ns else _clean_name
+    lprint('NODE EXISTS:', _trg_node, verbose=verbose)
 
     if cmds.objExists(_trg_node):
 
@@ -273,6 +399,39 @@ def get_ns_cleaner(namespace):
         return _ns_clean_fn
 
     return _ns_cleaner
+
+
+def is_visible(node):
+    """Test if the given node is visible.
+
+    This tests if the visibiliy attr is turned on for this node and all
+    its parents.
+
+    Args:
+        node (str): node to test
+
+    Returns:
+        (bool): whether node is visible
+    """
+    _visible = cmds.getAttr(node+'.visibility')
+    _parent = get_parent(node)
+    if not _parent:
+        return _visible
+    return _visible and is_visible(_parent)
+
+
+def load_plugin(plugin, verbose=0):
+    """Wrapper for cmds.loadPlugin that doesn't error if plugin is loaded.
+
+    Args:
+        plugin (str): name of plugin to load
+        verbose (int): print process data
+    """
+    if not cmds.pluginInfo(plugin, query=True, loaded=True):
+        lprint('LOADING PLUGIN', plugin, verbose=verbose)
+        cmds.loadPlugin(plugin)
+    else:
+        lprint('ALREADY LOADED:', plugin, verbose=verbose)
 
 
 def multiply_node(input1, input2, output, force=False, name='multiply'):
@@ -346,6 +505,28 @@ def set_namespace(namespace, clean=False):
     if not cmds.namespace(exists=_namespace):
         cmds.namespace(addNamespace=_namespace)
     cmds.namespace(setNamespace=_namespace)
+
+
+def set_val(attr, val, verbose=0):
+    """Set value of the given attribute.
+
+    This function aims to allow an attribute to be set without having to
+    worry about its type, eg. string, float, col attrs.
+
+    Args:
+        attr (str): attribute to set
+        val (any): value to apply
+        verbose (int): print process data
+    """
+    _args = [val]
+    _kwargs = {}
+    if isinstance(val, qt.HColor):
+        _args = val.to_tuple(mode='float')
+    elif isinstance(val, six.string_types):
+        _kwargs['type'] = 'string'
+
+    lprint('APPLYING VAL', attr, _args, _kwargs, verbose=verbose)
+    cmds.setAttr(attr, *_args, **_kwargs)
 
 
 def single_undo(func):

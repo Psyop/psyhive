@@ -10,7 +10,7 @@ from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
-    get_owner, Cacheable, get_result_storer)
+    get_owner, Cacheable, get_result_storer, Seq)
 from psyhive.utils.py_file.docs import MissingDocs
 
 _TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
@@ -173,6 +173,15 @@ class TestPath(unittest.TestCase):
         _test.delete(force=True)
 
 
+class TestSeq(unittest.TestCase):
+
+    def test_contains(self):
+
+        _seq = Seq('P:/dev0000_animation_persp_v004.%04d.jpg')
+        _file = 'P:/dev0000_animation_persp_v004.1019.jpg'
+        assert _seq.contains(_file)
+
+
 class TestUtils(unittest.TestCase):
 
     def test_apply_filter(self):
@@ -186,10 +195,11 @@ class TestUtils(unittest.TestCase):
 
     def test_obj_write(self):
 
-        _path = '{}/unit_test/test.txt'.format(TMP)
-        shutil.rmtree(os.path.dirname(_path))
+        _path = '{}/unit_test/test.txt'.format(tempfile.gettempdir())
+        if os.path.exists(_path):
+            shutil.rmtree(os.path.dirname(_path))
         _obj = 'blah'
-        obj_write(obj=_obj, path=_path, verbose=1)
+        obj_write(obj=_obj, file_=_path, verbose=1)
         assert obj_read(_path) == 'blah'
 
     def test_passes_filter(self):
@@ -197,6 +207,8 @@ class TestUtils(unittest.TestCase):
         assert passes_filter('blah', '-ag', verbose=1)
         assert passes_filter('blah', 'ah')
         assert not passes_filter('blah', 'ag')
+        assert passes_filter('test maya', 'test blah')
+        assert not passes_filter('test maya', 'test +blah')
 
         # Test key
         class _Test(object):

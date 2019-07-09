@@ -1,10 +1,12 @@
 """Tools for managing references in maya."""
 
+import operator
 import os
 
 from maya import cmds
 
-from psyhive.utils import File, get_single, lprint
+from psyhive import qt
+from psyhive.utils import File, get_single, lprint, apply_filter
 
 
 class FileRef(object):
@@ -26,6 +28,22 @@ class FileRef(object):
         except RuntimeError:
             return None
 
+    def find_top_node(self):
+        """Find top node of this reference.
+
+        Returns:
+            (HFnTransform): top node
+        """
+        _nodes = cmds.ls(
+            self.namespace+":*", long=True, dagObjects=True,
+            type='transform')
+        _min_pipes = min([_node.count('|') for _node in _nodes])
+        print 'MIN PIPES', _min_pipes
+        _top_nodes = sorted(set([
+            _node for _node in _nodes if _node.count('|') == _min_pipes]))
+        print _top_nodes
+        return get_single(_top_nodes).split('|')[-1]
+
     def get_attr(self, attr):
         """Get an attribute on this rig.
 
@@ -34,16 +52,19 @@ class FileRef(object):
         """
         return '{}:{}'.format(self.namespace, attr)
 
-    def get_node(self, name):
+    def get_node(self, name, class_=None):
         """Get node from this ref matching the given name.
 
         Args:
             name (str): name of node
+            class_ (class): override node class
 
         Returns:
-            (str): node name
+            (HFnDependencyNode): node name
         """
-        return '{}:{}'.format(self.namespace, name)
+        from maya_psyhive import open_maya as hom
+        _class = class_ or hom.HFnDependencyNode
+        return _class('{}:{}'.format(self.namespace, name))
 
     def is_loaded(self):
         """Check if this reference is loaded.
@@ -69,6 +90,20 @@ class FileRef(object):
             return None
         return self._file.split('{')[0]
 
+    def remove(self, force=False):
+        """Remove this reference from the scene.
+
+        Args:
+            force (bool): remove without confirmation
+        """
+        if not force:
+            _msg = (
+                'Are you sure you want to remove the reference {}?\n\n'
+                'This is not undoable.'.format(self.namespace))
+            if not qt.yes_no_cancel(_msg) == 'Yes':
+                return
+        cmds.file(self._file, removeReference=True)
+
     def swap_to(self, file_):
         """Swap this reference file path.
 
@@ -81,8 +116,15 @@ class FileRef(object):
             file_, loadReference=self.ref_node, ignoreVersion=True,
             options="v=0", force=True)
 
+    def __cmp__(self, other):
+        return cmp(self.ref_node, other.ref_node)
+
+    def __hash__(self):
+        return hash(self.ref_node)
+
     def __repr__(self):
-        return '<{}:{}>'.format(type(self).__name__, self.namespace)
+        return '<{}:{}>'.format(
+            type(self).__name__.strip('_'), self.namespace)
 
 
 def create_ref(file_, namespace):
@@ -117,32 +159,42 @@ def create_ref(file_, namespace):
     return FileRef(_ref)
 
 
-def find_ref(namespace=None, catch=False):
+def find_ref(
+        namespace=None, filter_=None, catch=False, class_=None, verbose=0):
     """Find reference with given namespace.
 
     Args:
         namespace (str): namespace to match
+        filter_ (str): apply filter to names list
         catch (bool): no error on fail to find matching ref
+        class_ (FileRef): override FileRef class
+        verbose (int): print process data
 
     Returns:
         (FileRef): matching ref
     """
-    _refs = find_refs(namespace=namespace)
+    _refs = find_refs(namespace=namespace, filter_=filter_, class_=class_)
+    lprint('Found {:d} refs'.format(len(_refs)), _refs, verbose=verbose)
     return get_single(_refs, catch=catch)
 
 
-def find_refs(namespace=None):
+def find_refs(namespace=None, filter_=None, class_=None):
     """Find reference with given namespace.
 
     Args:
         namespace (str): namespace to match
+        filter_ (str): namespace filter
+        class_ (FileRef): override FileRef class
 
     Returns:
         (FileRef list): scene refs
     """
-    _refs = _read_refs()
+    _refs = _read_refs(class_=class_)
     if namespace:
         _refs = [_ref for _ref in _refs if _ref.namespace == namespace]
+    if filter_:
+        _refs = apply_filter(
+            _refs, filter_, key=operator.attrgetter('namespace'))
     return _refs
 
 
@@ -181,21 +233,38 @@ def get_selected(catch=False, multi=False, verbose=0):
     return _ref
 
 
-def obtain_ref(file_, namespace):
+def obtain_ref(file_, namespace, class_=None):
     """Search for a reference and create it if it doesn't exist.
 
     Args:
         file_ (str): file to reference
         namespace (str): reference namespace
+        class_ (FileRef): override FileRef class
     """
-    _ref = find_ref(namespace, catch=True)
+    _ref = find_ref(namespace, catch=True, class_=class_)
     if _ref:
-        assert _ref.file == file_
+        assert _ref.path == file_
         return _ref
 
     return create_ref(file_=file_, namespace=namespace)
 
 
-def _read_refs():
-    """Read references in the scene."""
-    return [FileRef(_ref) for _ref in cmds.ls(type='reference')]
+def _read_refs(class_=None):
+    """Read references in the scene.
+
+    Args:
+        class_ (FileRef): override FileRef class - any refs which raise
+            a ValueError on init are excluded from the list
+
+    Returns:
+        (FileRef list): list of refs
+    """
+    _class = class_ or FileRef
+    _refs = []
+    for _ref_node in cmds.ls(type='reference'):
+        try:
+            _ref = _class(_ref_node)
+        except ValueError:
+            continue
+        _refs.append(_ref)
+    return _refs

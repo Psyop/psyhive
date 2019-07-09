@@ -6,7 +6,7 @@ from psyhive.qt.dialog import notify_warning, DialogCancelled
 
 def read_input(
         msg="Enter input:", title="Input dialog", default=None,
-        type_=str, width=300, required=False):
+        type_=str, width=300, required=False, parent=None):
     """Show an input dialog requesting the user enter data.
 
     Args:
@@ -16,15 +16,17 @@ def read_input(
         type_ (type): type of data to receive
         width (int): dialog width
         required (bool): whether data is required
+        parent (QDialog): parent dialog
 
     Returns:
         (any): entered data of requested type
     """
     _locals = locals()
+    _args = [parent] if parent else []
 
     if type_ is str:
         _default = default or ''
-        _dialog = QtWidgets.QInputDialog()
+        _dialog = QtWidgets.QInputDialog(*_args)
         _dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
         _dialog.setWindowTitle(title)
         _dialog.setLabelText(msg)

@@ -5,7 +5,7 @@ from maya.api import OpenMaya as om
 
 from maya_psyhive.open_maya.utils import cast_result
 from maya_psyhive.open_maya.base_array3 import BaseArray3
-from maya_psyhive.utils import set_col
+from maya_psyhive.utils import set_col, get_unique
 
 
 class HVector(BaseArray3, om.MVector):
@@ -40,7 +40,7 @@ class HVector(BaseArray3, om.MVector):
         _end = _pos+self
         _crv = cmds.curve(
             point=[_pos.to_tuple(), _end.to_tuple()],
-            degree=1, name=name)
+            degree=1, name=get_unique(name))
         if col:
             set_col(_crv, col)
         return hom.HFnNurbsCurve(_crv)

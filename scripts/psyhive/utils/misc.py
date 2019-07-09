@@ -2,6 +2,7 @@
 
 import functools
 import os
+import pprint
 import random
 import subprocess
 import tempfile
@@ -149,7 +150,9 @@ def get_single(
         if catch:
             lprint(_err_msg, verbose=verbose)
             return None
-        lprint(items, verbose=verbose > 1)
+        if verbose:
+            lprint('Found {:d} items:'.format(len(items)))
+            pprint.pprint(items)
         _error = error or ValueError
         raise _error(_err_msg)
 

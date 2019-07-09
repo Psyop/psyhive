@@ -3,11 +3,14 @@
 from maya import cmds
 from maya.api import OpenMaya as om
 
+from maya_psyhive.open_maya.utils import cast_result
 from maya_psyhive.open_maya.base_array3 import BaseArray3
 
 
 class HPoint(BaseArray3, om.MPoint):
     """Represents a point in 3d space."""
+
+    __div__ = cast_result(om.MPoint.__div__)
 
 
 def get_p(node):

@@ -7,6 +7,46 @@ from psyhive.utils import lprint, get_single
 from maya_psyhive.utils import get_unique
 
 
+class IndexedAttrGetter(object):
+    """Class to build an indexed attr string for the given node and index.
+
+    For example, this could be used to get mesh vtx names, or curve cvs.
+    """
+
+    def __init__(self, node, attr):
+        """Constructor.
+
+        Args:
+            node (HFnDependencyNode): node to create attr for
+            attr (str): attribute name
+        """
+        self.node = node
+        self.attr = attr
+
+    def __getitem__(self, idx):
+        return self.node.plugs('{}[{:d}]'.format(self.attr, idx))
+
+
+def build_arrow(name='arrow', length=0.3):
+    """Geometry in an arrow shape.
+
+    Args:
+        name (str): name for arrow curve
+        length (float): length of wings (base is length 1.0)
+
+    Returns:
+        (HFnNurbsCurve): arrow curve
+    """
+    import maya_psyhive.open_maya as hom
+    return hom.CMDS.curve(name=name, degree=1, point=(
+        hom.HPoint(0, 1-length, length),
+        hom.Y_AXIS,
+        hom.ORIGIN,
+        hom.Y_AXIS,
+        hom.HPoint(0, 1-length, -length),
+    ))
+
+
 def build_loc(name='locator', scale=None, col=None):
     """Build locator at this array's position.
 
@@ -54,7 +94,9 @@ def cast_result(func, verbose=0):
 
         _result = func(*args, **kwargs)
         lprint('CASTING RESULT', _result, verbose=verbose)
-        if isinstance(_result, om.MPoint):
+        if isinstance(_result, float):
+            return _result
+        elif isinstance(_result, om.MPoint):
             return hom.HPoint(_result)
         elif isinstance(_result, om.MVector):
             return hom.HVector(_result)

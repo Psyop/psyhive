@@ -6,13 +6,38 @@ from maya.api import OpenMaya as om
 import six
 
 from psyhive.utils import lprint
-from maya_psyhive.utils import get_unique, set_col
 
 
 class HBoundingBox(om.MBoundingBox):
     """Represents a bounding box."""
 
-    def _corner_ps(self):
+    def build_cube(self, name="bbox", col=None, verbose=0):
+        """Build cube geo to represent this bbox.
+
+        Args:
+            name (str): name for geo
+            col (str): cube colour
+            verbose (int): print process data
+
+        Returns:
+            (HFnMesh): cube geo
+        """
+        from maya_psyhive import open_maya as hom
+        _cube = hom.CMDS.polyCube(name=name)
+        if col:
+            _cube.set_col(col)
+
+        # Move points into pos
+        _pts = self.get_corners()
+        for _idx, _pt in enumerate(_pts):
+            _vtx = _cube.vtx[_idx]
+            lprint(' - APPLYING VTX', _vtx, _pt, verbose=verbose)
+            cmds.xform(
+                _vtx, translation=_pt.to_tuple(), worldSpace=True)
+
+        return _cube
+
+    def get_corners(self):
         """Get list of 8 corner points.
 
         Returns:
@@ -33,28 +58,46 @@ class HBoundingBox(om.MBoundingBox):
             hom.HPoint(_min[0], _min[1], _min[2]),
             hom.HPoint(_max[0], _min[1], _min[2])]
 
-    def build_cube(self, name="bbox", col=None):
-        """Build cube geo to represent this bbox.
+    def inside(self, other):
+        """Test if this bbox is inside another object.
+
+        This is defined as all or part of this bbox being inside
+        the other object.
 
         Args:
-            name (str): name for geo
-            col (str): cube colour
+            other (any): object to test against
 
         Returns:
-            (str): cube geo
+            (bool): whether this bbox is inside
         """
-        _cube = cmds.polyCube(name=get_unique(name))[0]
-        if col:
-            set_col(_cube, col)
+        from maya_psyhive import open_maya as hom
+        if isinstance(other, hom.HPlane):
+            return self.inside_plane(other)
+        raise ValueError(other)
 
-        # Move points into pos
-        _pts = self._corner_ps()
-        for _idx in range(8):
-            cmds.xform(
-                "{}.vtx[{:d}]".format(_cube, _idx),
-                translation=_pts[_idx].to_tuple(), worldSpace=True)
+    def inside_plane(self, plane):
+        """Test if this bbox falls inside the given plane.
 
-        return _cube
+        This is defined as at least one corner falling inside the plane.
+
+        Args:
+            plane (HPlane): plane to test against
+
+        Returns:
+            (bool): whether this bbbox is inside the plane
+        """
+        for _corner in self.get_corners():
+            if plane.contains(_corner):
+                return True
+        return False
+
+    def size(self):
+        """Get size of this bbox.
+
+        Returns:
+            (HVector): bbox size
+        """
+        return self.max - self.min
 
     def __add__(self, other):
         from maya_psyhive import open_maya as hom
@@ -76,11 +119,13 @@ class HBoundingBox(om.MBoundingBox):
         return "<{}>".format(type(self).__name__)
 
 
-def get_bbox(obj, verbose=0):
+def get_bbox(obj, ignore_points=False, verbose=0):
     """Get bbox for the given data.
 
     Args:
         obj (list|HPoint|HVector|str): input data
+        ignore_points (bool): ignore components with zero size bboxes
+            (for lists of objects)
         verbose (int): print process data
 
     Returns:
@@ -90,13 +135,16 @@ def get_bbox(obj, verbose=0):
 
     if isinstance(obj, list):
         _bboxes = [get_bbox(_obj) for _obj in obj]
+        if ignore_points:
+            _bboxes = [_bbox for _bbox in _bboxes if _bbox.size().length()]
         return sum(_bboxes[1:], _bboxes[0])
     elif isinstance(obj, hom.HPoint):
         return HBoundingBox(obj, obj)
     elif isinstance(obj, hom.HVector):
         _pt = hom.HPoint(obj)
         return HBoundingBox(_pt, _pt)
-    elif isinstance(obj, (six.string_types, hom.HFnNurbsCurve)):
+    elif isinstance(obj, (
+            six.string_types, hom.HFnDependencyNode)):
         _result = cmds.exactWorldBoundingBox(
             obj, calculateExactly=True, ignoreInvisible=True)
         lprint('BBOX RESULT', _result, verbose=verbose)

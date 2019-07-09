@@ -5,9 +5,10 @@ import os
 
 from psyhive.utils import (
     find, store_result, Dir, get_single, lprint, passes_filter,
-    apply_filter)
+    apply_filter, read_yaml, File)
 
 PROJECTS_ROOT = 'P:/projects'
+_PSYLAUNCH_CFG_FMT = r'{}\code\primary\config\psylaunch\settings.yml'
 
 
 class Project(Dir):
@@ -66,6 +67,22 @@ class Project(Dir):
             _shots.append(_shot)
 
         return _shots
+
+    def read_psylaunch_cfg(self, edit=False, verbose=0):
+        """Read psylaunch config data for this project.
+
+        Args:
+            edit (bool): open file in editor
+            verbose (int): print process data
+
+        Returns:
+            (dict): psylaunch config data
+        """
+        _yaml = _PSYLAUNCH_CFG_FMT.format(self.path)
+        lprint('PSYLAUNCH YAML', _yaml, verbose=verbose)
+        if edit:
+            File(_yaml).edit()
+        return read_yaml(_yaml)
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__, self.name)

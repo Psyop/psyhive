@@ -4,7 +4,7 @@ from maya import cmds
 
 import six
 
-from maya_psyhive.utils import add_attr, get_unique, add_to_set
+from maya_psyhive.utils import create_attr, get_unique, add_to_set
 from maya_psyhive.open_maya.plug import HPlug
 
 
@@ -25,7 +25,7 @@ class BaseNode(object):
                 node, type(node).__name__))
         self.node = node
 
-    def add_attr(self, name, *args, **kwargs):
+    def create_attr(self, name, *args, **kwargs):
         """Add an attribute to this node.
 
         Args:
@@ -34,7 +34,7 @@ class BaseNode(object):
         Returns:
             (HPlug): new attribute plug
         """
-        return HPlug(add_attr(self.node+'.'+name, *args, **kwargs))
+        return HPlug(create_attr(self.node+'.'+name, *args, **kwargs))
 
     def add_to_set(self, set_):
         """Add this node to a set, creating it if required.
@@ -61,6 +61,17 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
+    def has_attr(self, attr):
+        """Check if the given attribute exists on this node.
+
+        Args:
+            attr (str): attribute name to test
+
+        Returns:
+            (bool): whether attr exists
+        """
+        return cmds.attributeQuery(attr, node=self, exists=True)
+
     def list_connections(self, **kwargs):
         """Wrapper for cmds.listConnections command.
 
@@ -68,6 +79,14 @@ class BaseNode(object):
             (list): connections
         """
         return cmds.listConnections(self, **kwargs)
+
+    def list_relatives(self, **kwargs):
+        """Wrapper for cmds.listRelatives command.
+
+        Returns:
+            (list): relatives
+        """
+        return cmds.listRelatives(self, **kwargs)
 
     def plug(self, attr):
         """Get an attribute plug on this node.
@@ -81,7 +100,18 @@ class BaseNode(object):
         if not isinstance(attr, six.string_types):
             raise ValueError('Non-string attr {} ({})'.format(
                 attr, type(attr).__name__))
-        return HPlug(self.node+'.'+attr)
+        return HPlug(self.plugs(attr))
+
+    def plugs(self, attr):
+        """Get an attribute on this node as a string.
+
+        Args:
+            attr (str): attribute name
+
+        Returns:
+            (str): full attribute name with node
+        """
+        return self.node+'.'+attr
 
     def __str__(self):
         return self.node

@@ -82,3 +82,4 @@ def launch_interface():
     """Launch FK/IK switcher interface."""
     global _DIALOG
     _DIALOG = _FkIkSwitcherUi()
+    return _DIALOG

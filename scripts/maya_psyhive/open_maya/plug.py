@@ -6,8 +6,10 @@ import re
 from maya import cmds
 from maya.api import OpenMaya as om
 
+from psyhive import qt
 from psyhive.utils import get_single, lprint
-from maya_psyhive.utils import get_attr, multiply_node, divide_node
+from maya_psyhive.utils import (
+    get_val, multiply_node, divide_node, add_node)
 
 
 def _nice_runtime_error(func):
@@ -63,6 +65,18 @@ class HPlug(om.MPlug):
             _plug = _dep_node.findPlug(self.attr, False)
         super(HPlug, self).__init__(_plug)
 
+    def add_node(self, input_, output=None):
+        """Connect this plug as the first input in an add node.
+
+        Args:
+            input_ (HPlug): second input
+            output (HPlug): plug to connect output to
+
+        Returns:
+            (HPlug): ouptut channel
+        """
+        return HPlug(add_node(self, input_, output))
+
     def break_connections(self, verbose=0):
         """Break incoming connections on this plug.
 
@@ -111,14 +125,6 @@ class HPlug(om.MPlug):
         """
         return HPlug(divide_node(self, input_, output))
 
-    def get_attr(self):
-        """Get the value of this attribute.
-
-        Returns:
-            (any): attribute value
-        """
-        return get_attr(self.name)
-
     def find_anim(self):
         """Find any anim curve connected to this attribute.
 
@@ -131,6 +137,18 @@ class HPlug(om.MPlug):
                 self.node, type='animCurve', destination=False),
             catch=True)
         return hom.HFnAnimCurve(_anim) if _anim else None
+
+    def get_val(self):
+        """Get the value of this attribute.
+
+        Returns:
+            (any): attribute value
+        """
+        return get_val(self.name)
+
+    def hide(self):
+        """Hide this attribute in the channel box."""
+        cmds.setAttr(self, keyable=False)
 
     def list_connections(self, **kwargs):
         """Wrapper for cmds.listConnections command.
@@ -152,7 +170,20 @@ class HPlug(om.MPlug):
         """
         return multiply_node(self, input_, output)
 
-    def set_attr(self, val):
+    def set_col(self, val):
+        """Apply a colour value to this attribute.
+
+        Args:
+            val (HColor): colour value
+        """
+        _col = qt.get_col(val)
+        cmds.setAttr(self, *_col.to_tuple(mode='float'))
+
+    def set_keyframe(self, **kwargs):
+        """Set keyframe on this attr."""
+        cmds.setKeyframe(self, **kwargs)
+
+    def set_val(self, val):
         """Set the value of this attribute.
 
         Args:
@@ -161,13 +192,11 @@ class HPlug(om.MPlug):
         from maya_psyhive import open_maya as hom
         if isinstance(val, hom.BaseArray3):
             _vals = val.to_tuple()
+        elif isinstance(val, (list, tuple)):
+            _vals = val
         else:
             _vals = [val]
         cmds.setAttr(self.name, *_vals)
-
-    def set_keyframe(self, **kwargs):
-        """Set keyframe on this attr."""
-        cmds.setKeyframe(self, **kwargs)
 
     def __str__(self):
         return self.name

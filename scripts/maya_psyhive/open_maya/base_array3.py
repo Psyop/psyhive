@@ -55,6 +55,10 @@ class BaseArray3(object):
         return hom.HVector(
             self[0]+other[0], self[1]+other[1], self[2]+other[2])
 
+    def __div__(self, other):
+        return self.__class__(
+            self[0]/other, self[1]/other, self[2]/other)
+
     def __str__(self):
         return '<{}:({})>'.format(
             type(self).__name__.strip('_'),

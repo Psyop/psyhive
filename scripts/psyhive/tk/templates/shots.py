@@ -1,27 +1,65 @@
 """Tools relating to tank templates within shots."""
 
-import tank
-
 from tank.platform import current_engine
 
 from psyhive import pipe
-from psyhive.utils import find, Seq, abs_path
+from psyhive.utils import find
 
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import (
     TTBase, TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
-    TTRootBase, TTStepRootBase)
+    TTRootBase, TTStepRootBase, TTOutputFileSeqBase)
 
 
-class _TTShotChildBase(object):
+class _TTShotCpntBase(object):
     """Base class for any template inside a shot."""
 
     path = None
 
     @property
+    def maya_work_type(self):
+        """Get maya work type."""
+        return TTMayaShotWork
+
+    @property
+    def output_root_type(self):
+        """Get output root type."""
+        return TTShotOutputRoot
+
+    @property
+    def output_name_type(self):
+        """Get output name type."""
+        return TTShotOutputName
+
+    @property
+    def output_version_type(self):
+        """Get output version type."""
+        return TTShotOutputVersion
+
+    @property
+    def output_file_seq_type(self):
+        """Get output file seq type."""
+        return TTShotOutputFileSeq
+
+    @property
+    def output_file_type(self):
+        """Get output file type."""
+        return TTShotOutputFile
+
+    @property
     def shot(self):
         """This object's shot."""
         return TTShotRoot(self.path)
+
+    @property
+    def step_root_type(self):
+        """Get step root type."""
+        return TTShotStepRoot
+
+    @property
+    def work_area_maya_type(self):
+        """Get work area maya type."""
+        return TTShotWorkAreaMaya
 
 
 class TTSequenceRoot(TTDirBase):
@@ -55,7 +93,7 @@ class TTSequenceRoot(TTDirBase):
         return self.sequence
 
 
-class TTShotRoot(TTRootBase):
+class TTShotRoot(_TTShotCpntBase, TTRootBase):
     """Represents a tank template shot root."""
 
     hint = 'shot_root'
@@ -66,17 +104,13 @@ class TTShotRoot(TTRootBase):
         """Get step type."""
         return self.shot
 
-    @property
-    def step_type(self):
-        """Get step type."""
-        return TTShotStepRoot
 
-
-class TTShotStepRoot(TTStepRootBase, _TTShotChildBase):
+class TTShotStepRoot(_TTShotCpntBase, TTStepRootBase):
     """Represents a tank template shot step root."""
 
     hint = 'shot_step_root'
     work_area_maya_hint = 'shot_work_area_maya'
+    # work_area_maya_type = _TTShotCpntBase.work_area_maya_type
 
     def find_output_vers(self):
         """Find output versions in this shot.
@@ -99,13 +133,18 @@ class TTShotStepRoot(TTStepRootBase, _TTShotChildBase):
                     _vers.append(_ver)
         return _vers
 
-    @property
-    def work_area_maya_type(self):
-        """Get work area type."""
-        return TTShotWorkAreaMaya
+    # @property
+    # def maya_work(self):
+    #     """Get work area type for maya."""
+    #     return TTMayaShotWork
+
+    # @property
+    # def work_area_maya_type(self):
+    #     """Get work area type."""
+    #     return TTShotWorkAreaMaya
 
 
-class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotChildBase):
+class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotCpntBase):
     """Represents a tank template shot work area for maya."""
 
     hint = 'shot_work_area_maya'
@@ -127,14 +166,14 @@ class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotChildBase):
         return _work_files
 
 
-class TTMayaShotWork(TTWorkFileBase, _TTShotChildBase):
+class TTMayaShotWork(_TTShotCpntBase, TTWorkFileBase):
     """Represents a maya shot work file tank template."""
 
     hint = 'maya_shot_work'
     work_area_type = TTShotWorkAreaMaya
 
 
-class TTMayaShotIncrement(TTBase, _TTShotChildBase):
+class TTMayaShotIncrement(TTBase, _TTShotCpntBase):
     """Represents a maya work file increment file tank template."""
 
     hint = 'maya_shot_increment'
@@ -150,19 +189,19 @@ class TTMayaShotIncrement(TTBase, _TTShotChildBase):
         return TTMayaShotWork(_path)
 
 
-class TTShotOutputRoot(TTDirBase, _TTShotChildBase):
+class TTShotOutputRoot(TTDirBase, _TTShotCpntBase):
     """Represents a shot output root tank template path."""
 
     hint = 'shot_output_root'
 
 
-class TTShotOutputType(TTDirBase, _TTShotChildBase):
+class TTShotOutputType(TTDirBase, _TTShotCpntBase):
     """Represents a shot output type tank template path."""
 
     hint = 'shot_output_type'
 
 
-class TTShotOutputName(TTDirBase, _TTShotChildBase):
+class TTShotOutputName(TTDirBase, _TTShotCpntBase):
     """Represents a shot output name tank template path.
 
     This is the tank template for the versions dir.
@@ -171,7 +210,7 @@ class TTShotOutputName(TTDirBase, _TTShotChildBase):
     hint = 'shot_output_name'
 
 
-class TTShotOutputVersion(TTOutputVerBase, _TTShotChildBase):
+class TTShotOutputVersion(TTOutputVerBase, _TTShotCpntBase):
     """Represents a shot output version tank template path."""
 
     output_name = None
@@ -189,27 +228,15 @@ class TTShotOutputVersion(TTOutputVerBase, _TTShotChildBase):
             self.get_status())
 
 
-class TTShotOutputFileSeq(TTBase, _TTShotChildBase, Seq):
-    """Represents a shout output file seq tank template path."""
+class TTShotOutputFile(TTBase):
+    """Base class for any output file tank template."""
+    hint = 'shot_output_file'
+
+
+class TTShotOutputFileSeq(TTOutputFileSeqBase, _TTShotCpntBase):
+    """Represents a shot output file seq tank template path."""
 
     hint = 'shot_output_file_seq'
-
-    def __init__(self, path):
-        """Constructor.
-
-        Args:
-            path (str): file seq path
-        """
-        _tmpl = get_template(self.hint)
-        try:
-            _data = _tmpl.get_fields(path)
-        except tank.TankError:
-            raise ValueError
-        _data["SEQ"] = "%04d"
-        _path = abs_path(_tmpl.apply_fields(_data))
-        super(TTShotOutputFileSeq, self).__init__(
-            path=_path, data=_data, tmpl=_tmpl)
-        Seq.__init__(self, _path)
 
 
 def get_shot(path):

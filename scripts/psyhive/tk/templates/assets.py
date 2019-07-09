@@ -7,25 +7,48 @@ from psyhive.utils import find
 
 from psyhive.tk.templates.base import (
     TTBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
-    TTRootBase, TTStepRootBase, TTDirBase)
+    TTRootBase, TTStepRootBase, TTDirBase, TTOutputFileSeqBase)
 
 
-class TTAssetRoot(TTRootBase):
-    """Represents a tank asset root."""
+class _TTAssetCpntBase(object):
+    """Base class for any asset component tank template."""
 
-    hint = 'asset_root'
+    work_area_maya_hint = 'asset_work_area_maya'
 
     @property
-    def step_type(self):
-        """Get step type."""
+    def maya_work_type(self):
+        """Get work area type for maya."""
+        return TTMayaAssetWork
+
+    @property
+    def output_root_type(self):
+        """Get output root type."""
+        return TTAssetOutputRoot
+
+    @property
+    def output_name_type(self):
+        """Get output name type."""
+        return TTAssetOutputName
+
+    @property
+    def output_version_type(self):
+        """Get output version type."""
+        return TTAssetOutputVersion
+
+    @property
+    def output_file_type(self):
+        """Get output file type."""
+        return TTAssetOutputFile
+
+    @property
+    def output_file_seq_type(self):
+        """Get output file seq type."""
+        return TTAssetOutputFileSeq
+
+    @property
+    def step_root_type(self):
+        """Get step root type."""
         return TTAssetStepRoot
-
-
-class TTAssetStepRoot(TTStepRootBase):
-    """Represents a tank asset step root."""
-
-    hint = 'asset_step_root'
-    work_area_maya_hint = 'asset_work_area_maya'
 
     @property
     def work_area_maya_type(self):
@@ -33,16 +56,30 @@ class TTAssetStepRoot(TTStepRootBase):
         return TTAssetWorkAreaMaya
 
 
-class TTAssetWorkAreaMaya(TTWorkAreaBase):
+class TTAssetRoot(_TTAssetCpntBase, TTRootBase):
+    """Represents a tank asset root."""
+
+    hint = 'asset_root'
+    shot = None
+
+
+class TTAssetStepRoot(_TTAssetCpntBase, TTStepRootBase):
+    """Represents a tank asset step root."""
+
+    hint = 'asset_step_root'
+
+
+class TTAssetWorkAreaMaya(TTWorkAreaBase, _TTAssetCpntBase):
     """Represents a tank asset work area for maya."""
 
     hint = 'asset_work_area_maya'
 
 
-class TTMayaAssetWork(TTWorkFileBase):
+class TTMayaAssetWork(_TTAssetCpntBase, TTWorkFileBase):
     """Represents a tank asset work file for maya."""
 
     hint = 'maya_asset_work'
+    shot = None
     work_area_type = TTAssetWorkAreaMaya
 
 
@@ -50,6 +87,12 @@ class TTMayaAssetIncrement(TTWorkFileBase):
     """Represents a tank asset work file for maya."""
 
     hint = 'maya_asset_increment'
+
+
+class TTAssetOutputRoot(TTDirBase):
+    """Represents a tank asset output name."""
+
+    hint = 'asset_output_root'
 
 
 class TTAssetOutputName(TTDirBase):
@@ -88,6 +131,7 @@ class TTAssetOutputFile(TTBase):
     """Represents an tank asset output file."""
 
     hint = 'asset_output_file'
+    sg_asset_type = None
     version = None
 
     def get_latest(self):
@@ -109,6 +153,12 @@ class TTAssetOutputFile(TTBase):
             (bool): latest status
         """
         return self.get_latest() == self
+
+
+class TTAssetOutputFileSeq(TTOutputFileSeqBase, _TTAssetCpntBase):
+    """Represents a asset output file seq tank template path."""
+
+    hint = 'asset_output_file_seq'
 
 
 def find_asset_roots():

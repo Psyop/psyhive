@@ -13,8 +13,9 @@ def _main():
         _paths = [abs_path(sys.argv[1])]
     else:
         _paths = find(depth=1)
+    _win = '--win' in sys.argv
     for _path in _paths:
-        print _path
+        print abs_path(_path, win=_win)
 
 
 if __name__ == '__main__':

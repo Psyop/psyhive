@@ -58,6 +58,8 @@ def get_icon(icon):
     """
     if isinstance(icon, QtGui.QPixmap):
         return QtGui.QIcon(icon)
+    elif isinstance(icon, six.string_types):
+        return QtGui.QIcon(icon)
     raise ValueError(icon)
 
 

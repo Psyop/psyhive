@@ -47,7 +47,6 @@ class HMatrix(om.MMatrix):
             (str): group name
         """
         from maya_psyhive import open_maya as hom
-
         _grp = cmds.group(name=name, empty=True)
         for _col, _axis, _name in [
                 ('red', hom.X_AXIS*scale, 'X'),
@@ -62,14 +61,15 @@ class HMatrix(om.MMatrix):
 
         return _grp
 
-    def build_loc(self, name=None):
+    def build_loc(self, name=None, **kwargs):
         """Build locator using this matrix.
 
         Args:
             name (str): override name
         """
+        from maya_psyhive import open_maya as hom
         _name = name or type(self).__name__.strip('_')
-        _loc = cmds.spaceLocator(name=get_unique(_name))[0]
+        _loc = hom.build_loc(name=get_unique(_name), **kwargs)
         self.apply_to(_loc)
         return _loc
 

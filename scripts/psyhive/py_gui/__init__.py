@@ -2,6 +2,7 @@
 
 from psyhive import host
 
-from psyhive.py_gui.install import install_gui, set_section, ArgUpdater
+from psyhive.py_gui.install import (
+    install_gui, set_section, ArgUpdater, hide_from_gui)
 if host.NAME == 'maya':
-    from psyhive.py_gui.maya_ import MayaPyGui
+    from psyhive.py_gui.maya_ import MayaPyGui, get_selection_reader

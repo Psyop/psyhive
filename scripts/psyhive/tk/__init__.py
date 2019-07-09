@@ -6,10 +6,15 @@ from psyhive.tk.misc import (
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.assets import (
     TTAssetOutputFile, TTAssetOutputVersion, TTAssetRoot,
-    TTMayaAssetWork, find_asset_roots, TTAssetOutputName)
+    TTMayaAssetWork, find_asset_roots, TTAssetOutputName,
+    TTAssetWorkAreaMaya)
 from psyhive.tk.templates.shots import (
     TTShotOutputName, TTShotOutputVersion, TTMayaShotWork,
     TTMayaShotIncrement, find_shots, find_sequences, TTShotRoot,
     TTShotOutputFileSeq, TTShotStepRoot, TTShotOutputRoot,
-    get_shot)
-from psyhive.tk.templates.tools import get_work, cur_work
+    get_shot, TTShotWorkAreaMaya)
+from psyhive.tk.templates.tools import (
+    get_work, cur_work, get_step_root)
+
+from psyhive.tk.cache import (
+    obtain_work_area, obtain_work, clear_caches)

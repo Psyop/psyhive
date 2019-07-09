@@ -4,8 +4,10 @@ import os
 import tempfile
 import time
 
+import six
+
 from psyhive.utils import File, lprint, test_path, abs_path
-from psyhive.qt.wrapper.mgr import QtGui, QtCore
+from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
 
 
 class HColor(QtGui.QColor):
@@ -194,21 +196,32 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawArc(_rect, 0, 360*16)
         _pnt.end()
 
-    def add_dot(self, pos, col='black', radius=1.0):
+    def add_dot(self, pos, col='black', radius=1.0, outline=None):
         """Draw a circle on this pixmap.
 
         Args:
             pos (QPoint): centre point
             col (str): dot colour
             radius (float): dot radius
+            outline (QPen): apply outline pen
         """
         from psyhive import qt
 
         _pos = qt.get_p(pos)
         _col = qt.get_col(col)
         _brush = QtGui.QBrush(_col)
-        _pen = QtGui.QPen(_col)
-        _pen.setStyle(QtCore.Qt.NoPen)
+
+        # Set outline
+        if not outline:
+            _pen = QtGui.QPen(_col)
+            _pen.setStyle(QtCore.Qt.NoPen)
+        elif isinstance(outline, QtGui.QPen):
+            _pen = outline
+        elif isinstance(outline, six.string_types):
+            _out_col = qt.get_col(outline)
+            _pen = QtGui.QPen(_out_col)
+        else:
+            raise ValueError(outline)
 
         _pnt = HPainter()
         _pnt.begin(self)
@@ -327,6 +340,42 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawPath(_path)
         _pnt.end()
 
+    def add_polygon(self, pts, col, outline='black', thickness=1.0, verbose=0):
+        """Draw a polygon on this pixmap.
+
+        Args:
+            pts (QPointF list): polygon points
+            col (QColor): fill colour
+            outline (str|None): outline colour (if any)
+            thickness (float): line thickness
+            verbose (int): print process data
+        """
+        from psyhive import qt
+
+        if outline:
+            _pen = QtGui.QPen(outline)
+            _pen.setCapStyle(Qt.RoundCap)
+            if thickness:
+                _pen.setWidthF(thickness)
+        else:
+            _pen = QtGui.QPen()
+            _pen.setStyle(Qt.NoPen)
+
+        _col = qt.get_col(col)
+        _brush = QtGui.QBrush(_col)
+        _poly = QtGui.QPolygonF()
+        for _pt in pts:
+            _pt = qt.get_p(_pt)
+            _poly.append(_pt)
+
+        _pnt = HPainter()
+        _pnt.begin(self)
+        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
+        _pnt.setBrush(_brush)
+        _pnt.setPen(_pen)
+        _pnt.drawPolygon(_poly)
+        _pnt.end()
+
     def add_rect(self, pos, size, col, outline='black', operation=None):
         """Draw a rectangle on this pixmap.
 
@@ -347,7 +396,7 @@ class HPixmap(QtGui.QPixmap):
             _pen = QtGui.QPen(outline)
         else:
             _pen = QtGui.QPen()
-            _pen.setStyle(QtCore.Qt.NoPen)
+            _pen.setStyle(Qt.NoPen)
 
         _rect = QtCore.QRect(_pos, _size)
 
@@ -475,3 +524,4 @@ class HPixmap(QtGui.QPixmap):
             '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
         self.save_as(_tmp_file, verbose=1, force=True)
         self.save_as(_pics_file, verbose=1, force=True)
+        return _pics_file

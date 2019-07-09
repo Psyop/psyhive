@@ -13,7 +13,8 @@ from psyhive.utils.misc import (
 from psyhive.utils.path import (
     File, Path, Dir, abs_path, read_file, find, TMP, write_file, replace_file,
     search_files_for_text, test_path, touch, restore_cwd, rel_path, FileError,
-    diff, write_yaml, read_yaml, nice_size, get_copy_path_fn, get_owner)
+    diff, write_yaml, read_yaml, nice_size, get_copy_path_fn, get_owner,
+    launch_browser)
 from psyhive.utils.py_file import (
     PyFile, MissingDocs, text_to_py_file, PyBase, PyDef, PyClass)
 from psyhive.utils.range_ import ints_to_str, str_to_ints, ValueRange, fr_range

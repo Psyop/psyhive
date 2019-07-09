@@ -6,6 +6,7 @@ from maya.api import OpenMaya as om
 from psyhive.utils import lprint, store_result
 from maya_psyhive.utils import get_unique, set_col, multiply_node, get_single
 
+from maya_psyhive.open_maya.utils import IndexedAttrGetter
 from maya_psyhive.open_maya.base_transform import BaseTransform
 from maya_psyhive.open_maya.dag_path import HDagPath
 from maya_psyhive.open_maya.matrix import axes_to_m
@@ -28,6 +29,25 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         om.MFnNurbsCurve.__init__(self, _dag_path)
         self.world_space = self.shp.plug('worldSpace')
         self.create = self.shp.plug('create')
+        self.cv = IndexedAttrGetter(node=self, attr='cv')
+
+    def build_poci(self, u_value=0.0):
+        """Build point on curve info node attached to this curve.
+
+        By default, percentage is used.
+
+        Args:
+            u_value (float): parameter value
+
+        Returns:
+            (HFnDependencyNode):  point on curve info node
+        """
+        from maya_psyhive import open_maya as hom
+        _poci = hom.CMDS.createNode('pointOnCurveInfo')
+        _poci.plug('turnOnPercentage').set_val(True)
+        _poci.plug('parameter').set_val(u_value)
+        self.world_space.connect(_poci.plug('inputCurve'))
+        return _poci
 
     def close(self):
         """Close this curve (slow)."""
@@ -99,9 +119,7 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         if add_u_length:
             _ci = self.obtain_curve_info()
             _length = _ci.plug('arcLength')
-            print 'CURVE INFO', _ci
-            print _length.get_attr()
-            _u_len = _mpath.add_attr('uLength', 0.0)
+            _u_len = _mpath.create_attr('uLength', 0.0)
             multiply_node(_length, _u_val, _u_len)
         return _mpath
 

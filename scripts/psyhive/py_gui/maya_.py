@@ -6,13 +6,35 @@ from maya import cmds
 
 from psyhive import icons, qt, refresh
 from psyhive.utils import (
-    wrap_fn, to_nice, copy_text, lprint, dprint, chain_fns)
+    wrap_fn, to_nice, copy_text, lprint, dprint, chain_fns, get_single)
 
-from psyhive.py_gui import base
+from psyhive.py_gui import base, install
 from psyhive.py_gui.misc import (
     get_code_fn, get_exec_fn, get_help_fn, get_def_icon)
 
 from maya_psyhive import ui
+
+
+def get_selection_reader(type_):
+    """Get updater to get node transform with shape matching given type.
+
+    Args:
+        type_ (str): shape type to match (eg. nurbsCurve)
+
+    Returns:
+        (ArgUpdater): pygui arg updater
+    """
+
+    def _get_sel():
+        _sel = []
+        for _node in cmds.ls(selection=True):
+            _shp = get_single(
+                cmds.listRelatives(shapes=True, type=type_), catch=True)
+            if _shp:
+                _sel.append(_node)
+        return get_single(_sel, catch=True)
+
+    return install.ArgUpdater(_get_sel, label='Get selected')
 
 
 def _get_update_fn(set_fn, update, field):
@@ -49,7 +71,7 @@ class MayaPyGui(base.BasePyGui):
 
     def init_ui(self):
         """Initiate interface."""
-        dprint('Building ui', self.ui_name)
+        dprint('Building ui {} ({})'.format(self.ui_name, self.base_col))
         if cmds.window(self.ui_name, exists=True):
             cmds.deleteUI(self.ui_name)
         cmds.window(
@@ -279,10 +301,10 @@ class MayaPyGui(base.BasePyGui):
             section (_Section): section to apply
         """
         _col = qt.HColor(self.base_col).blacken(0.5)
-        _col = qt.HColor(self.base_col).whiten(1)
-        _col = qt.HColor(self.base_col)
-        cmds.frameLayout(
+        _frame = cmds.frameLayout(
             collapsable=True, label=section.label, collapse=section.collapse,
+            parent=self.master, backgroundColor=_col.to_tuple(mode='float'),
         )
+        cmds.columnLayout(parent=_frame, adjustableColumn=1)
         cmds.separator(style='none', height=1, horizontal=True)
-        print 'SETTING SECTION', section
+        print '[py_gui.maya] SETTING SECTION', section, section.collapse

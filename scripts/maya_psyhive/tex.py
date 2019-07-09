@@ -1,9 +1,15 @@
 """Tools for managing texturing and shading."""
 
+import os
+
 from maya import cmds
 
+import six
+
 from psyhive import qt
-from psyhive.utils import get_single
+from psyhive.utils import get_single, lprint
+from maya_psyhive import open_maya as hom
+from maya_psyhive.utils import get_shp
 
 
 class _BaseShader(object):
@@ -30,6 +36,7 @@ class _BaseShader(object):
         _file = cmds.shadingNode('file', asShader=True)
         cmds.connectAttr(_file+'.outColor', self.col_attr)
         cmds.setAttr(_file+'.fileTextureName', path, type='string')
+        cmds.setAttr(_file+'.colorSpace', 'linear', type='string')
 
     def assign_to(self, geo):
         """Assign this shader to the given geo transform.
@@ -78,15 +85,34 @@ class _BaseShader(object):
             return cmds.getAttr(_file+'.fileTextureName')
         return None
 
-    def set_col(self, col):
+    def set_col(self, col, verbose=0):
         """Set this node's main col attr.
 
         Args:
-            col (str|tuple|QColor): colour to apply
+            col (str|tuple|QColor|HPlug): colour to apply (an existing
+                path will be applied as a texture)
+            verbose (int): print process data
         """
+        if isinstance(col, hom.HPlug):
+            lprint("CONNECTING PLUG", col, verbose=verbose)
+            col.connect(self.col_attr)
+            return
+        if isinstance(col, six.string_types) and os.path.exists(col):
+            lprint("APPLYING FILE TEXTURE", col, verbose=verbose)
+            self.apply_texture(col)
+            return
+
+        # Apply colour as value
         _col = qt.get_col(col)
+        lprint("APPLYING COLOUR", _col, verbose=verbose)
         cmds.setAttr(
             self.col_attr, *_col.to_tuple(mode='float'), type='double3')
+
+    def __cmp__(self, other):
+        return cmp(self.shd, other.shd)
+
+    def __hash__(self):
+        return hash(self.shd)
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__.strip('_'), self.shd)
@@ -148,6 +174,59 @@ def ai_ambient_occlusion(name='aiAmbientOcclusion'):
     return _shd
 
 
+def connect_place_2d(node_, place=None):
+    """Connect a place 2d texture node to the given shading node.
+
+    Args:
+        node_ (str): node to apply place 2d texture
+        place (str): use an existing place2dTexture node
+
+    Returns:
+        (HFnDependencyNode): place2dTexture node
+    """
+    _node = hom.HFnDependencyNode(str(node_))
+
+    # Get tex place node
+    if place:
+        _place = hom.HFnDependencyNode(place)
+        assert _place.object_type() == "place2dTexture"
+    else:
+        _place = hom.CMDS.shadingNode("place2dTexture", asUtility=1)
+
+    # Connect attrs with same name
+    for _attr in [
+            'coverage',
+            'mirrorU',
+            'mirrorV',
+            'noiseUV',
+            'offset',
+            'repeatUV',
+            'rotateFrame',
+            'rotateUV',
+            'stagger',
+            'translateFrame',
+            'uvCoord',
+            'uvFilterSize',
+            'vertexCameraOne',
+            'vertexUvOne',
+            'vertexUvThree',
+            'vertexUvTwo',
+            'wrapU',
+            'wrapV',
+    ]:
+        if _node.has_attr(_attr):
+            _place.plug(_attr).connect(_node.plug(_attr), force=True)
+
+    # Connect attrs with different names
+    for _src, _trg in [
+            ("outUV", "uvCoord"),
+            ("outUvFilterSize", "uvFilterSize"),
+    ]:
+        _place.plug(_src).connect(_node.plug(_trg), force=True)
+
+    return _place
+
+
 def find_shd(shd):
     """Build shader object from the given node name.
 
@@ -184,18 +263,23 @@ def lambert(name='lambert', col=None):
     return _shd
 
 
-def read_shd(shp):
+def read_shd(shp, verbose=1):
     """Read shader from the given geo shape node.
 
     Args:
         shp (str): shape node to read
+        verbose (int): print process data
 
     Returns:
         (_BaseShader): shader object
     """
+    _shp = shp
+    if cmds.objectType(_shp) == 'transform':
+        _shp = get_shp(_shp)
     _se = get_single(cmds.listConnections(
-        shp, source=False, type='shadingEngine'), catch=True)
+        _shp, source=False, type='shadingEngine'), catch=True)
     if not _se:
+        lprint('No shading engine found:', _shp, verbose=verbose)
         return None
     _shd = get_single(cmds.listConnections(
         _se+'.surfaceShader', destination=False), catch=True)

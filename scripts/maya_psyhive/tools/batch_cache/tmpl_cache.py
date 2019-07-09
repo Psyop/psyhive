@@ -19,7 +19,7 @@ class CTTShotRoot(tk.TTShotRoot):
     """Used to stored cache shotgun request data for a shot."""
 
     @store_result
-    def find_steps(self, class_=None):
+    def find_step_roots(self, class_=None):
         """Find steps in this shot.
 
         Args:
@@ -28,7 +28,7 @@ class CTTShotRoot(tk.TTShotRoot):
         Returns:
             (TTShotStepRoot list): list of steps
         """
-        return super(CTTShotRoot, self).find_steps(class_=class_)
+        return super(CTTShotRoot, self).find_step_roots(class_=class_)
 
     @store_result
     def read_cache_data(self, force=False):
@@ -109,7 +109,7 @@ class CTTShotRoot(tk.TTShotRoot):
             force (bool): force reread data from disk
         """
         _work_files = []
-        for _step in self.find_steps():
+        for _step in self.find_step_roots():
             _work_area = _step.get_work_area()
             _task_work_files = {}
             for _work_file in _work_area.find_work_files():

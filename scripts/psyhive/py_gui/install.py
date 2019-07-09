@@ -5,7 +5,10 @@ import pprint
 
 from psyhive.utils import lprint, to_nice
 
-INSTALL_GUI_DEFS = {}
+_RECORD_DATA = False
+_DEFS = {}
+_SECTIONS = []
+_HIDDEN = []
 _SECTION = None
 
 
@@ -47,12 +50,38 @@ def get_installed_data(py_file):
     Args:
         py_file (PyFile): python file to read
     """
-    global _SECTION
+    global _SECTION, _RECORD_DATA, _SECTIONS, _DEFS, _HIDDEN
+
     _mod = py_file.get_module()
-    INSTALL_GUI_DEFS[_mod.__name__] = []
+
+    _DEFS = []
+    _SECTIONS = {}
+    _HIDDEN = []
     _SECTION = None
+    _RECORD_DATA = True
     reload(_mod)
-    return INSTALL_GUI_DEFS[_mod.__name__]
+    _RECORD_DATA = False
+
+    return _DEFS, _SECTIONS, _HIDDEN
+
+
+def hide_from_gui(func):
+    """Decoration which hides the decorated function from py_gui.
+
+    (This only applies if the all_defs flag is used)
+
+    Args:
+        func (fn): function to hide
+
+    Returns:
+        (fn): decorated function
+    """
+    global _HIDDEN
+
+    if _RECORD_DATA:
+        _HIDDEN.append(func.__name__)
+
+    return func
 
 
 def install_gui(
@@ -79,26 +108,24 @@ def install_gui(
 
     def _install_gui_decorator(func):
 
-        global INSTALL_GUI_DEFS
-
         # Keep list of install gui functions
-        _opts = {
-            'icon': icon,
-            'choices': choices,
-            'hide': hide,
-            'label': label,
-            'label_width': label_width,
-            'col': col,
-            'update': update,
-            'disable_reload': disable_reload,
-            'catch_error_': catch_error_,
-            'section': _SECTION,
-        }
-        if func.__module__ not in INSTALL_GUI_DEFS:
-            INSTALL_GUI_DEFS[func.__module__] = []
-        INSTALL_GUI_DEFS[func.__module__].append((func, _opts))
-        lprint(' - INSTALLING GUI', func.__name__, verbose=verbose)
-        lprint(pprint.pformat(_opts), verbose=verbose)
+        if _RECORD_DATA:
+            global _DEFS
+            _opts = {
+                'icon': icon,
+                'choices': choices,
+                'hide': hide,
+                'label': label,
+                'label_width': label_width,
+                'col': col,
+                'update': update,
+                'disable_reload': disable_reload,
+                'catch_error_': catch_error_,
+                'section': _SECTION,
+            }
+            _DEFS.append((func, _opts))
+            lprint(' - INSTALLING GUI', func.__name__, verbose=verbose)
+            lprint(pprint.pformat(_opts), verbose=verbose)
 
         @functools.wraps(func)
         def _install_gui_func(*args, **kwargs):
@@ -127,6 +154,17 @@ class _Section(object):
         self.label = label
         self.collapse = collapse
 
+        if _RECORD_DATA:
+            global _SECTIONS
+            if self.label in _SECTIONS:
+                raise RuntimeError('Multiple sections with name - {}'.format(
+                    self.label))
+            _SECTIONS[self.label] = self
+
+    def __repr__(self):
+        return '<{}:{}>'.format(
+            type(self).__name__.strip('_'), self.label)
+
 
 def set_section(label, collapse=True):
     """Set current section.
@@ -137,4 +175,3 @@ def set_section(label, collapse=True):
     """
     global _SECTION
     _SECTION = _Section(label, collapse=collapse)
-    print 'APPLYING SECTION', _SECTION

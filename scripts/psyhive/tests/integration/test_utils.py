@@ -1,11 +1,15 @@
+import tempfile
 import unittest
+
+from psyhive.utils import touch, find
+
 
 class TestPyFile(unittest.TestCase):
 
     def test_find(self):
 
         # Test depth flag
-        _TEST_DIR = TMP+'/testing'
+        _TEST_DIR = '{}/testing'.format(tempfile.gettempdir())
         touch(_TEST_DIR+'/test.txt')
         touch(_TEST_DIR+'/BLAH/test.txt')
         touch(_TEST_DIR+'/BLAH/BLEE/test.txt')

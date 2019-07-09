@@ -3,7 +3,7 @@
 from maya import cmds
 
 from psyhive.utils import get_single
-from maya_psyhive.utils import add_to_grp
+from maya_psyhive.utils import add_to_grp, set_col
 
 from maya_psyhive.open_maya.base_node import BaseNode
 from maya_psyhive.open_maya.plug import HPlug
@@ -44,7 +44,7 @@ class BaseTransform(BaseNode):
         Returns:
             (HPlug): uniform scale
         """
-        _u_scale = self.add_attr('uScale', 1.0)
+        _u_scale = self.create_attr('uScale', 1.0)
         _u_scale.connect(self.scale, axes='XYZ')
         return _u_scale
 
@@ -104,7 +104,16 @@ class BaseTransform(BaseNode):
 
     def hide(self):
         """Hide this node."""
-        self.visibility.set_attr(False)
+        self.visibility.set_val(False)
+
+    def get_p(self):
+        """Get position of this transform.
+
+        Returns:
+            (HPoint): position
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.get_p(self)
 
     def get_m(self):
         """Get matrix of this object's transform.
@@ -139,6 +148,14 @@ class BaseTransform(BaseNode):
         _constr = cmds.pointConstraint(self, *args, **kwargs)[0]
         return hom.HFnTransform(_constr)
 
+    def set_col(self, col):
+        """Set colour of this node in maya viewport.
+
+        Args:
+            col (str): colour to apply
+        """
+        set_col(str(self), col)
+
     def set_pivot(self, pos=None, scale=True, rotate=True):
         """Set this node's scale/rotate pivot.
 
@@ -153,3 +170,11 @@ class BaseTransform(BaseNode):
                 (rotate, self.plug('rotatePivot'))]:
             if _tgl:
                 cmds.move(_pos[0], _pos[1], _pos[2], _plug)
+
+    def u_scale(self, scale):
+        """Apply a uniform scale to this node.
+
+        Args:
+            scale (float): scale value
+        """
+        self.scale.set_val([scale, scale, scale])

@@ -248,19 +248,20 @@ def remove_sys_path(path):
             sys.path.remove(_sys_path)
 
 
-def update_libs(check_root, mod_names=None, sort=None):
+def update_libs(check_root, mod_names=None, sort=None, close_interfaces=True):
     """Update a list of modules to a new location.
 
     Args:
         check_root (str): location to check paths match to
         mod_names (str list): list of modules to update
         sort (fn): module sort function
+        close_interfaces (bool): close interfaces before refresh
     """
     for _idx in range(6):
         dprint('Updating modules - attempt', _idx+1)
         _result = reload_libs(
             catch=True, check_root=check_root, mod_names=mod_names,
-            sort=sort)
+            sort=sort, close_interfaces=close_interfaces)
         dprint('Updating modules:', 'success' if _result else 'failed')
         if _result:
             break

@@ -149,3 +149,21 @@ COLS = [
     "Yellow",
     "YellowGreen",
 ]
+
+NICE_COLS = [
+    'salmon', 'tomato', 'darksalmon', 'coral', 'orangered', 'lightsalmon',
+    'sandybrown', 'darkorange', 'orange', 'goldenrod', 'gold', 'yellow',
+    'olivedrab', 'yellowgreen', 'darkolivegreen', 'greenyellow', 'chartreuse',
+    'lawngreen', 'darkgreen', 'forestgreen', 'green', 'lightgreen', 'lime',
+    'limegreen', 'palegreen', 'mediumseagreen', 'seagreen', 'springgreen',
+    'mediumspringgreen', 'aquamarine', 'mediumaquamarine', 'turquoise',
+    'lightseagreen', 'mediumturquoise', 'cyan', 'darkcyan', 'darkslategrey',
+    'darkturquoise', 'teal', 'cadetblue', 'powderblue', 'lightblue',
+    'deepskyblue', 'lightskyblue', 'steelblue', 'dodgerblue',
+    'lightslategrey', 'slategray', 'slategrey', 'lightsteelblue',
+    'cornflowerblue', 'royalblue', 'blue', 'darkblue', 'mediumblue',
+    'midnightblue', 'navy', 'darkslateblue', 'mediumslateblue', 'slateblue',
+    'mediumpurple', 'blueviolet', 'indigo', 'darkorchid', 'darkviolet',
+    'mediumorchid', 'darkmagenta', 'magenta', 'plum', 'purple', 'thistle',
+    'violet', 'orchid', 'mediumvioletred', 'deeppink', 'hotpink',
+    'palevioletred', 'crimson', 'pink', 'lightpink']

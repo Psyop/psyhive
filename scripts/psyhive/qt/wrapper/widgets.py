@@ -86,14 +86,17 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             lprint(" - TESTING", _data, _data in items, verbose=verbose)
             _item.setSelected(_data in items)
 
-    def select_text(self, items):
+    def select_text(self, items, verbose=0):
         """The items with text matching the given list.
 
         Args:
-            items (str list): list of text of items to select
+            items (str): list of text of items to select
+            verbose (int): print process data
         """
+        lprint('SELECTING TEXT', items, verbose=verbose)
         for _item in self.all_items():
             _text = _item.text()
+            lprint(' -', _text, _text in items, verbose=verbose)
             _item.setSelected(_text in items)
 
     def selected_data(self):
@@ -183,6 +186,19 @@ class HMenu(QtWidgets.QMenu, HWidgetBase):
         _action.setEnabled(0)
         return _action
 
+    def add_menu(self, label):
+        """Add sub menu to this one.
+
+        Args:
+            label (str): label for sub menu
+
+        Returns:
+            ():
+        """
+        _menu = HMenu(label)
+        self.addMenu(_menu)
+        return _menu
+
 
 class HProgressBar(QtWidgets.QProgressBar, HWidgetBase):
     """Override for QProgressBar object."""
@@ -207,6 +223,19 @@ class HPushButton(QtWidgets.QPushButton, HWidgetBase):
     """Override for QPushButton object."""
 
 
+class HTabWidget(QtWidgets.QTabWidget, HWidgetBase):
+    """Override for QTabWidget object."""
+
+    def cur_text(self):
+        """Get text of the currently selected tab.
+
+        Returns:
+            (str): current tab title
+        """
+        _idx = self.currentIndex()
+        return self.tabText(_idx)
+
+
 class HTextBrowser(QtWidgets.QTextBrowser, HWidgetBase):
     """Override for QTextBrowser object."""
 
@@ -228,10 +257,30 @@ class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         super(HTreeWidgetItem, self).__init__()
         self.setText(0, text)
         if self._col:
-            _brush = QtGui.QBrush(QtGui.QColor(self._col))
+            _brush = QtGui.QBrush(get_col(self._col))
             self.setForeground(0, _brush)
         if data:
             self.setData(0, QtCore.Qt.UserRole, data)
+
+    def all_children(self):
+        """Get a list of all children (including children's children).
+
+        Returns:
+            (QTreeWidgetItem list): all children
+        """
+        _all_children = []
+        for _child in self.children():
+            _all_children.append(_child)
+            _all_children += _child.all_children()
+        return _all_children
+
+    def children(self):
+        """Get a list of immediate children.
+
+        Returns:
+            (QTreeWidgetItem list): children
+        """
+        return [self.child(_idx) for _idx in range(self.childCount())]
 
     def get_data(self):
         """Get retrieve data from this item."""

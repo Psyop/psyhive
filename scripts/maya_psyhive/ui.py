@@ -6,6 +6,35 @@ from psyhive import qt
 from psyhive.utils import lprint
 
 
+def get_active_model_panel(as_editor=False, catch=False):
+    """Get current active model panel.
+
+    Args:
+        as_editor (bool): return editor rather than panel
+        catch (bool): no error on no/multi matches
+
+    Returns:
+        (str): ui element name
+    """
+    _panels = []
+    _editors = []
+
+    for _panel in cmds.lsUI(panels=True):
+        if not cmds.modelPanel(_panel, query=True, exists=True):
+            continue
+        _editor = cmds.modelPanel(_panel, query=True, modelEditor=True)
+        if cmds.modelEditor(_editor, query=True, activeView=True):
+            _editors.append(_editor)
+            _panels.append(_panel)
+
+    if len(_panels) != 1 or len(_editors) != 1:
+        if catch:
+            return None
+        raise RuntimeError("Could not read active model panel")
+
+    return _editors[0] if as_editor else _panels[0]
+
+
 def get_main_window():
     """Get maya main window ui element name."""
     return mel.eval('$s=$gMainWindow', verbose=0)

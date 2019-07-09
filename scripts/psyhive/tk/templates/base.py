@@ -13,7 +13,7 @@ from tank.platform import current_engine
 from psyhive import pipe, host
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
-    lprint, read_yaml, write_yaml, diff)
+    lprint, read_yaml, write_yaml, diff, Seq)
 
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.misc import find_tank_mod
@@ -59,6 +59,30 @@ class TTBase(Path):
                 continue
             setattr(self, _key, _val)
 
+    def map_to(self, class_, **kwargs):
+        """Map this template's values to a different template.
+
+        For example, this could be used to map a maya work file to
+        a output file seq. If additional data is required, this can
+        be passed in the kwargs.
+
+        Args:
+            class_ (TTBase): template type to map to
+
+        Returns:
+            (TTBase): new template instance
+        """
+        _data = copy.copy(self.data)
+        for _key, _val in kwargs.items():
+            _data[_key] = _val
+        _tmpl = get_template(class_.hint)
+        try:
+            _path = _tmpl.apply_fields(_data)
+        except tank.TankError as _exc:
+            _tags = '['+_exc.message.split('[')[-1]
+            raise ValueError('Missing tags: '+_tags)
+        return class_(_path)
+
 
 class TTDirBase(Dir, TTBase):
     """Base class for any tank template directoy object."""
@@ -85,9 +109,9 @@ class TTDirBase(Dir, TTBase):
 class TTRootBase(TTDirBase):
     """Base class for shot/asset root object."""
 
-    step_type = None
+    step_root_type = None
 
-    def find_steps(self, class_=None):
+    def find_step_roots(self, class_=None):
         """Find steps in this shot.
 
         Args:
@@ -96,7 +120,7 @@ class TTRootBase(TTDirBase):
         Returns:
             (TTShotStepRoot list): list of steps
         """
-        _class = class_ or self.step_type
+        _class = class_ or self.step_root_type
         _steps = []
         for _path in self.find(depth=1, type_='d'):
             try:
@@ -111,6 +135,7 @@ class TTRootBase(TTDirBase):
 class TTStepRootBase(TTDirBase):
     """Base class for any shot/asset step root."""
 
+    maya_work_type = None
     work_area_maya_hint = None
     work_area_maya_type = None
 
@@ -122,6 +147,25 @@ class TTStepRootBase(TTDirBase):
         """
         super(TTStepRootBase, self).__init__(path)
         self.name = self.step
+
+    def find_work_files(self):
+        """Find work files inside this step root.
+
+        Args:
+            cacheable (bool):
+
+        Returns:
+            (TTWorkFileBase list): list of work files
+        """
+        _works = []
+        _work_type = self.maya_work_type
+        for _file in self.get_work_area().find(depth=2, type_='f'):
+            try:
+                _work = _work_type(_file)
+            except ValueError:
+                continue
+            _works.append(_work)
+        return _works
 
     def get_work_area(self, dcc='maya'):
         """Get work area in this step for the given dcc.
@@ -141,7 +185,7 @@ class TTStepRootBase(TTDirBase):
 class TTWorkAreaBase(TTDirBase):
     """Base class for any work area tank template."""
 
-    def get_metadata(self, verbose=0):
+    def get_metadata(self, verbose=1):
         """Read this work area's metadata yaml file.
 
         Args:
@@ -150,7 +194,7 @@ class TTWorkAreaBase(TTDirBase):
         Returns:
             (dict): work area metadata
         """
-        lprint("Reading metadata yaml", self.yaml, verbose=verbose)
+        dprint("Reading metadata", self.path, verbose=verbose)
         if not os.path.exists(self.yaml):
             return {}
         return read_yaml(self.yaml)
@@ -180,6 +224,12 @@ class TTWorkAreaBase(TTDirBase):
 class TTWorkFileBase(TTBase, File):
     """Base class for any work file template."""
 
+    output_file_type = None
+    output_file_seq_type = None
+    output_name_type = None
+    output_root_type = None
+    output_version_type = None
+    step_root_type = None
     task = None
     version = None
     work_area_type = None
@@ -223,6 +273,94 @@ class TTWorkFileBase(TTBase, File):
         _path = get_template(_latest.hint).apply_fields(_data)
         return self.__class__(_path)
 
+    def find_output_names(self, verbose=0):
+        """Find output names for this work file.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (list): list of output names
+        """
+        _root_tmpl = get_template(self.output_root_type.hint)
+        _root = self.output_root_type(_root_tmpl.apply_fields(self.data))
+        lprint('ROOT', _root, verbose=verbose)
+        _names = []
+        for _dir in _root.find(depth=2, type_='d'):
+            try:
+                _name = self.output_name_type(_dir)
+            except ValueError:
+                continue
+            if not _name.task == self.task:
+                continue
+            lprint(' - ADDED NAME', _name, verbose=verbose)
+            _names.append(_name)
+        return _names
+
+    def find_outputs(self, verbose=1):
+        """Find outputs from this work file.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTAssetOutputFile list): list of outputs
+        """
+        _ver_tmpl = get_template(self.output_version_type.hint)
+
+        # Find vers that exist in each name
+        _vers = []
+        for _name in self.find_output_names():
+            _data = copy.copy(_name.data)
+            _data['version'] = self.version
+            _ver = self.output_version_type(_ver_tmpl.apply_fields(_data))
+            if _ver.exists():
+                lprint(' - ADDED VER', _ver, verbose=verbose)
+                _vers.append(_ver)
+        lprint('FOUND {:d} VERS'.format(len(_vers)), verbose=verbose)
+
+        # Find output in each ver
+        _outputs = []
+        _seqs = []
+        for _ver in _vers:
+            _files = _ver.find(type_='f', depth=2)
+            for _file in _files:
+
+                # Ignore files already matched in seq
+                _already_matched = False
+                for _seq in _seqs:
+                    if _seq.contains(_file):
+                        _already_matched = True
+                        break
+                if _already_matched:
+                    continue
+
+                _output = None
+                lprint(' - TESTING', _file, verbose=verbose > 1)
+
+                # Match seq
+                try:
+                    _output = self.output_file_seq_type(_file)
+                except ValueError:
+                    lprint('   - NOT OUTPUT FILE SEQ', _file,
+                           verbose=verbose > 1)
+                else:
+                    _seqs.append(_output)
+
+                # Match file
+                if not _output:
+                    try:
+                        _output = self.output_file_type(_file)
+                    except ValueError:
+                        lprint('   - NOT OUTPUT FILE', _file,
+                               verbose=verbose > 1)
+
+                if _output:
+                    lprint(' - ADDED OUTPUT', _output, verbose=verbose)
+                    _outputs.append(_output)
+
+        return _outputs
+
     def find_vers(self):
         """Find other versions of this workfile.
 
@@ -251,7 +389,7 @@ class TTWorkFileBase(TTBase, File):
         """
         return self.get_metadata(verbose=verbose).get('comment')
 
-    def get_metadata(self, data=None, catch=True, verbose=1):
+    def get_metadata(self, data=None, catch=True, verbose=0):
         """Get metadata for this work file.
 
         This can be expensive - it should read at work area level and
@@ -262,6 +400,7 @@ class TTWorkFileBase(TTBase, File):
             catch (bool): no error on work file missing from metadata
             verbose (int): print process data
         """
+        dprint('Reading metadata', self.path, verbose=verbose)
         _work_area = self.get_work_area()
         if data:
             _data = data
@@ -286,7 +425,7 @@ class TTWorkFileBase(TTBase, File):
         lprint(
             "MATCHED {:d} WORK FILES IN TASK {}".format(
                 len(_work_files), self.task.lower()),
-            verbose=verbose)
+            verbose=verbose > 1)
         lprint(pprint.pformat(_work_files), verbose=verbose > 1)
 
         # Find this version
@@ -302,6 +441,14 @@ class TTWorkFileBase(TTBase, File):
             _versions, fail_message='Missing version in metadata '+self.path)
 
         return _version
+
+    def get_step_root(self):
+        """Get step root for this work file.
+
+        Returns:
+            (TTStepRootBase): step root
+        """
+        return self.step_root_type(self.path)
 
     def get_work_area(self):
         """Get work area associated with this work file.
@@ -319,11 +466,12 @@ class TTWorkFileBase(TTBase, File):
         _fileops.open_file(
             _work_file, open=True, force=True, change_context=True)
 
-    def save(self, comment):
+    def save(self, comment, verbose=0):
         """Save this version.
 
         Args:
             comment (str): comment for version
+            verbose (int): print process data
         """
         _fileops = tank.platform.current_engine().apps['psy-multi-fileops']
         _handler = _fileops._fileops_handler
@@ -331,6 +479,8 @@ class TTWorkFileBase(TTBase, File):
 
         # Build tk objects
         if not self.exists():  # Version up
+
+            lprint('VERSION UP', verbose=verbose)
 
             # Get prev workfile
             _prev = self.find_vers()[-1]
@@ -433,3 +583,24 @@ class TTOutputVerBase(TTDirBase):
             (bool): latest state
         """
         return self == self.find_latest()
+
+
+class TTOutputFileSeqBase(TTBase, Seq):
+    """Represents a shout output file seq tank template path."""
+
+    def __init__(self, path):
+        """Constructor.
+
+        Args:
+            path (str): file seq path
+        """
+        _tmpl = get_template(self.hint)
+        try:
+            _data = _tmpl.get_fields(path)
+        except tank.TankError:
+            raise ValueError
+        _data["SEQ"] = "%04d"
+        _path = abs_path(_tmpl.apply_fields(_data))
+        super(TTOutputFileSeqBase, self).__init__(
+            path=_path, data=_data, tmpl=_tmpl)
+        Seq.__init__(self, _path)

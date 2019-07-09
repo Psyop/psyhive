@@ -11,7 +11,8 @@ from ctypes import wintypes
 
 import six
 
-from psyhive.utils.misc import lprint, system, dprint, bytes_to_str, copy_text
+from psyhive.utils.misc import (
+    lprint, system, dprint, bytes_to_str, copy_text, get_ord)
 from psyhive.utils.heart import check_heart
 from psyhive.utils.filter_ import passes_filter
 
@@ -107,6 +108,26 @@ class Path(object):
             (int): size of path in bytes
         """
         return os.path.getsize(self.path)
+
+    def nice_mtime(self, fmt=None):
+        """Get mtime of this file in a readable format.
+
+        Args:
+            fmt (str): override strftime format
+
+        Returns:
+            (str): mtime as readable string
+        """
+        _mtime = self.get_mtime()
+        _mtime_t = time.localtime(_mtime)
+        if fmt:
+            _fmt = fmt
+        else:
+            _month = int(time.strftime('%d', _mtime_t))
+            _ord = get_ord(_month)
+            _day = '{:d}{}'.format(_month, _ord)
+            _fmt = '%a {} %Y %b %H:%M:%S'.format(_day)
+        return time.strftime(_fmt, _mtime_t)
 
     def nice_size(self):
         """Get size of this path as a readable str.
@@ -218,6 +239,15 @@ class File(Path):
         """Touch this path."""
         touch(self.path)
 
+    def write_text(self, text, force=False):
+        """Write text to this file.
+
+        Args:
+            text (str): text to write
+            force (bool): overwrite existing file with no warning
+        """
+        write_file(file_=self.path, text=text, force=force)
+
 
 def abs_path(path, win=False, root=None, verbose=0):
     """Get the absolute path for the given path.
@@ -267,18 +297,23 @@ def abs_path(path, win=False, root=None, verbose=0):
     return _path
 
 
-def diff(left, right):
+def diff(left, right, tool=None, label=None):
     """Show diffs between two files.
 
     Args:
         left (str): path to left file
         right (str): path to right file
+        tool (str): diff tool to use
+        label (str): label to pass to diff tool
     """
-    print "FILECMP"
+    _tool = tool or os.environ.get('PSYHIVE_DIFF_EXE') or 'Diffinity'
     assert not filecmp.cmp(left, right)
-
-    _bcomp_exe = 'C:/Program Files/Beyond Compare 4/BComp.exe'
-    system([_bcomp_exe, left, right], verbose=1)
+    if not File(left).extn in [None, 'py', 'yml']:
+        raise ValueError(File(left).extn)
+    _cmds = [_tool, left, right]
+    if label and _tool == 'Meld':
+        _cmds += ['-L', '"{}"'.format(label)]
+    system(_cmds, verbose=1)
 
 
 def find(
@@ -486,6 +521,15 @@ def get_owner(path):
     _name, _, _ = _look_up_account_sid(_sid)
 
     return _name
+
+
+def launch_browser(dir_):
+    """Launch browser set to this dir.
+
+    Args:
+        dir_ (str): dir to open browser in
+    """
+    Dir(dir_).launch_browser()
 
 
 def nice_size(path):

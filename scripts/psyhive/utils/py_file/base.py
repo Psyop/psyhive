@@ -14,24 +14,31 @@ from psyhive.utils.py_file.docs import MissingDocs
 class PyBase(object):
     """Base class for any component of a python file."""
 
-    def __init__(self, ast_, py_file, name=None):
+    docs = None
+
+    def __init__(self, ast_, py_file, name=None, read_docs=True):
         """Constructor.
 
         Args:
             ast_ (ast.Module): ast module for this object
             py_file (PyFile): parent python file for this object
             name (str): override name for this object
+            read_docs (bool): read docstring from ast
         """
         from psyhive.utils.py_file.file_ import PyFile
         assert isinstance(py_file, PyFile)
 
         self._ast = ast_
+        if read_docs and self._ast:
+            self.docs = ast.get_docstring(self._ast)
         self.py_file = py_file
         self.name = name or ast_.name
 
         self.clean_name = name.split('.')[-1]
         self.is_super_private = self.clean_name.startswith('__')
         self.is_private = self.clean_name.startswith('_')
+
+        self.cmp_str = '{}:{}'.format(self.py_file.path, self.name)
 
     def check_docs(self, recursive=False, verbose=0):
         """Check this object's docstring.
@@ -49,7 +56,7 @@ class PyBase(object):
 
     def find_child(
             self, match=None, recursive=False, catch=False, type_=None,
-            private=None):
+            private=None, force=False):
         """Find child node of this object.
 
         Args:
@@ -58,6 +65,7 @@ class PyBase(object):
             catch (bool): no error on fail to find
             type_ (PyBase): filter by object type
             private (bool): filter by private/non-private
+            force (bool): rebuild list of children from file
 
         Returns:
             (PyBase): matching child object
@@ -70,7 +78,7 @@ class PyBase(object):
         _filtered = get_single(
             self.find_children(
                 filter_=match, recursive=recursive, type_=type_,
-                private=private),
+                private=private, force=force),
             catch=True)
         if _filtered:
             return _filtered
@@ -222,39 +230,63 @@ class PyBase(object):
         """
         return self._ast
 
-    @store_result_on_obj
-    def _read_children(self, force=False, verbose=0):
-        """Read children of this object (executed on init).
+    def _read_child(self, ast_item, verbose=0):
+        """Convert an ast object to a PyBase object.
+
+        If the object cannot be converted, nothing is returned.
+
+        This is implemented as a separate method to allow the PyFile
+        object to be sublclassed and additional dynamics PyBase objects
+        to be added (for example to allow matching of section declarations
+        in py_gui objectes).
 
         Args:
-            force (bool): force reread children
+            ast_item (ast.Module): ast object to convert
             verbose (int): print process data
+
+        Returns:
+            (PyBase|None): def/class object (if any)
         """
         from psyhive.utils.py_file.class_ import PyClass
         from psyhive.utils.py_file.def_ import PyDef
         from psyhive.utils.py_file.file_ import PyFile
 
+        _name = getattr(ast_item, 'name', '-')
+        if not isinstance(self, PyFile):
+            _name = self.name+'.'+_name
+
+        lprint("FOUND", ast_item, verbose=verbose)
+        if isinstance(ast_item, ast.FunctionDef):
+            _obj = PyDef(ast_=ast_item, py_file=self.py_file, name=_name)
+        elif isinstance(ast_item, ast.ClassDef):
+            _obj = PyClass(ast_=ast_item, py_file=self.py_file, name=_name)
+        else:
+            _obj = None
+
+        return _obj
+
+    @store_result_on_obj
+    def _read_children(self, force=False):
+        """Read children of this object (executed on init).
+
+        Args:
+            force (bool): force reread children
+        """
         _ast = self.get_ast(force=force)
+
         _objs = []
-
         for _item in _ast.body:
-
-            _name = getattr(_item, 'name', '-')
-            if not isinstance(self, PyFile):
-                _name = self.name+'.'+_name
-
-            lprint("FOUND", _item, verbose=verbose)
-            if isinstance(_item, ast.FunctionDef):
-                _obj = PyDef(ast_=_item, py_file=self.py_file, name=_name)
-            elif isinstance(_item, ast.ClassDef):
-                _obj = PyClass(ast_=_item, py_file=self.py_file, name=_name)
-            else:
-                _obj = None
-
+            _obj = self._read_child(ast_item=_item)
             if _obj:
                 _objs.append(_obj)
 
         return _objs
+
+    def __cmp__(self, other):
+        return cmp(self.cmp_str, other.cmp_str)
+
+    def __hash__(self):
+        return hash(self.cmp_str)
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__, self.name)

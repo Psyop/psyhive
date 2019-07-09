@@ -103,12 +103,15 @@ class _CmdsMapper(object):
         elif name in ['sphere', 'loft']:
             return _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnNurbsSurface)
-        elif name in ['createNode', 'pathAnimation']:
+        elif name in ['createNode', 'pathAnimation', 'shadingNode']:
             return _get_result_mapper(
                 _fn, class_=hom.HFnDependencyNode)
-        elif name in ['polyCube', 'polyCylinder']:
+        elif name in ['polyCube', 'polyCylinder', 'polyPlane']:
             return _get_result_mapper(
-                _fn, list_idx=0, class_=hom.HFnTransform)
+                _fn, list_idx=0, class_=hom.HFnMesh)
+        elif name in ['cluster']:
+            return _get_result_mapper(
+                _fn, list_idx=1, class_=hom.HFnTransform)
         raise ValueError(name)
 
 

@@ -1,3 +1,41 @@
+#### v0.25.0 ####
+
+    Released: Mon 8th Jul 2019
+
+    frustrum test blast: added,
+    
+    bin:
+        lsfp added --win option,
+    maya_psyhive:
+        open_maya added HBoundingBox/HFnCamera/HFnMesh/HPlane/get_active_cam/HVRay/build_arrow,
+        open_maya.HPlug set_attr -> set_val,
+        ref.FileRef get_node/remove added,
+        tex.connect_place_2d added,
+        tools.frustrum_test_blast added,
+        ui.get_active_model_panel added,
+        utils add_node/freeze_viewports_on_exec/get_parent/is_visible/load_plugin/set_val added,
+        utils get_attr -> get_val,
+        utils add_attr -> create_attr,
+        host refresh/batch_mode added,
+        host.t_frames added inc,
+    psyhive:
+        icons.BROWSER added,
+        py_gui added section handling,
+        py_gui.hide_from_gui added,
+        qt.NICE_COLS added,
+        qt.HUiInterface.cast_to_standalone_app added,
+        qt.HUiInterface disable push buttons while executing,
+        qt.HPixmap.add_polygon added,
+        qt.HTabWidget added,
+        tk find_steps -> find_step_roots,
+        tk.cache added obtain_work/obtain_work_area/clear_caches,
+        utils.launch_browser added,
+        utils.obj_read renamed arg path -> file_,
+        utils.filter added required tokens,
+        utils.PyBase.docs added,
+        utils.Seq.contains added,
+
+
 #### v0.24.0 ####
 
     Released: Fri 14th Jun 2019

@@ -1,8 +1,11 @@
 """Tools for managing qt interfaces."""
 
+import ctypes
+import functools
 import os
 import sys
 import tempfile
+import time
 import types
 
 import six
@@ -13,7 +16,8 @@ from psyhive.utils import (
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import (
-    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget)
+    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget,
+    HTabWidget)
 from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
@@ -62,6 +66,7 @@ class HUiDialog(QtWidgets.QDialog):
         _loader.registerCustomWidget(HListWidget)
         _loader.registerCustomWidget(HPushButton)
         _loader.registerCustomWidget(HTextBrowser)
+        _loader.registerCustomWidget(HTabWidget)
         assert os.path.exists(ui_file)
         self.ui = _loader.load(ui_file, self)
         self._is_widget_ui = type(self.ui) is QtWidgets.QWidget
@@ -134,6 +139,37 @@ class HUiDialog(QtWidgets.QDialog):
 
         return _result
 
+    def cast_to_standalone_app(self,):
+        """Cast this dialog to a standalone app.
+
+        This applies maya colours, applies the icon to the task bar,
+        moves the ui layout onto top level dialog, and then closes the
+        ui element.
+        """
+        from psyhive import qt
+
+        if not isinstance(self.ui, QtWidgets.QDialog):
+            raise TypeError('Bad ui type '+type(self.ui).__name__)
+
+        _title = self.windowTitle()
+        _uid = time.strftime('%y%m%d_%H%M%S_'+_title)
+        _icon = self.windowIcon()
+        _app = qt.get_application()
+
+        # Mimic maya's colours outside maya
+        qt.set_maya_palette()
+
+        # Send icon to taskbar
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(_uid)
+        _app.setWindowIcon(_icon)
+
+        # Move ui layout to dialog
+        self.resize(self.ui.size())
+        self.setWindowTitle(_title)
+        self.setLayout(self.ui.layout())
+        self.ui.close()
+        self.show()
+
     def connect_widgets(
             self, catch_error_=False, track_usage_=True, verbose=0):
         """Connect widgets with redraw/callback methods.
@@ -161,6 +197,8 @@ class HUiDialog(QtWidgets.QDialog):
                         from psyhive.tools import get_error_catcher
                         _catcher = get_error_catcher(exit_on_error=False)
                         _callback = _catcher(_callback)
+                    _callback = _disable_while_executing(
+                        func=_callback, btn=_widget)
                 _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)
                 for _hook_name in [
@@ -249,16 +287,14 @@ class HUiDialog(QtWidgets.QDialog):
                 _widget.setText(_val)
             elif isinstance(_widget, (
                     QtWidgets.QRadioButton,
-                    QtWidgets.QCheckBox)):
+                    QtWidgets.QCheckBox,
+                    QtWidgets.QPushButton)):
                 if isinstance(_val, six.string_types):
                     _val = {'true': True, 'false': False}[_val]
                 if isinstance(_val, bool):
                     _widget.setChecked(_val)
                 else:
                     print ' - FAILED TO APPLY:', _widget, _val, type(_val)
-            elif isinstance(_widget, QtWidgets.QPushButton):
-                if _val:
-                    _widget.setChecked(_val)
             elif isinstance(_widget, QtWidgets.QListWidget):
                 for _row in range(_widget.count()):
                     _item = _widget.item(_row)
@@ -328,6 +364,10 @@ class HUiDialog(QtWidgets.QDialog):
             elif isinstance(_widget, (
                     QtWidgets.QRadioButton,
                     QtWidgets.QCheckBox)):
+                _val = _widget.isChecked()
+            elif (
+                    isinstance(_widget, QtWidgets.QPushButton) and
+                    _widget.isCheckable()):
                 _val = _widget.isChecked()
             elif isinstance(_widget, QtWidgets.QListWidget):
                 _val = [
@@ -399,6 +439,30 @@ def close_all_interfaces():
         print 'CLOSING', _dialog
         _dialog.delete()
         del sys.QT_DIALOG_STACK[_key]
+
+
+def _disable_while_executing(func, btn):
+    """Disable pushbutton while executing callback.
+
+    Args:
+        func (fn): callback function
+        btn (QPushButton): button executing callback
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _disable_during_exec_fn(*args, **kwargs):
+        from psyhive import qt
+        _app = qt.get_application()
+        btn.setEnabled(False)
+        host.refresh()
+        _result = func(*args, **kwargs)
+        btn.setEnabled(True)
+        return _result
+
+    return _disable_during_exec_fn
 
 
 def _get_default_parent():

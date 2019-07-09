@@ -28,6 +28,17 @@ class PyFile(File, PyBase):
             raise ValueError(path)
         PyBase.__init__(self, ast_=None, py_file=self, name=self.basename)
 
+    @property
+    def docs(self):
+        """Get docstrings for this module.
+
+        Since it requires reading the ast, it's stored as a property.
+
+        Returns:
+            (str): module docstrings
+        """
+        return ast.get_docstring(self.get_ast())
+
     def check_docs(self, recursive=True, verbose=0):
         """Check this file's docstrings.
 

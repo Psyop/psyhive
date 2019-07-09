@@ -61,12 +61,16 @@ def passes_filter(text, filter_, key=None, case_sensitive=False, verbose=0):
     # Parse filter str
     _matches = []
     _ignores = []
+    _required = []
     for _ftoken in _ftokens:
-        if _ftoken.startswith('-'):
+        if _ftoken.startswith('+'):
+            _required.append(_ftoken[1:])
+        elif _ftoken.startswith('-'):
             _ignores.append(_ftoken[1:])
         else:
             _matches.append(_ftoken)
 
+    # Get text to compare with
     if key:
         _text = key(text)
     else:
@@ -76,6 +80,12 @@ def passes_filter(text, filter_, key=None, case_sensitive=False, verbose=0):
     if not case_sensitive:
         _text = _text.lower()
     lprint('TESTING', _text, verbose=verbose)
+
+    # Check for required matches
+    lprint(' - REQUIRED', _required, verbose=verbose)
+    for _requirement in _required:
+        if _requirement not in _text:
+            return False
 
     # Check for matches
     lprint(' - MATCHES', _matches, verbose=verbose)

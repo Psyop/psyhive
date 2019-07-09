@@ -258,7 +258,7 @@ def get_result_to_file_storer(
             # Write to file
             try:
                 obj_write(
-                    _result, path=cache_file, create_dir=create_dir,
+                    _result, file_=cache_file, create_dir=create_dir,
                     verbose=max(verbose-1, 0))
             except (OSError, IOError):
                 pass
@@ -323,43 +323,43 @@ def get_result_to_file_storer(
     return _store_result_to_file
 
 
-def obj_read(path, verbose=0):
+def obj_read(file_, verbose=0):
     """Read a python object from file.
 
     Args:
-        path (str): path to read
+        file_ (str): path to read
         verbose (int): print process data
     """
     from psyhive.utils.path import abs_path
 
-    assert isinstance(path, six.string_types)
-    _path = abs_path(path)
+    assert isinstance(file_, six.string_types)
+    _path = abs_path(file_)
     if not os.path.exists(_path):
-        raise OSError("Path is missing {}".format(path))
+        raise OSError("Path is missing {}".format(_path))
 
     _file = open(_path, "r")
     try:
         _obj = cPickle.load(_file)
     except Exception as _exc:
         lprint(_exc, verbose=verbose)
-        raise ReadError(path)
+        raise ReadError(_path)
     _file.close()
 
     return _obj
 
 
-def obj_write(obj, path, create_dir=True, verbose=0):
+def obj_write(obj, file_, create_dir=True, verbose=0):
     """Write a python object to file.
 
     Args:
         obj (any): object to write
-        path (str): path to write object to
+        file_ (str): path to write object to
         create_dir (bool): create the parent dir if it doesn't exist
         verbose (int): print process data
     """
     from psyhive.utils.path import abs_path, test_path
 
-    _path = abs_path(path)
+    _path = abs_path(file_)
     lprint('WRITING TO', _path, verbose=verbose)
 
     if create_dir:
