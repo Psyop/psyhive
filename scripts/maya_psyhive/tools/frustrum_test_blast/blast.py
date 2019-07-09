@@ -6,7 +6,6 @@ from maya import cmds
 
 from psyhive import tk, py_gui
 from psyhive.utils import lprint, passes_filter, ints_to_str
-from hv_test import dev
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
@@ -47,7 +46,6 @@ class _Rig(ref.FileRef):
             passes_filter(_geo, '-_eye_Geo -_tongue_Geo -_teeth_Geo')]
 
 
-@dev.print_dur
 def _blast_and_find_rigs_outside_frustrum(
         cam, rigs, kwargs, sample_freq, verbose=1):
     """Execute blast, checking to find rigs outside frustrum.

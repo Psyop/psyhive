@@ -623,6 +623,10 @@ def search_files_for_text(
         win (bool): display paths in windows format
         edit (bool): open the first found instance in an editor and exit
         verbose (int): print process data
+
+    Returns:
+        (bool): whether search completed successfully - ie. if an instance
+            was found and the code was edited then false is returned
     """
     from psyhive import qt
 
@@ -643,9 +647,11 @@ def search_files_for_text(
             # Check if this line should be printed
             _print_line = False
             if _text_in_line:
+                lprint(' - MATCHED TEXT IN LINE', text, verbose=verbose)
                 _print_line = True
             elif filter_ and passes_filter(
                     _line, filter_, case_sensitive=True):
+                lprint(' - MATCHED FILTER IN LINE', filter_, verbose=verbose)
                 _print_line = True
 
             if _print_line:
@@ -656,13 +662,15 @@ def search_files_for_text(
                 _found_instance = True
                 if edit:
                     File(_file).edit(line_n=_idx+1)
-                    return
+                    return False
 
         if _printed_path:
             lprint()
 
     if not _found_instance:
         dprint('No instances found')
+
+    return True
 
 
 def test_path(dir_):

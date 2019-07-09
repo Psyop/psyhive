@@ -1,3 +1,15 @@
+#### v0.25.1 ####
+
+    Released: Tue 9th Jul 2019
+
+    frustrum test blast: fixed reference to bad module in code,
+    
+    maya_psyhive:
+        tools.frustrum_test_blast removed reference to hv_test.dev,
+    psyhive:
+        utils.search_files_for_text returns success status,
+
+
 #### v0.25.0 ####
 
     Released: Mon 8th Jul 2019
