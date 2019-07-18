@@ -1,5 +1,6 @@
 """Miscellaneous utility tools."""
 
+import copy
 import functools
 import os
 import pprint
@@ -416,17 +417,29 @@ def wrap_fn(func, *args, **kwargs):
 
     Args:
         func (fn): function to wrap
+        arg_to_kwarg (str): map the first arg to a kwargs of the given name
+        pass_data (bool): new function recieves args/kwargs on exec
 
     Returns:
         (fn): wrapped function
     """
-
+    _pass_data = kwargs.get('pass_data')
+    if _pass_data:
+        kwargs.pop('pass_data')
     _arg_to_kwarg = kwargs.get('arg_to_kwarg')
     if _arg_to_kwarg:
         kwargs.pop('arg_to_kwarg')
 
     @functools.wraps(func)
     def _wrapped_fn(*xargs, **xkwargs):
+
+        # Combine both args/kwargs
+        if _pass_data:
+            _args = list(args) + list(xargs)
+            _kwargs = copy.copy(kwargs)
+            for _key, _val in xkwargs.items():
+                _kwargs[_key] = _val
+            return func(*_args, **_kwargs)
 
         # Map an arg to kwarg
         if _arg_to_kwarg:

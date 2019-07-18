@@ -6,6 +6,12 @@ from psyhive import qt
 from psyhive.utils import lprint
 
 
+def clear_script_editor():
+    """Clear script editor text."""
+    _reporter = mel.eval('string $tmp = $gCommandReporter;')
+    cmds.cmdScrollFieldReporter(_reporter, edit=True, clear=True)
+
+
 def get_active_model_panel(as_editor=False, catch=False):
     """Get current active model panel.
 

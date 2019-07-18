@@ -10,7 +10,7 @@ import tank
 
 from tank.platform import current_engine
 
-from psyhive import pipe, host
+from psyhive import pipe
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
@@ -243,8 +243,9 @@ class TTWorkFileBase(TTBase, File):
         """
         super(TTWorkFileBase, self).__init__(
             path, hint=self.hint, verbose=verbose)
-        self.ver_fmt = self.path.replace(
-            'v{:03d}'.format(self.version), 'v{:03d}')
+        self.ver_fmt = '{}/{}'.format(
+            self.dir, self.filename.replace(
+                '_v{:03d}'.format(self.version), '_v{:03d}'))
 
     def find_latest(self, vers=None):
         """Find latest version of this work file stream.
@@ -253,10 +254,10 @@ class TTWorkFileBase(TTBase, File):
             vers (TTWorkFileBase list): override versions list
 
         Returns:
-            (TTWorkFileBase): latest version
+            (TTWorkFileBase|None): latest version (if any)
         """
         _vers = vers or self.find_vers()
-        return _vers[-1]
+        return _vers[-1] if _vers else None
 
     def find_next(self, vers=None):
         """Find next version.
@@ -267,10 +268,10 @@ class TTWorkFileBase(TTBase, File):
         Returns:
             (TTWorkFileBase): next version
         """
+        _data = copy.copy(self.data)
         _latest = self.find_latest(vers=vers)
-        _data = copy.copy(_latest.data)
-        _data['version'] = _latest.version + 1
-        _path = get_template(_latest.hint).apply_fields(_data)
+        _data['version'] = _latest.version + 1 if _latest else 1
+        _path = get_template(self.hint).apply_fields(_data)
         return self.__class__(_path)
 
     def find_output_names(self, verbose=0):
@@ -309,6 +310,7 @@ class TTWorkFileBase(TTBase, File):
         _ver_tmpl = get_template(self.output_version_type.hint)
 
         # Find vers that exist in each name
+        lprint('SEARCHING FOR VERSIONS', verbose=verbose)
         _vers = []
         for _name in self.find_output_names():
             _data = copy.copy(_name.data)
@@ -320,10 +322,12 @@ class TTWorkFileBase(TTBase, File):
         lprint('FOUND {:d} VERS'.format(len(_vers)), verbose=verbose)
 
         # Find output in each ver
+        lprint('SEARCHING FOR OUTPUTS', verbose=verbose)
         _outputs = []
         _seqs = []
         for _ver in _vers:
-            _files = _ver.find(type_='f', depth=2)
+            _files = _ver.find(type_='f', depth=3)
+            lprint(' - FOUND {:d} FILES'.format(len(_files)), verbose=verbose)
             for _file in _files:
 
                 # Ignore files already matched in seq
@@ -466,83 +470,65 @@ class TTWorkFileBase(TTBase, File):
         _fileops.open_file(
             _work_file, open=True, force=True, change_context=True)
 
-    def save(self, comment, verbose=0):
+    def save(self, comment):
         """Save this version.
 
         Args:
             comment (str): comment for version
-            verbose (int): print process data
         """
         _fileops = tank.platform.current_engine().apps['psy-multi-fileops']
         _handler = _fileops._fileops_handler
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
+        _prev = self.find_latest()
 
-        # Build tk objects
-        if not self.exists():  # Version up
+        assert not self.exists()  # Must be version up
 
-            lprint('VERSION UP', verbose=verbose)
-
-            # Get prev workfile
-            _prev = self.find_vers()[-1]
+        # Get prev workfile
+        if _prev:
             assert _prev.version == self.version - 1
-            _tk_workspace = _mod.get_workspace_from_path(
-                app=_fileops, path=_prev.path)
-            _tk_workfile = _mod.WorkfileModel(
-                workspace=_tk_workspace, template=_prev.tmpl,
-                path=_prev.path)
-            _tk_workfile = _tk_workfile.get_next_version()
-
-            # Save
-            _tk_workfile.save()
-
-        elif self.path == host.cur_scene():  # Save over
-            raise NotImplementedError
-            # _metadata = {'comment': self.get_comment()}
-            # print _handler.save_increment_file(metadata=_metadata)
-            # _tk_workspace = _mod.get_workspace_from_path(
-            #     app=_fileops, path=self.path)
-            # _tk_workfile = _mod.WorkfileModel(
-            #     workspace=_tk_workspace, template=self.tmpl,
-            #     path=self.path)
-
         else:
-            raise ValueError("Unhandled")
+            assert self.version == 1
+            raise NotImplementedError
+        _tk_workspace = _mod.get_workspace_from_path(
+            app=_fileops, path=_prev.path)
+        _tk_workfile = _mod.WorkfileModel(
+            workspace=_tk_workspace, template=_prev.tmpl,
+            path=_prev.path)
+        _tk_workfile = _tk_workfile.get_next_version()
+
+        # Save
+        _tk_workfile.save()
 
         # Save metadata
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
         _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
 
-    def set_comment(self, comment):
-        """Set comment for this work file.
 
-        Args:
-            comment (str): comment to apply
+class TTWorkIncrementBase(TTBase, File):
+    """Base class for any tank template increment file."""
+
+    maya_work_type = None
+
+    def get_work(self):
+        """Get work file this increment belongs to.
+
+        Returns:
+            (TTWorkFileBase): work file
         """
-        _work_area = self.get_work_area()
-        _metadata = copy.copy(_work_area.get_metadata(verbose=1))
+        _class = self.maya_work_type
+        return self.map_to(_class)
 
-        _updated = False
-        for _idx, _task_data in enumerate(_metadata['workfiles']):
-            if not _task_data['name'] == self.task:
-                continue
-            for _jdx, _ver_data in enumerate(_task_data['versions']):
-                if not _ver_data['version'] == self.version:
-                    continue
-                print 'UPDATE {} -> {}'.format(_ver_data['comment'], comment)
-                _updated = True
-                _versions = _metadata['workfiles'][_idx]['versions']
-                assert (
-                    _versions[_jdx]['comment'] ==
-                    _ver_data['comment'])
-                _versions[_jdx]['comment'] = comment
-                _work_area.set_metadata(_metadata)
-
-        if not _updated:
-            raise ValueError("Failed to update metadata "+self.path)
+    def load(self):
+        """Load this work file."""
+        _engine = tank.platform.current_engine()
+        _fileops = _engine.apps['psy-multi-fileops']
+        _work_file = _fileops.get_workfile_from_path(self.path)
+        _fileops.open_file(
+            _work_file, open=True, force=True, change_context=True)
 
 
-class TTOutputVerBase(TTDirBase):
+class TTOutputVersionBase(TTDirBase):
     """Base class for any tank template version dir."""
 
     task = None
@@ -557,7 +543,7 @@ class TTOutputVerBase(TTDirBase):
         """Find latest version.
 
         Returns:
-            (TTOutputVerBase): latest version
+            (TTOutputVersionBase): latest version
         """
         _vers = find(self.vers_dir, depth=1, type_='d', full_path=False)
         _data = copy.copy(self.data)
@@ -585,20 +571,52 @@ class TTOutputVerBase(TTDirBase):
         return self == self.find_latest()
 
 
+class TTOutputFileBase(TTBase, File):
+    """Base class for any output file tank template."""
+
+    output_file_type = None
+    output_type = None
+    output_version_type = None
+
+    def get_latest(self):
+        """Get latest version asset stream.
+
+        Returns:
+            (TTAssetOutputFile): latest asset output file
+        """
+        _ver = self.output_version_type(self.path)
+        _latest = _ver.find_latest()
+        _data = copy.copy(self.data)
+        _data['version'] = _latest.version
+        return self.output_file_type(self.tmpl.apply_fields(_data))
+
+    def is_latest(self):
+        """Check if this is the latest version.
+
+        Returns:
+            (bool): latest status
+        """
+        return self.get_latest() == self
+
+
 class TTOutputFileSeqBase(TTBase, Seq):
     """Represents a shout output file seq tank template path."""
 
-    def __init__(self, path):
+    exists = Seq.exists
+
+    def __init__(self, path, verbose=0):
         """Constructor.
 
         Args:
             path (str): file seq path
+            verbose (int): print process data
         """
         _tmpl = get_template(self.hint)
         try:
             _data = _tmpl.get_fields(path)
-        except tank.TankError:
-            raise ValueError
+        except tank.TankError as _exc:
+            lprint('TANK ERROR', _exc.message, verbose=verbose)
+            raise ValueError("Tank rejected path "+path)
         _data["SEQ"] = "%04d"
         _path = abs_path(_tmpl.apply_fields(_data))
         super(TTOutputFileSeqBase, self).__init__(

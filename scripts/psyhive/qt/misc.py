@@ -4,20 +4,23 @@ import sys
 
 import six
 
-from psyhive.utils import store_result
+from psyhive.utils import get_result_storer
 from psyhive.qt.wrapper.mgr import QtWidgets, QtCore, QtGui
 
 
-@store_result
-def get_application():
+@get_result_storer(ignore_args=True)
+def get_application(name='any'):
     """Get QApplication object.
+
+    Args:
+        name (str): name for application
 
     Returns:
         (QApplication): qt application
     """
     if 'maya.cmds' in sys.modules:
         return QtWidgets.QApplication.instance()
-    return QtWidgets.QApplication(['any'])
+    return QtWidgets.QApplication([name])
 
 
 def get_col(col):

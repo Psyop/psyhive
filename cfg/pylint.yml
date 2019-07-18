@@ -5,6 +5,8 @@ ignore:
         hv_test/diary/y19/d0517/pinterest_rip.py
     arguments-differ:
         hv_test/diary/entry.py
+    bare-except:
+        hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
         hv_test/diary/
         maya_psyhive/utils.py
@@ -15,9 +17,11 @@ ignore:
     eval-used:
         hv_test/diary/
         maya_psyhive/tools/batch_cache/tmpl_cache.py
+    exec-used:
+        hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     expression-not-assigned:
         psyhive/qt/interface.py
-        diary/y19/d0613/curve_to_image_test.py
+        hv_test/diary/y19/d0613/curve_to_image_test.py
     global-statement: '*'
     inconsistent-return-statements:
         hv_test/diary/
@@ -44,6 +48,7 @@ ignore:
         psyhive/tools/err_catcher.py
         hv_test/diary/
         hv_test/release/misc.py
+        hv_test/toolkits/release_tools.py
         hv_test/tools/cod_bro.py
         hv_test/tools/qube/hive_qube.py
         sanity_check/checks/maya/
@@ -140,5 +145,7 @@ no_member_libs:
     maya.utils
     OpenEXR
     pymel.core
+    PySide2.QtCore
     PySide2.QtWidgets
     sgtk
+    shiboken2

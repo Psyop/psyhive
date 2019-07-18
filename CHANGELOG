@@ -1,3 +1,37 @@
+#### v0.26.0 ####
+
+    Released: Wed 17th Jul 2019
+
+    clash short tools: added hud tool (jfievet),
+    image plane restore: added basic implementation (iirvin),
+    
+    maya_psyhive:
+        open_maya.base_node compare/find_downstream/load_preset/save_preset added,
+        open_maya.euler_rotation allow init from node,
+        ref.create_ref added class_ override,
+        startup added show toolkits,
+        tools.img_plane_restore added,
+        tools.batch_cache.CTTShotRoot.read_cache_data catch shot missing from shotgun,
+        ui.clear_script_editor added,
+    psyhive:
+        host.open_scene added,
+        icons track emojis used,
+        qt added HCheckBox/HListWidget/get_ui_loader,
+        qt.read_input added handling for parent arg,
+        qt.get_application allow app name override,
+        qt.HPixmap.add_overlay added resize arg,
+        qt.HPixmap.darken added,
+        qt.HListWidget.all_text added,
+        tk added TTWorkFileBase/obtain_cur_work/get_output,
+        tk._CTTWorkAreaBase.find_increments added,
+        tk._CTTWorkFileBase added find_caches/find_increments/find_latest/find_renders/find_seqs/get_metadata/get_work_area/set_comment,
+        utils.fr_enumerate added,
+        utils.get_result_storer fix ignore_args,
+        utils.wrap_fn added arg_to_kwarg/pass_data,
+        utils.PyDef.check_docs allow superfluous args with deferenced kwargs,
+        utils.Seq added basename/exists,
+
+
 #### v0.25.1 ####
 
     Released: Tue 9th Jul 2019

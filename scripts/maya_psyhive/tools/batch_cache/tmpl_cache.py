@@ -45,12 +45,19 @@ class CTTShotRoot(tk.TTShotRoot):
         _shotgun = tank.platform.current_engine().shotgun
         _project = pipe.cur_project()
 
+        # Get shot data
+        try:
+            _shot_data = tk.get_shot_data(self)
+        except RuntimeError:
+            print 'MISSING FROM SHOTGUN:', self
+            return {}
+
         # Request data from shotgun
         _sg_data = _shotgun.find(
             "PublishedFile", filters=[
                 ["project", "is", [tk.get_project_data(_project)]],
                 ["sg_format", "is", 'alembic'],
-                ["entity", "is", [tk.get_shot_data(self)]],
+                ["entity", "is", [_shot_data]],
             ],
             fields=["code", "name", "sg_status_list", "sg_metadata", "path"])
 

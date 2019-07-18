@@ -10,7 +10,7 @@ from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
-    get_owner, Cacheable, get_result_storer, Seq)
+    get_owner, Cacheable, get_result_storer, Seq, store_result_on_obj)
 from psyhive.utils.py_file.docs import MissingDocs
 
 _TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
@@ -32,6 +32,12 @@ class TestCache(unittest.TestCase):
         assert _val != _test.get_rand(2)
         assert _val != _Test().get_rand(1)
 
+        # Test ignore_args
+        @get_result_storer(ignore_args=True)
+        def _test(a):
+            return random.random()
+        assert _test(1) == _test(2)
+
     def test_store_result(self):
 
         @store_result
@@ -41,6 +47,16 @@ class TestCache(unittest.TestCase):
         _result = _test()
         assert _test() == _result
 
+    def test_store_result_on_obj(self):
+
+        class _Test():
+            @store_result_on_obj
+            def test(self, vers=None):
+                return random.random()
+        _inst = _Test()
+        _result = _inst.test()
+        assert _inst.test() == _result
+        assert _inst.test(vers=12123) == _result
 
 
 class TestPyFile(unittest.TestCase):
@@ -238,6 +254,17 @@ class TestUtils(unittest.TestCase):
             return a, b, c
         assert wrap_fn(_test, b=3)() == (1, 3, 3)
         assert wrap_fn(_test, arg_to_kwarg='c')(4) == (1, 2, 4)
+
+        # Test pass_data
+        def _test(*args, **kwargs):
+            return args, kwargs
+        assert _test() == ((), {})
+        assert _test(a=1) == ((), {'a': 1})
+        assert wrap_fn(_test)() == ((), {})
+        assert wrap_fn(_test, a=1)() == ((), {'a': 1})
+        assert wrap_fn(_test)(a=1) == ((), {})
+        assert wrap_fn(_test, arg_to_kwarg='test')(1) == ((), {'test': 1})
+        assert wrap_fn(_test, pass_data=True)(a=1) == ((), {'a': 1})
 
 
 if __name__ == '__main__':

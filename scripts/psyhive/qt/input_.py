@@ -21,8 +21,14 @@ def read_input(
     Returns:
         (any): entered data of requested type
     """
+    from psyhive import qt
     _locals = locals()
     _args = [parent] if parent else []
+
+    # Get pos
+    _pos = None
+    if parent:
+        _pos = parent.get_c()
 
     if type_ is str:
         _default = default or ''
@@ -32,6 +38,8 @@ def read_input(
         _dialog.setLabelText(msg)
         _dialog.setTextValue(_default)
         _dialog.resize(width, 100)
+        if _pos:
+            _dialog.move(_pos-qt.get_p(_dialog.size())/2)
         _responded = _dialog.exec_()
         _result = str(_dialog.textValue())
     elif type_ is int:

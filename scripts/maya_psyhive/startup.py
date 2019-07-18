@@ -4,10 +4,11 @@ import logging
 
 from maya import cmds
 
-from psyhive import icons, refresh, qt
+from psyhive import icons, refresh, qt, py_gui
 from psyhive.tools import track_usage
-from psyhive.utils import dprint, wrap_fn, get_single, lprint
-from maya_psyhive import ui
+from psyhive.utils import (
+    dprint, wrap_fn, get_single, lprint, File, str_to_seed)
+from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher, batch_cache
 
 _BUTTONS = {
@@ -48,6 +49,39 @@ def _add_elements_to_psyop_menu(verbose=0):
                 label=_data['label'])
 
 
+def _add_show_toolkits(parent):
+    """Add show toolkits options.
+
+    Args:
+        parent (str): parent menu
+    """
+    _shows = cmds.menuItem(
+        label='Shows', parent=parent, subMenu=True,
+        image=icons.EMOJI.find('Lion'))
+
+    _shows = File(shows.__file__).parent()
+    print 'SHOWS', _shows
+    for _py in _shows.find(extn='py', depth=1, type_='f'):
+        _file = File(_py)
+        if _file.basename.startswith('_'):
+            continue
+        print ' - ADDING FILE', _file
+        _rand = str_to_seed(_file.basename)
+        _icon = _rand.choice(icons.ANIMALS)
+        _cmd = '\n'.join([
+            'import {py_gui} as py_gui',
+            '_path = "{file}"',
+            '_title = "{title}"',
+            'py_gui.MayaPyGui(_path, title=_title, all_defs=True)',
+        ]).format(
+            py_gui=py_gui.__name__, file=_file.path,
+            title='{} tools'.format(_file.basename))
+        cmds.menuItem(
+            command=_cmd, image=_icon, label=_file.basename)
+
+    # for
+
+
 def _build_psyhive_menu():
     """Build psyhive menu."""
     _menu = ui.obtain_menu('PsyHive', replace=True)
@@ -63,15 +97,19 @@ def _build_psyhive_menu():
         'batch_cache.launch()']).format(batch_cache.__name__)
     cmds.menuItem(command=_cmd, image=batch_cache.ICON, label='Batch cache')
 
-    # Add reset settings
+    # Add show toolkits
     cmds.menuItem(divider=True)
+    _add_show_toolkits(_menu)
+
+    # Add reset settings
+    cmds.menuItem(divider=True, parent=_menu)
     _cmd = '\n'.join([
         'import {} as qt'.format(qt.__name__),
         'qt.reset_interface_settings()',
     ]).format()
     cmds.menuItem(
         label='Reset interface settings', command=_cmd,
-        image=icons.EMOJI.find('Shower'))
+        image=icons.EMOJI.find('Shower'), parent=_menu)
 
     # Add refresh
     _cmd = '\n'.join([
@@ -82,7 +120,7 @@ def _build_psyhive_menu():
         'cmds.evalDeferred(startup.user_setup)',
     ]).format()
     cmds.menuItem(
-        label='Reload libs', command=_cmd,
+        label='Reload libs', command=_cmd, parent=_menu,
         image=icons.EMOJI.find('Counterclockwise Arrows Button'))
 
     return _menu

@@ -4,9 +4,28 @@ from psyhive import host
 from psyhive.utils import File
 
 from psyhive.tk.templates.assets import (
-    TTMayaAssetIncrement, TTMayaAssetWork, TTAssetStepRoot)
+    TTMayaAssetIncrement, TTMayaAssetWork, TTAssetStepRoot,
+    TTAssetOutputFile)
 from psyhive.tk.templates.shots import (
-    TTMayaShotIncrement, TTMayaShotWork, get_shot, TTShotStepRoot)
+    TTMayaShotIncrement, TTMayaShotWork, get_shot, TTShotStepRoot,
+    TTShotOutputFile)
+
+
+def get_output(path):
+    """Get output from the given path.
+
+    Args:
+        path (str): path to convert to output object
+
+    Returns:
+        (TTOutputFileBase): output tank template object
+    """
+    for _type in [TTAssetOutputFile, TTShotOutputFile]:
+        try:
+            return _type(path)
+        except ValueError:
+            pass
+    return None
 
 
 def get_step_root(path, catch=True):
@@ -78,4 +97,7 @@ def cur_work(class_=None):
     Returns:
         (TTWorkFileBase): work file
     """
-    return get_work(host.cur_scene(), class_=class_)
+    _cur_scene = host.cur_scene()
+    if not _cur_scene:
+        return _cur_scene
+    return get_work(_cur_scene, class_=class_)

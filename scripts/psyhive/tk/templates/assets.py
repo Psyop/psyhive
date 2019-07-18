@@ -1,19 +1,23 @@
 """Tools for mananging asset type tank templates."""
 
-import copy
-
 from psyhive import pipe
 from psyhive.utils import find
 
 from psyhive.tk.templates.base import (
-    TTBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
-    TTRootBase, TTStepRootBase, TTDirBase, TTOutputFileSeqBase)
+    TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
+    TTRootBase, TTStepRootBase, TTDirBase, TTOutputFileSeqBase,
+    TTWorkIncrementBase, TTOutputFileBase)
 
 
 class _TTAssetCpntBase(object):
     """Base class for any asset component tank template."""
 
     work_area_maya_hint = 'asset_work_area_maya'
+
+    @property
+    def maya_inc_type(self):
+        """Get maya work increment type."""
+        return TTMayaAssetIncrement
 
     @property
     def maya_work_type(self):
@@ -69,7 +73,7 @@ class TTAssetStepRoot(_TTAssetCpntBase, TTStepRootBase):
     hint = 'asset_step_root'
 
 
-class TTAssetWorkAreaMaya(TTWorkAreaBase, _TTAssetCpntBase):
+class TTAssetWorkAreaMaya(_TTAssetCpntBase, TTWorkAreaBase):
     """Represents a tank asset work area for maya."""
 
     hint = 'asset_work_area_maya'
@@ -83,25 +87,25 @@ class TTMayaAssetWork(_TTAssetCpntBase, TTWorkFileBase):
     work_area_type = TTAssetWorkAreaMaya
 
 
-class TTMayaAssetIncrement(TTWorkFileBase):
+class TTMayaAssetIncrement(_TTAssetCpntBase, TTWorkIncrementBase):
     """Represents a tank asset work file for maya."""
 
     hint = 'maya_asset_increment'
 
 
-class TTAssetOutputRoot(TTDirBase):
+class TTAssetOutputRoot(_TTAssetCpntBase, TTDirBase):
     """Represents a tank asset output name."""
 
     hint = 'asset_output_root'
 
 
-class TTAssetOutputName(TTDirBase):
+class TTAssetOutputName(_TTAssetCpntBase, TTDirBase):
     """Represents a tank asset output name."""
 
     hint = 'asset_output_name'
 
 
-class TTAssetOutputVersion(TTOutputVerBase):
+class TTAssetOutputVersion(_TTAssetCpntBase, TTOutputVersionBase):
     """Represents an tank asset output version."""
 
     asset = None
@@ -127,32 +131,12 @@ class TTAssetOutputVersion(TTOutputVerBase):
         return TTAssetOutputName(self.path)
 
 
-class TTAssetOutputFile(TTBase):
+class TTAssetOutputFile(_TTAssetCpntBase, TTOutputFileBase):
     """Represents an tank asset output file."""
 
     hint = 'asset_output_file'
     sg_asset_type = None
     version = None
-
-    def get_latest(self):
-        """Get latest version asset stream.
-
-        Returns:
-            (TTAssetOutputFile): latest asset output file
-        """
-        _ver = TTAssetOutputVersion(self.path)
-        _latest = _ver.find_latest()
-        _data = copy.copy(self.data)
-        _data['version'] = _latest.version
-        return TTAssetOutputFile(self.tmpl.apply_fields(_data))
-
-    def is_latest(self):
-        """Check if this is the latest version.
-
-        Returns:
-            (bool): latest status
-        """
-        return self.get_latest() == self
 
 
 class TTAssetOutputFileSeq(TTOutputFileSeqBase, _TTAssetCpntBase):

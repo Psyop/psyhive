@@ -297,7 +297,7 @@ def abs_path(path, win=False, root=None, verbose=0):
     return _path
 
 
-def diff(left, right, tool=None, label=None):
+def diff(left, right, tool=None, label=None, check_extn=True):
     """Show diffs between two files.
 
     Args:
@@ -305,10 +305,13 @@ def diff(left, right, tool=None, label=None):
         right (str): path to right file
         tool (str): diff tool to use
         label (str): label to pass to diff tool
+        check_extn (bool): check extension is approved (to avoid
+            binary compares)
     """
     _tool = tool or os.environ.get('PSYHIVE_DIFF_EXE') or 'Diffinity'
-    assert not filecmp.cmp(left, right)
-    if not File(left).extn in [None, 'py', 'yml']:
+    if filecmp.cmp(left, right):
+        raise RuntimeError("Files are identical")
+    if check_extn and not File(left).extn in [None, 'py', 'yml']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

@@ -1,6 +1,6 @@
 from maya import cmds
 
-from maya_psyhive.utils import set_namespace, add_attr, get_attr
+from maya_psyhive.utils import set_namespace, create_attr, get_val
 import unittest
 
 
@@ -16,5 +16,5 @@ class TestUtils(unittest.TestCase):
                 ('my_int', 1),
         ]:
             _attr = _cube+'.'+_name
-            add_attr(_attr, _val)
-            assert get_attr(_attr) == _val
+            create_attr(_attr, _val)
+            assert get_val(_attr) == _val

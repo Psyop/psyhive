@@ -127,17 +127,19 @@ class FileRef(object):
             type(self).__name__.strip('_'), self.namespace)
 
 
-def create_ref(file_, namespace):
+def create_ref(file_, namespace, class_=None):
     """Create a reference.
 
     Args:
         file_ (str): path to reference
         namespace (str): reference namespace
+        class_ (type): override FileRef class
 
     Returns:
         (FileRef): reference
     """
     _file = File(file_)
+    _class = class_ or FileRef
 
     # Test for existing
     cmds.namespace(set=":")
@@ -156,7 +158,7 @@ def create_ref(file_, namespace):
     # Find new reference node
     _ref = get_single(set(cmds.ls(type='reference')).difference(_cur_refs))
 
-    return FileRef(_ref)
+    return _class(_ref)
 
 
 def find_ref(
@@ -246,7 +248,7 @@ def obtain_ref(file_, namespace, class_=None):
         assert _ref.path == file_
         return _ref
 
-    return create_ref(file_=file_, namespace=namespace)
+    return create_ref(file_=file_, namespace=namespace, class_=class_)
 
 
 def _read_refs(class_=None):

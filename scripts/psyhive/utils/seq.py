@@ -21,8 +21,9 @@ class Seq(object):
         _file = File(self.path)
         self.dir = _file.dir
         self.extn = _file.extn
-        assert '%04d' in self.path
+        assert _file.filename.count('.%04d.') == 1
         self.frame_expr = '%04d'
+        self.basename = _file.filename.split('.%04d.')[0]
         if frames:
             self.set_frames(frames)
 
@@ -74,6 +75,17 @@ class Seq(object):
         for _path in self.get_paths():
             os.remove(_path)
         self.get_frames(force=True)
+
+    def exists(self, force=False):
+        """Test if this image sequence exists.
+
+        Args:
+            force (bool): force reread frames from disk
+
+        Returns:
+            (bool): whether sequence exists
+        """
+        return bool(self.get_frames(force=force))
 
     @store_result_on_obj
     def get_frames(self, frames=None, force=False):

@@ -289,7 +289,7 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     _kwargs = {}
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
-    elif _type in ['float', 'long', 'doubleLinear', 'float3']:
+    elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double']:
         pass
     else:
         raise ValueError(_type)

@@ -20,7 +20,7 @@ class HEulerRotation(om.MEulerRotation):
             node (str): node to apply rotations to
         """
         _degrees = [math.degrees(_val) for _val in self]
-        cmds.setAttr(node+'.rotateOrder', self.order)
+        cmds.setAttr(str(node)+'.rotateOrder', self.order)
         cmds.xform(node, rotation=_degrees, worldSpace=True)
 
 

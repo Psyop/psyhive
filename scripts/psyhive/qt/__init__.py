@@ -1,8 +1,8 @@
 """Tools for managing qt."""
 
 from psyhive.qt.wrapper import (
-    QtCore, QtGui, QtWidgets, QtUiTools, HPushButton,
-    HLabel, HTreeWidgetItem, HListWidgetItem,
+    QtCore, QtGui, QtWidgets, QtUiTools, HPushButton, HCheckBox,
+    HLabel, HTreeWidgetItem, HListWidgetItem, HListWidget,
     HPixmap, HColor, X_AXIS, Y_AXIS, Qt)
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (
@@ -11,7 +11,7 @@ from psyhive.qt.constants import COLS, NICE_COLS
 
 from psyhive.qt.interface import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
-    reset_interface_settings)
+    reset_interface_settings, get_ui_loader)
 
 from psyhive.qt.dialog import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,

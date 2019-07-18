@@ -89,7 +89,7 @@ class PyDef(PyBase):
                 raise MissingDocs('Arg {} missing desc'.format(_ast_arg.id))
         if len(_ast_args) > len(_docs.args):
             raise MissingDocs('Docs are missing args')
-        elif len(_ast_args) < len(_docs.args):
+        elif len(_ast_args) < len(_docs.args) and not self._ast.args.kwarg:
             raise MissingDocs('Docs have superfluous args')
 
     def get_docs_suggestion(self, verbose=0):

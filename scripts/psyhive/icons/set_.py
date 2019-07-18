@@ -10,6 +10,8 @@ from psyhive.utils import (
     Seq, store_result_on_obj, lprint, read_file,
     File, apply_filter, get_single, store_result)
 
+_FOUND_EMOJIS = set()
+
 
 class _Emoji(File):
     """Represents an emoji image file."""
@@ -84,7 +86,9 @@ class EmojiSet(Seq):
         Returns:
             (str): path to emoji image file
         """
+        global _FOUND_EMOJIS
         _match = self.find_emoji(match, verbose=verbose)
+        _FOUND_EMOJIS.add(_match.name)
         return _match.path
 
     def find_emoji(self, match, verbose=0):

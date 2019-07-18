@@ -1,20 +1,24 @@
 """Tools relating to tank templates within shots."""
 
-from tank.platform import current_engine
-
 from psyhive import pipe
-from psyhive.utils import find
+from psyhive.utils import find, passes_filter
 
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import (
-    TTBase, TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVerBase,
-    TTRootBase, TTStepRootBase, TTOutputFileSeqBase)
+    TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
+    TTRootBase, TTStepRootBase, TTOutputFileSeqBase, TTWorkIncrementBase,
+    TTOutputFileBase)
 
 
 class _TTShotCpntBase(object):
     """Base class for any template inside a shot."""
 
     path = None
+
+    @property
+    def maya_inc_type(self):
+        """Get maya work increment type."""
+        return TTMayaShotIncrement
 
     @property
     def maya_work_type(self):
@@ -68,10 +72,11 @@ class TTSequenceRoot(TTDirBase):
     hint = 'sequence_root'
     sequence = None
 
-    def find_shots(self, class_=None):
+    def find_shots(self, filter_=None, class_=None):
         """Find shots in this sequence.
 
         Args:
+            filter_ (str): filter by shot name
             class_ (TTShotRoot): override shot class
 
         Returns:
@@ -83,6 +88,8 @@ class TTSequenceRoot(TTDirBase):
             try:
                 _shot = _class(_path)
             except ValueError:
+                continue
+            if filter_ and not passes_filter(_shot.name, filter_):
                 continue
             _shots.append(_shot)
         return _shots
@@ -173,35 +180,25 @@ class TTMayaShotWork(_TTShotCpntBase, TTWorkFileBase):
     work_area_type = TTShotWorkAreaMaya
 
 
-class TTMayaShotIncrement(TTBase, _TTShotCpntBase):
+class TTMayaShotIncrement(_TTShotCpntBase, TTWorkIncrementBase):
     """Represents a maya work file increment file tank template."""
 
     hint = 'maya_shot_increment'
 
-    def get_work(self):
-        """Get work file this increment belongs to.
 
-        Returns:
-            (TTMayaShotWork): work file
-        """
-        _tmpl = current_engine().tank.templates['maya_shot_work']
-        _path = _tmpl.apply_fields(self.data)
-        return TTMayaShotWork(_path)
-
-
-class TTShotOutputRoot(TTDirBase, _TTShotCpntBase):
+class TTShotOutputRoot(_TTShotCpntBase, TTDirBase):
     """Represents a shot output root tank template path."""
 
     hint = 'shot_output_root'
 
 
-class TTShotOutputType(TTDirBase, _TTShotCpntBase):
+class TTShotOutputType(_TTShotCpntBase, TTDirBase):
     """Represents a shot output type tank template path."""
 
     hint = 'shot_output_type'
 
 
-class TTShotOutputName(TTDirBase, _TTShotCpntBase):
+class TTShotOutputName(_TTShotCpntBase, TTDirBase):
     """Represents a shot output name tank template path.
 
     This is the tank template for the versions dir.
@@ -210,7 +207,7 @@ class TTShotOutputName(TTDirBase, _TTShotCpntBase):
     hint = 'shot_output_name'
 
 
-class TTShotOutputVersion(TTOutputVerBase, _TTShotCpntBase):
+class TTShotOutputVersion(_TTShotCpntBase, TTOutputVersionBase):
     """Represents a shot output version tank template path."""
 
     output_name = None
@@ -228,12 +225,13 @@ class TTShotOutputVersion(TTOutputVerBase, _TTShotCpntBase):
             self.get_status())
 
 
-class TTShotOutputFile(TTBase):
+class TTShotOutputFile(_TTShotCpntBase, TTOutputFileBase):
     """Base class for any output file tank template."""
+
     hint = 'shot_output_file'
 
 
-class TTShotOutputFileSeq(TTOutputFileSeqBase, _TTShotCpntBase):
+class TTShotOutputFileSeq(_TTShotCpntBase, TTOutputFileSeqBase):
     """Represents a shot output file seq tank template path."""
 
     hint = 'shot_output_file_seq'

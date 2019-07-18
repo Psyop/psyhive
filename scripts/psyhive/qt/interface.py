@@ -60,13 +60,7 @@ class HUiDialog(QtWidgets.QDialog):
         super(HUiDialog, self).__init__(*_args)
 
         # Load ui file
-        _loader = QtUiTools.QUiLoader()
-        _loader.registerCustomWidget(HCheckBox)
-        _loader.registerCustomWidget(HLabel)
-        _loader.registerCustomWidget(HListWidget)
-        _loader.registerCustomWidget(HPushButton)
-        _loader.registerCustomWidget(HTextBrowser)
-        _loader.registerCustomWidget(HTabWidget)
+        _loader = get_ui_loader()
         assert os.path.exists(ui_file)
         self.ui = _loader.load(ui_file, self)
         self._is_widget_ui = type(self.ui) is QtWidgets.QWidget
@@ -515,6 +509,22 @@ def get_list_redrawer(default_selection='first'):
         return _redraw_list
 
     return _list_redrawer
+
+
+def get_ui_loader():
+    """Build ui loader object with psyhive overrides registered.
+
+    Returns:
+        (QUiLoader): ui loader
+    """
+    _loader = QtUiTools.QUiLoader()
+    _loader.registerCustomWidget(HCheckBox)
+    _loader.registerCustomWidget(HLabel)
+    _loader.registerCustomWidget(HListWidget)
+    _loader.registerCustomWidget(HPushButton)
+    _loader.registerCustomWidget(HTextBrowser)
+    _loader.registerCustomWidget(HTabWidget)
+    return _loader
 
 
 def list_redrawer(func):

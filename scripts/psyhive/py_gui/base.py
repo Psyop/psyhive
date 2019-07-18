@@ -262,11 +262,12 @@ class BasePyGui(object):
         dprint('Saved settings', self.settings_file, verbose=verbose)
         write_yaml(file_=self.settings_file, data=_settings)
 
-    def _set_section(self, section):
+    def _set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
 
         Args:
             section (_Section): section to apply
+            verbose (int): print process data
         """
 
 

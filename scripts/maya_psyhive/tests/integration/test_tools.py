@@ -33,6 +33,7 @@ class TestTools(unittest.TestCase):
             'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
             'output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
         _ref = ref.obtain_ref(namespace='archer', file_=_path, class_=_Rig)
+        assert isinstance(_ref, _Rig)
         _cam = hom.HFnCamera('persp')
         _pos = hom.HMatrix([
             0.95, 0.00, 0.31, 0.00, 0.08, 0.96, -0.26, 0.00, -0.29, 0.27,

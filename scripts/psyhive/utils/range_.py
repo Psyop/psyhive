@@ -188,6 +188,18 @@ def fr_range(count):
     return [1.0*_idx/(count-1) for _idx in range(count)]
 
 
+def fr_enumerate(list_):
+    """Enumerate the given list with fractional values 0.0 to 1.0.
+
+    Args:
+        list_ (list): values to enumerate
+
+    Returns:
+        (list): fractionally enumerated values
+    """
+    return zip(fr_range(len(list_)), list_)
+
+
 def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):
     """Convert a range string to a list of integers.
 

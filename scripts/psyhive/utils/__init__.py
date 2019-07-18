@@ -17,5 +17,6 @@ from psyhive.utils.path import (
     launch_browser)
 from psyhive.utils.py_file import (
     PyFile, MissingDocs, text_to_py_file, PyBase, PyDef, PyClass)
-from psyhive.utils.range_ import ints_to_str, str_to_ints, ValueRange, fr_range
+from psyhive.utils.range_ import (
+    ints_to_str, str_to_ints, ValueRange, fr_range, fr_enumerate)
 from psyhive.utils.seq import Seq, Collection

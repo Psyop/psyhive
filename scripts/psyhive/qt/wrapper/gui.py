@@ -269,7 +269,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawLine(_pt1.x(), _pt1.y(), _pt2.x(), _pt2.y())
         _pnt.end()
 
-    def add_overlay(self, pix, pos=None, anchor='TL', operation=None):
+    def add_overlay(
+            self, pix, pos=None, anchor='TL', operation=None, resize=None):
         """Add overlay to this pixmap.
 
         Args:
@@ -277,9 +278,12 @@ class HPixmap(QtGui.QPixmap):
             pos (QPoint|tuple): position of overlay
             anchor (str): anchor position
             operation (str): overlay mode
+            resize (int|QSize): apply resize to overlay
         """
         from psyhive import qt
         _pix = qt.get_pixmap(pix)
+        if resize:
+            _pix = _pix.resize(resize)
         _pos = qt.get_p(pos) if pos else QtCore.QPoint()
 
         # Set offset
@@ -464,6 +468,16 @@ class HPixmap(QtGui.QPixmap):
         _pnt.add_text(**_kwargs)
         _pnt.end()
 
+    def darken(self, factor):
+        """Darken this pixmap (1 makes the pixmap black).
+
+        Args:
+            factor (float): how much to darken
+        """
+        _tmp = HPixmap(self.size())
+        _tmp.fill(HColor(0, 0, 0, 255*factor))
+        self.add_overlay(_tmp, operation='mult')
+
     def get_c(self):
         """Get centre point of this pixmap.
 
@@ -517,8 +531,19 @@ class HPixmap(QtGui.QPixmap):
         self.save(abs_path(path, win=True), format=_fmt, quality=100)
         assert _file.exists()
 
-    def save_test(self):
-        """Save test image and copy it to pictures dir."""
+    def save_test(self, file_=None):
+        """Save test image and copy it to pictures dir.
+
+        Args:
+            file_ (str): override save file path - this can be used
+                to switch this method with a regular save
+
+        Returns:
+            (str): path to saved file
+        """
+        if file_:
+            self.save_as(file_, force=True)
+            return file_
         _tmp_file = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
         _pics_file = abs_path(time.strftime(
             '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))

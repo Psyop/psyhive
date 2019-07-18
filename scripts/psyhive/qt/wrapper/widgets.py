@@ -3,7 +3,7 @@
 from psyhive.utils import lprint
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, QtCore
-from psyhive.qt.misc import get_col, get_pixmap, get_p
+from psyhive.qt.misc import get_col, get_pixmap, get_p, get_icon
 
 
 def _dummy():
@@ -72,6 +72,14 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             (QListWidgetItem list): list of items
         """
         return [self.item(_idx) for _idx in range(self.count())]
+
+    def all_text(self):
+        """Get a list of all items text.
+
+        Returns:
+            (str list): item texts
+        """
+        return [str(_item.text()) for _item in self.all_items()]
 
     def select_data(self, items, verbose=0):
         """The items with text matching the given list.
@@ -186,16 +194,20 @@ class HMenu(QtWidgets.QMenu, HWidgetBase):
         _action.setEnabled(0)
         return _action
 
-    def add_menu(self, label):
+    def add_menu(self, label, icon=None):
         """Add sub menu to this one.
 
         Args:
             label (str): label for sub menu
+            icon (str|QPixmap): icon for menu
 
         Returns:
-            ():
+            (HMenu): menu instance
         """
         _menu = HMenu(label)
+        if icon:
+            _icon = get_icon(icon)
+            _menu.setIcon(_icon)
         self.addMenu(_menu)
         return _menu
 

@@ -36,7 +36,8 @@ def _clean_item(item, verbose=0):
     return item
 
 
-def _get_result_mapper(func, list_idx=None, class_=None, verbose=0):
+def _get_result_mapper(
+        func, list_idx=None, as_list=False, class_=None, verbose=0):
     """Get result mapper decorator.
 
     The faciliates the mapping of a maya.cmds function to open_maya
@@ -46,6 +47,7 @@ def _get_result_mapper(func, list_idx=None, class_=None, verbose=0):
         func (fn): function to map
         list_idx (int): indicates the result is a list and this index
             item should be returned
+        as_list (bool): resturn results as list
         class_ (type): convert the result to this class
         verbose (int): print process data
 
@@ -75,7 +77,11 @@ def _get_result_mapper(func, list_idx=None, class_=None, verbose=0):
 
         if list_idx is not None:
             _result = _result[list_idx]
-        if class_:
+
+        if as_list:
+            assert class_
+            _result = [class_(_result) for _result in _result]
+        elif class_:
             _result = class_(_result)
 
         lprint(' - RESULT', _result, type(_result), verbose=verbose)
@@ -94,25 +100,47 @@ class _CmdsMapper(object):
     def __getattr__(self, name):
         from maya_psyhive import open_maya as hom
         _fn = getattr(cmds, name)
-        if name in ['circle']:
-            return _get_result_mapper(
+
+        # Node
+        if name in ['createNode', 'pathAnimation', 'shadingNode']:
+            _result = _get_result_mapper(
+                _fn, class_=hom.HFnDependencyNode)
+        elif name in ['ls']:
+            _result = _get_result_mapper(
+                _fn, as_list=True, class_=hom.HFnDependencyNode)
+
+        # Transform
+        elif name in ['cluster']:
+            _result = _get_result_mapper(
+                _fn, list_idx=1, class_=hom.HFnTransform)
+        elif name in ['imagePlane']:
+            _result = _get_result_mapper(
+                _fn, list_idx=0, class_=hom.HFnTransform)
+
+        # Nurbs
+        elif name in ['circle']:
+            _result = _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnNurbsCurve)
         elif name in ['curve']:
-            return _get_result_mapper(
+            _result = _get_result_mapper(
                 _fn, class_=hom.HFnNurbsCurve)
         elif name in ['sphere', 'loft']:
-            return _get_result_mapper(
+            _result = _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnNurbsSurface)
-        elif name in ['createNode', 'pathAnimation', 'shadingNode']:
-            return _get_result_mapper(
-                _fn, class_=hom.HFnDependencyNode)
-        elif name in ['polyCube', 'polyCylinder', 'polyPlane']:
-            return _get_result_mapper(
+
+        # Other
+        elif name in [
+                'polyCube', 'polyCylinder', 'polyPlane', 'polySphere']:
+            _result = _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnMesh)
-        elif name in ['cluster']:
-            return _get_result_mapper(
-                _fn, list_idx=1, class_=hom.HFnTransform)
-        raise ValueError(name)
+        elif name in ['camera']:
+            _result = _get_result_mapper(
+                _fn, list_idx=0, class_=hom.HFnCamera)
+
+        else:
+            raise ValueError(name)
+
+        return _result
 
 
 CMDS = _CmdsMapper()

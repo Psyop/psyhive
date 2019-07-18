@@ -46,6 +46,18 @@ class TestTk(unittest.TestCase):
         _work = tk.TTMayaShotWork(_path)
         assert _work.get_metadata()
 
+    def test_get_output(self):
+
+        for _path in [
+                ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                 'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
+                 'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
+                ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+                 'rig/output/rig/rig_main/v016/assembly/'
+                 'archer_rig_main_v016.mb'),
+        ]:
+            assert tk.get_output(_path)
+
 
 if __name__ == '__main__':
     unittest.main()

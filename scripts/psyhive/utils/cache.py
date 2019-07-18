@@ -90,7 +90,7 @@ def get_result_storer(
         key (str): arg to use as a key (ie. ignore other arg values)
         timeout (float): cause the cached result to expire after this
             many seconds
-        ignore_args (str list): list of args to ignore as cache keys
+        ignore_args (bool): ignore all args (always return the same result)
         id_as_key (bool): use only the id of the first arg as the
             results key
         get_depend_var (fn): function to read a depend variable - if this
@@ -103,9 +103,6 @@ def get_result_storer(
     """
 
     def _store_result(func):
-
-        if not isinstance(ignore_args, (bool, int)):
-            raise TypeError('Bad ignore_args type')
 
         # Dicts are used for _depend_var/_read_time to avoid global errors
         _depend_var = {None: get_depend_var()} if get_depend_var else None

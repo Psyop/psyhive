@@ -281,6 +281,7 @@ def read_shd(shp, verbose=1):
     if not _se:
         lprint('No shading engine found:', _shp, verbose=verbose)
         return None
+    lprint('Shading engine:', _se, verbose=verbose > 1)
     _shd = get_single(cmds.listConnections(
         _se+'.surfaceShader', destination=False), catch=True)
     if not _shd:

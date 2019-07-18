@@ -294,11 +294,12 @@ class MayaPyGui(base.BasePyGui):
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=False)
 
-    def _set_section(self, section):
+    def _set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
 
         Args:
             section (_Section): section to apply
+            verbose (int): print process data
         """
         _col = qt.HColor(self.base_col).blacken(0.5)
         _frame = cmds.frameLayout(
@@ -307,4 +308,7 @@ class MayaPyGui(base.BasePyGui):
         )
         cmds.columnLayout(parent=_frame, adjustableColumn=1)
         cmds.separator(style='none', height=1, horizontal=True)
-        print '[py_gui.maya] SETTING SECTION', section, section.collapse
+
+        lprint(
+            '[py_gui.maya] SETTING SECTION', section, section.collapse,
+            verbose=verbose)

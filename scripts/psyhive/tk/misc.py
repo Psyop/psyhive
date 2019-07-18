@@ -53,6 +53,8 @@ def get_shot_data(shot):
             ["project", "is", [get_project_data(shot.project)]],
             ["code", "is", _sg_name],
         ])
+    if not _data:
+        raise RuntimeError('Shot missing from shotgun {}'.format(shot.name))
     _id = get_single(_data)['id']
     return {'type': 'Shot', 'id': _id, 'name': shot.name}
 
