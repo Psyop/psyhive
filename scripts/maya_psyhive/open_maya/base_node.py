@@ -8,7 +8,8 @@ from maya import cmds, mel
 
 import six
 
-from psyhive.utils import abs_path, diff, store_result, test_path, lprint
+from psyhive.utils import (
+    abs_path, diff, store_result, test_path, lprint, apply_filter)
 from maya_psyhive.utils import create_attr, get_unique, add_to_set
 from maya_psyhive.open_maya.plug import HPlug
 
@@ -79,12 +80,13 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
-    def find_downstream(self, depth=1, type_=None, verbose=0):
+    def find_downstream(self, depth=1, type_=None, filter_=None, verbose=0):
         """Find nodes downstream from this one.
 
         Args:
             depth (int): max
             type_ (str): apply type filter
+            filter_ (str): apply node name filter
             verbose (int): print process data
 
         Returns:
@@ -99,17 +101,19 @@ class BaseNode(object):
         for _conn in _this_conns:
             _conn = hom.HFnDependencyNode(_conn)
             _conns.add(_conn)
-            lprint(' '*(5-depth), 'ADDING', _conn)
+            lprint(' '*(5-depth), 'ADDING', _conn, verbose=0)
             if depth > 0:
                 _conns |= set(_conn.find_downstream(
                     depth=depth-1, verbose=verbose))
         _conns = sorted(_conns)
 
-        # Apply type filter
+        # Apply filters
         if type_:
             _conns = [
                 _conn for _conn in _conns
                 if _conn.object_type() == type_]
+        if filter_:
+            _conns = apply_filter(_conns, filter_, key=str)
 
         return _conns
 

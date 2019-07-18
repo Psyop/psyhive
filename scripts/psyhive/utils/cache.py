@@ -213,7 +213,8 @@ def get_result_storer(
 
 
 def get_result_to_file_storer(
-        get_depend_path=None, min_mtime=None, create_dir=True, verbose=0):
+        get_depend_path=None, min_mtime=None, create_dir=True,
+        max_age=None, verbose=0):
     """Build a decorator that stores the result of a function to a file.
 
     Args:
@@ -224,6 +225,8 @@ def get_result_to_file_storer(
             then it should be ignored
         create_dir (bool): create the dir of the cache file if it
             doesn't exist
+        max_age (float): if the age of the cache (in secs) is more than
+            this value then it should be ignored (ie. regenerated)
         verbose (int): print process data
     """
 
@@ -302,14 +305,17 @@ def get_result_to_file_storer(
                         ' - DEPEND PATH DID NOT OUTDATE CACHE',
                         verbose=verbose)
 
-            # Apply min mtime
-            if not _force and _cache_file and min_mtime:
+            # Apply age/mtime constraints
+            if not _force and _cache_file and (min_mtime or max_age):
                 if _cache_file_exists is None:
                     _cache_file_exists = os.path.exists(_cache_file)
-                if (
-                        _cache_file_exists and
-                        os.path.getmtime(_cache_file) < min_mtime):
-                    _force = True
+                if _cache_file_exists:
+                    _mtime = os.path.getmtime(_cache_file)
+                    _age = time.time() - _mtime
+                    if min_mtime and _mtime < min_mtime:
+                        _force = True
+                    elif max_age and _age > max_age:
+                        _force = True
 
             return _get_result(
                 key=_key, args=args, kwargs=kwargs, force=_force,

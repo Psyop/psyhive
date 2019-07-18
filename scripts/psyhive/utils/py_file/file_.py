@@ -110,7 +110,9 @@ class PyFile(File, PyBase):
         _sys_path = _sys_paths[-1]
         lprint('ROOT', _sys_path, verbose=verbose)
         _rel_path = rel_path(path=_path, root=_sys_path)
+        lprint('REL PATH', _rel_path, verbose=verbose)
         _mod_name = _rel_path.replace('.py', '').replace('/', '.')
+        lprint('MOD NAME', _mod_name, verbose=verbose)
 
         # Try to import the module
         if _mod_name not in sys.modules:

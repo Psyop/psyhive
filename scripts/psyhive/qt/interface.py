@@ -10,7 +10,6 @@ import types
 
 import six
 
-from psyhive import host
 from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode)
 
@@ -448,7 +447,7 @@ def _disable_while_executing(func, btn):
 
     @functools.wraps(func)
     def _disable_during_exec_fn(*args, **kwargs):
-        from psyhive import qt
+        from psyhive import qt, host
         _app = qt.get_application()
         btn.setEnabled(False)
         host.refresh()
@@ -465,6 +464,7 @@ def _get_default_parent():
     Returns:
         (QWidget): default parent
     """
+    from psyhive import host
     _parent = None
     if host.NAME == 'maya':
         from maya_psyhive import ui

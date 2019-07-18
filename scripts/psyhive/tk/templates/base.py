@@ -466,9 +466,7 @@ class TTWorkFileBase(TTBase, File):
         """Load this work file."""
         _engine = tank.platform.current_engine()
         _fileops = _engine.apps['psy-multi-fileops']
-        _work_file = _fileops.get_workfile_from_path(self.path)
-        _fileops.open_file(
-            _work_file, open=True, force=True, change_context=True)
+        _fileops.open_file(self.path)
 
     def save(self, comment):
         """Save this version.
@@ -575,6 +573,7 @@ class TTOutputFileBase(TTBase, File):
     """Base class for any output file tank template."""
 
     output_file_type = None
+    output_name = None
     output_type = None
     output_version_type = None
 

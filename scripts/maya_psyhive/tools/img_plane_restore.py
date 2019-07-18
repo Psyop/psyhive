@@ -59,12 +59,14 @@ def restore_img_plane(time_control, abc):
         _preset = '{}/{}.preset'.format(_abc.dir, _type)
         if not os.path.exists(_preset):
             print 'MISSING PRESET', _preset
+            return
         _presets.append(_preset)
 
     # Find camera node
     _time_ctrl = hom.HFnDependencyNode(time_control)
     _cam_shp = get_single(
-        _time_ctrl.find_downstream(type_='camera'), catch=True)
+        _time_ctrl.find_downstream(type_='camera', filter_=_abc.output_name),
+        catch=True)
     if not _cam_shp:
         print 'NO CAM FOUND'
         return

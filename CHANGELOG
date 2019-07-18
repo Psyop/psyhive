@@ -1,3 +1,18 @@
+#### v0.26.1 ####
+
+    Released: Thu 18th Jul 2019
+
+    qt: bugfix cyclical import error [PHD12369]
+    
+    maya_psyhive:
+        open_maya.base_node.find_downstream added filter_,
+        tools.img_plane_restore bugfix no planes found,
+    psyhive:
+        qt fixed cyclical import error,
+        tk.TTWorkFileBase.load enabled scene modified warning,
+        utils.get_result_to_file_storer
+
+
 #### v0.26.0 ####
 
     Released: Wed 17th Jul 2019
