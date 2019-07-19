@@ -1,10 +1,12 @@
 ignore:
     anomalous-backslash-in-string:
         hv_test/diary/y19/d0528/bro_tools_tests.py
+        hv_test/diary/y19/d0717/make_littlezoo_zip.py
     anomalous-unicode-escape-in-string:
         hv_test/diary/y19/d0517/pinterest_rip.py
     arguments-differ:
         hv_test/diary/entry.py
+        hv_test/diary/y19/d0718/cleanup_job.py
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
@@ -33,6 +35,8 @@ ignore:
         psyhive/host.py
     invalid-unary-operand-type:
         maya_psyhive/tools/fkik_switcher/system.py
+    line-too-long:
+        hv_test/diary/y19/d0717/make_littlezoo_zip.py
     missing-docstring: '*'
     no-member:
         hv_test/diary/

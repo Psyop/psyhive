@@ -462,11 +462,15 @@ class TTWorkFileBase(TTBase, File):
         """
         return self.work_area_type(self.path)
 
-    def load(self):
-        """Load this work file."""
+    def load(self, force=True):
+        """Load this work file.
+
+        Args:
+            force (bool): open with no scene modified warning
+        """
         _engine = tank.platform.current_engine()
         _fileops = _engine.apps['psy-multi-fileops']
-        _fileops.open_file(self.path)
+        _fileops.open_file(self.path, force=force)
 
     def save(self, comment):
         """Save this version.

@@ -17,6 +17,17 @@ COLS = (
     "pink", "orange", "lightyellow", "fadedgreen", "darktan", "tanyellow",
     "olivegreen", "woodgreen", "cyan", "greyblue", "purple", "crimson")
 
+_FPS_LOOKUP = {
+    23.97: "film",
+    23.98: "film",
+    24.0: "film",
+    25.0: "pal",
+    29.97: "ntsc",
+    30.0: "ntsc",
+    48.0: "show",
+    50.0: "palf",
+    60.0: "ntscf"}
+
 
 def restore_ns(func):
     """Decorator to execute a function, restoring the original namespace.
@@ -268,6 +279,83 @@ def freeze_viewports_on_exec(func, verbose=0):
     return _freeze_viewport_fn
 
 
+def get_fps():
+    """Get current frame rate.
+
+    Returns:
+        (float): fps
+    """
+    _unit = cmds.currentUnit(query=True, time=True)
+
+    for _fps, _name in reversed(_FPS_LOOKUP.items()):
+        if _fps in [23.98, 23.97, 29.97]:  # Ignore values that confuse maya
+            continue
+        if _unit == _name:
+            return _fps
+
+    try:
+        return float(_unit.replace("fps", ""))
+    except ValueError:
+        pass
+
+    raise RuntimeError("Unknown maya time unit: "+_unit)
+
+
+def get_ns_cleaner(namespace):
+    """Build a decorator that executes a function in a cleaned namespace.
+
+    This will empty the given namespace before executing the function,
+    and then revert to the root namespace after execution.
+
+    Args:
+        namespace (str): namespace to use during execution
+
+    Returns:
+        (fn): decorator
+    """
+
+    def _ns_cleaner(func):
+
+        @functools.wraps(func)
+        def _ns_clean_fn(*args, **kwargs):
+            set_namespace(namespace, clean=True)
+            _result = func(*args, **kwargs)
+            set_namespace(":")
+            return _result
+
+        return _ns_clean_fn
+
+    return _ns_cleaner
+
+
+def get_parent(node):
+    """Get parent of the given node.
+
+    Args:
+        node (str): node to read
+
+    Returns:
+        (str): parent node
+    """
+    return get_single(cmds.listRelatives(node, parent=True) or [], catch=True)
+
+
+def get_shp(node):
+    """Get the shape of the given node.
+
+    Args:
+        node (str): node to read
+
+    Returns:
+        (str): shape node
+    """
+    _shps = cmds.listRelatives(node, shapes=True, noIntermediate=True)
+    if not len(_shps) == 1:
+        raise ValueError("Multiple shapes found on {} - {}".format(
+            node, ', '.join(_shps)))
+    return get_single(_shps)
+
+
 def get_val(attr, type_=None, class_=None, verbose=0):
     """Read an attribute value.
 
@@ -302,34 +390,6 @@ def get_val(attr, type_=None, class_=None, verbose=0):
         else:
             _result = class_(_result)
     return _result
-
-
-def get_shp(node):
-    """Get the shape of the given node.
-
-    Args:
-        node (str): node to read
-
-    Returns:
-        (str): shape node
-    """
-    _shps = cmds.listRelatives(node, shapes=True, noIntermediate=True)
-    if not len(_shps) == 1:
-        raise ValueError("Multiple shapes found on {} - {}".format(
-            node, ', '.join(_shps)))
-    return get_single(_shps)
-
-
-def get_parent(node):
-    """Get parent of the given node.
-
-    Args:
-        node (str): node to read
-
-    Returns:
-        (str): parent node
-    """
-    return get_single(cmds.listRelatives(node, parent=True) or [], catch=True)
 
 
 def get_unique(name, verbose=0):
@@ -372,33 +432,6 @@ def get_unique(name, verbose=0):
             _clean_name = "%s%d" % (_clean_name, _idx)
 
     return _clean_name
-
-
-def get_ns_cleaner(namespace):
-    """Build a decorator that executes a function in a cleaned namespace.
-
-    This will empty the given namespace before executing the function,
-    and then revert to the root namespace after execution.
-
-    Args:
-        namespace (str): namespace to use during execution
-
-    Returns:
-        (fn): decorator
-    """
-
-    def _ns_cleaner(func):
-
-        @functools.wraps(func)
-        def _ns_clean_fn(*args, **kwargs):
-            set_namespace(namespace, clean=True)
-            _result = func(*args, **kwargs)
-            set_namespace(":")
-            return _result
-
-        return _ns_clean_fn
-
-    return _ns_cleaner
 
 
 def is_visible(node):

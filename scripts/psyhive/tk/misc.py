@@ -6,6 +6,26 @@ from psyhive import pipe, refresh
 from psyhive.utils import store_result, get_single
 
 
+def find_tank_app(name):
+    """Find tank app for the given name.
+
+    Args:
+        name (str): app name
+
+    Returns:
+        (SgtkApp): tank app
+    """
+    _engine = tank.platform.current_engine()
+    if name in _engine.apps:
+        return _engine.apps[name]
+    _suffix_match = get_single([
+        _key for _key in _engine.apps.keys()
+        if _key.split('-')[-1] == name], catch=True)
+    if _suffix_match:
+        return _engine.apps[_suffix_match]
+    raise RuntimeError('Could not find tank app '+name)
+
+
 def find_tank_mod(name, app=None):
     """Find a tank mod in sys.modules dict.
 
@@ -29,7 +49,6 @@ def get_project_data(project=None):
     Returns:
         (dict): search data
     """
-
     _project = project or pipe.cur_project()
     _data = tank.platform.current_engine().shotgun.find(
         "Project", filters=[["name", "is", _project.name]])

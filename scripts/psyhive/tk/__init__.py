@@ -1,7 +1,7 @@
 """Tools for interacting with tank/shotgun."""
 
 from psyhive.tk.misc import (
-    get_project_data, get_shot_data, find_tank_mod)
+    get_project_data, get_shot_data, find_tank_mod, find_tank_app)
 
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import TTWorkFileBase

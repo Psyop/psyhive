@@ -10,7 +10,8 @@ from psyhive.utils import (
     passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
-    get_owner, Cacheable, get_result_storer, Seq, store_result_on_obj)
+    get_owner, Cacheable, get_result_storer, Seq, store_result_on_obj,
+    get_result_to_file_storer)
 from psyhive.utils.py_file.docs import MissingDocs
 
 _TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
@@ -37,6 +38,19 @@ class TestCache(unittest.TestCase):
         def _test(a):
             return random.random()
         assert _test(1) == _test(2)
+
+        # Test max age
+        class _Test(object):
+            cache_fmt = '{}/test/{{}}.cache'.format(tempfile.gettempdir())
+            @get_result_to_file_storer(max_age=1)
+            def blah(self):
+                return random.random()
+        _test = _Test()
+        _val = _test.blah()
+        assert _val == _test.blah()
+        assert _val == _test.blah()
+        time.sleep(2)
+        assert _val != _test.blah()
 
     def test_store_result(self):
 

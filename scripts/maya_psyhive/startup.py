@@ -9,8 +9,7 @@ from psyhive.tools import track_usage
 from psyhive.utils import (
     dprint, wrap_fn, get_single, lprint, File, str_to_seed)
 from maya_psyhive import ui, shows
-from maya_psyhive.tools import fkik_switcher, batch_cache
-
+from maya_psyhive.tools import fkik_switcher
 _BUTTONS = {
     'IKFK': {
         'cmd': '\n'.join([
@@ -91,11 +90,17 @@ def _build_psyhive_menu():
         cmds.menuItem(
             command=_data['cmd'], image=_data['image'], label=_data['label'])
 
-    # Add batch cache
-    _cmd = '\n'.join([
-        'import {} as batch_cache',
-        'batch_cache.launch()']).format(batch_cache.__name__)
-    cmds.menuItem(command=_cmd, image=batch_cache.ICON, label='Batch cache')
+    # Add batch cache (not available at LittleZoo)
+    try:
+        from maya_psyhive.tools import batch_cache
+    except ImportError:
+        pass
+    else:
+        _cmd = '\n'.join([
+            'import {} as batch_cache',
+            'batch_cache.launch()']).format(batch_cache.__name__)
+        cmds.menuItem(
+            command=_cmd, image=batch_cache.ICON, label='Batch cache')
 
     # Add show toolkits
     cmds.menuItem(divider=True)

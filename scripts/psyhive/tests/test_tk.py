@@ -58,6 +58,11 @@ class TestTk(unittest.TestCase):
         ]:
             assert tk.get_output(_path)
 
+    def test_find_tank_app(self):
+
+        tk.find_tank_app('fileops')
+        tk.find_tank_app('psy-multi-fileops')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,7 @@
 ignore:
     E501:  // Line too long
-        diary/y19/d0517/pinterest_rip.py
+        hv_test/diary/y19/d0517/pinterest_rip.py
+        hv_test/diary/y19/d0717/make_littlezoo_zip.py
         sanity_check/
     E731:  // Lambda
         hv_test/diary/y19/d0531/colour_bro.py
@@ -9,3 +10,4 @@ ignore:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     W605:  // Redundant escape char
         hv_test/diary/y19/d0528/bro_tools_tests.py
+        hv_test/diary/y19/d0717/make_littlezoo_zip.py

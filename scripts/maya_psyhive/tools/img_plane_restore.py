@@ -6,7 +6,6 @@ apps respectively.
 
 import os
 
-from psyhive import tk
 from psyhive.utils import get_single, lprint, safe_zip
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import get_parent
@@ -45,6 +44,7 @@ def restore_img_plane(time_control, abc):
         time_control (str): exocortex time control name
         abc (str): path to output abc
     """
+    from psyhive import tk
 
     # Ignore non camera caches
     _abc = tk.get_output(abc)

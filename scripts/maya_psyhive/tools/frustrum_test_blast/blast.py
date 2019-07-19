@@ -4,7 +4,7 @@ import copy
 
 from maya import cmds
 
-from psyhive import tk, py_gui
+from psyhive import py_gui
 from psyhive.utils import lprint, passes_filter, ints_to_str
 
 from maya_psyhive import ref
@@ -22,6 +22,7 @@ class _Rig(ref.FileRef):
         Args:
             ref_node (str): reference node
         """
+        from psyhive import tk
         super(_Rig, self).__init__(ref_node)
         self.asset = tk.TTAssetOutputFile(self.path)
         if self.asset.sg_asset_type == 'camera':

@@ -1,9 +1,24 @@
+#### v0.27.0 ####
+
+    Released: Fri 19th Jul 2019
+
+    maya_psyhive tools: allow import w/o tank (for littlezoo)
+
+    maya_psyhive:
+        startup allow batch_catch unavailable (for littlezoo),
+        tools frustrum_test_blast/img_plane_restore allow import w/o tk,
+        utils added get_fps,
+    psyhive:
+        tk.find_tank_app added,
+        tk.TTWorkFileBase.load added force flag,
+
+
 #### v0.26.1 ####
 
     Released: Thu 18th Jul 2019
 
     qt: bugfix cyclical import error [PHD12369]
-    
+
     maya_psyhive:
         open_maya.base_node.find_downstream added filter_,
         tools.img_plane_restore bugfix no planes found,
@@ -19,7 +34,7 @@
 
     clash short tools: added hud tool (jfievet),
     image plane restore: added basic implementation (iirvin),
-    
+
     maya_psyhive:
         open_maya.base_node compare/find_downstream/load_preset/save_preset added,
         open_maya.euler_rotation allow init from node,
@@ -52,7 +67,7 @@
     Released: Tue 9th Jul 2019
 
     frustrum test blast: fixed reference to bad module in code,
-    
+
     maya_psyhive:
         tools.frustrum_test_blast removed reference to hv_test.dev,
     psyhive:
@@ -64,7 +79,7 @@
     Released: Mon 8th Jul 2019
 
     frustrum test blast: added,
-    
+
     bin:
         lsfp added --win option,
     maya_psyhive:
@@ -102,7 +117,7 @@
     Released: Fri 14th Jun 2019
 
     batch cache: fix error on launch
-    
+
     bin:
         applying linting,
     maya_psyhive:
@@ -137,7 +152,7 @@
     Released: Tue 28th May 2019
 
     batch cache: allow selection of shots/workfiles to cache
-    
+
     maya_psyhive:
         tools.batch_cache added refresh levels to allow select shots to cache,
         utils.use_tmp_ns added,
@@ -157,7 +172,7 @@
     Released: Fri 24th May 2019
 
     batch cache: added handling for cameras
-    
+
     maya_psyhive:
         tools.batch_cache added handling for cams,
         tools.batch_cache catch no namespace matches found,
@@ -173,7 +188,7 @@
     Released: Fri 24th May 2019
 
     batch cache: fix issues with maya QWidget ui
-    
+
     psyhive:
         qt.HUiDialog fix maya parenting for widget ui,
         qt.HUiDialog fix maya resizing issue,
@@ -186,7 +201,7 @@
     Released: Wed 22nd May 2019
 
     batch cache: bugfix dialog no show after read data
-    
+
     maya_psyhive:
         tools.batch_cache bugfix missing show after read data,
     psyhive:
@@ -198,7 +213,7 @@
     Released: Wed 22nd May 2019
 
     multi select: use QWidget not QDialog for stability for kcassidy deleted c++ issue
-    
+
     maya_psyhive:
         startup added reset interface settings option,
     psyhive:
@@ -213,7 +228,7 @@
     Released: Wed 22nd May 2019
 
     batch cache: use QWidget not QDialog for stability for kcassidy deleted c++ issue
-    
+
     maya_psyhive:
         tools.batch_cache use QWidget not QDialog for stability,
     psyhive:
@@ -226,7 +241,7 @@
     Released: Wed 22nd May 2019
 
     multi select: store dialog in global for kcassidy deleted c++ issue
-    
+
     maya_psyhive:
         tools.batch_cache pass dialog to progress/multi_select children,
         tools.batch_cache added usage tracker,
@@ -241,7 +256,7 @@
     Released: Wed 22nd May 2019
 
     qt interface: check settings file writable on init,
-    
+
     psyhive:
         qt.HUiDialog touch settings file on init,
         tk.TTWorkFileBase.find_next added,
@@ -255,7 +270,7 @@
     Released: Wed 22nd May 2019
 
     PsyHive menu: rebuild menu on reload libs
-    
+
     maya_psyhive.startup: reload libs also rebuilds menu
 
 
@@ -264,7 +279,7 @@
     Released: Wed 22nd May 2019
 
     batch cache tool: added,
-    
+
     maya_psyhive:
         tools recacher -> batch_cache,
     psyhive:
@@ -298,7 +313,7 @@
     Released: Wed 15th May 2019
 
     FK/IK Switcher + Recacher: added usage track on launch
-    
+
     maya_psyhive:
         tools fkik_switcher/recacher added usage tracker,
         tools.recacher.recache_work_file made public,
@@ -313,7 +328,7 @@
     Released: Wed 15th May 2019
 
     recacher tool: added
-    
+
     maya_psyhive:
         startup added recacher to PsyHive menu,
         tools.fkik_switcher.ICON added,
@@ -348,7 +363,7 @@
     Released: Tue 7th May 2019
 
     fkik switcher: changes to allow tool to be sent to LittleZoo
-    
+
     bin:
         lsfp list dir if no arg passed,
     maya_psyhive:
@@ -372,7 +387,7 @@
     Released: Tue 30th Apr 2019
 
     startup: fixed build ui error on farm (ccessaro)
-    
+
     maya_psyhive:
         ref namespace/_file unicode -> str,
         ref.FileRef.path added,
@@ -406,10 +421,10 @@
 
     Released: Tue 23rd Apr 2019
 
-    FK/IK tools: 
+    FK/IK tools:
         ik -> fk account for ik stretch,
         fk -> ik reset foot offsets,
-    
+
     maya_psyhive:
         open_maya added HEulerRotation/get_r,
         open_maya.HMatrix added mul/sub/inverse/pprint/eq,
@@ -494,7 +509,7 @@
 
 #### v0.9.0 ####
 
-    startup: fixed FK/IK option, 
+    startup: fixed FK/IK option,
     FK/IK switcher: use range from timeline,
 
     maya_psyhive:

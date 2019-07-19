@@ -1,9 +1,15 @@
+import os
 import unittest
 
+from maya import cmds
+
+from psyhive import tk
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
+from maya_psyhive.utils import use_tmp_ns
 
-from maya_psyhive.tools import fkik_switcher
+from maya_psyhive.tools import (
+    fkik_switcher, batch_cache, export_img_plane, restore_img_plane)
 from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
@@ -17,7 +23,6 @@ class TestTools(unittest.TestCase):
         _shot = CTTShotRoot(_path)
         _shot.read_work_files(force=True)
 
-        from maya_psyhive.tools import batch_cache
         _dialog = batch_cache.launch()
         _dialog.close()
 
@@ -49,6 +54,55 @@ class TestTools(unittest.TestCase):
         # Test remove rigs ui
         _dialog = remove_rigs.launch([_ref], exec_=False)
         _dialog.close()
+
+    def test_restore_image_plane(self):
+        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                 'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
+        tk.get_work(_path).load(force=True)
+        assert not cmds.ls(type='imagePlane')
+        for _path, _time_ctrl in [
+                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                  'tracking/output/camcache/imagePlaneTest_animCam/v053/'
+                  'alembic/dev0000_imagePlaneTest_animCam_v053.abc'),
+                'animCam:AlembicTimeControl'),
+                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                  'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
+                  'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
+                'renderCam:AlembicTimeControl'),
+                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                  'tracking/output/camcache/imagePlaneTest_badCam/v053/'
+                  'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
+                'badCam:AlembicTimeControl')]:
+            restore_img_plane(time_control=_time_ctrl, abc=_path)
+        assert cmds.ls(type='imagePlane')
+
+    @use_tmp_ns
+    def test_write_image_plane(self):
+        """Write image plane settings to output abc dir."""
+        _img = (r"\\la1nas006\homedir\hvanderbeek\Desktop"
+                r"\tumblr_p3gzfbykSP1rv4b7io1_1280.png")
+        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+                'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
+                'dev0000_imagePlaneTest_renderCam_v047.abc')
+        _presets = [
+            ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
+             'camera.preset'),
+            ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
+             'imagePlane.preset')]
+
+        for _preset in _presets:
+            if os.path.exists(_preset):
+                os.remove(_preset)
+
+        _cam = hom.CMDS.camera()
+        _img_plane = hom.CMDS.imagePlane(camera=_cam, fileName=_img)
+
+        export_img_plane(camera='renderCamShape', abc=_abc)
+
+        for _preset in _presets:
+            assert os.path.exists(_preset)
 
 
 if __name__ == '__main__':

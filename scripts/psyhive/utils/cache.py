@@ -41,9 +41,12 @@ def build_cache_fmt(path, namespace):
     """
     from psyhive.utils.path import Path, abs_path
     _path = Path(path)
+
     return abs_path(
         '{tmp}/{namespace}/cache/{dir}/{base}_{{}}.cache'.format(
-            tmp=tempfile.gettempdir(), dir=_path.dir, base=_path.basename,
+            tmp=tempfile.gettempdir(),
+            dir=_path.dir.replace(':', ''),
+            base=_path.basename,
             namespace=namespace))
 
 
