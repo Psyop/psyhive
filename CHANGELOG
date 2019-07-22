@@ -1,3 +1,14 @@
+#### v0.28.1 ####
+
+    Released: Mon 22nd Jul 2019
+
+    FK/IK switcher: bugfix error on apply
+    
+    maya_psyhive:
+        open_maya.base_node added select/__add__,
+        tools.fkik_switcher fix error on apply + added test,
+
+
 #### v0.28.0 ####
 
     Released: Mon 22nd Jul 2019

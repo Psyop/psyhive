@@ -64,7 +64,7 @@ class _FkIkSystem(object):
 
         self.ik_ = rig.get_node('{side}_{limb}Ik_Ctrl'.format(**_names))
         self.ik_pole = rig.get_node('{side}_{limb}Pole_Ctrl'.format(**_names))
-        self.ik_pole_rp = self.ik_pole+'.rotatePivot'
+        self.ik_pole_rp = self.ik_pole.plug('rotatePivot')
 
         self.ik_offs = ['{}.{offset}_Offset'.format(self.ik_, **_names)]
         if self.limb == 'leg':
@@ -125,7 +125,7 @@ class _FkIkSystem(object):
 
         # Apply vals to ik ctrls
         if apply_:
-            cmds.setAttr(self.gimbal+'.FK_IK', 1)
+            self.gimbal.plug('FK_IK').set_val(1)
             lprint('SET', self.ik_, 'TO IK', verbose=verbose)
 
         if build_tmp_geo:
@@ -153,7 +153,7 @@ class _FkIkSystem(object):
             _mtx.apply_to(self.fk_ctrls[_idx])
 
         if apply_:
-            cmds.setAttr(self.gimbal+'.FK_IK', 0)
+            self.gimbal.plug('FK_IK').set_val(0)
             lprint('SET', self.ik_, 'TO FK', verbose=verbose)
 
     @single_undo
@@ -268,7 +268,7 @@ class _FkIkSystem(object):
         """Get attrs to key for this system."""
         _attrs = []
         for _fk_ctrl in self.fk_ctrls:
-            _attrs += [_fk_ctrl+'.r'+_axis for _axis in 'xyz']
+            _attrs += [str(_fk_ctrl)+'.r'+_axis for _axis in 'xyz']
         _attrs += [self.ik_pole+'.t'+_axis for _axis in 'xyz']
         _attrs += [self.ik_+'.t'+_axis for _axis in 'xyz']
         _attrs += [self.ik_+'.r'+_axis for _axis in 'xyz']

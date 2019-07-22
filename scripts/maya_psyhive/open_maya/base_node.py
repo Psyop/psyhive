@@ -248,6 +248,13 @@ class BaseNode(object):
         shutil.move(_file, file_)
         return file_
 
+    def select(self, **kwargs):
+        """Wrapper for cmds.select as applied to this node."""
+        cmds.select(self, **kwargs)
+
+    def __add__(self, other):
+        return str(self)+other
+
     def __cmp__(self, other):
         return cmp(str(self), str(other))
 

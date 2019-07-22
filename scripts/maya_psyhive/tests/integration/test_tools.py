@@ -14,6 +14,10 @@ from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
 
+_RIG_PATH = (
+    'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
+    'output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
+
 
 class TestTools(unittest.TestCase):
 
@@ -31,13 +35,18 @@ class TestTools(unittest.TestCase):
         _dialog = fkik_switcher.launch_interface()
         _dialog.ui.close()
 
+        _ref = ref.obtain_ref(namespace='archer', file_=_RIG_PATH)
+        _ctrl = _ref.get_node('Lf_armIk_Ctrl')
+        _ctrl.select()
+        _system = fkik_switcher.get_selected_system()
+        _system.get_key_attrs()
+        _system.apply_ik_to_fk()
+        _system.apply_fk_to_ik()
+
     def test_frustrum_test_blast(self):
 
         # Test frustrum test
-        _path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
-            'output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
-        _ref = ref.obtain_ref(namespace='archer', file_=_path, class_=_Rig)
+        _ref = ref.obtain_ref(namespace='archer', file_=_RIG_PATH, class_=_Rig)
         assert isinstance(_ref, _Rig)
         _cam = hom.HFnCamera('persp')
         _pos = hom.HMatrix([
