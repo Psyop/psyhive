@@ -5,6 +5,7 @@ import copy
 from maya import cmds
 
 from psyhive import py_gui
+from psyhive.tools import track_usage
 from psyhive.utils import lprint, passes_filter, ints_to_str
 
 from maya_psyhive import ref
@@ -123,6 +124,7 @@ def _rig_in_cam(cam, rig):
 
 
 @py_gui.hide_from_gui
+@track_usage
 def blast_with_frustrum_check(kwargs, sample_freq=5):
     """Blast and check rigs in frustrum.
 

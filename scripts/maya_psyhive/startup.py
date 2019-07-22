@@ -56,7 +56,7 @@ def _add_show_toolkits(parent):
     """
     _shows = cmds.menuItem(
         label='Shows', parent=parent, subMenu=True,
-        image=icons.EMOJI.find('Lion'))
+        image=icons.EMOJI.find('Top Hat'))
 
     _shows = File(shows.__file__).parent()
     print 'SHOWS', _shows

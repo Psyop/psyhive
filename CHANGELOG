@@ -1,3 +1,19 @@
+#### v0.28.0 ####
+
+    Released: Mon 22nd Jul 2019
+
+    frustrum test blast + restore image planes: added usage tracking
+    
+    maya_psyhive:
+        startup better shows icon,
+        tools frustrum_test_blast/img_plane_restore added usage tracker,
+    psyhive:
+        py_gui save window/section settings,
+        qt.HPixmap.contains added,
+        tk.cache fix work area get_metadata cache,
+        tk.cache work.find_publishes find model publishes,
+
+
 #### v0.27.0 ####
 
     Released: Fri 19th Jul 2019

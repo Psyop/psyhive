@@ -100,6 +100,15 @@ class MayaPyGui(base.BasePyGui):
         self.master = self.ui_name+'_master'
         cmds.columnLayout(self.master, adjustableColumn=1)
 
+        # Setup set window settings fns
+        for _attr in ['width', 'height']:
+            _set_fn = wrap_fn(
+                cmds.window, self.ui_name, edit=True, arg_to_kwarg=_attr)
+            self.set_settings_fns['window']['Geometry'][_attr] = _set_fn
+            _read_fn = wrap_fn(
+                cmds.window, self.ui_name, query=True, **{_attr: True})
+            self.read_settings_fns['window']['Geometry'][_attr] = _read_fn
+
     def add_arg(
             self, arg, default, label=None, choices=None, label_width=None,
             update=None, verbose=0):
@@ -165,8 +174,8 @@ class MayaPyGui(base.BasePyGui):
                 label=update.label, height=19, command=_get_update_fn(
                     set_fn=_set_fn, update=update, field=_field))
 
-        self.read_arg_fns[arg.def_.name][arg.name] = _read_fn
-        self.set_arg_fns[arg.def_.name][arg.name] = _set_fn
+        self.read_settings_fns['def'][arg.def_.name][arg.name] = _read_fn
+        self.set_settings_fns['def'][arg.def_.name][arg.name] = _set_fn
 
         cmds.setParent('..')
 
@@ -198,7 +207,7 @@ class MayaPyGui(base.BasePyGui):
         _icon = icon or get_def_icon(def_.name, set_=self.icon_set)
         _help_icon = icons.EMOJI.find('Information')
         _exec_fn = get_exec_fn(
-            def_=def_, read_arg_fns=self.read_arg_fns[def_.name],
+            def_=def_, read_arg_fns=self.read_settings_fns['def'][def_.name],
             disable_reload=disable_reload, catch_error_=catch_error_)
 
         _btn_width = 10
@@ -292,7 +301,7 @@ class MayaPyGui(base.BasePyGui):
         """Reset settings to defaults."""
         base.BasePyGui.reset_settings(self)  # Avoid super for reload
         cmds.menuItem(
-            self._save_on_close, edit=True, checkBox=False)
+            self._save_on_close, edit=True, checkBox=True)
 
     def _set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
@@ -308,6 +317,14 @@ class MayaPyGui(base.BasePyGui):
         )
         cmds.columnLayout(parent=_frame, adjustableColumn=1)
         cmds.separator(style='none', height=1, horizontal=True)
+
+        self.read_settings_fns['section'][section.label] = {}
+        self.read_settings_fns['section'][section.label]['collapse'] = wrap_fn(
+            cmds.frameLayout, _frame, query=True, collapse=True)
+
+        self.set_settings_fns['section'][section.label] = {}
+        self.set_settings_fns['section'][section.label]['collapse'] = wrap_fn(
+            cmds.frameLayout, _frame, edit=True, arg_to_kwarg='collapse')
 
         lprint(
             '[py_gui.maya] SETTING SECTION', section, section.collapse,

@@ -468,6 +468,17 @@ class HPixmap(QtGui.QPixmap):
         _pnt.add_text(**_kwargs)
         _pnt.end()
 
+    def contains(self, pos):
+        """Check if the point falls inside this pixmap.
+
+        Args:
+            pos (QPoint): point to check
+
+        Returns:
+            (bool): whether point falls inside
+        """
+        return self.rect().contains(pos)
+
     def darken(self, factor):
         """Darken this pixmap (1 makes the pixmap black).
 

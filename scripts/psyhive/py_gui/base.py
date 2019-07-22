@@ -6,12 +6,17 @@ import os
 import pprint
 import sys
 
+import six
+
 from psyhive import icons
 from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
     read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase)
 from psyhive.py_gui import install
 from psyhive.py_gui.misc import NICE_COLS
+
+_EMPTY_SETTINGS = {
+    'def': {}, 'section': {}, 'window': {"Geometry": {}}}
 
 
 class BasePyGui(object):
@@ -58,8 +63,8 @@ class BasePyGui(object):
         assert isinstance(self.icon_set, Collection)
 
         # Build defs into ui
-        self.read_arg_fns = {}
-        self.set_arg_fns = {}
+        self.read_settings_fns = copy.deepcopy(_EMPTY_SETTINGS)
+        self.set_settings_fns = copy.deepcopy(_EMPTY_SETTINGS)
         _defs_data = self._get_defs_data()
         self.init_ui()
         lprint(
@@ -110,8 +115,8 @@ class BasePyGui(object):
         if _section:
             self._set_section(_section)
 
-        self.read_arg_fns[def_.name] = {}
-        self.set_arg_fns[def_.name] = {}
+        self.read_settings_fns['def'][def_.name] = {}
+        self.set_settings_fns['def'][def_.name] = {}
 
         # Add args
         for _arg in def_.find_args():
@@ -200,36 +205,50 @@ class BasePyGui(object):
         """
         _settings = read_yaml(self.settings_file)
         lprint('LOADING', _settings, verbose=verbose)
-        for _def_name, _arg_settings in _settings.items():
-            lprint('DEF NAME', _def_name, verbose=verbose)
-            for _arg_name, _val in _arg_settings.items():
-                _set_fn = self.set_arg_fns[_def_name][_arg_name]
-                if _set_fn:
-                    lprint(
-                        ' - APPLYING', _arg_name, _val, _set_fn,
-                        verbose=verbose)
-                    _set_fn(_val)
-                else:
-                    lprint(
-                        ' - FAILED TO APPLY', _arg_name, _val)
+        for _attr, _attr_settings in _settings.items():
+            print 'APPLING', _attr
+            for _name, _settings in _attr_settings.items():
+                lprint(' - NAME', _name, verbose=verbose)
+                for _arg_name, _val in _settings.items():
+                    _set_fn = self.set_settings_fns[_attr][_name][_arg_name]
+                    _applied = False
+                    if _set_fn:
+                        lprint(
+                            '   - APPLYING', _arg_name, _val, _set_fn,
+                            verbose=verbose)
+                        try:
+                            _set_fn(_val)
+                        except TypeError:
+                            continue
+                        else:
+                            _applied = True
+                    if not _applied:
+                        lprint('   - FAILED TO APPLY', _arg_name, _val)
 
         dprint('Loaded settings', self.settings_file)
 
-    def _read_settings(self):
+    def _read_settings(self, verbose=0):
         """Read current settings from interface.
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (dict): current settings
         """
-        _settings = {}
-        for _def, _read_arg_fns in self.read_arg_fns.items():
-            if not _read_arg_fns:
-                continue
-            _settings[_def] = {}
-            for _arg, _arg_fn in _read_arg_fns.items():
-                _val = _arg_fn()
-                _settings[_def][_arg] = _val
-
+        _settings = copy.deepcopy(_EMPTY_SETTINGS)
+        for _attr in ['def', 'section', 'window']:
+            _items = self.read_settings_fns[_attr].items()
+            lprint('READING', _attr, _items, verbose=verbose)
+            for _name, _read_settings_fns in _items:
+                lprint(' - READING', _name, _read_settings_fns,
+                       verbose=verbose)
+                _settings[_attr][_name] = {}
+                for _arg, _arg_fn in _read_settings_fns.items():
+                    _val = _arg_fn()
+                    if isinstance(_val, six.string_types):
+                        _val = str(_val)
+                    _settings[_attr][_name][_arg] = _val
         return _settings
 
     def rebuild(self):
@@ -242,13 +261,25 @@ class BasePyGui(object):
     def reset_settings(self):
         """Reset current settings to defaults."""
         print 'RESETTING SETTINGS'
-        for _fn, _, _ in self._get_defs_data():
+        _sections = set()
+        for _fn, _data in self._get_defs_data():
             _py_def = self.py_file.find_def(_fn.__name__)
-            print _fn
+            print' - ADDING', _fn, _data
             for _py_arg in _py_def.find_args():
-                print ' - SETTING', _py_arg, _py_arg.default
-                _set_fn = self.set_arg_fns[_py_def.name][_py_arg.name]
+                print '   - SETTING', _py_arg, _py_arg.default
+                _set_fn = self.set_settings_fns[
+                    'def'][_py_def.name][_py_arg.name]
                 _set_fn(_py_arg.default)
+            _section = _data.get('section')
+            if _section:
+                print ' - SECTION', _section
+                _sections.add(_section)
+        print 'SECTIONS', _sections
+        for _section in _sections:
+            print ' - ADDING', _section, _section.collapse
+            _set_fn = self.set_settings_fns[
+                'section'][_section.label]['collapse']
+            _set_fn(_section.collapse)
 
     def save_settings(self, verbose=1):
         """Save current settings to disk.

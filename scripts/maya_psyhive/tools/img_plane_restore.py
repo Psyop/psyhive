@@ -6,11 +6,13 @@ apps respectively.
 
 import os
 
+from psyhive.tools import track_usage
 from psyhive.utils import get_single, lprint, safe_zip
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import get_parent
 
 
+@track_usage
 def export_img_plane(camera, abc):
     """Export image plane preset data for the given camera/abc.
 
@@ -37,6 +39,7 @@ def export_img_plane(camera, abc):
         _shp.save_preset(_preset)
 
 
+@track_usage
 def restore_img_plane(time_control, abc):
     """Restore image plane from preset data.
 

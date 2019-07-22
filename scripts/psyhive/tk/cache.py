@@ -156,25 +156,37 @@ class _CTTWorkAreaBase(object):
             _works.append(_work)
         return _works
 
-    @store_result_on_obj
-    def get_metadata(self, force=False, **kwargs):
-        """Read and store the metadata.
-
-        Args:
-            force (bool): force reread metadata from disk
-
-        Returns:
-            (dict): work area metadata
-        """
-        return super(_CTTWorkAreaBase, self).get_metadata(**kwargs)
-
 
 class _CTTAssetWorkAreaMaya(TTAssetWorkAreaMaya, _CTTWorkAreaBase):
     """Cachable asset work area for maya."""
 
+    @store_result_on_obj
+    def get_metadata(self, force=False, **kwargs):
+        """Get metadata for this work area.
+
+        Args:
+            force (bool): force reread from disk
+
+        Returns:
+            (dict): metadata
+        """
+        return super(_CTTAssetWorkAreaMaya, self).get_metadata(**kwargs)
+
 
 class _CTTShotWorkAreaMaya(TTShotWorkAreaMaya, _CTTWorkAreaBase):
     """Cachable shot work area for maya."""
+
+    @store_result_on_obj
+    def get_metadata(self, force=False, **kwargs):
+        """Get metadata for this work area.
+
+        Args:
+            force (bool): force reread from disk
+
+        Returns:
+            (dict): metadata
+        """
+        return super(_CTTShotWorkAreaMaya, self).get_metadata(**kwargs)
 
 
 class _CTTWorkFileBase(Cacheable):
@@ -247,7 +259,7 @@ class _CTTWorkFileBase(Cacheable):
         """
         return [
             _output for _output in self.find_outputs()
-            if _output.output_type in ['rig', 'shadegeo']]
+            if _output.output_type in ['rig', 'shadegeo', 'geometry']]
 
     def find_renders(self):
         """Find renders generated from this work file.
@@ -280,7 +292,8 @@ class _CTTWorkFileBase(Cacheable):
         Returns:
             (dict): work file metadata
         """
-        _data = data or self.get_work_area().get_metadata(force=force)
+        _work_area = self.get_work_area()
+        _data = data or _work_area.get_metadata(force=force)
         return super(_CTTWorkFileBase, self).get_metadata(data=data)
 
     @store_result_on_obj
