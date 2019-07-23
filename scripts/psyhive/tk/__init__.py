@@ -19,4 +19,4 @@ from psyhive.tk.templates.tools import (
 
 from psyhive.tk.cache import (
     obtain_work_area, obtain_work, clear_caches, obtain_cur_work,
-    obtain_shot, obtain_cacheable)
+    obtain_cacheable)
