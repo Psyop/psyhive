@@ -337,7 +337,8 @@ def get_parent(node):
     Returns:
         (str): parent node
     """
-    return get_single(cmds.listRelatives(node, parent=True) or [], catch=True)
+    _parents = cmds.listRelatives(node, parent=True, path=True) or []
+    return get_single(_parents, catch=True)
 
 
 def get_shp(node):

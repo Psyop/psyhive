@@ -13,9 +13,10 @@ from psyhive.tk.templates.shots import (
     TTShotOutputName, TTShotOutputVersion, TTMayaShotWork,
     TTMayaShotIncrement, find_shots, find_sequences, TTShotRoot,
     TTShotOutputFileSeq, TTShotStepRoot, TTShotOutputRoot,
-    get_shot, TTShotWorkAreaMaya, TTShotOutputFile)
+    get_shot, TTShotWorkAreaMaya, TTShotOutputFile, TTShotOutputType)
 from psyhive.tk.templates.tools import (
     get_output, get_work, cur_work, get_step_root)
 
 from psyhive.tk.cache import (
-    obtain_work_area, obtain_work, clear_caches, obtain_cur_work)
+    obtain_work_area, obtain_work, clear_caches, obtain_cur_work,
+    obtain_shot, obtain_cacheable)

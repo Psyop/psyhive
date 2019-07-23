@@ -111,18 +111,19 @@ class TTRootBase(TTDirBase):
 
     step_root_type = None
 
-    def find_step_roots(self, class_=None):
+    def find_step_roots(self, class_=None, filter_=None):
         """Find steps in this shot.
 
         Args:
             class_ (TTShotStepRoot): override step root class
+            filter_ (str): filter the list of steps
 
         Returns:
             (TTShotStepRoot list): list of steps
         """
         _class = class_ or self.step_root_type
         _steps = []
-        for _path in self.find(depth=1, type_='d'):
+        for _path in self.find(depth=1, type_='d', filter_=filter_):
             try:
                 _step = _class(_path)
             except ValueError:
@@ -136,6 +137,8 @@ class TTStepRootBase(TTDirBase):
     """Base class for any shot/asset step root."""
 
     maya_work_type = None
+    output_name_type = None
+    output_root_type = None
     work_area_maya_hint = None
     work_area_maya_type = None
 
@@ -147,6 +150,28 @@ class TTStepRootBase(TTDirBase):
         """
         super(TTStepRootBase, self).__init__(path)
         self.name = self.step
+
+    def find_output_names(self, verbose=1):
+        """Find output names within this step root.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputNameBase list): output names list
+        """
+        lprint('SEARCHING FOR OUTPUT NAMES', self, verbose=verbose)
+        _root = self.map_to(self.output_root_type)
+        return _root.find(depth=2, type_='d', class_=self.output_name_type)
+
+    def find_renders(self):
+        """Find renders in this step root.
+
+        Returns:
+            (TTOutputNameBase list): output names list
+        """
+        return [_name for _name in self.find_output_names()
+                if _name.output_type == 'render']
 
     def find_work_files(self):
         """Find work files inside this step root.
@@ -533,13 +558,9 @@ class TTWorkIncrementBase(TTBase, File):
 class TTOutputVersionBase(TTDirBase):
     """Base class for any tank template version dir."""
 
+    maya_work_type = None
     task = None
     version = None
-
-    @property
-    def vers_dir(self):
-        """Stores directory containing versions."""
-        return os.path.dirname(self.path)
 
     def find_latest(self):
         """Find latest version.
@@ -552,6 +573,18 @@ class TTOutputVersionBase(TTDirBase):
         _data['version'] = int(_vers[-1][1:])
         _path = self.tmpl.apply_fields(_data)
         return self.__class__(_path)
+
+    def find_work_file(self):
+        """Find work file this output was generated from.
+
+        Returns:
+            (TTWorkFileBase|None): associated work file (if any)
+        """
+        for _extn in ['ma', 'mb']:
+            _work = self.map_to(self.maya_work_type, extension=_extn)
+            if _work.exists():
+                return _work
+        return None
 
     def get_status(self):
         """Generate status for this version.
@@ -571,6 +604,11 @@ class TTOutputVersionBase(TTDirBase):
             (bool): latest state
         """
         return self == self.find_latest()
+
+    @property
+    def vers_dir(self):
+        """Stores directory containing versions."""
+        return os.path.dirname(self.path)
 
 
 class TTOutputFileBase(TTBase, File):

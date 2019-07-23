@@ -390,7 +390,8 @@ def store_result(func):
 def store_result_on_obj(method):
     """Decorator which stores the result of a method on the object.
 
-    This generates a unique result for each instance of the object.
+    This generates a unique result for each instance of the object. This
+    cache acts like a property (except it is still a function).
 
     Args:
         method (fn): method to decorate

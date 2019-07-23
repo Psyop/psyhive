@@ -7,12 +7,11 @@ import time
 import unittest
 
 from psyhive.utils import (
-    passes_filter, apply_filter, abs_path, TMP, obj_write, obj_read, PyFile,
+    passes_filter, apply_filter, abs_path, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
     get_owner, Cacheable, get_result_storer, Seq, store_result_on_obj,
     get_result_to_file_storer)
-from psyhive.utils.py_file.docs import MissingDocs
 
 _TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
 
@@ -25,6 +24,7 @@ class TestCache(unittest.TestCase):
             @get_result_storer()
             def get_rand(self, arg):
                 return random.random()
+
             def __repr__(self):
                 return '<Test:{}>'.format(id(self))
         _test = _Test()
@@ -63,7 +63,7 @@ class TestCache(unittest.TestCase):
 
     def test_store_result_on_obj(self):
 
-        class _Test():
+        class _Test(object):
             @store_result_on_obj
             def test(self, vers=None):
                 return random.random()
@@ -118,15 +118,15 @@ class TestPyFile(unittest.TestCase):
         _args = text_to_py_file(_text).find_def().find_args()
         assert len(_args) == 4
         assert _args[3].name == 'd'
-        assert _args[0].type_ == None
-        assert _args[0].default == None
+        assert _args[0].type_ is None
+        assert _args[0].default is None
 
         # Test None defaults
         _text = '''def test(a=None):
             pass
         '''
         _args = text_to_py_file(_text).find_def().find_args()
-        assert _args[0].default == None
+        assert _args[0].default is None
 
         # Test tuple/dict/list defaults
         _text = '''def __test(a=(1, 2, 3), b=[1, 2, 3], c={'a': 1}):
@@ -168,7 +168,8 @@ class TestPath(unittest.TestCase):
         _path = (
             r'Z:/dev/global/code/pipeline/bootstrap/hv-test/python\psyhive\\'
             r'diary\y19\d0401\rip_icons.py')
-        assert rel_path(_path, root=_root) == 'psyhive/diary/y19/d0401/rip_icons.py'
+        assert rel_path(_path, root=_root) == (
+            'psyhive/diary/y19/d0401/rip_icons.py')
 
         _path = 'file:///W:/Temp/icons/Emoji/icon.2469.png'
         assert abs_path(_path) == 'W:/Temp/icons/Emoji/icon.2469.png'
@@ -185,7 +186,8 @@ class TestPath(unittest.TestCase):
 
     def test_get_owner(self):
 
-        _path = '{}/psyhive/testing/owner_test.txt'.format(tempfile.gettempdir())
+        _path = '{}/psyhive/testing/owner_test.txt'.format(
+            tempfile.gettempdir())
         touch(_path)
         self.assertEqual(get_owner(_path), os.environ['USER'])
 

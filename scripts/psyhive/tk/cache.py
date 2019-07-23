@@ -10,18 +10,23 @@ from psyhive.utils import (
     Cacheable, store_result_on_obj, find,
     lprint, dprint, store_result_content_dependent, Seq)
 
-from psyhive.tk.templates.assets import TTMayaAssetWork, TTAssetWorkAreaMaya
-from psyhive.tk.templates.shots import TTMayaShotWork, TTShotWorkAreaMaya
+from psyhive.tk.templates.assets import (
+    TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile)
+from psyhive.tk.templates.shots import (
+    TTMayaShotWork, TTShotWorkAreaMaya, TTShotRoot, TTShotStepRoot,
+    TTShotOutputName, TTShotOutputVersion)
 from psyhive.tk.templates.tools import get_work
 from psyhive.tk.templates.misc import get_template
 
+_CACHEABLES = {}
 _WORK_FILES = {}
 _WORK_AREAS = {}
 
 
 def clear_caches():
     """Clear all caches."""
-    global _WORK_FILES, _WORK_AREAS
+    global _WORK_FILES, _WORK_AREAS, _CACHEABLES
+    _CACHEABLES = {}
     _WORK_FILES = {}
     _WORK_AREAS = {}
 
@@ -38,6 +43,9 @@ def _map_class_to_cacheable(class_):
     from psyhive import tk
     return {
         tk.TTAssetWorkAreaMaya: _CTTAssetWorkAreaMaya,
+        tk.TTAssetOutputFile: _CTTAssetOutputFile,
+        tk.TTShotOutputName: _CTTShotOutputName,
+        tk.TTShotRoot: _CTTShotRoot,
         tk.TTShotWorkAreaMaya: _CTTShotWorkAreaMaya,
         tk.TTMayaAssetWork: _CTTMayaAssetWork,
         tk.TTMayaShotWork: _CTTMayaShotWork,
@@ -56,6 +64,25 @@ def obtain_cur_work():
     return obtain_work(_scene)
 
 
+def obtain_cacheable(source):
+    """Factory for any cachable object.
+
+    This maps any existing tank template object to its cacheable version,
+    making sure that only one instance of each cacheable object exists.
+
+    Args:
+        source (TTBase): source tank template object
+    """
+    global _CACHEABLES
+    _type = _map_class_to_cacheable(source.__class__)
+    if _type not in _CACHEABLES:
+        _CACHEABLES[_type] = {}
+    if source not in _CACHEABLES[_type]:
+        _cacheable = _type(source.path)
+        _CACHEABLES[_type][source] = _cacheable
+    return _CACHEABLES[_type][source]
+
+
 def obtain_work(file_):
     """Factory for cacheable work file object.
 
@@ -68,8 +95,8 @@ def obtain_work(file_):
     global _WORK_FILES
     _work = get_work(file_, catch=False)
     if _work not in _WORK_FILES:
-        _work_type = _map_class_to_cacheable(_work.__class__)
-        _WORK_FILES[_work] = _work_type(_work.path)
+        _type = _map_class_to_cacheable(_work.__class__)
+        _WORK_FILES[_work] = _type(_work.path)
     return _WORK_FILES[_work]
 
 
@@ -84,9 +111,75 @@ def obtain_work_area(work_area):
     """
     global _WORK_AREAS
     if work_area not in _WORK_AREAS:
-        _work_area_type = _map_class_to_cacheable(work_area.__class__)
-        _WORK_AREAS[work_area] = _work_area_type(work_area.path)
+        _type = _map_class_to_cacheable(work_area.__class__)
+        _WORK_AREAS[work_area] = _type(work_area.path)
     return _WORK_AREAS[work_area]
+
+
+class _CTTAssetOutputFile(TTAssetOutputFile):
+    """Cacheable TTAssetOutputFile object."""
+
+
+class _CTTShotRoot(TTShotRoot):
+    """Cacheable TTShotRoot object."""
+
+    @store_result_on_obj
+    def find_step_roots(self, class_=None, filter_=None):
+        """Find step roots.
+
+        Args:
+            class_ (type): not implemented
+            filter_ (str): not implemented
+
+        Returns:
+            (_CTTShotStepRoot list): list of step roots
+        """
+        assert not class_
+        assert not filter_
+        return [
+            obtain_cacheable(_step)
+            for _step in super(_CTTShotRoot, self).find_step_roots()]
+
+
+class _CTTShotStepRoot(TTShotStepRoot):
+    """Cacheable TTShotStepRoot object."""
+
+    @store_result_on_obj
+    def find_output_names(self, verbose=0):
+        """Find output names.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (_CTTShotOutputName list): output names
+        """
+        return [
+            obtain_cacheable(_name)
+            for _name in super(_CTTShotStepRoot, self).find_output_names(
+                verbose=verbose)]
+
+
+class _CTTShotOutputName(TTShotOutputName):
+    """Cacheable TTShotOutputName object."""
+
+    def find_latest(self):
+        """Find latest version.
+
+        Returns:
+            (TTShotOutputVersion): latest version
+        """
+        return self.find_vers()[-1]
+
+    @store_result_on_obj
+    def find_vers(self):
+        """Find versions.
+
+        Returns:
+            (TTShotOutputVersion list): versions
+        """
+        _vers = self.find(depth=1, type_='d', class_=TTShotOutputVersion)
+        return _vers
 
 
 class _CTTWorkAreaBase(object):

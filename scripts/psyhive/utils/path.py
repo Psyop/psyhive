@@ -319,6 +319,28 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     system(_cmds, verbose=1)
 
 
+def _find_cast_results_by_class(results, class_):
+    """Cast find results to the given class.
+
+    Any that raise ValueError are ignored.
+
+    Args:
+        results (str list): list of result to cast
+        class_ (type): type to cast to
+
+    Returns:
+        (list): castest results
+    """
+    _class_results = []
+    for _result in results:
+        try:
+            _result = class_(_result)
+        except ValueError:
+            continue
+        _class_results.append(_result)
+    return _class_results
+
+
 def find(
         dir_=None, type_=None, extn=None, filter_=None, base=None, depth=-1,
         name=None, full_path=True, class_=None, verbose=0):
@@ -405,8 +427,11 @@ def find(
     if not full_path:
         _results = [
             _result.replace(_dir+'/', '') for _result in _results]
+
+    # Apply class cast
     if class_:
-        _results = [class_(_result) for _result in _results]
+        _results = _find_cast_results_by_class(
+            results=_results, class_=class_)
 
     return sorted(_results)
 

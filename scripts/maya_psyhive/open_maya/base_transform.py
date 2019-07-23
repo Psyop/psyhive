@@ -23,7 +23,7 @@ class BaseTransform(BaseNode):
         super(BaseTransform, self).__init__(node)
 
         # Get shape (if any)
-        _shps = cmds.listRelatives(self.node, shapes=True) or []
+        _shps = cmds.listRelatives(self.node, shapes=True, path=True) or []
         _shp = get_single([str(_shp) for _shp in _shps], catch=True)
         self.shp = hom.HFnDependencyNode(_shp) if _shp else None
 

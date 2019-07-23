@@ -73,15 +73,15 @@ class TestTools(unittest.TestCase):
                 (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_animCam/v053/'
                   'alembic/dev0000_imagePlaneTest_animCam_v053.abc'),
-                'animCam:AlembicTimeControl'),
+                 'animCam:AlembicTimeControl'),
                 (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
                   'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
-                'renderCam:AlembicTimeControl'),
+                 'renderCam:AlembicTimeControl'),
                 (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
-                'badCam:AlembicTimeControl')]:
+                 'badCam:AlembicTimeControl')]:
             restore_img_plane(time_control=_time_ctrl, abc=_path)
         assert cmds.ls(type='imagePlane')
 

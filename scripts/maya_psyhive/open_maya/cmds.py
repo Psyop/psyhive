@@ -116,6 +116,9 @@ class _CmdsMapper(object):
         elif name in ['imagePlane']:
             _result = _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnTransform)
+        elif name in ['group']:
+            _result = _get_result_mapper(
+                _fn, class_=hom.HFnTransform)
 
         # Nurbs
         elif name in ['circle']:

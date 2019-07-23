@@ -29,8 +29,9 @@ class TestPipe(unittest.TestCase):
 
         # Dynamic rig
         _path = (
-            'P:/projects/cricketbillboa19_34774P/assets/3D/character/rose/rig/'
-            'output/rig/dynamic_dynamic/v054/maya/rose_dynamic_dynamic_v054.mb')
+            'P:/projects/cricketbillboa19_34774P/assets/3D/character/rose/'
+            'rig/output/rig/dynamic_dynamic/v054/maya/'
+            'rose_dynamic_dynamic_v054.mb')
         _asset = pipe.AssetFile(_path)
         assert _asset.step == 'rig'
         assert _asset.cpnt_name == 'dynamic'

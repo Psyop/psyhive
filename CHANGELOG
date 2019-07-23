@@ -1,3 +1,20 @@
+#### v0.29.0 ####
+
+    Released: Tue 23rd Jul 2019
+
+    frustrum test blast: added handling for duplicate nodes in rig
+    
+    maya_psyhive:
+        open_maya.base_name added handling for duplicate nodes,
+        open_maya.CMDS.group added,
+        utils.get_parent added handling for duplicate nodes,
+    psyhive:
+        tk.obtain_cacheable added,
+        tk.TTStepRootBase added find_output_names/find_renders added,
+        tk.TTOutputVersionBase.find_work_file added,
+        utils.find class_ casting ignores ValueError results,
+
+
 #### v0.28.1 ####
 
     Released: Mon 22nd Jul 2019

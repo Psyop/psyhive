@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestTools(unittest.TestCase):
 
     def test_fkik_switcher(self):

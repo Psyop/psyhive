@@ -1,13 +1,6 @@
-import operator
-import os
-import random
-import shutil
-import tempfile
-import time
 import unittest
 
 from psyhive.tools.err_catcher import Traceback
-from psyhive.utils.py_file.docs import MissingDocs
 
 _TRACEBACK_1 = r"""
 Traceback (most recent call last):
