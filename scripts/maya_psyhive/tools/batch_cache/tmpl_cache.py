@@ -19,16 +19,18 @@ class CTTShotRoot(tk.TTShotRoot):
     """Used to stored cache shotgun request data for a shot."""
 
     @store_result
-    def find_step_roots(self, class_=None):
+    def find_step_roots(self, class_=None, filter_=None):
         """Find steps in this shot.
 
         Args:
             class_ (TTShotStepRoot): override step root class
+            filter_ (str): filter the list of steps
 
         Returns:
             (TTShotStepRoot list): list of steps
         """
-        return super(CTTShotRoot, self).find_step_roots(class_=class_)
+        return super(CTTShotRoot, self).find_step_roots(
+            class_=class_, filter_=filter_)
 
     @store_result
     def read_cache_data(self, force=False):

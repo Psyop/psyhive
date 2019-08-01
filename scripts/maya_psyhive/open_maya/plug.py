@@ -9,7 +9,7 @@ from maya.api import OpenMaya as om
 from psyhive import qt
 from psyhive.utils import get_single, lprint
 from maya_psyhive.utils import (
-    get_val, multiply_node, divide_node, add_node)
+    get_val, multiply_node, divide_node, add_node, set_val)
 
 
 def _nice_runtime_error(func):
@@ -183,20 +183,14 @@ class HPlug(om.MPlug):
         """Set keyframe on this attr."""
         cmds.setKeyframe(self, **kwargs)
 
-    def set_val(self, val):
+    def set_val(self, val, verbose=0):
         """Set the value of this attribute.
 
         Args:
             val (any): attribute value
+            verbose (int): print process data
         """
-        from maya_psyhive import open_maya as hom
-        if isinstance(val, hom.BaseArray3):
-            _vals = val.to_tuple()
-        elif isinstance(val, (list, tuple)):
-            _vals = val
-        else:
-            _vals = [val]
-        cmds.setAttr(self.name, *_vals)
+        set_val(self, val, verbose=verbose)
 
     def __str__(self):
         return self.name

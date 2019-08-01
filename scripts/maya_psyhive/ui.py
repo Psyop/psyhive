@@ -75,7 +75,8 @@ def obtain_menu(name, replace=False, verbose=0):
     # Find parent menu
     for _menu in cmds.lsUI(menus=True):
         _label = cmds.menu(_menu, query=True, label=True)
-        lprint(' - TESTING', _menu, _label, verbose=verbose)
+        lprint(' - TESTING name="{}" label="{}"'.format(_menu, _label),
+               verbose=verbose)
         if _label == name:
             lprint(' - MATCHED', verbose=verbose)
             if replace:
@@ -86,6 +87,7 @@ def obtain_menu(name, replace=False, verbose=0):
                 return _menu
 
     # Create if not found
+    lprint(' - CREATING NEW MENU', verbose=verbose)
     return cmds.menu(
         name+"_MENU", label=name, tearOff=True, parent=get_main_window())
 

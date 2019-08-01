@@ -5,6 +5,7 @@ import copy
 import os
 import pprint
 import sys
+import types
 
 import six
 
@@ -129,6 +130,8 @@ class BasePyGui(object):
             _default = _arg.default
             _arg_choices = _choices.get(_arg.name)
             _arg_update = _update.get(_arg.name)
+            if isinstance(_arg_update, types.FunctionType):  # Convert function
+                _arg_update = install.ArgUpdater(get_choices=_arg_update)
             if _arg_update:
                 _arg_choices = _arg_update.get_choices() or _arg_choices
                 _default = _arg_update.get_default() or _default

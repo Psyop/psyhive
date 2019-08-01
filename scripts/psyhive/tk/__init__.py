@@ -1,10 +1,11 @@
 """Tools for interacting with tank/shotgun."""
 
 from psyhive.tk.misc import (
-    get_project_data, get_shot_data, find_tank_mod, find_tank_app)
+    get_project_data, get_shot_data, find_tank_mod, find_tank_app,
+    restart_tank)
 
 from psyhive.tk.templates.misc import get_template
-from psyhive.tk.templates.base import TTWorkFileBase
+from psyhive.tk.templates.base import TTWorkFileBase, TTOutputFileBase
 from psyhive.tk.templates.assets import (
     TTAssetOutputFile, TTAssetOutputVersion, TTAssetRoot,
     TTMayaAssetWork, find_asset_roots, TTAssetOutputName,

@@ -128,7 +128,7 @@ def cache_work_file(
         if not _ref.is_loaded():
             _ref.load()
         _cur_asset = tk.TTAssetOutputFile(_ref.path)
-        _latest_asset = _cur_asset.get_latest()
+        _latest_asset = _cur_asset.find_latest()
         lprint(' - UPDATING {} v{:03d} -> v{:03d}'.format(
             _ref.namespace, _cur_asset.version, _latest_asset.version))
         if _cur_asset.is_latest():

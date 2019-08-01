@@ -7,7 +7,7 @@ from maya import cmds
 from psyhive import icons, refresh, qt, py_gui
 from psyhive.tools import track_usage
 from psyhive.utils import (
-    dprint, wrap_fn, get_single, lprint, File, str_to_seed)
+    dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile)
 from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher
 _BUTTONS = {
@@ -59,26 +59,22 @@ def _add_show_toolkits(parent):
         image=icons.EMOJI.find('Top Hat'))
 
     _shows = File(shows.__file__).parent()
-    print 'SHOWS', _shows
     for _py in _shows.find(extn='py', depth=1, type_='f'):
-        _file = File(_py)
+        _file = PyFile(_py)
         if _file.basename.startswith('_'):
             continue
-        print ' - ADDING FILE', _file
+        _mod = _file.get_module()
         _rand = str_to_seed(_file.basename)
         _icon = _rand.choice(icons.ANIMALS)
+        _label = getattr(_mod, 'LABEL', _file.basename)
+        _title = '{} tools'.format(_label)
         _cmd = '\n'.join([
             'import {py_gui} as py_gui',
             '_path = "{file}"',
             '_title = "{title}"',
             'py_gui.MayaPyGui(_path, title=_title, all_defs=True)',
-        ]).format(
-            py_gui=py_gui.__name__, file=_file.path,
-            title='{} tools'.format(_file.basename))
-        cmds.menuItem(
-            command=_cmd, image=_icon, label=_file.basename)
-
-    # for
+        ]).format(py_gui=py_gui.__name__, file=_file.path, title=_title)
+        cmds.menuItem(command=_cmd, image=_icon, label=_label)
 
 
 def _build_psyhive_menu():
@@ -101,6 +97,18 @@ def _build_psyhive_menu():
             'batch_cache.launch()']).format(batch_cache.__name__)
         cmds.menuItem(
             command=_cmd, image=batch_cache.ICON, label='Batch cache')
+
+    # Add batch rerender (not available at LittleZoo)
+    try:
+        from maya_psyhive.tools import batch_rerender
+    except ImportError:
+        pass
+    else:
+        _cmd = '\n'.join([
+            'import {} as batch_rerender',
+            'batch_rerender.launch()']).format(batch_rerender.__name__)
+        cmds.menuItem(
+            command=_cmd, image=batch_rerender.ICON, label='Batch rerender')
 
     # Add show toolkits
     cmds.menuItem(divider=True)

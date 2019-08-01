@@ -1,28 +1,45 @@
 """General utilities."""
 
+import sys
+import time
+
+import sgtk
 import tank
 
-from psyhive import pipe, refresh
-from psyhive.utils import store_result, get_single
+from psyhive import pipe, refresh, qt, icons
+from psyhive.utils import store_result, get_single, lprint, abs_path, dprint
 
 
-def find_tank_app(name):
+def find_tank_app(name, catch=True):
     """Find tank app for the given name.
 
     Args:
         name (str): app name
+        catch (bool): offer to restart tank if app is missing
 
     Returns:
         (SgtkApp): tank app
     """
     _engine = tank.platform.current_engine()
+
+    # Try exact match
     if name in _engine.apps:
         return _engine.apps[name]
+
+    # Try suffix match
     _suffix_match = get_single([
         _key for _key in _engine.apps.keys()
         if _key.split('-')[-1] == name], catch=True)
     if _suffix_match:
         return _engine.apps[_suffix_match]
+
+    if catch:
+        qt.ok_cancel('Could not find tank app "{}".\n\nWould you like to '
+                     'restart tank?'.format(name),
+                     icon=icons.EMOJI.find('Kaaba'))
+        restart_tank()
+        return find_tank_app(name)
+
     raise RuntimeError('Could not find tank app '+name)
 
 
@@ -99,3 +116,60 @@ def _get_sg_name(name):
             _sg_name += '_'
         _sg_name += _chr.lower()
     return _sg_name
+
+
+def restart_tank(force=True, verbose=0):
+    """Restart shotgun toolkit (and remove unused modules).
+
+    Args:
+        force (bool): remove leftover libs with no confirmation
+        verbose (int): print process data
+    """
+    _start = time.time()
+    sgtk.platform.restart()
+    _clean_leftover_modules(force=force, verbose=verbose)
+    dprint("RESTARTED TANK ({:.02f}s)".format(time.time() - _start))
+
+
+def _clean_leftover_modules(force=False, verbose=0):
+    """Clean unused tk modules from sys.modules dict.
+
+    Args:
+        force (bool): remove leftover libs with no confirmation
+        verbose (int): print process data
+    """
+    _engine = tank.platform.current_engine()
+
+    # Find leftover modules
+    _to_delete = []
+    for _app_name in _engine.apps:
+        _app = _engine.apps[_app_name]
+        _id = _app._TankBundle__module_uid
+        if not _id:
+            continue
+        lprint(_app_name, verbose=verbose)
+        lprint(_id, verbose=verbose > 1)
+
+        for _mod in refresh.find_mods():
+            if _app_name not in _mod.__file__:
+                continue
+            if not _mod.__name__.startswith('tkimp'):
+                continue
+            if not _mod.__name__.startswith(_id):
+                lprint(' - DELETE', _mod, verbose=verbose > 1)
+                _to_delete.append(_mod.__name__)
+                continue
+            lprint(
+                ' - {:80} {}'.format(_mod.__name__, abs_path(_mod.__file__)),
+                verbose=verbose)
+        lprint(verbose=verbose)
+
+    # Remove modules
+    if _to_delete:
+        if not force:
+            qt.ok_cancel(
+                'Delete {:d} leftover modules?'.format(len(_to_delete)))
+        for _mod_name in _to_delete:
+            del sys.modules[_mod_name]
+    else:
+        print 'Nothing to clean'

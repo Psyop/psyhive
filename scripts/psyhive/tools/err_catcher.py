@@ -7,7 +7,8 @@ import traceback
 
 from psyhive import qt, icons
 from psyhive.utils import (
-    abs_path, check_heart, File, FileError, lprint, dprint, dev_mode)
+    abs_path, check_heart, File, FileError, lprint, dprint, dev_mode,
+    copy_text)
 
 _UI_FILE = abs_path('err_dialog.ui', root=os.path.dirname(__file__))
 
@@ -70,8 +71,10 @@ class _ErrDialog(qt.HUiDialog):
             widget.addItem(_item)
         widget.setCurrentRow(0)
 
-    def _callback__er_view_code(self):
+    def _callback__er_copy_text(self):
+        copy_text('```\n{}\n```'.format(self.traceback.clean_text))
 
+    def _callback__er_view_code(self):
         _line = self.ui.er_traceback.currentItem().data(qt.QtCore.Qt.UserRole)
         _line.edit()
 
@@ -121,9 +124,11 @@ class Traceback(object):
             _TraceStep((_splitter+_item).strip().split('\n'))
             for _item in _file_text.split(_splitter)[1:]]
 
+        self.clean_text = '# '+self.body.replace('\n', '\n# ')
+
     def pprint(self):
         """Print this traceback in maya format."""
-        print '# '+self.body.replace('\n', '\n# ')
+        print self.clean_text
 
 
 def _handle_exception(exc, verbose=0):

@@ -155,17 +155,20 @@ def add_to_grp(obj, grp):
         cmds.namespace(set=':')
         cmds.group(name=grp, empty=True)
     cmds.parent(obj, grp)
+    return grp
 
 
 @restore_ns
-def add_to_set(obj, set_):
+def add_to_set(obj, set_, verbose=0):
     """Add the given object to the given set, creating it if required.
 
     Args:
         obj (str): object to add
         set_ (str): name of set to add to
+        verbose (int): print process data
     """
     if not cmds.objExists(set_):
+        lprint("SET DOES NOT EXIST:", set_, verbose=verbose)
         cmds.namespace(set=':')
         cmds.sets(name=set_, empty=True)
     cmds.sets(obj, addElement=set_)
@@ -558,6 +561,8 @@ def set_val(attr, val, verbose=0):
         _args = val.to_tuple(mode='float')
     elif isinstance(val, six.string_types):
         _kwargs['type'] = 'string'
+    elif isinstance(val, (list, tuple)):
+        _args = val
 
     lprint('APPLYING VAL', attr, _args, _kwargs, verbose=verbose)
     cmds.setAttr(attr, *_args, **_kwargs)

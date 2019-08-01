@@ -24,7 +24,7 @@ class _BaseShader(object):
         Args:
             shd (str): shader node (eg. lambert1)
         """
-        self.shd = shd
+        self.shd = hom.HFnDependencyNode(shd)
 
     def apply_texture(self, path):
         """Apply a texture file to this shader's main col attr.
@@ -64,14 +64,18 @@ class _BaseShader(object):
         cmds.connectAttr(self.out_col_attr, _se+'.surfaceShader')
         return _se
 
-    def get_se(self):
+    def get_se(self, verbose=0):
         """Get this shader's shading engine node.
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (str): shading engine node
         """
-        return get_single(cmds.listConnections(
-            self.shd, type='objectSet', source=False), catch=True)
+        _sets = cmds.listConnections(self.shd, type='objectSet', source=False)
+        lprint('SETS', _sets, verbose=verbose)
+        return get_single(_sets, catch=True)
 
     def read_texture(self):
         """Read the path to this shader's file texture (if any).
@@ -128,8 +132,9 @@ class _AiAmbientOcclusion(_BaseShader):
             shd (str): shader node (eg. lambert1)
         """
         super(_AiAmbientOcclusion, self).__init__(shd)
-        self.col_attr = self.shd+'.white'
-        self.out_col_attr = self.shd+'.outColor'
+        self.col_attr = self.shd.plug('white')
+        self.white = self.col_attr
+        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _Lambert(_BaseShader):
@@ -142,8 +147,8 @@ class _Lambert(_BaseShader):
             shd (str): shader node (eg. lambert1)
         """
         super(_Lambert, self).__init__(shd)
-        self.col_attr = self.shd+'.color'
-        self.out_col_attr = self.shd+'.outColor'
+        self.col_attr = self.shd.plug('color')
+        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _SurfaceShader(_BaseShader):

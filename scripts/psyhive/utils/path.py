@@ -270,7 +270,9 @@ def abs_path(path, win=False, root=None, verbose=0):
     # Handle relative paths
     if _path.startswith('~/'):
         _path = '{}/{}'.format(os.environ['HOME'], _path[2:])
-    elif not (_path.startswith('/') or _path[1] == ':'):
+    elif not (
+            _path.startswith('/') or
+            (len(_path) >= 2 and _path[1] == ':')):
         _root = root or os.getcwd()
         lprint('ADDING ROOT', _root, verbose=verbose)
         _path = '{}/{}'.format(_root, _path)
@@ -292,6 +294,10 @@ def abs_path(path, win=False, root=None, verbose=0):
         _tokens.pop(_idx-1)
         _path = '/'.join(_tokens)
 
+    # Capitalise drive letter
+    if len(_path) >= 2 and _path[1] == ':':
+        _path = _path[0].upper() + _path[1:]
+
     if win:
         return _path.replace('/', '\\')
     return _path
@@ -311,7 +317,7 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     _tool = tool or os.environ.get('PSYHIVE_DIFF_EXE') or 'Diffinity'
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
-    if check_extn and not File(left).extn in [None, 'py', 'yml']:
+    if check_extn and not File(left).extn in [None, 'py', 'yml', 'ui']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

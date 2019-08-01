@@ -106,6 +106,8 @@ class PyFile(File, PyBase):
             if _path.startswith(abs_path(_spath))]))
         _sys_paths.sort(key=len)
         if not _sys_paths:
+            if catch:
+                return None
             raise RuntimeError('Failed to find sys path '+_path)
         _sys_path = _sys_paths[-1]
         lprint('ROOT', _sys_path, verbose=verbose)

@@ -1,9 +1,12 @@
 ignore:
+    abstract-method:
+        hv_test/diary/y19/d0726/_machi/player.py
     anomalous-backslash-in-string:
         hv_test/diary/y19/d0528/bro_tools_tests.py
         hv_test/diary/y19/d0717/make_littlezoo_zip.py
     anomalous-unicode-escape-in-string:
         hv_test/diary/y19/d0517/pinterest_rip.py
+        hv_test/diary/y19/d0724/pinterest_rip_2.py
     arguments-differ:
         hv_test/diary/entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
@@ -49,7 +52,9 @@ ignore:
     no-self-use:
         maya_psyhive/tools/fkik_switcher/interface.py
         maya_psyhive/tools/batch_cache/
+        maya_psyhive/tools/batch_rerender/
         psyhive/tools/err_catcher.py
+        psyhive/tools/hive_bro/interface.py
         hv_test/diary/
         hv_test/release/misc.py
         hv_test/toolkits/release_tools.py
@@ -70,6 +75,7 @@ ignore:
     protected-access:
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
+        psyhive/tk/misc.py
         psyhive/tk/templates/base.py
     raising-bad-type:
         maya_psyhive/utils.py
@@ -112,6 +118,8 @@ ignore:
         psyhive/utils/range_.py
     unbalanced-tuple-unpacking:
         maya_psyhive/open_maya/camera.py
+    unexpected-keyword-arg:
+        diary/y19/d0726/machi4.py
     unidiomatic-typecheck:
         psyhive/qt/interface.py
     unreachable:

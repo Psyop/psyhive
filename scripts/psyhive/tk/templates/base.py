@@ -16,7 +16,7 @@ from psyhive.utils import (
     lprint, read_yaml, write_yaml, diff, Seq)
 
 from psyhive.tk.templates.misc import get_template
-from psyhive.tk.misc import find_tank_mod
+from psyhive.tk.misc import find_tank_mod, find_tank_app
 
 
 class TTBase(Path):
@@ -136,9 +136,12 @@ class TTRootBase(TTDirBase):
 class TTStepRootBase(TTDirBase):
     """Base class for any shot/asset step root."""
 
+    asset = None
     maya_work_type = None
     output_name_type = None
     output_root_type = None
+    sequence = None
+    sg_asset_type = None
     work_area_maya_hint = None
     work_area_maya_type = None
 
@@ -271,6 +274,20 @@ class TTWorkFileBase(TTBase, File):
         self.ver_fmt = '{}/{}'.format(
             self.dir, self.filename.replace(
                 '_v{:03d}'.format(self.version), '_v{:03d}'))
+
+    def add_to_recent(self):
+        """Add this file to tank recent file list for this show."""
+        _fileops = find_tank_app('psy-multi-fileops')
+        _mod = find_tank_mod('workspace', app='psy-multi-fileops')
+
+        assert self.exists()
+
+        _tk_workspace = _mod.get_workspace_from_path(
+            app=_fileops, path=self.path)
+        _tk_workfile = _mod.WorkfileModel(
+            workspace=_tk_workspace, template=self.tmpl,
+            path=self.path)
+        _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
 
     def find_latest(self, vers=None):
         """Find latest version of this work file stream.
@@ -493,8 +510,8 @@ class TTWorkFileBase(TTBase, File):
         Args:
             force (bool): open with no scene modified warning
         """
-        _engine = tank.platform.current_engine()
-        _fileops = _engine.apps['psy-multi-fileops']
+        from psyhive import tk
+        _fileops = tk.find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
     def save(self, comment):
@@ -503,8 +520,7 @@ class TTWorkFileBase(TTBase, File):
         Args:
             comment (str): comment for version
         """
-        _fileops = tank.platform.current_engine().apps['psy-multi-fileops']
-        _handler = _fileops._fileops_handler
+        _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
         _prev = self.find_latest()
 
@@ -513,23 +529,44 @@ class TTWorkFileBase(TTBase, File):
         # Get prev workfile
         if _prev:
             assert _prev.version == self.version - 1
+            _tk_workspace = _mod.get_workspace_from_path(
+                app=_fileops, path=_prev.path)
+            _tk_workfile = _mod.WorkfileModel(
+                workspace=_tk_workspace, template=_prev.tmpl,
+                path=_prev.path)
+            _tk_workfile = _tk_workfile.get_next_version()
         else:
             assert self.version == 1
-            raise NotImplementedError
-        _tk_workspace = _mod.get_workspace_from_path(
-            app=_fileops, path=_prev.path)
-        _tk_workfile = _mod.WorkfileModel(
-            workspace=_tk_workspace, template=_prev.tmpl,
-            path=_prev.path)
-        _tk_workfile = _tk_workfile.get_next_version()
+            _tk_workspace = _mod.get_workspace_from_path(
+                app=_fileops, path=self.path)
+            _tk_workfile = _tk_workspace.get_workfile(
+                name=self.task, version=1)
 
         # Save
         _tk_workfile.save()
 
         # Save metadata
+        self.set_comment(comment)
+        self.add_to_recent()
+
+    def set_comment(self, comment):
+        """Set comment for this version.
+
+        Args:
+            comment (str): comment to apply
+        """
+        _fileops = find_tank_app('psy-multi-fileops')
+        _mod = find_tank_mod('workspace', app='psy-multi-fileops')
+
+        assert self.exists()
+
+        _tk_workspace = _mod.get_workspace_from_path(
+            app=_fileops, path=self.path)
+        _tk_workfile = _mod.WorkfileModel(
+            workspace=_tk_workspace, template=self.tmpl,
+            path=self.path)
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
-        _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
 
 
 class TTWorkIncrementBase(TTBase, File):
@@ -574,14 +611,18 @@ class TTOutputVersionBase(TTDirBase):
         _path = self.tmpl.apply_fields(_data)
         return self.__class__(_path)
 
-    def find_work_file(self):
+    def find_work_file(self, verbose=1):
         """Find work file this output was generated from.
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (TTWorkFileBase|None): associated work file (if any)
         """
         for _extn in ['ma', 'mb']:
             _work = self.map_to(self.maya_work_type, extension=_extn)
+            lprint(' - CHECKING WORK', _work, verbose=verbose)
             if _work.exists():
                 return _work
         return None
@@ -619,7 +660,7 @@ class TTOutputFileBase(TTBase, File):
     output_type = None
     output_version_type = None
 
-    def get_latest(self):
+    def find_latest(self):
         """Get latest version asset stream.
 
         Returns:
@@ -637,7 +678,7 @@ class TTOutputFileBase(TTBase, File):
         Returns:
             (bool): latest status
         """
-        return self.get_latest() == self
+        return self.find_latest() == self
 
 
 class TTOutputFileSeqBase(TTBase, Seq):

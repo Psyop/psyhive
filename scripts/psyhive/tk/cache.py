@@ -45,7 +45,9 @@ def _map_class_to_cacheable(class_):
         tk.TTAssetWorkAreaMaya: _CTTAssetWorkAreaMaya,
         tk.TTAssetOutputFile: _CTTAssetOutputFile,
         tk.TTShotOutputName: _CTTShotOutputName,
+        tk.TTShotOutputVersion: _CTTShotOutputVersion,
         tk.TTShotRoot: _CTTShotRoot,
+        tk.TTShotStepRoot: _CTTShotStepRoot,
         tk.TTShotWorkAreaMaya: _CTTShotWorkAreaMaya,
         tk.TTMayaAssetWork: _CTTMayaAssetWork,
         tk.TTMayaShotWork: _CTTMayaShotWork,
@@ -169,7 +171,7 @@ class _CTTShotOutputName(TTShotOutputName):
         Returns:
             (TTShotOutputVersion): latest version
         """
-        return self.find_vers()[-1]
+        return obtain_cacheable(self.find_vers()[-1])
 
     @store_result_on_obj
     def find_vers(self):
@@ -180,6 +182,26 @@ class _CTTShotOutputName(TTShotOutputName):
         """
         _vers = self.find(depth=1, type_='d', class_=TTShotOutputVersion)
         return _vers
+
+
+class _CTTShotOutputVersion(TTShotOutputVersion):
+    """Cacheable shot output version."""
+
+    @store_result_on_obj
+    def find_work_file(self, verbose=0):
+        """Find work file associated with this version.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (_CTTWorkFileBase|None): work file (if any)
+        """
+        _work = super(_CTTShotOutputVersion, self).find_work_file(
+            verbose=verbose)
+        if _work:
+            _work = obtain_cacheable(_work)
+        return _work
 
 
 class _CTTWorkAreaBase(object):
@@ -342,7 +364,9 @@ class _CTTWorkFileBase(Cacheable):
             (TTWorkFileBase): latest work file
         """
         _latest = super(_CTTWorkFileBase, self).find_latest(vers=vers)
-        return obtain_work(_latest.path)
+        if _latest:
+            return obtain_work(_latest.path)
+        return None
 
     def find_publishes(self):
         """Find publishes generated from this work file.
@@ -405,28 +429,9 @@ class _CTTWorkFileBase(Cacheable):
         Args:
             comment (str): comment to apply
         """
-        _work_area = self.get_work_area()
-        _metadata = copy.copy(_work_area.get_metadata(verbose=1))
-
-        _updated = False
-        for _idx, _task_data in enumerate(_metadata['workfiles']):
-            if not _task_data['name'] == self.task:
-                continue
-            for _jdx, _ver_data in enumerate(_task_data['versions']):
-                if not _ver_data['version'] == self.version:
-                    continue
-                print 'UPDATE {} -> {}'.format(_ver_data['comment'], comment)
-                _updated = True
-                _versions = _metadata['workfiles'][_idx]['versions']
-                assert (
-                    _versions[_jdx]['comment'] ==
-                    _ver_data['comment'])
-                _versions[_jdx]['comment'] = comment
-                _work_area.set_metadata(_metadata)
-
-        if not _updated:
-            raise ValueError("Failed to update metadata "+self.path)
-
+        from psyhive import tk
+        # Don't use super as this class is not TTWorkFileBase instance
+        tk.TTWorkFileBase.set_comment(self, comment)
         self.get_metadata(force=True)
 
 

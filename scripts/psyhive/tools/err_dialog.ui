@@ -67,6 +67,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="er_copy_text">
+         <property name="text">
+          <string>Copy text</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="er_view_code">
          <property name="text">
           <string>View code</string>

@@ -163,7 +163,7 @@ def get_single(
     return items[0]
 
 
-def get_plural(items):
+def get_plural(items, plural='s'):
     """Get plural character for the given list of items.
 
     If the list has one item, this is an empty string. Otherwise, the
@@ -171,11 +171,13 @@ def get_plural(items):
 
     Args:
         items (list): list of items to check
+        plural (str): override plural str (eg. for pass -> passes
+            the plural str would be "es")
 
     Returns:
-        (str): plural character
+        (str): plural character(s)
     """
-    return '' if len(items) == 1 else 's'
+    return '' if len(items) == 1 else plural
 
 
 def get_ord(idx):

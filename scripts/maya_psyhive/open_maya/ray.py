@@ -51,6 +51,20 @@ class HVRay(object):
         _crv.set_col(col=col)
         _crv.add_to_grp(name+"_GRP")
 
+    def intersection(self, other):
+        """Find intersection between this ray and another object.
+
+        Args:
+            other (any): object to compare with
+
+        Returns:
+            (any): intersections
+        """
+        from maya_psyhive import open_maya as hom
+        if isinstance(other, hom.HFnMesh):
+            return other.intersection(self)
+        raise ValueError(other)
+
     def to_plane(self):
         """Get the equivalent plane to this ray.
 

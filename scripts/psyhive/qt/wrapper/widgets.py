@@ -166,16 +166,23 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
 class HMenu(QtWidgets.QMenu, HWidgetBase):
     """Override for QMenu widget."""
 
-    def add_action(self, text, func, icon=None, verbose=0):
+    def add_action(self, text, func, icon=None, catch_error_=True,
+                   verbose=0):
         """Add an action to the menu.
 
         Args:
             text (str): action text
             func (fn): action function
             icon (str|QPixmap): action icon
+            catch_error_ (bool): apply catch error decorator to function
             verbose (int): print process data
         """
-        _args = [text, func]
+        _func = func
+        if catch_error_:
+            from psyhive.tools import get_error_catcher
+            _catcher = get_error_catcher(exit_on_error=False)
+            _func = _catcher(_func)
+        _args = [text, _func]
         if icon:
             _args = [get_pixmap(icon)] + _args
         lprint("ADD ACTION", _args, verbose=verbose)

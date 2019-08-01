@@ -1,3 +1,37 @@
+#### v0.30.0 ####
+
+    Released: Thu 1st Aug 2019
+
+    batch rerender: released
+    
+    maya_psyhive:
+        open_maya.HFnDependencyNode.rename added,
+        open_maya.HFnTransform.add_to_grp returns HFnTransform,
+        open_maya.HPlug.set_val uses utils.set_val,
+        open_maya.HRay.intersection added,
+        startup added read LABEL for shows,
+        shd._BaseShader.shd as HFnDependencyNode,
+        tools.batch_rerender added,
+        utils.add_to_grp returns grp,
+        utils.set_val added tuple/list handling,
+    psyhive:
+        py_gui.install_gui allow update val as func,
+        qt.HMenu.add_action added catch_error_ arg,
+        tk.restart_tank added,
+        tk.find_tank_app offer restart if missing app,
+        tk.cache added _CTTShotOutputVersion/_CTTShotStepRoot,
+        tk.cache._CTTWorkFileBase.set_comment use tank,
+        tk.TTRootBase.find_steps added filter_,
+        tk,TTWorkFileBase.add_to_recent added,
+        tk.TTWorkFileBase.save added new task handling,
+        tk.TTWorkFileBase renamed get_latest -> find_latest,
+        tools.err_catcher added copy text option,
+        tools.hive_bro added,
+        utils.get_plural allow plural override,
+        utils.abs_path capitalise drive letter,
+        utils.PyFile.get_module bugfix catch for unable to import,
+
+
 #### v0.29.1 ####
 
     Released: Tue 23rd Jul 2019

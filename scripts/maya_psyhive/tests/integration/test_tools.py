@@ -9,7 +9,8 @@ from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import use_tmp_ns
 
 from maya_psyhive.tools import (
-    fkik_switcher, batch_cache, export_img_plane, restore_img_plane)
+    fkik_switcher, batch_cache, export_img_plane, restore_img_plane,
+    batch_rerender)
 from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
@@ -28,6 +29,11 @@ class TestTools(unittest.TestCase):
         _shot.read_work_files(force=True)
 
         _dialog = batch_cache.launch()
+        _dialog.close()
+
+    def test_batch_rerender(self):
+
+        _dialog = batch_rerender.launch()
         _dialog.close()
 
     def test_fkik_switcher(self):
@@ -67,7 +73,8 @@ class TestTools(unittest.TestCase):
     def test_restore_image_plane(self):
         _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
                  'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
-        tk.get_work(_path).load(force=True)
+        _work = tk.get_work(_path)
+        _ref = ref.obtain_ref(file_=_work.path, namespace='restoreTest')
         assert not cmds.ls(type='imagePlane')
         for _path, _time_ctrl in [
                 (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
@@ -82,7 +89,8 @@ class TestTools(unittest.TestCase):
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
-            restore_img_plane(time_control=_time_ctrl, abc=_path)
+            _time_ctrl = _ref.get_node(_time_ctrl)
+            restore_img_plane(time_control=str(_time_ctrl), abc=_path)
         assert cmds.ls(type='imagePlane')
 
     @use_tmp_ns
@@ -90,16 +98,14 @@ class TestTools(unittest.TestCase):
         """Write image plane settings to output abc dir."""
         _img = (r"\\la1nas006\homedir\hvanderbeek\Desktop"
                 r"\tumblr_p3gzfbykSP1rv4b7io1_1280.png")
-        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
-                'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
-                'dev0000_imagePlaneTest_renderCam_v047.abc')
+        _abc_path = (
+            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+            'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
+            'dev0000_imagePlaneTest_renderCam_v047.abc')
+        _abc = tk.get_output(_abc_path).find_latest()
         _presets = [
-            ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
-             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
-             'camera.preset'),
-            ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
-             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
-             'imagePlane.preset')]
+            '{}/{}'.format(_abc.parent().path, _filename)
+            for _filename in ['camera.preset', 'imagePlane.preset']]
 
         for _preset in _presets:
             if os.path.exists(_preset):
@@ -108,7 +114,7 @@ class TestTools(unittest.TestCase):
         _cam = hom.CMDS.camera()
         _img_plane = hom.CMDS.imagePlane(camera=_cam, fileName=_img)
 
-        export_img_plane(camera='renderCamShape', abc=_abc)
+        export_img_plane(camera=_cam.shp, abc=_abc.path)
 
         for _preset in _presets:
             assert os.path.exists(_preset)

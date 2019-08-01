@@ -7,6 +7,8 @@ from psyhive.utils import File
 from maya_psyhive import ui
 from maya_psyhive import open_maya as hom
 
+LABEL = "Clash Short"
+
 
 def _get_scene_name():
     """Get current scene name hud text.
@@ -75,3 +77,25 @@ def uninstall_hud():
     for _name, _, _, _ in _get_hud_data():
         if cmds.headsUpDisplay(_name, query=True, exists=True):
             cmds.headsUpDisplay(_name, remove=True)
+
+
+py_gui.set_section('Dev')
+
+
+def fix_larry_scale():
+    """Fix larry scale."""
+    _mult = 1.05
+    _namespace = 'peter'
+    _ctrls = [
+        'Lf_legIk_Ctrl',
+        'Rt_legIk_Ctrl',
+        'Rt_armIk_Ctrl',
+        'Rt_armIk_Ctrl',
+        'cog_Ctrl',
+        'mover_Ctrl',
+    ]
+    _attrs = ['{}:{}.translate'.format(_namespace, _ctrl) for _ctrl in _ctrls]
+    for _attr in _attrs:
+        _val = cmds.getAttr(_attr)[0]
+        _new_val = [_item*_mult for _item in _val]
+        cmds.setAttr(_attr, *_new_val)

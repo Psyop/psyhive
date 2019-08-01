@@ -54,7 +54,8 @@ class BaseTransform(BaseNode):
         Args:
             grp (str): group to add to
         """
-        add_to_grp(self, grp)
+        from maya_psyhive import open_maya as hom
+        return hom.HFnTransform(add_to_grp(self, grp))
 
     def aim_constraint(self, *args, **kwargs):
         """Aim constrain a node to this node.

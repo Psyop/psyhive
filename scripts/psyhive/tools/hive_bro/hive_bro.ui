@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HiveBro</class>
+ <widget class="QDialog" name="HiveBro">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>465</width>
+    <height>725</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>HiveBro</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,3">
+     <item>
+      <widget class="HTabWidget" name="main_tabs">
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="assets_tab">
+        <attribute name="title">
+         <string>Assets</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,4">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Asset type</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="HListWidget" name="asset_type"/>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_11">
+                   <property name="minimumSize">
+                    <size>
+                     <width>33</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Asset</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="asset_filter"/>
+                 </item>
+                 <item>
+                  <widget class="HPushButton" name="asset_filter_clear">
+                   <property name="maximumSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="flat">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="HListWidget" name="asset"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Shots</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,5">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Sequence</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="HListWidget" name="sequence"/>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_4">
+                   <property name="minimumSize">
+                    <size>
+                     <width>31</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Shot</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="shot_filter"/>
+                 </item>
+                 <item>
+                  <widget class="HPushButton" name="shot_filter_clear">
+                   <property name="maximumSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="HListWidget" name="shot"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,3,0">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,2">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>17</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Step</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="HListWidget" name="step"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_12">
+               <property name="minimumSize">
+                <size>
+                 <width>29</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Task</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="HPushButton" name="task_refresh">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="HListWidget" name="task"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="task_edit"/>
+             </item>
+             <item>
+              <widget class="HPushButton" name="task_edit_clear">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2414.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <property name="spacing">
+          <number>3</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Version</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="HPushButton" name="work_jump_to">
+             <property name="maximumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Jump to current scene
+
+(right click for recent)</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="HPushButton" name="work_view_capture">
+             <property name="maximumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2381.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2381.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="HPushButton" name="work_refresh">
+             <property name="maximumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="HListWidget" name="work">
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>asdasd</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>asdas</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>asda</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>asdasdasd</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>New Item</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.0089.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.0089.png</iconset>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="HPushButton" name="work_open">
+           <property name="text">
+            <string>Open</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="HPushButton" name="work_save">
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_11">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="minimumSize">
+        <size>
+         <width>31</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Work</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="work_path">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="HPushButton" name="work_copy">
+       <property name="maximumSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2237.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2237.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HListWidget</class>
+   <extends>QListWidget</extends>
+   <header>hlistwidget.h</header>
+   <slots>
+    <slot>blah()</slot>
+    <slot>redraw()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>HPushButton</class>
+   <extends>QPushButton</extends>
+   <header>hpushbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>htabwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -55,13 +55,14 @@ class BaseNode(object):
         """
         return HPlug(create_attr(self.node+'.'+name, *args, **kwargs))
 
-    def add_to_set(self, set_):
+    def add_to_set(self, set_, verbose=0):
         """Add this node to a set, creating it if required.
 
         Args:
             set_ (str): set to add to
+            verbose (int): print process data
         """
-        add_to_set(self, set_)
+        add_to_set(self, set_, verbose=verbose)
 
     def delete(self):
         """Delete this object."""
@@ -219,6 +220,18 @@ class BaseNode(object):
             (str): full attribute name with node
         """
         return self.node+'.'+attr
+
+    def rename(self, name):
+        """Rename this node.
+
+        Args:
+            name (str): new name
+
+        Returns:
+            ():
+        """
+        _type = self.__class__
+        return _type(cmds.rename(self, name))
 
     def save_preset(self, file_=None, use_mel=True, verbose=0):
         """Save preset for this node.
