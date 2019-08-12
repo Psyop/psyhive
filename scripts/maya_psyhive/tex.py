@@ -1,6 +1,7 @@
 """Tools for managing texturing and shading."""
 
 import os
+import time
 
 from maya import cmds
 
@@ -33,10 +34,11 @@ class _BaseShader(object):
             path (str): texture file to apply
         """
         assert not cmds.listConnections(self.col_attr, destination=False)
-        _file = cmds.shadingNode('file', asShader=True)
+        _file = hom.CMDS.shadingNode('file', asShader=True)
         cmds.connectAttr(_file+'.outColor', self.col_attr)
         cmds.setAttr(_file+'.fileTextureName', path, type='string')
         cmds.setAttr(_file+'.colorSpace', 'linear', type='string')
+        return _file
 
     def assign_to(self, geo):
         """Assign this shader to the given geo transform.
@@ -57,7 +59,7 @@ class _BaseShader(object):
         Returns:
             (str): shading engine node
         """
-        _name = self.shd.split(":")[-1]+"SG"
+        _name = str(self.shd).split(":")[-1]+"SG"
         _se = cmds.sets(
             name=_name, renderable=True, noSurfaceShader=True,
             empty=True)
@@ -177,6 +179,20 @@ def ai_ambient_occlusion(name='aiAmbientOcclusion'):
     _shd = _AiAmbientOcclusion(cmds.shadingNode(
         'aiAmbientOcclusion', asShader=True, name=name))
     return _shd
+
+
+def build_texture_path(namespace):
+    """Build a texture path in the current workspace.
+
+    Args:
+        namespace (str): name for texture file
+
+    Returns:
+        (str): texture path
+    """
+    _tex_ws = cmds.workspace(fileRuleEntry='textures')
+    _tex_dir = cmds.workspace(expandName=_tex_ws)
+    return time.strftime('{}/{}_%H%M%S.jpg'.format(_tex_dir, namespace))
 
 
 def connect_place_2d(node_, place=None):

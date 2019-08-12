@@ -37,7 +37,8 @@ def _clean_item(item, verbose=0):
 
 
 def _get_result_mapper(
-        func, list_idx=None, as_list=False, class_=None, verbose=0):
+        func, list_idx=None, as_list=False, class_=None,
+        maintain_type=False, verbose=0):
     """Get result mapper decorator.
 
     The faciliates the mapping of a maya.cmds function to open_maya
@@ -49,6 +50,8 @@ def _get_result_mapper(
             item should be returned
         as_list (bool): resturn results as list
         class_ (type): convert the result to this class
+        maintain_type (bool): maintain current type (ie. list returns
+            list otherwise single value is returned)
         verbose (int): print process data
 
     Returns:
@@ -78,7 +81,7 @@ def _get_result_mapper(
         if list_idx is not None:
             _result = _result[list_idx]
 
-        if as_list:
+        if as_list or maintain_type and isinstance(_result, list):
             assert class_
             _result = [class_(_result) for _result in _result]
         elif class_:
@@ -108,6 +111,9 @@ class _CmdsMapper(object):
         elif name in ['ls']:
             _result = _get_result_mapper(
                 _fn, as_list=True, class_=hom.HFnDependencyNode)
+        elif name in ['referenceQuery']:
+            _result = _get_result_mapper(
+                _fn, maintain_type=True, class_=hom.HFnDependencyNode)
 
         # Transform
         elif name in ['cluster']:

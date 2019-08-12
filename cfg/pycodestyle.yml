@@ -6,6 +6,7 @@ ignore:
         /sanity_check/
     E731:  # Lambda
         hv_test/diary/y19/d0531/colour_bro.py
+        hv_test/diary/y19/d0806/qt_pygui_tests.py
         psyhive/host.py
     E722:  # Bare except
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py

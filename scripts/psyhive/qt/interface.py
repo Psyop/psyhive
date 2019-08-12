@@ -132,7 +132,7 @@ class HUiDialog(QtWidgets.QDialog):
 
         return _result
 
-    def cast_to_standalone_app(self,):
+    def cast_to_standalone_app(self):
         """Cast this dialog to a standalone app.
 
         This applies maya colours, applies the icon to the task bar,

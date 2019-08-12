@@ -1,3 +1,34 @@
+#### v0.31.0 ####
+
+    Released: Mon 12th Aug 2019
+
+    batch rerender:
+        bugfix not updating abc caches (iirvine),
+        get frame range from existing render,
+    py_gui:
+        added QtPyGui tool,
+    
+    maya_psyhive:
+        open_maya.CMDS.referenceQuery added,
+        tex.build_texture_path added,
+        tools.batch_rerender.DIALOG added,
+        tools.batch_rerender read frame ranges from existing passes,
+        tools.batch_rerender update abc caches,
+    psyhive:
+        py_gui.QtPyGui added,
+        qt HComboBox/HPoint/HPainter/HMenu added,
+        qt.HPushButton.set_pixmap added,
+        tk.find_tank_mod better error on fail,
+        tk.TTOutputVersionBase.find_outputs added,
+        tk.TTWorkFileBase.load update output paths,
+        tk.TTOutputFileSeqBase.find_work_file added,
+        tools.hive_bro added add selection to recent ctx option,
+        tools.hive_bro redraw save button on load,
+        utils.chain_fns catch args no fns,
+        utils.get_plural added set handling,
+        utils.Seq find_range/get_frame added,
+
+
 #### v0.30.0 ####
 
     Released: Thu 1st Aug 2019

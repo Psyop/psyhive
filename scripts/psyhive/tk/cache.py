@@ -203,6 +203,19 @@ class _CTTShotOutputVersion(TTShotOutputVersion):
             _work = obtain_cacheable(_work)
         return _work
 
+    @store_result_on_obj
+    def find_outputs(self, thumbs=False, verbose=0):
+        """Find outputs in this version.
+
+        Args:
+            thumbs (bool): include thumbs
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputFileBase|TTOutputFileSeqBase list): outputs
+        """
+        return super(_CTTShotOutputVersion, self).find_outputs()
+
 
 class _CTTWorkAreaBase(object):
     """Base class for any work area object."""

@@ -10,7 +10,7 @@ import tank
 
 from tank.platform import current_engine
 
-from psyhive import pipe
+from psyhive import pipe, host
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
@@ -364,46 +364,9 @@ class TTWorkFileBase(TTBase, File):
         lprint('FOUND {:d} VERS'.format(len(_vers)), verbose=verbose)
 
         # Find output in each ver
-        lprint('SEARCHING FOR OUTPUTS', verbose=verbose)
         _outputs = []
-        _seqs = []
         for _ver in _vers:
-            _files = _ver.find(type_='f', depth=3)
-            lprint(' - FOUND {:d} FILES'.format(len(_files)), verbose=verbose)
-            for _file in _files:
-
-                # Ignore files already matched in seq
-                _already_matched = False
-                for _seq in _seqs:
-                    if _seq.contains(_file):
-                        _already_matched = True
-                        break
-                if _already_matched:
-                    continue
-
-                _output = None
-                lprint(' - TESTING', _file, verbose=verbose > 1)
-
-                # Match seq
-                try:
-                    _output = self.output_file_seq_type(_file)
-                except ValueError:
-                    lprint('   - NOT OUTPUT FILE SEQ', _file,
-                           verbose=verbose > 1)
-                else:
-                    _seqs.append(_output)
-
-                # Match file
-                if not _output:
-                    try:
-                        _output = self.output_file_type(_file)
-                    except ValueError:
-                        lprint('   - NOT OUTPUT FILE', _file,
-                               verbose=verbose > 1)
-
-                if _output:
-                    lprint(' - ADDED OUTPUT', _output, verbose=verbose)
-                    _outputs.append(_output)
+            _outputs += _ver.find_outputs()
 
         return _outputs
 
@@ -511,8 +474,13 @@ class TTWorkFileBase(TTBase, File):
             force (bool): open with no scene modified warning
         """
         from psyhive import tk
+
         _fileops = tk.find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
+
+        if not host.batch_mode():  # Unstable in maya batch
+            _outputpaths = tk.find_tank_app('outputpaths')
+            _outputpaths.update_output_paths()
 
     def save(self, comment):
         """Save this version.
@@ -596,6 +564,8 @@ class TTOutputVersionBase(TTDirBase):
     """Base class for any tank template version dir."""
 
     maya_work_type = None
+    output_file_seq_type = None
+    output_file_type = None
     task = None
     version = None
 
@@ -610,6 +580,73 @@ class TTOutputVersionBase(TTDirBase):
         _data['version'] = int(_vers[-1][1:])
         _path = self.tmpl.apply_fields(_data)
         return self.__class__(_path)
+
+    def find_outputs(self, thumbs=False, verbose=0):
+        """Find outputs in this version.
+
+        Args:
+            thumbs (bool): include thumbs
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputFileBase|TTOutputFileSeqBase list): outputs
+        """
+        lprint('SEARCHING FOR OUTPUTS', verbose=verbose)
+
+        _files = self.find(type_='f', depth=3)
+        lprint(' - FOUND {:d} FILES'.format(len(_files)), verbose=verbose)
+
+        # Map files to outputs
+        _outputs = []
+        _seqs = {}
+        for _file in _files:
+
+            # Ignore files already matched in seq
+            _already_matched = False
+            for _seq in _seqs:
+                if _seq.contains(_file):
+                    _already_matched = True
+                    _frame = _seq.get_frame(_file)
+                    _seqs[_seq].add(_frame)
+                    break
+            if _already_matched:
+                continue
+
+            _output = None
+            lprint(' - TESTING', _file, verbose=verbose > 1)
+
+            # Match seq
+            try:
+                _output = self.output_file_seq_type(_file)
+            except ValueError:
+                lprint('   - NOT OUTPUT FILE SEQ', _file,
+                       verbose=verbose > 1)
+            else:
+                _frame = _output.get_frame(_file)
+                _seqs[_output] = set([_frame])
+
+            # Match file
+            if not _output:
+                try:
+                    _output = self.output_file_type(_file)
+                except ValueError:
+                    lprint('   - NOT OUTPUT FILE', _file,
+                           verbose=verbose > 1)
+
+            if _output:
+                lprint(' - ADDED OUTPUT', _output, verbose=verbose)
+                _outputs.append(_output)
+
+        # Apply frames cache
+        for _seq, _frames in _seqs.items():
+            _seq.set_frames(sorted(_frames))
+
+        if not thumbs:
+            for _output in copy.copy(_outputs):
+                if _output.data.get('channel') == '.thumbs':
+                    _outputs.remove(_output)
+
+        return _outputs
 
     def find_work_file(self, verbose=1):
         """Find work file this output was generated from.
@@ -684,6 +721,7 @@ class TTOutputFileBase(TTBase, File):
 class TTOutputFileSeqBase(TTBase, Seq):
     """Represents a shout output file seq tank template path."""
 
+    output_version_type = None
     exists = Seq.exists
 
     def __init__(self, path, verbose=0):
@@ -704,3 +742,12 @@ class TTOutputFileSeqBase(TTBase, Seq):
         super(TTOutputFileSeqBase, self).__init__(
             path=_path, data=_data, tmpl=_tmpl)
         Seq.__init__(self, _path)
+
+    def find_work_file(self):
+        """Find work file corresponding to this seq.
+
+        Returns:
+            (TTWorkFileBase): work file
+        """
+        _base = self.output_version_type()(self.path)
+        return _base.find_work_file()

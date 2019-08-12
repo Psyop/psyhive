@@ -38,19 +38,8 @@ class Seq(object):
         Returns:
             (bool): whether file is member of this seq
         """
-        _file = abs_path(file_)
-        _head, _tail = self.path.split(self.frame_expr)
-        if not (
-                _file.startswith(_head) and
-                _file.endswith(_tail)):
-            return False
-        _frame_str = _file[len(_head): -len(_tail)]
-        if not _frame_str.isdigit():
-            return False
-        _frame = int(_frame_str)
-        if self.frame_expr % _frame != _frame_str:
-            return False
-        return True
+        _frame = self.get_frame(file_)
+        return _frame is not None
 
     def delete(self, wording='Remove', force=False):
         """Delete this sequence's frames.
@@ -86,6 +75,41 @@ class Seq(object):
             (bool): whether sequence exists
         """
         return bool(self.get_frames(force=force))
+
+    def find_range(self):
+        """Find range of this sequence's frames.
+
+        Returns:
+            (tuple): start/end frames
+        """
+        _frames = self.get_frames()
+        return _frames[0], _frames[-1]
+
+    def get_frame(self, file_):
+        """Get frame number of the given member of this sequence.
+
+        If the file isn't a frame of this sequence then the function
+        returns None.
+
+        Args:
+            file_ (str): path to file
+
+        Returns:
+            (int|None): frame number (if any)
+        """
+        _file = abs_path(file_)
+        _head, _tail = self.path.split(self.frame_expr)
+        if not (
+                _file.startswith(_head) and
+                _file.endswith(_tail)):
+            return None
+        _frame_str = _file[len(_head): -len(_tail)]
+        if not _frame_str.isdigit():
+            return None
+        _frame = int(_frame_str)
+        if self.frame_expr % _frame != _frame_str:
+            return None
+        return _frame
 
     @store_result_on_obj
     def get_frames(self, frames=None, force=False):

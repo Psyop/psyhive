@@ -2,8 +2,8 @@
 
 from psyhive.qt.wrapper import (
     QtCore, QtGui, QtWidgets, QtUiTools, HPushButton, HCheckBox,
-    HLabel, HTreeWidgetItem, HListWidgetItem, HListWidget,
-    HPixmap, HColor, X_AXIS, Y_AXIS, Qt)
+    HLabel, HTreeWidgetItem, HListWidgetItem, HListWidget, HComboBox,
+    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, Qt)
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (
     get_application, get_col, get_p, get_size, get_pixmap, get_icon)

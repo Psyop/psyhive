@@ -4,12 +4,12 @@ import os
 import pprint
 
 from psyhive import tk, qt, icons
-from psyhive.utils import abs_path, get_plural, chain_fns, wrap_fn
+from psyhive.utils import (
+    abs_path, get_plural, chain_fns, wrap_fn, dprint, lprint)
 
 from maya_psyhive.tools.batch_rerender import rerender
 
 ICON = icons.EMOJI.find('Basket')
-_DIALOG = None
 
 
 class _BatchRerenderUi(qt.HUiDialog):
@@ -19,7 +19,7 @@ class _BatchRerenderUi(qt.HUiDialog):
         """Constructor."""
         self._all_steps = []
         self._all_renders = []
-        self._work_files = []
+        self._work_files = {}
         self._renders = []
         self._passes = []
 
@@ -102,12 +102,14 @@ class _BatchRerenderUi(qt.HUiDialog):
             _render.output_name for _render in self._renders]))
 
         # Find latest work files
-        self._work_files = set()
+        self._work_files = {}
         for _render in self._renders:
-            _work = _render.find_latest().find_work_file()
+            _latest = _render.find_latest()
+            _work = _latest.find_work_file()
             if _work:
-                self._work_files.add(_work.find_latest())
-        self._work_files = sorted(self._work_files)
+                if _work not in self._work_files:
+                    self._work_files[_work] = []
+                self._work_files[_work].append(_latest)
 
         widget.setText('Selected: {:d} render{} ({:d} work file{})'.format(
             len(self._renders), get_plural(self._renders),
@@ -116,13 +118,51 @@ class _BatchRerenderUi(qt.HUiDialog):
     def _context__submit(self, menu):
         menu.add_action("Print renders + work files", chain_fns(
             wrap_fn(pprint.pprint, self._renders),
-            wrap_fn(pprint.pprint, self._work_files),
+            wrap_fn(pprint.pprint, self._work_files.keys()),
             wrap_fn(pprint.pprint, self._passes)))
+        menu.add_action("Print frame ranges", wrap_fn(
+            self._read_frame_ranges, sorted(self._work_files), verbose=1))
 
     def _callback__submit(self):
-
+        _work_files = sorted(self._work_files)
+        _ranges = self._read_frame_ranges(_work_files)
         rerender.rerender_work_files(
-            work_files=self._work_files, passes=self._passes)
+            work_files=_work_files, ranges=_ranges, passes=self._passes)
+
+    def _read_frame_ranges(self, work_files, verbose=0):
+        """Read frame range for each work file.
+
+        This reads the frame range from all the selected passes for that
+        work files and then takes the overall range from that.
+
+        Args:
+            work_files (TTWorkFileBase list): list of work files
+            verbose (int): print process data
+
+        Returns:
+            (tuple list): list of start/end frames
+        """
+        _ranges = []
+        for _work_file in qt.ProgressBar(
+                work_files, 'Reading {:d} frame ranges'):
+            dprint('READING', _work_file)
+            _start, _end = None, None
+            for _render in self._work_files[_work_file]:
+                for _seq in _render.find_outputs():
+                    _sstart, _send = _seq.find_range()
+                    _start = (_sstart if _start is None
+                              else min(_start, _sstart))
+                    _end = (_send if _end is None
+                            else max(_end, _send))
+                    lprint(
+                        '   - {:d}-{:d} {}'.format(
+                            _sstart, _sstart, _seq.path),
+                        verbose=verbose)
+            print ' - RANGE {:d}-{:d} {}'.format(
+                _start, _end, _work_file.path)
+            _ranges.append((_start, _end))
+            lprint(verbose=verbose)
+        return _ranges
 
 
 def launch():
@@ -131,11 +171,11 @@ def launch():
     Returns:
         (_BatchRerenderUi): interface instance
     """
-    global _DIALOG
-    _DIALOG = _BatchRerenderUi()
+    from maya_psyhive.tools import batch_rerender
+    _dialog = _BatchRerenderUi()
+    batch_rerender.DIALOG = _dialog
 
-    _DIALOG.ui.steps.select_text('lighting')
-    _DIALOG.ui.tasks.select_text('lighting')
-    print _DIALOG.ui.tasks
+    _dialog.ui.steps.select_text('lighting')
+    _dialog.ui.tasks.select_text('lighting')
 
-    return _DIALOG
+    return _dialog

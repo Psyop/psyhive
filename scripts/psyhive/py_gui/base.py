@@ -5,16 +5,17 @@ import copy
 import os
 import pprint
 import sys
-import types
 
 import six
 
-from psyhive import icons
+from psyhive import qt, icons
 from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
-    read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase)
+    read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase,
+    wrap_fn)
 from psyhive.py_gui import install
-from psyhive.py_gui.misc import NICE_COLS
+from psyhive.py_gui.misc import (
+    NICE_COLS, get_def_icon, get_exec_fn, get_help_fn, get_code_fn)
 
 _EMPTY_SETTINGS = {
     'def': {}, 'section': {}, 'window': {"Geometry": {}}}
@@ -43,7 +44,7 @@ class BasePyGui(object):
 
         self.py_file = PyFile(path)
         self.label_width = 70
-        self.height = 400
+        self._height = 400
         self.all_defs = all_defs
         self.section = None
 
@@ -58,9 +59,10 @@ class BasePyGui(object):
 
         # Read attrs from module
         self.icon_set = getattr(_mod, 'PYGUI_ICON_SET', icons.FRUIT)
-        self.width = getattr(_mod, 'PYGUI_WIDTH', 300)
+        self._width = getattr(_mod, 'PYGUI_WIDTH', 300)
         self.base_col = base_col or getattr(
             _mod, 'PYGUI_COL', str_to_seed(self.mod_name).choice(NICE_COLS))
+        self.section_col = qt.HColor(self.base_col).blacken(0.5)
         assert isinstance(self.icon_set, Collection)
 
         # Build defs into ui
@@ -78,9 +80,52 @@ class BasePyGui(object):
         if os.path.exists(self.settings_file):
             self.load_settings()
 
-    def add_arg(
-            self, arg, default, label=None, choices=None, label_width=None,
-            update=None, verbose=0):
+    def init_ui(self, rebuild_fn=None):
+        """Initiate ui.
+
+        Args:
+            rebuild_fn (func): override rebuild function
+        """
+        dprint('Building ui {} ({})'.format(self.ui_name, self.base_col))
+
+        # Add menu bar
+        _interface = self.add_menu('Interface')
+        self.add_menu_item(
+            _interface, label='Rebuild', image=icons.EMOJI.find('Hammer'),
+            command=rebuild_fn or self.rebuild)
+        _settings = self.add_menu('Settings')
+        self.add_menu_item(
+            _settings, label='Save', image=icons.EMOJI.find('Floppy disk'),
+            command=self.save_settings)
+        self.add_menu_item(
+            _settings, label='Reset', image=icons.EMOJI.find('Shower'),
+            command=wrap_fn(self.reset_settings))  # Wrap to discard args
+        self._save_on_close = self.add_menu_item(
+            _settings, label='Save on close', checkbox=False)
+
+    def add_menu(self, name):
+        """Add menu to interface.
+
+        Args:
+            name (str): menu name
+        """
+        raise NotImplementedError
+
+    def add_menu_item(self, parent, label, command=None, image=None,
+                      checkbox=None):
+        """Add menu item to interface.
+
+        Args:
+            parent (any): parent menu
+            label (str): label for menu item
+            command (func): item command
+            image (str): path to item image
+            checkbox (bool): item as checkbox (with this state)
+        """
+        raise NotImplementedError
+
+    def add_arg(self, arg, default, label=None, choices=None, label_width=None,
+                update=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
@@ -92,6 +137,7 @@ class BasePyGui(object):
             update (ArgUpdater): updater for this arg
             verbose (int): print process data
         """
+        raise NotImplementedError
 
     def add_def(self, def_, opts, last_, verbose=0):
         """Add a def to the interface.
@@ -130,42 +176,60 @@ class BasePyGui(object):
             _default = _arg.default
             _arg_choices = _choices.get(_arg.name)
             _arg_update = _update.get(_arg.name)
-            if isinstance(_arg_update, types.FunctionType):  # Convert function
+            if _arg_update and not isinstance(_arg_update, install.ArgUpdater):
+                # Convert function to updater
                 _arg_update = install.ArgUpdater(get_choices=_arg_update)
             if _arg_update:
                 _arg_choices = _arg_update.get_choices() or _arg_choices
                 _default = _arg_update.get_default() or _default
 
-            self.add_arg(
+            _read_fn, _set_fn = self.add_arg(
                 _arg,
                 default=_default,
                 label=to_nice(_arg.name),
                 choices=_arg_choices,
-                label_width=opts.get('label_width'),
+                label_width=opts.get('label_width') or self.label_width,
                 update=_arg_update)
+            self.read_settings_fns['def'][def_.name][_arg.name] = _read_fn
+            self.set_settings_fns['def'][def_.name][_arg.name] = _set_fn
 
+        # Add execute
+        _icon = opts.get('icon') or get_def_icon(
+            def_.name, set_=self.icon_set)
+        _label = opts.get('label') or to_nice(def_.name)
+        _col = opts.get('col') or self.base_col
+        _exec_fn = get_exec_fn(
+            def_=def_, read_arg_fns=self.read_settings_fns['def'][def_.name],
+            disable_reload=_disable_reload, catch_error_=True)
+        _help_fn = get_help_fn(def_)
+        _code_fn = get_code_fn(def_)
         self.add_execute(
-            def_=def_,
-            icon=opts.get('icon'),
-            label=opts.get('label'),
-            col=opts.get('col') or self.base_col,
-            disable_reload=_disable_reload,
-            catch_error_=_catch_error)
+            def_=def_, exec_fn=_exec_fn, help_fn=_help_fn, icon=_icon,
+            label=_label, col=_col, code_fn=_code_fn)
 
-    def add_execute(
-            self, def_, depth=35, icon=None, label=None, col=None,
-            disable_reload=False, catch_error_=True):
+        if not last_:
+            self.add_separator()
+
+    def add_execute(self, def_, exec_fn, code_fn, help_fn, depth=35,
+                    icon=None, label=None, col=None):
         """Add execute button for the given def.
 
         Args:
             def_ (PyDef): def being added
+            exec_fn (fn): function to call on execute
+            code_fn (fn): function to call on jump to code
+            help_fn (fn): function to call on launch help
             depth (int): size in pixels of def
             icon (str): path to icon to display
             label (str): override label from exec button
             col (str): colour for button
-            disable_reload (bool): no refresh on execute
-            catch_error_ (bool): apply error catch decorator
         """
+
+    def add_separator(self):
+        """Add a separator to the inteface."""
+
+    def finalise_ui(self):
+        """Finalise ui (implemented in subclass)."""
 
     def close_event(self, verbose=0):
         """Executed on close.
@@ -193,12 +257,6 @@ class BasePyGui(object):
         return _read_all_defs(
             py_file=self.py_file, mod=_mod, defs_data=_defs_data,
             sections=_sections, hidden=_hidden)
-
-    def finalise_ui(self):
-        """Finalise ui (implemented in subclass)."""
-
-    def init_ui(self):
-        """Initiate ui (implemented in subclass)."""
 
     def load_settings(self, verbose=0):
         """Load settings from disk.

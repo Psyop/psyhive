@@ -2,7 +2,7 @@
 
 from psyhive.utils import lprint
 
-from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, QtCore
+from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, Qt
 from psyhive.qt.misc import get_col, get_pixmap, get_p, get_icon
 
 
@@ -42,11 +42,72 @@ class HWidgetBase(object):
         self.setIcon(_icon)
 
     def __repr__(self):
-        return '<{}:{}>'.format(type(self).__name__, self.objectName())
+        return '<{}:{}>'.format(
+            type(self).__name__, self.objectName() or id(self))
 
 
 class HCheckBox(QtWidgets.QCheckBox, HWidgetBase):
     """Override for QCheckBox widget."""
+
+
+class HComboBox(QtWidgets.QComboBox, HWidgetBase):
+    """Override for QComboBox widget."""
+
+    def add_item(self, label, data=None):
+        """Add item to this combo box.
+
+        Args:
+            label (str): text for item
+            data (any): link data to item
+        """
+        self.addItem(label)
+        if data:
+            self.set_item_data(self.count()-1, data)
+
+    def item_data(self, index):
+        """Get data linked with the given item index.
+
+        Args:
+            index (int): item to read
+
+        Returns:
+            (any): linked data
+        """
+        return self.itemData(index, Qt.UserRole)
+
+    def select_data(self, data, verbose=0):
+        """Select item with matching linked data.
+
+        Args:
+            data (any): data to match
+            verbose (int): print process data
+        """
+        lprint("SELECTING DATA", data, verbose=verbose)
+        for _idx in range(self.count()):
+            _data = self.item_data(_idx)
+            lprint(" - CHECKING DATA", _idx, _data, verbose=verbose)
+            if _data == data:
+                lprint(" - MATCHED", verbose=verbose)
+                self.setCurrentIndex(_idx)
+                break
+
+    def selected_data(self):
+        """Get data linked to the selected item.
+
+        Returns:
+            (any): linked data
+        """
+        _row = self.currentIndex()
+        return self.item_data(_row)
+
+    def set_item_data(self, index, data):
+        """Link data to the given item.
+
+        Args:
+            index (int): item to link data to
+            data (any): data to link
+        """
+        self.setItemData(index, data, Qt.UserRole)
 
 
 class HLabel(QtWidgets.QLabel, HWidgetBase):
@@ -63,7 +124,7 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             (any list): data list
         """
         return [
-            _item.data(QtCore.Qt.UserRole) for _item in self.all_items()]
+            _item.data(Qt.UserRole) for _item in self.all_items()]
 
     def all_items(self):
         """Get a list of all items.
@@ -114,7 +175,7 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             (any list): list of data
         """
         return [
-            _item.data(QtCore.Qt.UserRole) for _item in self.selectedItems()]
+            _item.data(Qt.UserRole) for _item in self.selectedItems()]
 
     def selected_text(self):
         """Get selected item as text.
@@ -134,7 +195,7 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
         Returns:
             (any): stored data
         """
-        return self.data(QtCore.Qt.UserRole)
+        return self.data(Qt.UserRole)
 
     def set_col(self, col):
         """Set text colour of this item.
@@ -151,7 +212,7 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
         Args:
             data (any): data to apply
         """
-        self.setData(QtCore.Qt.UserRole, data)
+        self.setData(Qt.UserRole, data)
 
     def set_icon(self, image):
         """Set icon for this item.
@@ -178,7 +239,7 @@ class HMenu(QtWidgets.QMenu, HWidgetBase):
             verbose (int): print process data
         """
         _func = func
-        if catch_error_:
+        if catch_error_ and func:
             from psyhive.tools import get_error_catcher
             _catcher = get_error_catcher(exit_on_error=False)
             _func = _catcher(_func)
@@ -241,6 +302,15 @@ class HProgressBar(QtWidgets.QProgressBar, HWidgetBase):
 class HPushButton(QtWidgets.QPushButton, HWidgetBase):
     """Override for QPushButton object."""
 
+    def set_pixmap(self, pixmap):
+        """Set pixmap for this widget.
+
+        Args:
+            pixmap (str|QPixmap): pixmap to apply
+        """
+        _icon = get_icon(pixmap)
+        self.setIcon(_icon)
+
 
 class HTabWidget(QtWidgets.QTabWidget, HWidgetBase):
     """Override for QTabWidget object."""
@@ -279,7 +349,7 @@ class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
             _brush = QtGui.QBrush(get_col(self._col))
             self.setForeground(0, _brush)
         if data:
-            self.setData(0, QtCore.Qt.UserRole, data)
+            self.setData(0, Qt.UserRole, data)
 
     def all_children(self):
         """Get a list of all children (including children's children).
@@ -303,7 +373,7 @@ class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def get_data(self):
         """Get retrieve data from this item."""
-        return self.data(0, QtCore.Qt.UserRole)
+        return self.data(0, Qt.UserRole)
 
     def __repr__(self):
         return '<{}:{}>'.format(type(self).__name__.strip('_'), self.text(0))

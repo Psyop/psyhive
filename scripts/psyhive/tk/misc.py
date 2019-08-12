@@ -53,6 +53,8 @@ def find_tank_mod(name, app=None):
     _mods = [
         _mod for _mod in refresh.find_mods(filter_=name, file_filter=app)
         if _mod.__name__.endswith(name)]
+    if not _mods:
+        raise ValueError("Failed to find module "+name)
     return _mods[0]
 
 

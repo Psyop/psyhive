@@ -5,12 +5,9 @@ import os
 from maya import cmds
 
 from psyhive import icons, qt, refresh
-from psyhive.utils import (
-    wrap_fn, to_nice, copy_text, lprint, dprint, chain_fns, get_single)
+from psyhive.utils import wrap_fn, copy_text, lprint, chain_fns, get_single
 
 from psyhive.py_gui import base, install
-from psyhive.py_gui.misc import (
-    get_code_fn, get_exec_fn, get_help_fn, get_def_icon)
 
 from maya_psyhive import ui
 
@@ -64,35 +61,22 @@ def _get_update_fn(set_fn, update, field):
 class MayaPyGui(base.BasePyGui):
     """Pygui interface built using maya.cmds interface tools."""
 
-    def close(self):
-        """Close this window."""
-        if cmds.window(self.ui_name, exists=True):
-            cmds.deleteUI(self.ui_name)
+    def init_ui(self, rebuild_fn=None):
+        """Initiate ui.
 
-    def init_ui(self):
-        """Initiate interface."""
-        dprint('Building ui {} ({})'.format(self.ui_name, self.base_col))
+        Args:
+            rebuild_fn (func): override rebuild function
+        """
+
+        # Init window
         if cmds.window(self.ui_name, exists=True):
             cmds.deleteUI(self.ui_name)
         cmds.window(
             self.ui_name, title=self.title, width=400, menuBar=True,
             closeCommand=self.close_event)
 
-        # Add menu bar
-        cmds.menu(label='Interface')
-        cmds.menuItem(
-            label='Rebuild', image=icons.EMOJI.find('Hammer'),
-            command=wrap_fn(cmds.evalDeferred, self.rebuild))
-        cmds.menu(label='Settings')
-        cmds.menuItem(
-            label='Save', image=icons.EMOJI.find('Floppy disk'),
-            command=self.save_settings)
-        cmds.menuItem(
-            label='Reset', image=icons.EMOJI.find('Shower'),
-            command=wrap_fn(self.reset_settings))  # Wrap to discard args
-        self._save_on_close = cmds.menuItem(
-            label='Save on close', image=icons.EMOJI.find('Floppy disk'),
-            checkBox=False)
+        _rebuild_fn = rebuild_fn or wrap_fn(cmds.evalDeferred, self.rebuild)
+        super(MayaPyGui, self).init_ui(rebuild_fn=_rebuild_fn)
 
         # Build layouts
         self.scroll = self.ui_name+'_scroll'
@@ -174,41 +158,25 @@ class MayaPyGui(base.BasePyGui):
                 label=update.label, height=19, command=_get_update_fn(
                     set_fn=_set_fn, update=update, field=_field))
 
-        self.read_settings_fns['def'][arg.def_.name][arg.name] = _read_fn
-        self.set_settings_fns['def'][arg.def_.name][arg.name] = _set_fn
-
         cmds.setParent('..')
 
-    def add_def(self, def_, **kwargs):
-        """Add a def to the interface.
+        return _read_fn, _set_fn
 
-        Args:
-            def_ (PyDef): def to add
-        """
-        super(MayaPyGui, self).add_def(def_, **kwargs)
-        _last = kwargs.get('last_')
-        if not _last:
-            cmds.separator(style='out', height=10, horizontal=True)
-
-    def add_execute(
-            self, def_, depth=35, icon=None, label=None, col=None,
-            disable_reload=False, catch_error_=True):
+    def add_execute(self, def_, exec_fn, code_fn, help_fn, depth=35,
+                    icon=None, label=None, col=None):
         """Add execute button for the given def.
 
         Args:
             def_ (PyDef): def being added
+            exec_fn (fn): function to call on execute
+            code_fn (fn): function to call on jump to code
+            help_fn (fn): function to call on launch help
             depth (int): size in pixels of def
             icon (str): path to icon to display
             label (str): override label from exec button
             col (str): colour for button
-            disable_reload (bool): no refresh on execute
-            catch_error_ (bool): apply error catch decorator
         """
-        _icon = icon or get_def_icon(def_.name, set_=self.icon_set)
         _help_icon = icons.EMOJI.find('Information')
-        _exec_fn = get_exec_fn(
-            def_=def_, read_arg_fns=self.read_settings_fns['def'][def_.name],
-            disable_reload=disable_reload, catch_error_=catch_error_)
 
         _btn_width = 10
         cmds.rowLayout(
@@ -217,18 +185,15 @@ class MayaPyGui(base.BasePyGui):
             adjustableColumn=2,
             height=depth)
         _icon = cmds.iconTextButton(
-            image1=_icon, width=depth, height=depth,
-            style='iconOnly', command=get_code_fn(def_))
+            image1=icon, width=depth, height=depth,
+            style='iconOnly', command=code_fn)
         _col = qt.get_col(col if col else self.base_col)
         _btn = cmds.button(
-            label=label or to_nice(def_.name),
-            height=depth,
-            width=_btn_width,
-            command=_exec_fn,
+            label=label, height=depth, width=_btn_width, command=exec_fn,
             align='center', backgroundColor=_col.to_tuple(mode='float'))
         cmds.iconTextButton(
             image1=_help_icon, height=depth, width=depth,
-            style='iconOnly', command=get_help_fn(def_))
+            style='iconOnly', command=help_fn)
         cmds.setParent('..')
 
         # Add right-click options (exec button)
@@ -248,7 +213,7 @@ class MayaPyGui(base.BasePyGui):
         cmds.menuItem(
             'Refresh and execute', parent=_menu,
             image=icons.REFRESH,
-            command=chain_fns(refresh.reload_libs, _exec_fn))
+            command=chain_fns(refresh.reload_libs, exec_fn))
 
         # Add right-click options (code icon)
         _menu = cmds.popupMenu(parent=_icon)
@@ -256,6 +221,38 @@ class MayaPyGui(base.BasePyGui):
             'Unlock button', parent=_menu,
             image=icons.EMOJI.find('Unlocked'),
             command=wrap_fn(cmds.button, _btn, edit=True, enable=True))
+
+    def add_separator(self):
+        """Add separator."""
+        cmds.separator(style='out', height=10, horizontal=True)
+
+    def add_menu(self, name):
+        """Add menu to interface.
+
+        Args:
+            name (str): menu name
+        """
+        return cmds.menu(label=name)
+
+    def add_menu_item(self, parent, label, command=None, image=None,
+                      checkbox=None):
+        """Add menu item to interface.
+
+        Args:
+            parent (any): parent menu
+            label (str): label for menu item
+            command (func): item command
+            image (str): path to item image
+            checkbox (bool): item as checkbox (with this state)
+        """
+        _kwargs = {}
+        if image:
+            _kwargs['image'] = image
+        if command:
+            _kwargs['command'] = command
+        if checkbox is not None:
+            _kwargs['checkBox'] = checkbox
+        return cmds.menuItem(parent=parent, label=label, **_kwargs)
 
     def close_event(self, verbose=0):
         """Executed on close.
@@ -284,8 +281,13 @@ class MayaPyGui(base.BasePyGui):
         _col_h = cmds.columnLayout(self.master, query=True, height=True)
         cmds.window(
             self.ui_name, edit=True,
-            height=min(_col_h+27, self.height),
-            width=self.width)
+            height=min(_col_h+27, self._height),
+            width=self._width)
+
+    def close(self):
+        """Close this window."""
+        if cmds.window(self.ui_name, exists=True):
+            cmds.deleteUI(self.ui_name)
 
     def load_settings(self, verbose=0):
         """Load settings from disk.
@@ -310,10 +312,10 @@ class MayaPyGui(base.BasePyGui):
             section (_Section): section to apply
             verbose (int): print process data
         """
-        _col = qt.HColor(self.base_col).blacken(0.5)
         _frame = cmds.frameLayout(
             collapsable=True, label=section.label, collapse=section.collapse,
-            parent=self.master, backgroundColor=_col.to_tuple(mode='float'),
+            parent=self.master,
+            backgroundColor=self.section_col.to_tuple(mode='float'),
         )
         cmds.columnLayout(parent=_frame, adjustableColumn=1)
         cmds.separator(style='none', height=1, horizontal=True)

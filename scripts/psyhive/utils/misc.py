@@ -8,6 +8,7 @@ import random
 import subprocess
 import tempfile
 import time
+import types
 import urllib2
 
 import six
@@ -46,6 +47,12 @@ def chain_fns(*args):
     """
 
     def _get_chained_fn(args):
+
+        # Catch args not funcs
+        for _arg in args:
+            if not isinstance(_arg, types.FunctionType):
+                raise TypeError('Arg is not function - {}'.format(_arg))
+
         def _chained_fn(*xargs):
             del xargs
             for _fn in args:
@@ -170,14 +177,20 @@ def get_plural(items, plural='s'):
     's' character is returned.
 
     Args:
-        items (list): list of items to check
+        items (list|int): list/number of items
         plural (str): override plural str (eg. for pass -> passes
             the plural str would be "es")
 
     Returns:
         (str): plural character(s)
     """
-    return '' if len(items) == 1 else plural
+    if isinstance(items, (list, tuple, set, dict)):
+        _count = len(items)
+    elif isinstance(items, int):
+        _count = items
+    else:
+        raise ValueError(items)
+    return '' if _count == 1 else plural
 
 
 def get_ord(idx):

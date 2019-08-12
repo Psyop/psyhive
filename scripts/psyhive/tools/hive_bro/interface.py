@@ -299,6 +299,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
     def _callback__work_open(self):
         _ver = get_single(self.ui.work.selected_data(), catch=True)
         _ver.load()
+        self.ui.work_save.redraw()
 
     def _callback__work_jump_to(self):
         _file = host.cur_scene()
@@ -359,19 +360,25 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
     def _context__work_jump_to(self, menu):
 
+        _ver = get_single(self.ui.work.selected_data(), catch=True)
+
+        # Add jump to recent options
         menu.add_label("Jump to")
-        menu.addSeparator()
-        for _work in _get_recent_work():
+        for _work in sorted(_get_recent_work()):
             _work = _work.find_latest()
             if _work.shot:
-                _label = '{}/{}/{}/v{:03}'.format(
-                    _work.shot.name, _work.step, _work.task, _work.version)
+                _label = '{}/{}/{}'.format(
+                    _work.shot.name, _work.step, _work.task)
             else:
-                _label = 'assets/{}/{}/v{:03}'.format(
-                    _work.step, _work.task, _work.version)
+                _label = 'assets/{}/{}'.format(_work.step, _work.task)
             _icon = _get_work_icon(_work, mode='basic')
             _fn = wrap_fn(self.select_path, _work.path)
             menu.add_action(_label, _fn, icon=_icon)
+
+        menu.addSeparator()
+        menu.add_action(
+            'Add selection to recent', _ver.add_to_recent,
+            icon=icons.EMOJI.find('Magnet'))
 
     def select_path(self, path, verbose=1):
         """Point HiveBro to the given path.
@@ -684,7 +691,7 @@ def _set_work_comment(ver, parent):
     _comment = qt.read_input(
         msg='Please enter new comment for {} v{:03d}:'.format(
             ver.task, ver.version),
-        title='Enter comment', parent=parent)
+        title='Enter comment', parent=parent, default=ver.get_comment())
     ver.set_comment(_comment)
 
 

@@ -1,4 +1,4 @@
-"""Overrides for QtGui module."""
+"""Override for QtGui.QPixmap."""
 
 import os
 import tempfile
@@ -8,159 +8,7 @@ import six
 
 from psyhive.utils import File, lprint, test_path, abs_path
 from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
-
-
-class HColor(QtGui.QColor):
-    """Override for QColor."""
-
-    def blacken(self, val):
-        """Whiten this colour by the given fraction (1 returns white).
-
-        Args:
-            val (float): whiten fraction
-
-        Returns:
-            (HColor): whitened colour
-        """
-        return self*(1-val) + HColor('black')*val
-
-    def to_tuple(self, mode='int'):
-        """Get this colour's RGB data as a tuple.
-
-        Args:
-            mode (str): colour mode (int or float)
-
-        Returns:
-            (tuple): RGB values
-        """
-        if mode == 'int':
-            return self.red(), self.green(), self.blue()
-        elif mode == 'float':
-            return self.red()/255.0, self.green()/255.0, self.blue()/255.0
-        raise ValueError(mode)
-
-    def whiten(self, val):
-        """Whiten this colour by the given fraction (1 returns white).
-
-        Args:
-            val (float): whiten fraction
-
-        Returns:
-            (HColor): whitened colour
-        """
-        return self*(1-val) + HColor('white')*val
-
-    def __add__(self, other):
-        return HColor(
-            self.red() + other.red(),
-            self.green() + other.green(),
-            self.blue() + other.blue())
-
-    def __mul__(self, value):
-        return HColor(
-            self.red() * value,
-            self.green() * value,
-            self.blue() * value)
-
-    def __str__(self):
-        return '<{}:({})>'.format(
-            type(self).__name__,
-            ', '.join(['{:d}'.format(_val) for _val in self.to_tuple()]))
-
-    def __sub__(self, other):
-        return HColor(
-            self.red() - other.red(),
-            self.green() - other.green(),
-            self.blue() - other.blue())
-
-
-class HPainter(QtGui.QPainter):
-    """Wrapper for QPainter object."""
-
-    def add_text(
-            self, text, pos=(0, 0), anchor='TL', col='white', font=None,
-            size=None, verbose=0):
-        """Write text to the image.
-
-        Args:
-            text (str): text to add
-            pos (tuple|QPoint): text position
-            anchor (str): text anchor
-            col (str|QColor): text colour
-            font (QFont): text font
-            size (int): apply font size
-            verbose (int): print process data
-        """
-        from psyhive.qt import get_p, get_col
-        lprint("Adding text", text, verbose=verbose)
-        _window = self.window()
-        _pos = get_p(pos)
-        _x, _y = _pos.x(), _pos.y()
-        _w, _h = _window.width(), _window.height()
-
-        if anchor == 'BL':
-            _rect = QtCore.QRect(_x, 0, _w-_x, _y)
-            _align = QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom
-        elif anchor == 'BR':
-            _rect = QtCore.QRect(0, 0, _x, _y)
-            _align = QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom
-        elif anchor == 'C':
-            _rect = QtCore.QRect(0, 0, 2*_x, 2*_y)
-            _align = QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter
-        elif anchor == 'L':
-            _rect = QtCore.QRect(_x, 0, _w, 2*_y)
-            _align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft
-        elif anchor == 'R':
-            _rect = QtCore.QRect(0, 0, _x, 2*_y)
-            _align = QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
-        elif anchor in ('T', 'TC'):
-            _rect = QtCore.QRect(0, _y, _w, _h)
-            _align = QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop
-        elif anchor == 'TL':
-            _rect = QtCore.QRect(_x, _y, _w, _h)
-            _align = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        elif anchor == 'TR':
-            _rect = QtCore.QRect(0, _y, _x, _h-_y)
-            _align = QtCore.Qt.AlignRight | QtCore.Qt.AlignTop
-        else:
-            raise ValueError('Unhandled anchor: %s' % anchor)
-
-        if font:
-            self.setFont(font)
-        elif size is not None:
-            _font = QtGui.QFont()
-            _font.setPointSize(size)
-            self.setFont(_font)
-
-        # Draw text
-        self.setPen(get_col(col or 'white'))
-        self.drawText(_rect, _align, text)
-
-    def set_operation(self, operation):
-        """Set compositing operation.
-
-        Args:
-            operation (str): operation to apply
-        """
-        if operation is None:
-            return
-        elif operation in ['add', 'plus']:
-            _mode = self.CompositionMode.CompositionMode_Plus
-        elif operation == 'darken':
-            _mode = self.CompositionMode.CompositionMode_Darken
-        elif operation == 'lighten':
-            _mode = self.CompositionMode.CompositionMode_Lighten
-        elif operation in ['multiply', 'mult']:
-            _mode = self.CompositionMode.CompositionMode_Multiply
-        elif operation == 'over':
-            _mode = self.CompositionMode.CompositionMode_SourceOver
-        elif operation == 'soft':
-            _mode = self.CompositionMode.CompositionMode_SoftLight
-        elif operation == 'source':
-            _mode = self.CompositionMode.CompositionMode_Source
-        else:
-            raise ValueError(operation)
-        self.setCompositionMode(_mode)
+from psyhive.qt.wrapper.gui.painter import HPainter
 
 
 class HPixmap(QtGui.QPixmap):
@@ -344,7 +192,7 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawPath(_path)
         _pnt.end()
 
-    def add_polygon(self, pts, col, outline='black', thickness=1.0, verbose=0):
+    def add_polygon(self, pts, col, outline='black', thickness=1.0):
         """Draw a polygon on this pixmap.
 
         Args:
@@ -352,7 +200,6 @@ class HPixmap(QtGui.QPixmap):
             col (QColor): fill colour
             outline (str|None): outline colour (if any)
             thickness (float): line thickness
-            verbose (int): print process data
         """
         from psyhive import qt
 
@@ -424,19 +271,19 @@ class HPixmap(QtGui.QPixmap):
             col (str): square colour
             thickness (float): line thickness
         """
-        from psyhive.qt import get_p, get_size, get_col
+        from psyhive import qt
 
-        _pos = get_p(pos)
-        _size = get_size(size)
+        _pos = qt.get_p(pos)
+        _size = qt.get_size(size)
         _rect = QtCore.QRect(_pos, _size)
 
-        _brush = QtGui.QBrush(HColor(0, 0, 0, 0))
-        _col = get_col(col)
+        _brush = QtGui.QBrush(qt.HColor(0, 0, 0, 0))
+        _col = qt.get_col(col)
         _pen = QtGui.QPen(_col)
         if thickness:
             _pen.setWidthF(thickness)
 
-        _pnt = HPainter()
+        _pnt = qt.HPainter()
         _pnt.begin(self)
         _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
@@ -485,8 +332,9 @@ class HPixmap(QtGui.QPixmap):
         Args:
             factor (float): how much to darken
         """
+        from psyhive import qt
         _tmp = HPixmap(self.size())
-        _tmp.fill(HColor(0, 0, 0, 255*factor))
+        _tmp.fill(qt.HColor(0, 0, 0, 255*factor))
         self.add_overlay(_tmp, operation='mult')
 
     def get_c(self):

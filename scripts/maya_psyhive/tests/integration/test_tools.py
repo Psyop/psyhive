@@ -52,7 +52,8 @@ class TestTools(unittest.TestCase):
     def test_frustrum_test_blast(self):
 
         # Test frustrum test
-        _ref = ref.obtain_ref(namespace='archer', file_=_RIG_PATH, class_=_Rig)
+        _ref = ref.obtain_ref(namespace='archer_TMP', file_=_RIG_PATH,
+                              class_=_Rig)
         assert isinstance(_ref, _Rig)
         _cam = hom.HFnCamera('persp')
         _pos = hom.HMatrix([
