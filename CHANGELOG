@@ -1,3 +1,15 @@
+#### v0.31.1 ####
+
+    Released: Mon 12th Aug 2019
+
+    frustrum test blast: added progress bar to allow cancel blast (aboyce),
+    
+    maya_psyhive:
+        tools.frustrum_test_blast added progress bar to allow cancel blast,
+    psyhive:
+        py_gui added reset setting def ctx option,
+
+
 #### v0.31.0 ####
 
     Released: Mon 12th Aug 2019

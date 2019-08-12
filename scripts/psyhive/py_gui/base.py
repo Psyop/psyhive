@@ -319,12 +319,18 @@ class BasePyGui(object):
         _class = getattr(sys.modules[_mod_name], _class_name)
         _class(**self._kwargs)
 
-    def reset_settings(self):
-        """Reset current settings to defaults."""
+    def reset_settings(self, def_=None):
+        """Reset current settings to defaults.
+
+        Args:
+            def_ (PyDef): only reset this def
+        """
         print 'RESETTING SETTINGS'
         _sections = set()
         for _fn, _data in self._get_defs_data():
             _py_def = self.py_file.find_def(_fn.__name__)
+            if def_ and not def_ == _py_def:
+                continue
             print' - ADDING', _fn, _data
             for _py_arg in _py_def.find_args():
                 print '   - SETTING', _py_arg, _py_arg.default
@@ -335,12 +341,14 @@ class BasePyGui(object):
             if _section:
                 print ' - SECTION', _section
                 _sections.add(_section)
-        print 'SECTIONS', _sections
-        for _section in _sections:
-            print ' - ADDING', _section, _section.collapse
-            _set_fn = self.set_settings_fns[
-                'section'][_section.label]['collapse']
-            _set_fn(_section.collapse)
+
+        if not def_:
+            print 'SECTIONS', _sections
+            for _section in _sections:
+                print ' - ADDING', _section, _section.collapse
+                _set_fn = self.set_settings_fns[
+                    'section'][_section.label]['collapse']
+                _set_fn(_section.collapse)
 
     def save_settings(self, verbose=1):
         """Save current settings to disk.

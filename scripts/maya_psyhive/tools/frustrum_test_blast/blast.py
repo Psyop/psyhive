@@ -4,7 +4,7 @@ import copy
 
 from maya import cmds
 
-from psyhive import py_gui
+from psyhive import py_gui, qt
 from psyhive.tools import track_usage
 from psyhive.utils import lprint, passes_filter, ints_to_str
 
@@ -68,17 +68,27 @@ def _blast_and_find_rigs_outside_frustrum(
 
     # Blast scene and test rigs in camera
     _off_cam_rigs = copy.copy(rigs)
+    _progress = qt.ProgressBar(
+        _check_frames, 'Blasting {:d} frames'.format(len(_frames)),
+        col='orchid')
+    _cancelled = False
     while _check_frames:
 
         _frame = _check_frames.pop(0)
+
+        # Update progress bar
+        if not _progress.isVisible():
+            _cancelled = True
+            raise StopIteration("Blast cancelled")
+        _progress.next()
+        print 'UPDATED PROGRESS', _progress
 
         lprint(' - CHECKING FRAME', _frame, verbose=verbose)
         cmds.currentTime(_frame)
 
         # Remove rigs in camera from list
-        lprint(
-            ' - TESTING {:d} RIGS'.format(len(_off_cam_rigs)),
-            _off_cam_rigs, verbose=verbose)
+        lprint(' - TESTING {:d} RIGS'.format(len(_off_cam_rigs)),
+               _off_cam_rigs, verbose=verbose)
         for _rig in copy.copy(_off_cam_rigs):
             if _rig_in_cam(cam, _rig):
                 lprint(' - RIG IN CAMERA:', _rig, verbose=verbose)
@@ -89,11 +99,14 @@ def _blast_and_find_rigs_outside_frustrum(
             lprint(' - NO RIGS LEFT TO CHECK', verbose=verbose)
             _check_frames = []
             _blast_frames = range(_frame, _frames[-1]+1)
+            _progress.close()
         else:
             _blast_frames = range(_frame, _frame+sample_freq)
-        lprint(
-            ' - BLASTING FRAMES', ints_to_str(_blast_frames), verbose=verbose)
+        lprint(' - BLASTING FRAMES', ints_to_str(_blast_frames),
+               verbose=verbose)
         cmds.playblast(frame=_blast_frames, **kwargs)
+
+    _progress.close()
 
     return _off_cam_rigs
 
@@ -139,7 +152,8 @@ def blast_with_frustrum_check(kwargs, sample_freq=5):
     _rigs = ref.find_refs(class_=_Rig)
     _off_cam_rigs = _blast_and_find_rigs_outside_frustrum(
         _cam, _rigs, kwargs, sample_freq=sample_freq)
-    print '{}/{} RIGS ARE OFF CAMERA'.format(len(_off_cam_rigs), len(_rigs))
+    print '{}/{} RIGS ARE OFF CAMERA {}'.format(
+        len(_off_cam_rigs), len(_rigs), _cam)
 
     # Remove off cam rigs
     if _off_cam_rigs:

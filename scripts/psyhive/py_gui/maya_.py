@@ -214,6 +214,10 @@ class MayaPyGui(base.BasePyGui):
             'Refresh and execute', parent=_menu,
             image=icons.REFRESH,
             command=chain_fns(refresh.reload_libs, exec_fn))
+        cmds.menuItem(
+            'Reset settings', parent=_menu,
+            image=icons.EMOJI.find('Shower'),
+            command=wrap_fn(self.reset_settings, def_=def_))
 
         # Add right-click options (code icon)
         _menu = cmds.popupMenu(parent=_icon)
@@ -299,9 +303,15 @@ class MayaPyGui(base.BasePyGui):
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=True)
 
-    def reset_settings(self):
-        """Reset settings to defaults."""
-        base.BasePyGui.reset_settings(self)  # Avoid super for reload
+    def reset_settings(self, def_=None):
+        """Reset current settings to defaults.
+
+        Args:
+            def_ (PyDef): only reset this def
+        """
+
+        # Avoid super for reload
+        base.BasePyGui.reset_settings(self, def_=def_)
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=True)
 
