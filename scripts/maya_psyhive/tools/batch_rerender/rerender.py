@@ -138,7 +138,7 @@ def _update_outputs_to_latest():
             _abc = _exo.plug('fileName').get_val()
             print ' - CURRENT ABC', _abc
             _output = tk.get_output(_abc)
-            if not _output.is_latest():
+            if _output and not _output.is_latest():
                 _latest = _output.find_latest()
                 print ' - UPDATING TO LATEST', _latest
                 _exo.plug('fileName').set_val(_latest.path)

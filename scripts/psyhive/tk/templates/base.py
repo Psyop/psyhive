@@ -10,7 +10,7 @@ import tank
 
 from tank.platform import current_engine
 
-from psyhive import pipe, host
+from psyhive import pipe, qt
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
@@ -478,9 +478,9 @@ class TTWorkFileBase(TTBase, File):
         _fileops = tk.find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
-        if not host.batch_mode():  # Unstable in maya batch
-            _outputpaths = tk.find_tank_app('outputpaths')
-            _outputpaths.update_output_paths()
+        qt.get_application().processEvents()  # outputpaths is deferred load
+        _outputpaths = tk.find_tank_app('outputpaths')
+        _outputpaths.update_output_paths()
 
     def save(self, comment):
         """Save this version.

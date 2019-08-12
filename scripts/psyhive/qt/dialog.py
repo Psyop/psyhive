@@ -203,6 +203,14 @@ def raise_dialog(
         parent (QDialog): parent dialog
         verbose (int): print process data
     """
+    from psyhive import host
+
+    # Avoid farm qt seg fault
+    if host.batch_mode():
+        print 'MESSAGE:\n'+msg
+        raise RuntimeError("Cannot raise dialog in batch mode - "+title)
+
+    # Build dialog
     get_application()
     _box = _HMessageBox(
         title=title, text=msg, buttons=buttons, icon=icon, icon_size=icon_size,
@@ -215,6 +223,7 @@ def raise_dialog(
     if pos:
         _box.show()  # To calculate size
         _box.move(pos-get_p(_box.size())/2)
+
     return _box.get_result()
 
 

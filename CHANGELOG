@@ -1,3 +1,18 @@
+#### v0.31.2 ####
+
+    Released: Mon 12th Aug 2019
+
+    batch rerender:
+        catch error on exocortex abc off pipeline (iirvine),
+        fix missing outputpaths tank app warning (iirvine),
+    
+    maya_psyhive:
+        tools.batch_rerender catch exo abc not tk output,
+    psyhive:
+        qt.raise_dialog RuntimeError in batch mode to avoid seg fault,
+        tk.TTWorkFileBase.load update paths after QApplication.processEvents to avoid missing outputpaths app,
+
+
 #### v0.31.1 ####
 
     Released: Mon 12th Aug 2019
