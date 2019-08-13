@@ -3,11 +3,11 @@
 import os
 import pprint
 
-from psyhive import tk, qt, icons
+from psyhive import tk, qt, icons, farm
 from psyhive.utils import (
-    abs_path, get_plural, chain_fns, wrap_fn, dprint, lprint)
+    abs_path, get_plural, chain_fns, wrap_fn, dprint, lprint, safe_zip)
 
-from maya_psyhive.tools.batch_rerender import rerender
+from psyhive.tools import get_usage_tracker
 
 ICON = icons.EMOJI.find('Basket')
 
@@ -17,6 +17,9 @@ class _BatchRerenderUi(qt.HUiDialog):
 
     def __init__(self):
         """Constructor."""
+        from psyhive.tools import batch_rerender
+        batch_rerender.DIALOG = self
+
         self._all_steps = []
         self._all_renders = []
         self._work_files = {}
@@ -26,6 +29,7 @@ class _BatchRerenderUi(qt.HUiDialog):
         _ui_file = abs_path(
             'batch_rerender.ui', root=os.path.dirname(__file__))
         super(_BatchRerenderUi, self).__init__(ui_file=_ui_file)
+        self.setWindowTitle('Batch Rerender')
         self.set_icon(ICON)
 
         self.ui.sequences.itemSelectionChanged.connect(
@@ -38,6 +42,9 @@ class _BatchRerenderUi(qt.HUiDialog):
             self.ui.renders.redraw)
         self.ui.renders.itemSelectionChanged.connect(
             self.ui.info.redraw)
+
+        self.ui.steps.select_text('lighting')
+        self.ui.tasks.select_text('lighting')
 
     @qt.list_redrawer
     def _redraw__sequences(self, widget):
@@ -104,12 +111,13 @@ class _BatchRerenderUi(qt.HUiDialog):
         # Find latest work files
         self._work_files = {}
         for _render in self._renders:
-            _latest = _render.find_latest()
-            _work = _latest.find_work_file()
+            _latest_render = _render.find_latest()
+            _work = _latest_render.find_work_file()
+            _latest_work = _work.find_latest()
             if _work:
                 if _work not in self._work_files:
-                    self._work_files[_work] = []
-                self._work_files[_work].append(_latest)
+                    self._work_files[_latest_work] = []
+                self._work_files[_latest_work].append(_latest_render)
 
         widget.setText('Selected: {:d} render{} ({:d} work file{})'.format(
             len(self._renders), get_plural(self._renders),
@@ -126,7 +134,7 @@ class _BatchRerenderUi(qt.HUiDialog):
     def _callback__submit(self):
         _work_files = sorted(self._work_files)
         _ranges = self._read_frame_ranges(_work_files)
-        rerender.rerender_work_files(
+        _rerender_work_files(
             work_files=_work_files, ranges=_ranges, passes=self._passes)
 
     def _read_frame_ranges(self, work_files, verbose=0):
@@ -156,7 +164,7 @@ class _BatchRerenderUi(qt.HUiDialog):
                             else max(_end, _send))
                     lprint(
                         '   - {:d}-{:d} {}'.format(
-                            _sstart, _sstart, _seq.path),
+                            _sstart, _send, _seq.path),
                         verbose=verbose)
             print ' - RANGE {:d}-{:d} {}'.format(
                 _start, _end, _work_file.path)
@@ -165,17 +173,40 @@ class _BatchRerenderUi(qt.HUiDialog):
         return _ranges
 
 
+def _rerender_work_files(work_files, ranges, passes):
+    """Rerender the given work files on qube.
+
+    Args:
+        work_files (TTWorkFileBase list): work file list
+        ranges (tuple list): list of start/end frames
+        passes (str list): list of passes to rerender
+    """
+    _job = farm.MayaPyJob('Submit {:d} render{}'.format(
+        len(work_files), get_plural(work_files)))
+    for _work_file, _range in safe_zip(work_files, ranges):
+        _py = '\n'.join([
+            'from psyhive import tk',
+            'from maya_psyhive.tools import m_batch_rerender',
+            '_path = "{work.path}"',
+            '_range = {range}',
+            '_passes = {passes}',
+            '_work = tk.get_work(_path)',
+            'm_batch_rerender.rerender_work_file(',
+            '    range_=_range, work_file=_work, passes=_passes)',
+        ]).format(work=_work_file, passes=passes, range=_range)
+        _task = farm.MayaPyTask(
+            _py, label='Rerender {}'.format(_work_file.basename))
+        _job.tasks.append(_task)
+
+    _job.submit()
+
+
+@get_usage_tracker(name='launch_batch_rerender')
 def launch():
     """Launch batch rerender interface.
 
     Returns:
-        (_BatchRerenderUi): interface instance
+        (__BatchRerenderUi): interface instance
     """
-    from maya_psyhive.tools import batch_rerender
     _dialog = _BatchRerenderUi()
-    batch_rerender.DIALOG = _dialog
-
-    _dialog.ui.steps.select_text('lighting')
-    _dialog.ui.tasks.select_text('lighting')
-
     return _dialog

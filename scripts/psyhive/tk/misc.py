@@ -1,5 +1,6 @@
 """General utilities."""
 
+import os
 import sys
 import time
 
@@ -56,6 +57,27 @@ def find_tank_mod(name, app=None):
     if not _mods:
         raise ValueError("Failed to find module "+name)
     return _mods[0]
+
+
+@store_result
+def get_current_engine():
+    """Get current tank engine.
+
+    If no engine exists, a default tk-shell engine is created.
+
+    Returns:
+        (SgtkEngine): tank engine
+    """
+    _current = tank.platform.current_engine()
+    if _current:
+        return _current
+
+    # Create shell engine
+    _project_path = os.getenv('PSYOP_PROJECT_PATH')
+    _tk = sgtk.Sgtk(_project_path)
+    _ctx = _tk.context_from_path(_project_path)
+    _shell = tank.platform.start_engine('tk-shell', _tk, _ctx)
+    return _shell
 
 
 @store_result

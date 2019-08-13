@@ -1,70 +1,18 @@
 """Tools for batch submitting rerenders."""
 
 import copy
-import pprint
 
 from maya import cmds
 
 from psyq.jobs.maya import render_settings, hooks, render_job
 
 from psyhive import tk, qt, host
-from psyhive.utils import get_plural, get_single, safe_zip
+from psyhive.utils import get_plural, get_single
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 
 
-def rerender_work_files(work_files, ranges, passes):
-    """Rerender the given list of work files.
-
-    Args:
-        work_files (TTWorkFileBase list): work files to rerender
-        ranges (tuple list): list of start/end frames
-        passes (str list): list of passes to rerender
-    """
-
-    # Confirm
-    qt.ok_cancel(
-        'Are you sure you want to rerender {:d} pass{} in {:d} '
-        'work file{}?'.format(
-            len(passes), get_plural(passes, plural='es'), len(work_files),
-            get_plural(work_files)))
-
-    # Submit the renders
-    _missing_layers = []
-    for _work_file, _range in qt.ProgressBar(
-            safe_zip(work_files, ranges), 'Re-rendering {:d} work file{}'):
-        _work_file = tk.get_work(_work_file.path)  # Don't want cacheable
-        _file_missing_layers = _rerender_work_file(
-            _work_file, passes, range_=_range)
-        if _file_missing_layers:
-            _missing_layers.append([_work_file, _file_missing_layers])
-
-    # Warn on layers missing from work files
-    if _missing_layers:
-        print 'MISSING LAYERS'
-        pprint.pprint(_missing_layers)
-        qt.notify_warning(
-            'Some passes were not found in the work file.\n\n'
-            'Check the script editor for details.')
-    else:
-        qt.notify('{:d} passes submitted to the farm.'.format(len(passes)))
-
-
-def _layer_from_pass(pass_):
-    """Get render layer name from pass name.
-
-    Args:
-        pass_ (str): pass name
-
-    Returns:
-        (str): render layer name
-    """
-    if pass_ == 'masterLayer':
-        return 'defaultRenderLayer'
-    return 'rs_{}'.format(pass_)
-
-
-def _rerender_work_file(work_file, passes, range_):
+def rerender_work_file(work_file, passes, range_):
     """Rerender a work file.
 
     Assets are updated to the latest version and then the workfile is
@@ -107,6 +55,20 @@ def _rerender_work_file(work_file, passes, range_):
         range_=range_)
 
     return _missing_layers
+
+
+def _layer_from_pass(pass_):
+    """Get render layer name from pass name.
+
+    Args:
+        pass_ (str): pass name
+
+    Returns:
+        (str): render layer name
+    """
+    if pass_ == 'masterLayer':
+        return 'defaultRenderLayer'
+    return 'rs_{}'.format(pass_)
 
 
 def _update_outputs_to_latest():

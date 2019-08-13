@@ -55,6 +55,7 @@ ignore:
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
         psyhive/py_gui/qt_.py
+        psyhive/tools/batch_rerender/interface.py
         psyhive/tools/err_catcher.py
         psyhive/tools/hive_bro/interface.py
         hv_test/diary/
@@ -75,8 +76,10 @@ ignore:
     pointless-statement:
         hv_test/diary/
     protected-access:
+        /tests/
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
+        psyhive/farm/psyq_plugin/mayapy_worker.p
         psyhive/tk/misc.py
         psyhive/tk/templates/base.py
     raising-bad-type:
@@ -149,6 +152,8 @@ ignore:
     unused-variable:
         hv_test/diary/
         /tests/
+    wrong-import-position:
+        psyhive/bin/batch_rerender
 allowed_names:
     closeEvent
     cv
@@ -171,6 +176,7 @@ no_member_libs:
     maya.standalone
     maya.utils
     OpenEXR
+    psyop.env
     pymel.core
     PySide2.QtCore
     PySide2.QtWidgets

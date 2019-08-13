@@ -1,7 +1,5 @@
 """Miscellaneous tools for managing qt."""
 
-import sys
-
 import six
 
 from psyhive.utils import get_result_storer
@@ -18,8 +16,9 @@ def get_application(name='any'):
     Returns:
         (QApplication): qt application
     """
-    if 'maya.cmds' in sys.modules:
-        return QtWidgets.QApplication.instance()
+    _existing = QtWidgets.QApplication.instance()
+    if _existing:
+        return _existing
     return QtWidgets.QApplication([name])
 
 

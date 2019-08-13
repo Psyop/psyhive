@@ -6,6 +6,10 @@ from psyhive.utils import wrap_fn
 NAME = None
 
 
+def _get_cur_scene():
+    """None if no dcc."""
+
+
 def refresh():
     """Refresh current dcc interface."""
 

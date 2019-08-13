@@ -8,15 +8,13 @@ import shutil
 
 import tank
 
-from tank.platform import current_engine
-
 from psyhive import pipe, qt
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
 
 from psyhive.tk.templates.misc import get_template
-from psyhive.tk.misc import find_tank_mod, find_tank_app
+from psyhive.tk.misc import find_tank_mod, find_tank_app, get_current_engine
 
 
 class TTBase(Path):
@@ -40,7 +38,7 @@ class TTBase(Path):
         lprint('PATH', _path, verbose=verbose)
         super(TTBase, self).__init__(_path)
         self.hint = hint or self.hint
-        self.tmpl = tmpl or current_engine().tank.templates[self.hint]
+        self.tmpl = tmpl or get_current_engine().tank.templates[self.hint]
 
         self.project = pipe.Project(path)
         if self.project != pipe.cur_project():
@@ -97,7 +95,7 @@ class TTDirBase(Dir, TTBase):
         """
         _raw_path = abs_path(path)
         _hint = hint or self.hint
-        _tmpl = current_engine().tank.templates[_hint]
+        _tmpl = get_current_engine().tank.templates[_hint]
         _def = abs_path(_tmpl.definition, root=pipe.Project(path).path)
         _path = '/'.join(_raw_path.split('/')[:_def.count('/')+1])
         if verbose:

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BatchRerender</class>
- <widget class="QWidget" name="BatchRerender">
+ <class>BatchRerenderUi</class>
+ <widget class="QDialog" name="BatchRerenderUi">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>428</height>
+    <width>481</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,7 +106,7 @@
        <item>
         <widget class="QPushButton" name="submit">
          <property name="text">
-          <string>Submit</string>
+          <string>Submit to qube</string>
          </property>
         </widget>
        </item>

@@ -1,3 +1,23 @@
+#### v0.32.0 ####
+
+    Released: Tue 13th Aug 2019
+
+    batch rerender: added standalone interface (iirvine),
+    
+    maya_psyhive:
+        tools renamed batch_rerender -> m_batch_rerender,
+    psyhive:
+        host._get_cur_scene added for no dcc,    
+        farm added,
+        qt.get_application remove dcc specific code for natron,
+        tools.batch_rerender added,
+        tk.get_current_engine add to build tk-shell app for no dcc,
+        tk.templates working outside dcc,
+    bin:
+        batch_rerender added,
+        lsfp moved to hv_test,
+
+
 #### v0.31.2 ####
 
     Released: Mon 12th Aug 2019

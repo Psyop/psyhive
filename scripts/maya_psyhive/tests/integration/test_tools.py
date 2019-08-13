@@ -9,8 +9,7 @@ from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import use_tmp_ns
 
 from maya_psyhive.tools import (
-    fkik_switcher, batch_cache, export_img_plane, restore_img_plane,
-    batch_rerender)
+    fkik_switcher, batch_cache, export_img_plane, restore_img_plane)
 from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
@@ -29,11 +28,6 @@ class TestTools(unittest.TestCase):
         _shot.read_work_files(force=True)
 
         _dialog = batch_cache.launch()
-        _dialog.close()
-
-    def test_batch_rerender(self):
-
-        _dialog = batch_rerender.launch()
         _dialog.close()
 
     def test_fkik_switcher(self):
