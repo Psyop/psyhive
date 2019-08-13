@@ -42,7 +42,7 @@ def rerender_work_file(work_file, passes, range_):
     if _missing_layers:
         print 'MISSING LAYERS', _missing_layers
     if not _layers:
-        return _missing_layers
+        raise RuntimeError("No layers were found to render")
     print ' - FOUND LAYERS TO RENDER', _layers
 
     _update_outputs_to_latest()
