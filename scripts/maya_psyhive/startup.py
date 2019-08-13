@@ -100,7 +100,7 @@ def _build_psyhive_menu():
 
     # Add batch rerender (not available at LittleZoo)
     try:
-        from maya_psyhive.tools import batch_rerender
+        from psyhive.tools import batch_rerender
     except ImportError:
         pass
     else:
