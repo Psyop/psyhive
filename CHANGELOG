@@ -1,3 +1,14 @@
+#### v0.32.2 ####
+
+    Released: Tue 13th Aug 2019
+
+    batch rerender: bugfix submit jobs from qube,
+    
+    psyhive:
+        tools.batch_rerender force USERNAME to bugfix fileops error,
+        utils.py_file.PyFile.docs catch SyntaxError,
+
+
 #### v0.32.1 ####
 
     Released: Tue 13th Aug 2019

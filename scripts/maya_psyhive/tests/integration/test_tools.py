@@ -13,6 +13,7 @@ from maya_psyhive.tools import (
 from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
+from maya_psyhive.tools.m_batch_rerender import rerender
 
 _RIG_PATH = (
     'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
@@ -29,6 +30,13 @@ class TestTools(unittest.TestCase):
 
         _dialog = batch_cache.launch()
         _dialog.close()
+
+    def test_batch_rerender(self):
+        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/'
+                 'babyDragon/shade/output/shadegeo/shade_main/v019/maya/'
+                 'babyDragon_shade_main_v019.mb')
+        _ref = ref.obtain_ref(file_=_path, namespace='dragon')
+        rerender._update_outputs_to_latest(refs=[_ref])
 
     def test_fkik_switcher(self):
 

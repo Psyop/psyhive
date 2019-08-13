@@ -71,10 +71,14 @@ def _layer_from_pass(pass_):
     return 'rs_{}'.format(pass_)
 
 
-def _update_outputs_to_latest():
-    """Update outputs referenced in this file to latest versions."""
+def _update_outputs_to_latest(refs=None):
+    """Update outputs referenced in this file to latest versions.
 
-    for _ref in ref.find_refs():
+    Args:
+        refs (FileRef list): override list of file refs
+    """
+
+    for _ref in refs or ref.find_refs():
 
         # Find asset
         _asset = tk.get_output(_ref.path)
@@ -93,7 +97,7 @@ def _update_outputs_to_latest():
         # Check if cache needs updating
         _exo = get_single([
             _node for _node in hom.CMDS.referenceQuery(
-                _ref.ref_node, nodes=True)
+                _ref.ref_node, nodes=True, dagPath=True)
             if cmds.objectType(_node) == 'ExocortexAlembicFile'], catch=True)
         if _exo:
             print ' - EXO', _exo

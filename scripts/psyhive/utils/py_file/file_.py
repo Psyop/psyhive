@@ -37,7 +37,10 @@ class PyFile(File, PyBase):
         Returns:
             (str): module docstrings
         """
-        return ast.get_docstring(self.get_ast())
+        try:
+            return ast.get_docstring(self.get_ast())
+        except SyntaxError:
+            return None
 
     def check_docs(self, recursive=True, verbose=0):
         """Check this file's docstrings.

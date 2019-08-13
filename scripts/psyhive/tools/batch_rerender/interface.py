@@ -185,6 +185,8 @@ def _rerender_work_files(work_files, ranges, passes):
         len(work_files), get_plural(work_files)))
     for _work_file, _range in safe_zip(work_files, ranges):
         _py = '\n'.join([
+            'import os',
+            'os.environ["USERNAME"] = "{user}"  # For fileops/submit',
             'from psyhive import tk',
             'from maya_psyhive.tools import m_batch_rerender',
             '_path = "{work.path}"',
@@ -193,7 +195,8 @@ def _rerender_work_files(work_files, ranges, passes):
             '_work = tk.get_work(_path)',
             'm_batch_rerender.rerender_work_file(',
             '    range_=_range, work_file=_work, passes=_passes)',
-        ]).format(work=_work_file, passes=passes, range=_range)
+        ]).format(work=_work_file, passes=passes, range=_range,
+                  user=os.environ['USERNAME'])
         _task = farm.MayaPyTask(
             _py, label='Rerender {}'.format(_work_file.basename))
         _job.tasks.append(_task)
