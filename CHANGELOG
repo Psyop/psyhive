@@ -1,3 +1,24 @@
+#### v0.33.0 ####
+
+    Released: Wed 14th Aug 2019
+
+    shot_builder: added [TOOLS-154],
+    
+    bin:
+        shot_builder added,
+    maya_psyhive:
+        utils.get_val added double3 handling,
+    psyhive:
+        farm.MayaPyJob allow dev jobs to execute non locally,
+        farm.MayaPyTask print py + add USERNAME,
+        host added set_start/set_end/set_range,
+        qt.progress_bar added,
+        tk.find_shot added,
+        tk.map_to allow class_ as None for no type change,
+        tk.TTOutputVersionBase.find_latest better error on no vers found,
+        tk.TTShotRoot.get_frame_range added,
+
+
 #### v0.32.2 ####
 
     Released: Tue 13th Aug 2019

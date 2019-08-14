@@ -58,6 +58,12 @@ class ProgressBar(QtWidgets.QDialog):
                 existing progress bar has the same stack key then this
                 will replace it
         """
+
+        # Avoid batch mode seg fault
+        from psyhive import host
+        if host.batch_mode():
+            raise RuntimeError("Cannot create progress bar in batch mode")
+
         _items = items
         if isinstance(_items, (enumerate, collections.Iterable)):
             _items = list(_items)
@@ -151,3 +157,19 @@ class ProgressBar(QtWidgets.QDialog):
         return _result
 
     next = __next__
+
+
+def progress_bar(items, *args, **kwargs):
+    """Get a safe progress bar which deactivates in batch mode.
+
+    Args:
+        items (list): items list
+
+    Returns:
+        (list|ProgressBar): progress bar or the items list
+    """
+    from psyhive import host
+    if host.batch_mode():
+        print 'DISABLE PROGRESS BAR IN BATCH MODE'
+        return items
+    return ProgressBar(items, *args, **kwargs)

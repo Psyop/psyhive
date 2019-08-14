@@ -1,7 +1,9 @@
 """Tools relating to tank templates within shots."""
 
+import tank
+
 from psyhive import pipe
-from psyhive.utils import find, passes_filter
+from psyhive.utils import find, passes_filter, get_single
 
 from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import (
@@ -105,6 +107,23 @@ class TTShotRoot(_TTShotCpntBase, TTRootBase):
 
     hint = 'shot_root'
     shot = None
+
+    def get_frame_range(self):
+        """Read shot frame range from shotgun.
+
+        Returns:
+            (tuple): start/end frames
+        """
+        from psyhive import tk
+        _shotgun = tank.platform.current_engine().shotgun
+        _fields = ["sg_head_in", "sg_tail_out"]
+        _sg_data = _shotgun.find_one(
+            "Shot", filters=[
+                ["project", "is", [tk.get_project_data(self.project)]],
+                ["code", "is", self.name],
+            ],
+            fields=_fields)
+        return tuple([_sg_data[_field] for _field in _fields])
 
     @property
     def name(self):
@@ -264,6 +283,19 @@ def find_sequences():
         _seq = TTSequenceRoot(_path)
         _seqs.append(_seq)
     return _seqs
+
+
+def find_shot(name):
+    """Find shot matching the given name.
+
+    Args:
+        name (str): name to search for
+
+    Returns:
+        (TTShotRoot): matching shot
+    """
+    return get_single([
+        _shot for _shot in find_shots() if _shot.name == name])
 
 
 def find_shots(class_=None):

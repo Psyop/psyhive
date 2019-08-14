@@ -154,6 +154,7 @@ ignore:
         /tests/
     wrong-import-position:
         psyhive/bin/batch_rerender
+        psyhive/bin/shot_builder
 allowed_names:
     closeEvent
     cv

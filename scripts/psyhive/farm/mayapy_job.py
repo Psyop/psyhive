@@ -1,4 +1,19 @@
-"""Tools for managing mayapy jobs."""
+"""Tools for managing mayapy jobs.
+
+The local flag allows the job to be executed on the local machine.
+
+To set this up:
+
+    Start
+        > services
+        > qubeworker (right-click)
+        > stop
+    Explorer
+        > C:/Program Files/pfx/qube/sbin (shift-right-click)
+        > Open Powershell window here
+        > Enter "worker --desktop"
+
+"""
 
 import os
 import time
@@ -11,7 +26,7 @@ from psyq.engines.qube import QubeSubmitter
 
 import psyhive
 from psyhive import pipe, tk
-from psyhive.utils import abs_path, write_file, lprint
+from psyhive.utils import abs_path, write_file, lprint, dev_mode
 
 
 def _get_app_version():
@@ -55,6 +70,7 @@ class MayaPyJob(object):
             modules (mod list): modules to add to sys.path in local mode
             verbose (int): print process data
         """
+        _local = local or os.environ.get('PSYHIVE_FARM_LOCAL_SUBMIT')
         _uid = self.uid or _get_uid()
         _tmp_dir = _get_tmp_dir(uid=_uid)
         _tmp_fmt = '{}/task.{{}}.py'.format(_tmp_dir)
@@ -64,11 +80,10 @@ class MayaPyJob(object):
         _label = '{}: {}'.format(pipe.cur_project().name, self.label)
         _job = Job(label=_label)
         _job.worker = "psyhive_mayapy"
-        _job.fixture.environ = _get_job_environ()
+        _job.fixture.environ = _get_job_environ(local=_local)
         _job.payload = {'app_version': _get_app_version()}
 
         # Setup job for local execute
-        _local = local or os.environ.get('PSYHIVE_FARM_LOCAL_SUBMIT')
         if _local:
 
             _job.extra['qube.reservations'] = (
@@ -106,7 +121,7 @@ class MayaPyJob(object):
         _submitter = QubeSubmitter()
         if submit:
             _result = _submitter.submit(_job_graph)
-            lprint('RESULT', _result, verbose=verbose)
+            lprint('RESULT', _result, verbose=verbose > 1)
 
 
 def _get_tmp_root():
@@ -137,20 +152,30 @@ def _get_uid():
     return time.strftime('%y%m%d_%H%M%S')
 
 
-def _get_job_environ():
+def _get_job_environ(local=False):
     """Get environment for psyq job.
+
+    Args:
+        local (bool): if job is being executed locally
 
     Returns:
         (dict): environ
     """
-    _plugin_path = abs_path(os.path.dirname(__file__)+'/psyq_plugin')
-    print "PSYQ_PLUGIN_PATH", _plugin_path
-
-    _clean_env = psyrc.original_environment()
-
     _result = {}
     _result.update(psyop.env.get_bootstrap_variables())
+
+    # Update python path
+    _clean_env = psyrc.original_environment()
     _result["PYTHONPATH"] = _clean_env.get("PYTHONPATH", "")
+
+    # Set psyq plugin path
+    if dev_mode() and not local:
+        _plugin_path = (
+            'P:/projects/hvanderbeek_0001P/code/primary/addons/'
+            'maya/modules/psyhive/scripts/psyhive/farm/psyq_plugin')
+    else:
+        _plugin_path = abs_path(os.path.dirname(__file__)+'/psyq_plugin')
+    print "PSYQ_PLUGIN_PATH", _plugin_path
     _result["PSYQ_PLUGIN_PATH"] = _plugin_path
 
     return _result

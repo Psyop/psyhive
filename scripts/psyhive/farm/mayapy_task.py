@@ -1,5 +1,7 @@
 """Stripped down version of mayapy psyq submission."""
 
+import os
+
 
 class MayaPyTask(object):
     """Maya python task."""
@@ -23,14 +25,29 @@ class MayaPyTask(object):
         Returns:
             (str): python to execute for this task
         """
-        return '\n'.join([
+        _lines = []
+        if os.environ.get('USERNAME') != 'render':
+            _lines += [
+                '# Set user to allow tank apps to work',
+                'import os',
+                'os.environ["USERNAME"] = "{user}"',
+                '',
+            ]
+        _lines += [
+            '# Print header',
             'from psyhive.utils import dprint',
             'dprint("Starting task {label}")',
             'print " - [task] TMP PY {tmp_py}"',
-            'print " - [task] EXECUTING TASK CODE"',
+            'print " - [task] EXECUTING TASK CODE:"',
+            'print """\n{py}\n"""',
             '',
-            self.py_,
+            '# Execute task code',
+            '{py}',
             '',
             'dprint("Completed task {label}")',
             '',
-        ]).format(label=self.label, tmp_py=tmp_py)
+        ]
+
+        return '\n'.join(_lines).format(
+            label=self.label, tmp_py=tmp_py, py=self.py_,
+            user=os.environ.get('USERNAME'))

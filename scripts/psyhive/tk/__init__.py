@@ -13,7 +13,7 @@ from psyhive.tk.templates.assets import (
 from psyhive.tk.templates.shots import (
     TTShotOutputName, TTShotOutputVersion, TTMayaShotWork,
     TTMayaShotIncrement, find_shots, find_sequences, TTShotRoot,
-    TTShotOutputFileSeq, TTShotStepRoot, TTShotOutputRoot,
+    TTShotOutputFileSeq, TTShotStepRoot, TTShotOutputRoot, find_shot,
     get_shot, TTShotWorkAreaMaya, TTShotOutputFile, TTShotOutputType)
 from psyhive.tk.templates.tools import (
     get_output, get_work, cur_work, get_step_root)

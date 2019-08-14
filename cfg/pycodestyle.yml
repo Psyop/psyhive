@@ -1,6 +1,7 @@
 ignore:
     E402:  # Module level import not at top of file
         psyhive/bin/batch_rerender
+        psyhive/bin/shot_builder
     E501:  # Line too long
         hv_test/diary/y19/d0517/pinterest_rip.py
         hv_test/diary/y19/d0717/make_littlezoo_zip.py

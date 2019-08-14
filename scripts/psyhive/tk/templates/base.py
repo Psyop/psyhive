@@ -57,7 +57,7 @@ class TTBase(Path):
                 continue
             setattr(self, _key, _val)
 
-    def map_to(self, class_, **kwargs):
+    def map_to(self, class_=None, **kwargs):
         """Map this template's values to a different template.
 
         For example, this could be used to map a maya work file to
@@ -70,16 +70,17 @@ class TTBase(Path):
         Returns:
             (TTBase): new template instance
         """
+        _class = class_ or type(self)
         _data = copy.copy(self.data)
         for _key, _val in kwargs.items():
             _data[_key] = _val
-        _tmpl = get_template(class_.hint)
+        _tmpl = get_template(_class.hint)
         try:
             _path = _tmpl.apply_fields(_data)
         except tank.TankError as _exc:
             _tags = '['+_exc.message.split('[')[-1]
             raise ValueError('Missing tags: '+_tags)
-        return class_(_path)
+        return _class(_path)
 
 
 class TTDirBase(Dir, TTBase):
@@ -575,6 +576,8 @@ class TTOutputVersionBase(TTDirBase):
         """
         _vers = find(self.vers_dir, depth=1, type_='d', full_path=False)
         _data = copy.copy(self.data)
+        if not _vers:
+            raise OSError("No versions found")
         _data['version'] = int(_vers[-1][1:])
         _path = self.tmpl.apply_fields(_data)
         return self.__class__(_path)

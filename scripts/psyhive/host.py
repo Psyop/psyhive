@@ -30,6 +30,8 @@ else:
     _scene_modified = wrap_fn(cmds.file, query=True, modified=True)
     t_start = wrap_fn(cmds.playbackOptions, query=True, minTime=True)
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
+    set_start = wrap_fn(cmds.playbackOptions, arg_to_kwarg='minTime')
+    set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
 
 
 def cur_scene():
@@ -68,6 +70,17 @@ def open_scene(file_):
             raise ValueError(_result)
 
     _force_open_scene(file_)
+
+
+def set_range(start, end):
+    """Set timeline range.
+
+    Args:
+        start (float): start frame
+        end (float): end frame
+    """
+    set_start(start)
+    set_end(end)
 
 
 def t_range():

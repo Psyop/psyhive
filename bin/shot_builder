@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+"""Build shot from a template."""
+
+# Add psyhive to sys.path
+import os
+import sys
+_PSYHIVE_DIR = '{}/code/primary/addons/maya/modules/psyhive/scripts'.format(
+    os.environ['PSYOP_PROJECT_PATH'])
+sys.path.append(_PSYHIVE_DIR)
+
+import optparse
+
+from psyhive import tk, farm
+
+_EXAMPLE_TMPL = ('P:/projects/clashshortfilm_33294P/sequences/rnD/rnd0050/'
+                 'lighting/work/maya/scenes/rnd0050_lighting_v004.ma')
+_USAGE = '''
+
+Tool for building a shot scene file from a template.
+
+All asset paths are updated to the latest, and all abc paths are
+updated to the latest publish in the current shot.
+
+Example:
+
+> cd P:/projects/clashshortfilm_33294P/sequences/rnD/rnd0080
+> shot_builder {}
+
+This will build a maya scene for rnd0080 from the template in rnd0050.
+'''.format(_EXAMPLE_TMPL)
+
+
+def _get_opts():
+    """Read command line options.
+
+    Returns:
+        (tuple): options/args
+    """
+    _parser = optparse.OptionParser(_USAGE)
+    return _parser.parse_args()
+
+
+def _main():
+    """Execute shot builder."""
+    _opts, _args = _get_opts()
+
+    # Get template
+    if not _args:
+        raise RuntimeError('No template path')
+    _tmpl_path = _args[0]
+    print 'TEMPLATE', _tmpl_path
+    if not os.path.exists(_tmpl_path):
+        raise RuntimeError('Missing template path '+_tmpl_path)
+    _tmpl_work = tk.get_work(_tmpl_path)
+    if not _tmpl_work:
+        raise RuntimeError('Template is not work file '+_tmpl_path)
+    assert _tmpl_work.extn in ['ma', 'mb']
+
+    # Get shot
+    _shot = tk.get_shot(os.getcwd())
+    print 'SHOT', _shot.path
+    if _shot == _tmpl_work.shot:
+        raise RuntimeError('Template is in same shot as current dir')
+
+    # Build farm job
+    _py = '\n'.join([
+        'from maya_psyhive.tools import m_shot_builder',
+        '_template = "{template.path}"',
+        '_shot = "{shot.name}"',
+        'm_shot_builder.build_shot_from_template(',
+        '    template=_template, shot=_shot, force=True)',
+    ]).format(template=_tmpl_work, shot=_shot)
+    _label = 'Build shot '+_shot.name
+    _task = farm.MayaPyTask(_py, label=_label)
+    _job = farm.MayaPyJob(_label, tasks=[_task])
+    _job.submit()
+
+
+if __name__ == '__main__':
+    _main()
