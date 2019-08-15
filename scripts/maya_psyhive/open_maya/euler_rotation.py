@@ -23,6 +23,26 @@ class HEulerRotation(om.MEulerRotation):
         cmds.setAttr(str(node)+'.rotateOrder', self.order)
         cmds.xform(node, rotation=_degrees, worldSpace=True)
 
+    def as_vect(self):
+        """Get this rotation as a vector.
+
+        This is equivalent to a unit vector on the z (forward) axis
+        had this rotation applied.
+
+        Returns:
+            (HVector): vector
+        """
+        from maya_psyhive import open_maya as hom
+        _vect = hom.Z_AXIS
+        return _vect.rotate_by(self)
+
+    def __str__(self):
+        _order = {0: 'XYZ'}[self.order]
+        return '<{}[{}]({:.03f}, {:.03f}, {:.03f})>'.format(
+            type(self).__name__, _order, self.x, self.y, self.z)
+
+    __repr__ = __str__
+
 
 def get_r(node):
     """Get euler rotations for the given node.

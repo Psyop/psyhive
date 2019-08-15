@@ -1,3 +1,22 @@
+#### v0.33.1 ####
+
+    Released: Thu 15th Aug 2019
+
+    shot_builder: fix output paths no updated on build scene (iirvin),
+    
+    maya_psyhive:
+        open_maya.BaseTransform.set_key added,
+        open_maya.CMDS.polyPyramid added,
+        open_maya.HEulerRotation as_vect/__str__ added,
+        open_maya.HMatrix added rot/get_bearing/get_pitch,
+        open_maya.axes_to_m added handling for lx_ as None,
+        open_maya.HFnNurbsCurve.t_at_param use world space,
+        open_maya.HVector added get_bearing/get_pitch/rotate_by,
+    psyhive:
+        farm added py_dir to job payload,
+        tk.TTWorkFileBase update output paths before save,
+
+
 #### v0.33.0 ####
 
     Released: Wed 14th Aug 2019

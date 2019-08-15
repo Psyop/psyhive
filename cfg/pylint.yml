@@ -55,6 +55,7 @@ ignore:
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
         psyhive/py_gui/qt_.py
+        psyhive/tk/templates/base.py
         psyhive/tools/batch_rerender/interface.py
         psyhive/tools/err_catcher.py
         psyhive/tools/hive_bro/interface.py

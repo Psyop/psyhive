@@ -267,7 +267,7 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         _param = param
         if turn_on_percentage:
             _param = self._fractionToParam(_param)
-        _tan = HVector(self.tangent(_param))
+        _tan = HVector(self.tangent(_param, om.MSpace.kWorld))
         return _tan.normalized()
 
 

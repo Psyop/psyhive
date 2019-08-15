@@ -1,5 +1,7 @@
 """Matrix tools."""
 
+import math
+
 from maya import cmds
 from maya.api import OpenMaya as om
 
@@ -73,6 +75,32 @@ class HMatrix(om.MMatrix):
         self.apply_to(_loc)
         return _loc
 
+    def get_bearing(self):
+        """Get bearing of this matrix's rotation.
+
+        This is the angle in the XZ plane facing down (-Y). The
+        result is clamped in the range 0-360.
+
+        Returns:
+            (float): bearing
+        """
+        return math.degrees(-self.rot().y) % 360
+
+    def get_pitch(self, build_geo=False):
+        """Get pitch of this matrix's rotation.
+
+        The is the angle which the local z (forward) axis makes
+        with the horizontal and is clamped in the range 0-360.
+
+        Args:
+            build_geo (bool): build test geo
+
+        Returns:
+            (float): pitch
+        """
+        _lz = self.lz_()
+        return _lz.get_pitch(build_geo=build_geo)
+
     def lx_(self):
         """Get local x-axis."""
         return HVector(self.to_tuple()[: 3])
@@ -105,6 +133,16 @@ class HMatrix(om.MMatrix):
                 _str += '\n'
 
         print _str
+
+    def rot(self):
+        """Get rotation.
+        
+        Returns:
+        	(HEulerRotation): rotation component
+    	"""
+        from maya_psyhive import open_maya as hom
+        _tm = om.MTransformationMatrix(self)
+        return hom.HEulerRotation(_tm.rotation())
 
     def scale(self):
         """Get translation."""
@@ -167,8 +205,12 @@ def axes_to_m(pos=None, lx_=None, ly_=None, lz_=None, verbose=0):
         assert _lx
         assert _ly
         lprint('CALCULATING LZ', _lx.length(), _ly.length(), verbose=verbose)
-        # print _lx, _ly, _lx^_ly
         _lz = (_lx ^ _ly).normalized()
+    elif _lx is None:
+        assert _lz
+        assert _ly
+        lprint('CALCULATING LY', _ly.length(), _lz.length(), verbose=verbose)
+        _lx = (_lz ^ _ly).normalized()
 
     if verbose:
         print "LX", _lx, _lx.length()

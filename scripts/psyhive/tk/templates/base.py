@@ -473,13 +473,9 @@ class TTWorkFileBase(TTBase, File):
             force (bool): open with no scene modified warning
         """
         from psyhive import tk
-
         _fileops = tk.find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
-
-        qt.get_application().processEvents()  # outputpaths is deferred load
-        _outputpaths = tk.find_tank_app('outputpaths')
-        _outputpaths.update_output_paths()
+        self.update_output_paths()
 
     def save(self, comment):
         """Save this version.
@@ -510,6 +506,7 @@ class TTWorkFileBase(TTBase, File):
                 name=self.task, version=1)
 
         # Save
+        self.update_output_paths()
         _tk_workfile.save()
 
         # Save metadata
@@ -534,6 +531,13 @@ class TTWorkFileBase(TTBase, File):
             path=self.path)
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
+
+    def update_output_paths(self):
+        """Update current scene output paths to match this work file."""
+        from psyhive import tk
+        qt.get_application().processEvents()  # outputpaths is deferred load
+        _outputpaths = tk.find_tank_app('outputpaths')
+        _outputpaths.update_output_paths()
 
 
 class TTWorkIncrementBase(TTBase, File):

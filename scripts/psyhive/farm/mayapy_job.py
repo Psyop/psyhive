@@ -81,7 +81,10 @@ class MayaPyJob(object):
         _job = Job(label=_label)
         _job.worker = "psyhive_mayapy"
         _job.fixture.environ = _get_job_environ(local=_local)
-        _job.payload = {'app_version': _get_app_version()}
+        _job.payload = {
+            'app_version': _get_app_version(),
+            'py_dir': _tmp_dir,
+        }
 
         # Setup job for local execute
         if _local:

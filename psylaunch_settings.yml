@@ -1,3 +1,22 @@
+# apps:
+#     houdini:
+#         addon_types:
+#             modules:
+#             -   path: '{project_branch_path}/addons/general/modules/psyhive'
+#     maya:
+#         addon_types:
+#             modules:
+#             -   path: '{project_branch_path}/addons/general/modules/psyhive'
+#     nuke:
+#         addon_types:
+#             modules:
+#             -   path: '{project_branch_path}/addons/general/modules/psyhive'
+
+# global:
+#     addon_types:
+#         modules:
+#         -   path: '{project_branch_path}/addons/psyhive'
+
 apps:
     maya:
         addon_types:

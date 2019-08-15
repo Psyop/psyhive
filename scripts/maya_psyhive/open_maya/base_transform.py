@@ -172,6 +172,10 @@ class BaseTransform(BaseNode):
             if _tgl:
                 cmds.move(_pos[0], _pos[1], _pos[2], _plug)
 
+    def set_key(self):
+        """Set keyframe on this node."""
+        cmds.setKeyframe(self)
+
     def u_scale(self, scale):
         """Apply a uniform scale to this node.
 
