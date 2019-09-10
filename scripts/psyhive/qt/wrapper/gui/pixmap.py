@@ -337,6 +337,14 @@ class HPixmap(QtGui.QPixmap):
         _tmp.fill(qt.HColor(0, 0, 0, 255*factor))
         self.add_overlay(_tmp, operation='mult')
 
+    def get_aspect(self):
+        """Get aspect ratio of this image.
+
+        Returns:
+            (float): aspect ratio
+        """
+        return 1.0*self.width()/self.height()
+
     def get_c(self):
         """Get centre point of this pixmap.
 

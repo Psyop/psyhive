@@ -62,20 +62,31 @@ def _update_assets(verbose=0):
     print
 
 
-def _update_abcs(shot='rnd0080'):
+def _update_abcs(shot='rnd0080', verbose=0):
     """Update abcs to point to the given shot.
 
     Args:
         shot (str): name of shot to update to (eg. rnd0080)
+        verbose (int): print process data
     """
 
     dprint('CHECKING ABCS')
+    _refs_to_remove = set()
     for _exo in qt.progress_bar(
             hom.CMDS.ls(type='ExocortexAlembicFile'), 'Updating {:d} abc{}'):
-        _status = _update_abc(exo=_exo, shot=shot)
+        lprint('CHECKING EXO', _exo, verbose=verbose)
         _path = _exo.plug('fileName').get_val()
+        _status, _to_remove = _update_abc(exo=_exo, shot=shot, verbose=verbose)
+        if _to_remove:
+            _refs_to_remove.add(_to_remove)
         print ' - {:60} {:30} {}'.format(_exo, _status, _path)
     print
+
+    if _refs_to_remove:
+        dprint('REMOVING {:d} REFS WITH NO {} CACHES'.format(
+            len(_refs_to_remove), shot))
+        for _ref in _refs_to_remove:
+            _ref.remove(force=True)
 
 
 def _update_abc(exo, shot, verbose=0):
@@ -87,16 +98,20 @@ def _update_abc(exo, shot, verbose=0):
         verbose (int): print process data
 
     Returns:
-        (str): update status
+        (tuple): update status, ref to remove (if any)
     """
+    _ref = (
+        ref.find_ref(namespace=exo.namespace, catch=True)
+        if exo.namespace else None)
+    lprint(' - REF', _ref, verbose=verbose)
     _tmpl_abc = exo.plug('fileName').get_val()
     _tmpl_output = tk.get_output(_tmpl_abc)
     if not _tmpl_output or not _tmpl_output.shot:
         lprint(' - NO OUTPUT FOUND', exo, _tmpl_abc, verbose=verbose)
-        return 'off pipeline'
+        return 'off pipeline', None
     if _tmpl_output.shot.name == shot:
         lprint(' - NO UPDATE NEEDED', _tmpl_abc, verbose=verbose)
-        return 'no update needed'
+        return 'no update needed', None
 
     # Map to this shot
     lprint(' - TMPL ABC', _tmpl_abc, verbose=verbose)
@@ -106,9 +121,9 @@ def _update_abc(exo, shot, verbose=0):
         _shot_output = _shot_output.find_latest()
     except OSError:
         lprint(' - NO VERSIONS FOUND', _shot_output, verbose=verbose)
-        return 'no {} versions found'.format(shot)
+        return 'no {} versions found'.format(shot), _ref
 
     # Update exocortex node
     lprint(' - SHOT ABC', _shot_output.path, verbose=verbose)
     exo.plug('fileName').set_val(_shot_output.path)
-    return 'updated'
+    return 'updated', None

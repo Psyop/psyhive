@@ -136,10 +136,10 @@ class HMatrix(om.MMatrix):
 
     def rot(self):
         """Get rotation.
-        
+
         Returns:
-        	(HEulerRotation): rotation component
-    	"""
+            (HEulerRotation): rotation component
+        """
         from maya_psyhive import open_maya as hom
         _tm = om.MTransformationMatrix(self)
         return hom.HEulerRotation(_tm.rotation())

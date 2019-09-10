@@ -6,9 +6,10 @@ import pprint
 import tempfile
 import shutil
 
+import sgtk
 import tank
 
-from psyhive import pipe, qt
+from psyhive import pipe, host
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
@@ -211,6 +212,24 @@ class TTStepRootBase(TTDirBase):
 
 class TTWorkAreaBase(TTDirBase):
     """Base class for any work area tank template."""
+
+    work_type = None
+
+    def find_work_files(self):
+        """Find work files in this shot area.
+
+        Returns:
+            (TTWorkFileBase list): list of work files
+        """
+        _work_files = []
+        for _file in self.find(depth=2, type_='f'):
+            try:
+                _work = self.work_type(_file)
+            except ValueError:
+                continue
+            _work_files.append(_work)
+
+        return _work_files
 
     def get_metadata(self, verbose=1):
         """Read this work area's metadata yaml file.
@@ -475,13 +494,14 @@ class TTWorkFileBase(TTBase, File):
         from psyhive import tk
         _fileops = tk.find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
-        self.update_output_paths()
+        self.update_output_paths(catch=True)
 
-    def save(self, comment):
+    def save(self, comment, body=None):
         """Save this version.
 
         Args:
             comment (str): comment for version
+            body (str): override work file body
         """
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
@@ -506,8 +526,14 @@ class TTWorkFileBase(TTBase, File):
                 name=self.task, version=1)
 
         # Save
-        self.update_output_paths()
-        _tk_workfile.save()
+        if not body:
+            try:
+                self.update_output_paths()
+            except AttributeError:
+                print 'FAILED TO UPDATE OUTPUT PATHS'
+            _tk_workfile.save()
+        else:
+            self.write_text(body)
 
         # Save metadata
         self.set_comment(comment)
@@ -532,12 +558,36 @@ class TTWorkFileBase(TTBase, File):
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
 
-    def update_output_paths(self):
-        """Update current scene output paths to match this work file."""
+    def update_output_paths(self, catch=False):
+        """Update current scene output paths to match this work file.
+
+        Args:
+            catch (bool): no error if update output file paths fails
+        """
         from psyhive import tk
-        qt.get_application().processEvents()  # outputpaths is deferred load
+
+        # Make sure outputpaths app is loaded
+        _engine = tank.platform.current_engine()
+        _tk = sgtk.Sgtk(self.path)
+        _ctx = _tk.context_from_path(self.path)
+        try:
+            _engine.change_context(_ctx)
+        except tank.TankError as _exc:
+            if not catch:
+                raise _exc
+            print 'FAILED TO APPLY CONTEXT', _ctx
+            return
+
+        # Apply output paths
         _outputpaths = tk.find_tank_app('outputpaths')
-        _outputpaths.update_output_paths()
+        _no_workspace = not host.cur_scene()
+        try:
+            _outputpaths.update_output_paths(
+                scene_path=self.path, no_workspace=_no_workspace)
+        except AttributeError as _exc:
+            if not catch:
+                raise _exc
+            print 'FAILED TO UPDATE OUTPUT PATHS'
 
 
 class TTWorkIncrementBase(TTBase, File):
@@ -572,8 +622,11 @@ class TTOutputVersionBase(TTDirBase):
     task = None
     version = None
 
-    def find_latest(self):
+    def find_latest(self, catch=False):
         """Find latest version.
+
+        Args:
+            catch (bool): no error if no versions found
 
         Returns:
             (TTOutputVersionBase): latest version
@@ -581,6 +634,8 @@ class TTOutputVersionBase(TTDirBase):
         _vers = find(self.vers_dir, depth=1, type_='d', full_path=False)
         _data = copy.copy(self.data)
         if not _vers:
+            if catch:
+                return None
             raise OSError("No versions found")
         _data['version'] = int(_vers[-1][1:])
         _path = self.tmpl.apply_fields(_data)
@@ -689,30 +744,51 @@ class TTOutputVersionBase(TTDirBase):
         return self == self.find_latest()
 
     @property
+    def name(self):
+        """Get version name (eg. v001).
+
+        Returns:
+            (str): version name
+        """
+        return self.filename
+
+    @property
     def vers_dir(self):
         """Stores directory containing versions."""
         return os.path.dirname(self.path)
 
 
-class TTOutputFileBase(TTBase, File):
-    """Base class for any output file tank template."""
+class _TTOutputBase(TTBase):
+    """Base class for any output leaf node (eg. file/seq)."""
 
-    output_file_type = None
-    output_name = None
-    output_type = None
     output_version_type = None
 
-    def find_latest(self):
+    def find_latest(self, catch=False):
         """Get latest version asset stream.
+
+        Args:
+            catch (bool): no error if no versions found
 
         Returns:
             (TTAssetOutputFile): latest asset output file
         """
         _ver = self.output_version_type(self.path)
-        _latest = _ver.find_latest()
-        _data = copy.copy(self.data)
-        _data['version'] = _latest.version
-        return self.output_file_type(self.tmpl.apply_fields(_data))
+        _latest = _ver.find_latest(catch=catch)
+        if not _latest:
+            return None
+        return self.map_to(version=_latest.version)
+
+    def find_work_file(self, verbose=1):
+        """Find work file corresponding to this seq.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTWorkFileBase): work file
+        """
+        _ver = self.output_version_type(self.path)
+        return _ver.find_work_file(verbose=verbose)
 
     def is_latest(self):
         """Check if this is the latest version.
@@ -723,10 +799,13 @@ class TTOutputFileBase(TTBase, File):
         return self.find_latest() == self
 
 
-class TTOutputFileSeqBase(TTBase, Seq):
+class TTOutputFileBase(_TTOutputBase, File):
+    """Base class for any output file tank template."""
+
+
+class TTOutputFileSeqBase(_TTOutputBase, Seq):
     """Represents a shout output file seq tank template path."""
 
-    output_version_type = None
     exists = Seq.exists
 
     def __init__(self, path, verbose=0):
@@ -747,12 +826,3 @@ class TTOutputFileSeqBase(TTBase, Seq):
         super(TTOutputFileSeqBase, self).__init__(
             path=_path, data=_data, tmpl=_tmpl)
         Seq.__init__(self, _path)
-
-    def find_work_file(self):
-        """Find work file corresponding to this seq.
-
-        Returns:
-            (TTWorkFileBase): work file
-        """
-        _base = self.output_version_type()(self.path)
-        return _base.find_work_file()

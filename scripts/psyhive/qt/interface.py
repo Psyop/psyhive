@@ -16,7 +16,7 @@ from psyhive.utils import (
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import (
     HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget,
-    HTabWidget)
+    HTabWidget, HComboBox)
 from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
@@ -519,6 +519,7 @@ def get_ui_loader():
     """
     _loader = QtUiTools.QUiLoader()
     _loader.registerCustomWidget(HCheckBox)
+    _loader.registerCustomWidget(HComboBox)
     _loader.registerCustomWidget(HLabel)
     _loader.registerCustomWidget(HListWidget)
     _loader.registerCustomWidget(HPushButton)

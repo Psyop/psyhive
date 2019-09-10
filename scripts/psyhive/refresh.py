@@ -59,6 +59,9 @@ _RELOAD_ORDER = [
     'hv_test.tools.qube.qb_core',
     'hv_test.tools.qube.hive_qube',
     'hv_test.tools.qube',
+
+    'hv_test.diary.y19.d0726._machi.player',
+    'hv_test.diary.y19.d0726._machi.robot',
     'hv_test.diary.entry',
     'hv_test.diary',
     'hv_test.tools',

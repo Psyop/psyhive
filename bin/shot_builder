@@ -59,6 +59,8 @@ def _main():
 
     # Get shot
     _shot = tk.get_shot(os.getcwd())
+    if not _shot:
+        raise RuntimeError('Current dir is not a shot - '+os.getcwd())
     print 'SHOT', _shot.path
     if _shot == _tmpl_work.shot:
         raise RuntimeError('Template is in same shot as current dir')

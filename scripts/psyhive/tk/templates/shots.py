@@ -159,37 +159,20 @@ class TTShotStepRoot(_TTShotCpntBase, TTStepRootBase):
                     _vers.append(_ver)
         return _vers
 
-    # @property
-    # def maya_work(self):
-    #     """Get work area type for maya."""
-    #     return TTMayaShotWork
-
-    # @property
-    # def work_area_maya_type(self):
-    #     """Get work area type."""
-    #     return TTShotWorkAreaMaya
-
 
 class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotCpntBase):
     """Represents a tank template shot work area for maya."""
 
     hint = 'shot_work_area_maya'
 
-    def find_work_files(self):
-        """Find work files in this shot area.
+    @property
+    def work_type(self):
+        """Get work file object type.
 
         Returns:
-            (TTMayaShotWork list): list of work files
+            (class): work file type
         """
-        _work_files = []
-        for _file in self.find(depth=2, type_='f'):
-            try:
-                _work = TTMayaShotWork(_file)
-            except ValueError:
-                continue
-            _work_files.append(_work)
-
-        return _work_files
+        return TTMayaShotWork
 
 
 class TTMayaShotWork(_TTShotCpntBase, TTWorkFileBase):
@@ -203,6 +186,28 @@ class TTMayaShotIncrement(_TTShotCpntBase, TTWorkIncrementBase):
     """Represents a maya work file increment file tank template."""
 
     hint = 'maya_shot_increment'
+
+
+class TTShotWorkAreaNuke(TTWorkAreaBase, _TTShotCpntBase):
+    """Represents a tank template shot work area for nuke."""
+
+    hint = 'shot_work_area_nuke'
+
+    @property
+    def work_type(self):
+        """Get work file object type.
+
+        Returns:
+            (class): work file type
+        """
+        return TTNukeShotWork
+
+
+class TTNukeShotWork(_TTShotCpntBase, TTWorkFileBase):
+    """Represents a nuke shot work file tank template."""
+
+    hint = 'nuke_shot_work'
+    work_area_type = TTShotWorkAreaNuke
 
 
 class TTShotOutputRoot(_TTShotCpntBase, TTDirBase):

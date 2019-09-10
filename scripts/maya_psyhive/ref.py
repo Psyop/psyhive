@@ -28,6 +28,22 @@ class FileRef(object):
         except RuntimeError:
             return None
 
+    def find_nodes(self, type_=None):
+        """Find nodes within this reference.
+
+        Args:
+            type_ (str): filter nodes by type
+
+        Returns:
+            (HFnDepenencyNode list): list of nodes
+        """
+        from maya_psyhive import open_maya as hom
+        _kwargs = {'referencedNodes': True}
+        if type_:
+            _kwargs['type'] = type_
+        return [hom.HFnDependencyNode(_node)
+                for _node in cmds.ls(self.namespace+":*", **_kwargs)]
+
     def find_top_node(self):
         """Find top node of this reference.
 

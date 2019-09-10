@@ -62,6 +62,8 @@ class ValueRange(object):
             else:
                 self.min = self.max = _max_mult*_min_mult*float(rng_str)
 
+        self.width = self.max - self.min
+
     def rand(self, random_=None):
         """Get a random value from within the range.
 

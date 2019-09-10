@@ -3,7 +3,7 @@
 import os
 
 from psyhive.utils.cache import store_result_on_obj
-from psyhive.utils.path import File, abs_path, find
+from psyhive.utils.path import File, abs_path, find, test_path
 from psyhive.utils.misc import system
 
 
@@ -159,6 +159,10 @@ class Seq(object):
             frames (int list): list of frames to store
         """
         self.get_frames(force=True, frames=frames)
+
+    def test_dir(self):
+        """Test this sequence's parent directory exists."""
+        test_path(self.dir)
 
     def view(self):
         """View this image sequence."""

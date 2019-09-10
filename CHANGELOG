@@ -1,3 +1,32 @@
+#### v0.34.0 ####
+
+    Released: Tue 10th Sep 2019
+
+    yeti tools: added interface for caching yeti,
+    
+    bin:
+        shot_builder catch cwd not shot,
+    maya_psyhive:
+        ref.FileRef.find_nodes added,
+        startup added yeti tools to PsyHive menu,
+        tools.m_shot_builder remove refs with no abc in shot,
+    psyhive:
+        qt.HUiDialog added HComboBox handling,
+        qt.HPixmap.get_aspect added,
+        tk.TTNukeShotWork added,
+        tk.TTWorkAreaBase.find_work_files added,
+        tk.TTWorkFileBase.load catch update output file fails,
+        tk.TTWorkFileBase.save added body override arg,
+        tk.TTWorkFileBase.update_output_paths added catch,
+        tk.TTOutputVersionBase.find_latest added catch,
+        tk.TTOutputVersionBase.name added property,
+        tk._TTOutputBase added for shared file/seq functionality,
+        tk.get_output added TTShotOutputFileSeq handling,
+        utils.File diff/test_dir added,
+        utils.ValueRange.width added attr,
+        utils.Seq.test_dir added,
+
+
 #### v0.33.1 ####
 
     Released: Thu 15th Aug 2019

@@ -54,6 +54,7 @@ ignore:
         maya_psyhive/tools/fkik_switcher/interface.py
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
+        maya_psyhive/tools/yeti/cache.py
         psyhive/py_gui/qt_.py
         psyhive/tk/templates/base.py
         psyhive/tools/batch_rerender/interface.py
@@ -130,6 +131,8 @@ ignore:
         hv_test/diary/y19/d0726/_machi/card.py
     unbalanced-tuple-unpacking:
         maya_psyhive/open_maya/camera.py
+    undefined-loop-variable:
+        diary/y19/d0814/boid_test.py
     unexpected-keyword-arg:
         diary/y19/d0726/machi4.py
     unidiomatic-typecheck:

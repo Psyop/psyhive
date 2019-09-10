@@ -1,14 +1,14 @@
 """Tools relating to tank templates."""
 
 from psyhive import host
-from psyhive.utils import File
+from psyhive.utils import File, lprint
 
 from psyhive.tk.templates.assets import (
     TTMayaAssetIncrement, TTMayaAssetWork, TTAssetStepRoot,
     TTAssetOutputFile)
 from psyhive.tk.templates.shots import (
     TTMayaShotIncrement, TTMayaShotWork, get_shot, TTShotStepRoot,
-    TTShotOutputFile)
+    TTShotOutputFile, TTShotOutputFileSeq, TTNukeShotWork)
 
 
 def get_output(path):
@@ -20,7 +20,7 @@ def get_output(path):
     Returns:
         (TTOutputFileBase): output tank template object
     """
-    for _type in [TTAssetOutputFile, TTShotOutputFile]:
+    for _type in [TTAssetOutputFile, TTShotOutputFile, TTShotOutputFileSeq]:
         try:
             return _type(path)
         except ValueError:
@@ -48,7 +48,40 @@ def get_step_root(path, catch=True):
     raise ValueError(path)
 
 
-def get_work(file_, class_=None, catch=True):
+def _get_work_type(file_, inc, catch):
+    """Get work type for the given file.
+
+    Args:
+        file_ (File): file to test
+        inc (bool): if file is an increment
+        catch (bool): no error if no valid work could be found
+
+    Returns:
+        (class): work file type
+    """
+    _shot = get_shot(file_.path)
+
+    if file_.extn in ['ma', 'mb']:
+        if _shot:
+            _class = TTMayaShotIncrement if inc else TTMayaShotWork
+        else:
+            _class = TTMayaAssetIncrement if inc else TTMayaAssetWork
+    elif file_.extn in ['nk']:
+        if _shot:
+            if inc:
+                raise NotImplementedError
+            _class = TTNukeShotWork
+        else:
+            raise NotImplementedError
+    else:
+        if catch:
+            return None
+        raise ValueError(file_)
+
+    return _class
+
+
+def get_work(file_, class_=None, catch=True, verbose=0):
     """Get work file object associated with the given file.
 
     If an increment is passed, the associated work file is returned.
@@ -57,25 +90,17 @@ def get_work(file_, class_=None, catch=True):
         file_ (str): path to file
         class_ (type): force workfile type
         catch (bool): no error if no valid work could be found
+        verbose (int): print process data
 
     Returns:
         (TTWorkFileBase): work file
     """
     _file = File(file_)
     _inc = not _file.basename.split("_")[-1].startswith('v')
-    _shot = get_shot(file_)
-
-    if class_:
-        _class = class_
-    elif _file.extn in ['ma', 'mb']:
-        if _shot:
-            _class = TTMayaShotIncrement if _inc else TTMayaShotWork
-        else:
-            _class = TTMayaAssetIncrement if _inc else TTMayaAssetWork
-    else:
-        if catch:
-            return None
-        raise ValueError(file_)
+    _class = class_ or _get_work_type(file_=_file, inc=_inc, catch=catch)
+    lprint("CLASS", _class, verbose=verbose)
+    if not _class:
+        return None
 
     if _inc:
         return _class(file_).get_work()

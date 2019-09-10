@@ -412,19 +412,21 @@ class _CTTWorkFileBase(Cacheable):
             if isinstance(_output, Seq)]
 
     @store_result_on_obj
-    def get_metadata(self, data=None, force=False):
+    def get_metadata(self, data=None, force=False, verbose=1):
         """Get metadata for this workfile.
 
         Args:
             data (dict): pass metadata to avoid disk read
             force (bool): force reread data
+            verbose (int): print process data
 
         Returns:
             (dict): work file metadata
         """
         _work_area = self.get_work_area()
         _data = data or _work_area.get_metadata(force=force)
-        return super(_CTTWorkFileBase, self).get_metadata(data=data)
+        return super(_CTTWorkFileBase, self).get_metadata(
+            data=data, verbose=verbose)
 
     @store_result_on_obj
     def get_work_area(self):

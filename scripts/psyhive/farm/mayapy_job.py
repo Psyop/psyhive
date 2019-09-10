@@ -83,8 +83,7 @@ class MayaPyJob(object):
         _job.fixture.environ = _get_job_environ(local=_local)
         _job.payload = {
             'app_version': _get_app_version(),
-            'py_dir': _tmp_dir,
-        }
+            'py_dir': _tmp_dir}
 
         # Setup job for local execute
         if _local:

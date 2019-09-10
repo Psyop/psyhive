@@ -110,6 +110,18 @@ def _build_psyhive_menu():
         cmds.menuItem(
             command=_cmd, image=batch_rerender.ICON, label='Batch rerender')
 
+    # Add batch rerender (not available at LittleZoo)
+    try:
+        from maya_psyhive.tools import yeti
+    except ImportError:
+        pass
+    else:
+        _cmd = '\n'.join([
+            'import {} as yeti',
+            'yeti.launch_cache_tools()']).format(yeti.__name__)
+        cmds.menuItem(
+            command=_cmd, image=yeti.ICON, label='Yeti cache tools')
+
     # Add show toolkits
     cmds.menuItem(divider=True)
     _add_show_toolkits(_menu)

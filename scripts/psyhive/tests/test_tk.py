@@ -49,6 +49,7 @@ class TestTk(unittest.TestCase):
 
     def test_get_output(self):
 
+        # Test create output
         for _path in [
                 ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
                  'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
@@ -58,6 +59,28 @@ class TestTk(unittest.TestCase):
                  'archer_rig_main_v016.mb'),
         ]:
             assert tk.get_output(_path)
+
+        # Test output objects
+        for _path in [
+                'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                'animation/output/animcache/test_archer/v004/alembic/'
+                'dev9999_test_archer_v004.abc',
+                'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                'animation/output/render/test_masterLayer/v004/jpg/'
+                'dev9999_test_masterLayer_v004.%04d.jpg',
+        ]:
+            print _path
+            _out = tk.get_output(_path)
+            _latest = _out.find_latest()
+            print _out
+            assert not _out.is_latest()
+            assert not _out == _latest
+            assert _out.version < _latest.version
+            print _latest
+            print _out.find_work_file(verbose=0)
+            assert (_out.map_to(_out.output_name_type) ==
+                    _latest.map_to(_out.output_name_type))
+            print
 
     def test_find_tank_app(self):
 

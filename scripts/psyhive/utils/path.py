@@ -198,6 +198,14 @@ class File(Path):
             qt.ok_cancel("Delete file?\n\n"+self.path)
         os.remove(self.path)
 
+    def diff(self, other):
+        """Show diffs between this and another text file.
+
+        Args:
+            other (str): path to other file
+        """
+        diff(self.path, other)
+
     def edit(self, line_n=None, verbose=0):
         """Edit this file in a text editor.
 
@@ -234,6 +242,10 @@ class File(Path):
         """
         _perms = 0o777 if writable else 0o444
         os.chmod(self.path, _perms)
+
+    def test_dir(self):
+        """Test this file's parent directory exists."""
+        test_path(self.dir)
 
     def touch(self):
         """Touch this path."""
@@ -317,7 +329,8 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     _tool = tool or os.environ.get('PSYHIVE_DIFF_EXE') or 'Diffinity'
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
-    if check_extn and not File(left).extn in [None, 'py', 'yml', 'ui']:
+    if check_extn and not File(left).extn in [
+            None, 'py', 'yml', 'ui', 'nk']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':
