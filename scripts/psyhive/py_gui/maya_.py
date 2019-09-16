@@ -288,6 +288,12 @@ class MayaPyGui(base.BasePyGui):
             height=min(_col_h+27, self._height),
             width=self._width)
 
+        # Make sure window is not offscreen
+        for _attr in ('topEdge', 'leftEdge'):
+            _val = cmds.window(self.ui_name, query=True, **{_attr: True})
+            if _val < 0:
+                cmds.window(self.ui_name, edit=True, **{_attr: 100})
+
     def close(self):
         """Close this window."""
         if cmds.window(self.ui_name, exists=True):

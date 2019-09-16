@@ -111,7 +111,7 @@ def _blast_and_find_rigs_outside_frustrum(
     return _off_cam_rigs
 
 
-def _rig_in_cam(cam, rig):
+def _rig_in_cam(cam, rig, create_geo=False, verbose=0):
     """Test if the given rig is inside the camera frustrum.
 
     Combining the geo is slightly quicker, but testing each geo separately
@@ -123,13 +123,18 @@ def _rig_in_cam(cam, rig):
     Args:
         cam (HFnCamera): camera to test against
         rig (FileRef): rig to check
+        create_geo (bool): create test geo
+        verbose (int): print process data
 
     Returns:
         (bool): whether rig is inside camera frustrum
     """
     _geos = rig.get_geos()
     for _geo in _geos:
+        lprint('TESTING GEO', _geo, verbose=verbose)
         _bbox = hom.get_bbox(_geo)
+        if create_geo:
+            _bbox.build_cube()
         if cam.contains(_bbox):
             return True
 

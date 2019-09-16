@@ -272,13 +272,11 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         widget.setEnabled(bool(_work and _work.find_seqs()))
 
     def _callback__task(self):
-        print 'CALLBACK TASK'
         _task = get_single(self.ui.task.selected_text(), catch=True)
         self.ui.task_edit.setText(_task)
 
     def _callback__task_edit(self):
         _text = self.ui.task_edit.text()
-        print 'CALLBACK TASK EDIT', _text
         self.ui.task.blockSignals(True)
         if not _text:
             self.ui.task.redraw()
@@ -366,19 +364,27 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         menu.add_label("Jump to")
         for _work in sorted(_get_recent_work()):
             _work = _work.find_latest()
-            if _work.shot:
-                _label = '{}/{}/{}'.format(
-                    _work.shot.name, _work.step, _work.task)
-            else:
-                _label = 'assets/{}/{}'.format(_work.step, _work.task)
+            _label = _get_work_label(_work)
             _icon = _get_work_icon(_work, mode='basic')
             _fn = wrap_fn(self.select_path, _work.path)
             menu.add_action(_label, _fn, icon=_icon)
 
         menu.addSeparator()
-        menu.add_action(
-            'Add selection to recent', _ver.add_to_recent,
-            icon=icons.EMOJI.find('Magnet'))
+
+        # Jump to clipboard work
+        _clip_work = tk.get_work(qt.get_application().clipboard().text())
+        if _clip_work:
+            _label = _get_work_label(_clip_work)
+            _fn = wrap_fn(self.select_path, _clip_work.path)
+            menu.add_action('Jump to '+_label, _fn, icon=icons.COPY)
+        else:
+            menu.add_label('No work in clipboard', icon=icons.COPY)
+
+        # Add current work to recent
+        if _ver:
+            menu.add_action(
+                'Add selection to recent', _ver.add_to_recent,
+                icon=icons.EMOJI.find('Magnet'))
 
     def select_path(self, path, verbose=1):
         """Point HiveBro to the given path.
@@ -601,6 +607,23 @@ def _get_work_icon(
         _pix.add_overlay(_over, _offs, anchor='BL')
 
     return _pix
+
+
+def _get_work_label(work):
+    """Get context menu label for work file.
+
+    Args:
+        work (TTWorkFileBase): work file
+
+    Returns:
+        (str): label
+    """
+    if work.shot:
+        _label = '{}/{}/{}'.format(
+            work.shot.name, work.step, work.task)
+    else:
+        _label = 'assets/{}/{}'.format(work.step, work.task)
+    return _label
 
 
 def _get_work_text(work, data):

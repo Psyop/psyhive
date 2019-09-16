@@ -264,7 +264,7 @@ def find_shd(shd):
         return _AiAmbientOcclusion(shd)
     elif _type == 'surfaceShader':
         return _SurfaceShader(shd)
-    raise ValueError(shd)
+    raise ValueError(_type)
 
 
 def lambert(name='lambert', col=None):

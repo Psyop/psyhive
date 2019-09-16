@@ -72,3 +72,15 @@ class TestOpenMaya(unittest.TestCase):
         print _tmp_preset
         _sphere2.load_preset(_tmp_preset)
         assert not (_sphere1.get_p() - _sphere2.get_p()).length()
+
+    def test_get_selected(self):
+        cmds.select('persp')
+        assert hom.get_selected() == 'persp'
+        cmds.select('top', add=True)
+        with self.assertRaises(ValueError):
+            hom.get_selected()
+        assert len(hom.get_selected(multi=True)) == 2
+        cmds.select('time1', add=True)
+        assert len(hom.get_selected(multi=True)) == 3
+        assert len(hom.get_selected('transform', multi=True)) == 2
+        assert len(hom.get_selected('camera', multi=True)) == 2

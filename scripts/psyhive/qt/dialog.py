@@ -132,6 +132,15 @@ class _HMessageBox(QtWidgets.QMessageBox):
         return _result
 
 
+def help_(msg):
+    """Raise a help message dialog.
+
+    Args:
+        msg (str): help message
+    """
+    notify(msg, icon=icons.EMOJI.find('Information'), title='Help')
+
+
 def ok_cancel(
         msg, title='Confirm', icon=None, pos=None, parent=None,
         verbose=1):

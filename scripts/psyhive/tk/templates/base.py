@@ -529,7 +529,7 @@ class TTWorkFileBase(TTBase, File):
         if not body:
             try:
                 self.update_output_paths()
-            except AttributeError:
+            except (AttributeError, tank.TankError):
                 print 'FAILED TO UPDATE OUTPUT PATHS'
             _tk_workfile.save()
         else:
@@ -761,6 +761,8 @@ class TTOutputVersionBase(TTDirBase):
 class _TTOutputBase(TTBase):
     """Base class for any output leaf node (eg. file/seq)."""
 
+    channel = None
+    output_name = None
     output_version_type = None
 
     def find_latest(self, catch=False):

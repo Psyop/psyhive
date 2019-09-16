@@ -1,3 +1,32 @@
+#### v0.35.0 ####
+
+    Released: Mon 16th Sep 2019
+
+    yeti tools:
+        added option to cache single yeti node,
+        create missing yeti node on import,
+    clash short tools:
+        added tool to fix bad vdb aiVolume shaders,
+    shot builder:
+        added nk file handling,
+    
+    bin:
+        shot_builder add nk handling,
+    maya_psyhive:
+        open_maya.get_selected added,
+        ref.get_node added str handling for non-existant nodes,
+        shows.clashshortfilm.fix_vdb_shaders added,
+        tools.yeti allow cache single yeti node,
+        tools.yeti create yeti node on import if missing,
+    psyhive:
+        py_gui catch maya builds gui offscreen,
+        qt.dialog.help_ added,
+        qt.HPixmap.rotated added,
+        tk.TTNukeShotWork added,
+        tools.shot_builder added,
+        utils.PyDefDocs.desc_full added,
+
+
 #### v0.34.0 ####
 
     Released: Tue 10th Sep 2019

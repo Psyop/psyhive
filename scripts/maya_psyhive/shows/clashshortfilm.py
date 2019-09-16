@@ -3,7 +3,7 @@
 from maya import cmds
 
 from psyhive import host, py_gui
-from psyhive.utils import File
+from psyhive.utils import File, get_single
 from maya_psyhive import ui
 from maya_psyhive import open_maya as hom
 
@@ -77,6 +77,41 @@ def uninstall_hud():
     for _name, _, _, _ in _get_hud_data():
         if cmds.headsUpDisplay(_name, query=True, exists=True):
             cmds.headsUpDisplay(_name, remove=True)
+
+
+py_gui.set_section('VDB', collapse=False)
+
+
+def _find_sg(vdb):
+    """Find shading group of the given vdb.
+
+    Args:
+        vdb (HFnDependencyNode): vdb to read
+
+    Returns:
+        (HFnDependencyNode): shading group
+    """
+    return get_single([
+        _set for _set in hom.CMDS.ls(type='objectSet')
+        if vdb in (cmds.sets(_set, query=True) or [])])
+
+
+@py_gui.install_gui()
+def fix_vdb_shaders():
+    """Fix shaders on vdb nodes.
+
+    In some cases, having a surface shader applied to a vdb node seems
+    to make maya seg fault when the viewport draws it.
+
+    To fix the scene, pause the viewport, open the scene, run this fix
+    and then you should be able to unpause the viewport without maya
+    erroring.
+    """
+    for _vdb in hom.CMDS.ls(type='aiVolume'):
+        _sg = _find_sg(_vdb)
+        print _vdb, _sg
+        _sg.plug('surfaceShader').break_connections()
+        assert not _sg.plug('surfaceShader').list_connections()
 
 
 py_gui.set_section('Dev')

@@ -57,6 +57,7 @@ class PyDefDocs(object):
         for _split in ['Args:', 'Result:', 'Raises:']:
             _desc = _desc.split(_split)[0]
         self.desc = _desc.strip()
+        self.desc_full = '{}\n\n{}'.format(self.header, self.desc)
 
         self.exc_type, self.exc_desc = self._read_exc()
         self.result_type, self.result_desc = self._read_result()

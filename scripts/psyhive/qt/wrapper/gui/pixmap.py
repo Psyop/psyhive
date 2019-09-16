@@ -309,6 +309,10 @@ class HPixmap(QtGui.QPixmap):
         _kwargs = locals()
         del _kwargs['self']
 
+        if not isinstance(text, six.string_types):
+            raise TypeError("Bad text type {} ({})".format(
+                text, type(text).__name___))
+
         _pnt = HPainter()
         _pnt.begin(self)
         _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
@@ -353,6 +357,19 @@ class HPixmap(QtGui.QPixmap):
         """
         from psyhive import qt
         return qt.get_p(self.size())/2
+
+    def rotated(self, degrees):
+        """Get a rotated version of this pixmap.
+
+        Args:
+            degrees (float): rotation to apply
+
+        Returns:
+            (QPixmap): rotate pixmap
+        """
+        _tfm = QtGui.QTransform()
+        _tfm.rotate(degrees)
+        return self.transformed(_tfm)
 
     def resize(self, width, height=None):
         """Return a resized version of this pixmap.

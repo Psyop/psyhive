@@ -14,7 +14,7 @@ from psyhive.tk.templates.assets import (
     TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile)
 from psyhive.tk.templates.shots import (
     TTMayaShotWork, TTShotWorkAreaMaya, TTShotRoot, TTShotStepRoot,
-    TTShotOutputName, TTShotOutputVersion)
+    TTShotOutputName, TTShotOutputVersion, TTNukeShotWork)
 from psyhive.tk.templates.tools import get_work
 from psyhive.tk.templates.misc import get_template
 
@@ -51,6 +51,7 @@ def _map_class_to_cacheable(class_):
         tk.TTShotWorkAreaMaya: _CTTShotWorkAreaMaya,
         tk.TTMayaAssetWork: _CTTMayaAssetWork,
         tk.TTMayaShotWork: _CTTMayaShotWork,
+        tk.TTNukeShotWork: _CTTNukeShotWork,
     }[class_]
 
 
@@ -480,3 +481,19 @@ class _CTTMayaShotWork(_CTTWorkFileBase, TTMayaShotWork):
             (list): list of outputs
         """
         return super(_CTTMayaShotWork, self).find_outputs(**kwargs)
+
+
+class _CTTNukeShotWork(_CTTWorkFileBase, TTNukeShotWork):
+    """Shot work file with built in caching."""
+
+    @store_result_content_dependent
+    def find_outputs(self, force=False, **kwargs):
+        """Find outputs generated from this work file.
+
+        Args:
+            force (bool): force reread from disk
+
+        Returns:
+            (list): list of outputs
+        """
+        return super(_CTTNukeShotWork, self).find_outputs(**kwargs)

@@ -15,7 +15,7 @@ from psyhive.qt.interface import (
 
 from psyhive.qt.dialog import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,
-    yes_no_cancel)
+    yes_no_cancel, help_)
 from psyhive.qt.progress import ProgressBar, progress_bar
 from psyhive.qt.input_ import read_input
 from psyhive.qt.multi_select_ import multi_select

@@ -128,7 +128,7 @@ ignore:
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/utils/range_.py
     too-many-return-statements:
-        hv_test/diary/y19/d0726/_machi/card.py
+        _machi/card.py
     unbalanced-tuple-unpacking:
         maya_psyhive/open_maya/camera.py
     undefined-loop-variable:
@@ -141,6 +141,7 @@ ignore:
         hv_test/diary/
     unsubscriptable-object:
         hv_test/diary/y19/d0726/_machi/game.py
+        psyhive/scripts/maya_psyhive/tools/yeti/cache.py
     unused-argument:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py

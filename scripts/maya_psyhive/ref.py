@@ -68,19 +68,28 @@ class FileRef(object):
         """
         return '{}:{}'.format(self.namespace, attr)
 
-    def get_node(self, name, class_=None):
+    def get_node(self, name, class_=None, catch=False):
         """Get node from this ref matching the given name.
 
         Args:
             name (str): name of node
             class_ (class): override node class
+            catch (bool): no error if node is missing
 
         Returns:
             (HFnDependencyNode): node name
         """
         from maya_psyhive import open_maya as hom
         _class = class_ or hom.HFnDependencyNode
-        return _class('{}:{}'.format(self.namespace, name))
+        _name = '{}:{}'.format(self.namespace, name)
+        if _class is str:
+            return _name
+        try:
+            return _class(_name)
+        except RuntimeError as _exc:
+            if catch:
+                return None
+            raise ValueError("Missing node "+_name)
 
     def is_loaded(self):
         """Check if this reference is loaded.

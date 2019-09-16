@@ -105,3 +105,49 @@ def cast_result(func, verbose=0):
         raise ValueError(_result)
 
     return _casted_result_fn
+
+
+def get_selected(type_=None, multi=False, verbose=1):
+    """Get selected node.
+
+    Unless the multi flag is using, this will error if there isn't
+    exactly one selected node matched.
+
+    Args:
+        type_ (str): filter nodes by type
+        multi (bool): return multiple nodes
+        verbose (int): print process data
+
+    Returns:
+        (HFnDependencyNode): matching node
+        (HFnDependencyNode list): matching nodes (if multi flag used)
+    """
+    from maya_psyhive import open_maya as hom
+
+    # Build list of selected nodes
+    _nodes = []
+    for _node in hom.CMDS.ls(selection=True):
+
+        _type = _node.object_type()
+        lprint('TESTING', _node, verbose=verbose > 1)
+
+        # Map transforms to HFnTransform
+        if _type == 'transform':
+            _node = hom.HFnTransform(str(_node))
+
+        # Apply type filter
+        if type_:
+            if type_ != 'transform' and _type == 'transform':
+                _type = _node.shp.object_type()
+                lprint(' - SHAPE TYPE', _type, verbose=verbose > 1)
+            if not _type == type_:
+                lprint(' - REJECTED', type_, _type, verbose=verbose > 1)
+                continue
+
+        lprint(' - ADDED', verbose=verbose > 1)
+        _nodes.append(_node)
+
+    # Get result
+    if multi:
+        return _nodes
+    return get_single(_nodes, name='selected object', verbose=verbose)

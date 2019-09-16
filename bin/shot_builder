@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Build shot from a template."""
+"""Build shot work file from a template scene."""
 
 # Add psyhive to sys.path
 import os
@@ -11,7 +11,8 @@ sys.path.append(_PSYHIVE_DIR)
 
 import optparse
 
-from psyhive import tk, farm
+from psyhive import tk
+from psyhive.tools import shot_builder
 
 _EXAMPLE_TMPL = ('P:/projects/clashshortfilm_33294P/sequences/rnD/rnd0050/'
                  'lighting/work/maya/scenes/rnd0050_lighting_v004.ma')
@@ -19,8 +20,15 @@ _USAGE = '''
 
 Tool for building a shot scene file from a template.
 
-All asset paths are updated to the latest, and all abc paths are
-updated to the latest publish in the current shot.
+In maya all asset paths are updated to the latest, and all abc paths are
+updated to the latest publish in the current shot. Maya scene need to be
+generated in an instance of maya and so will be generated on the farm.
+
+In nuke the output is generated immediately. All Read nodes will have their
+file paths updated to the current shot if there is a render in that shot,
+otherwise the Read node will be disabled. The frame ranges will be updated
+to match the current shot's frame range in shotgun. Write nodes will also
+be updated to match the new work file.
 
 Example:
 
@@ -38,6 +46,9 @@ def _get_opts():
         (tuple): options/args
     """
     _parser = optparse.OptionParser(_USAGE)
+    _parser.add_option(
+        "--diff", dest="diff", action="store_true",
+        help="Show diffs (nk only)")
     return _parser.parse_args()
 
 
@@ -55,7 +66,6 @@ def _main():
     _tmpl_work = tk.get_work(_tmpl_path)
     if not _tmpl_work:
         raise RuntimeError('Template is not work file '+_tmpl_path)
-    assert _tmpl_work.extn in ['ma', 'mb']
 
     # Get shot
     _shot = tk.get_shot(os.getcwd())
@@ -66,17 +76,12 @@ def _main():
         raise RuntimeError('Template is in same shot as current dir')
 
     # Build farm job
-    _py = '\n'.join([
-        'from maya_psyhive.tools import m_shot_builder',
-        '_template = "{template.path}"',
-        '_shot = "{shot.name}"',
-        'm_shot_builder.build_shot_from_template(',
-        '    template=_template, shot=_shot, force=True)',
-    ]).format(template=_tmpl_work, shot=_shot)
-    _label = 'Build shot '+_shot.name
-    _task = farm.MayaPyTask(_py, label=_label)
-    _job = farm.MayaPyJob(_label, tasks=[_task])
-    _job.submit()
+    if _tmpl_work.extn in ['ma', 'mb']:
+        shot_builder.submit_update_ma(template=_tmpl_work, shot=_shot)
+    elif _tmpl_work.extn in ['nk']:
+        shot_builder.update_nk(template=_tmpl_work, shot=_shot)
+    else:
+        raise ValueError(_tmpl_work.extn)
 
 
 if __name__ == '__main__':
