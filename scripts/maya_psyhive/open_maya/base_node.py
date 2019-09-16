@@ -265,6 +265,17 @@ class BaseNode(object):
         """Wrapper for cmds.select as applied to this node."""
         cmds.select(self, **kwargs)
 
+    def split(self, splitter):
+        """Apply str.split to the string value of this node.
+
+        Args:
+            splitter (str): split chars
+
+        Returns:
+            (str list): split string
+        """
+        return str(self).split(splitter)
+
     def __add__(self, other):
         return str(self)+other
 

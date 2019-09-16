@@ -1,3 +1,14 @@
+#### v0.35.1 ####
+
+    Released: Mon 16th Sep 2019
+
+    shot_builder: fix error on ref node without path in scene (iirvin)
+    
+    maya_psyhive:
+        open_maya.BaseNode.split added,
+        ref._read_refs ignore ref w/o path,
+
+
 #### v0.35.0 ####
 
     Released: Mon 16th Sep 2019
