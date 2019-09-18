@@ -1,9 +1,17 @@
 """Tools for managing qt."""
 
 from psyhive.qt.wrapper import (
-    QtCore, QtGui, QtWidgets, QtUiTools, HPushButton, HCheckBox,
-    HLabel, HTreeWidgetItem, HListWidgetItem, HListWidget, HComboBox,
-    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, Qt)
+
+    # Raw qt libs
+    QtCore, QtGui, QtWidgets, QtUiTools, Qt,
+
+    # QtWidgets overrides
+    HPushButton, HCheckBox, HLabel, HTreeWidgetItem, HListWidgetItem,
+    HListWidget, HComboBox, HTreeWidget, HTabWidget, HTextBrowser,
+
+    # QtCore/QtGui overrides
+    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS)
+
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (
     get_application, get_col, get_p, get_size, get_pixmap, get_icon)

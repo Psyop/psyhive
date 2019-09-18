@@ -50,7 +50,7 @@ def chain_fns(*args):
 
         # Catch args not funcs
         for _arg in args:
-            if not isinstance(_arg, types.FunctionType):
+            if not isinstance(_arg, (types.FunctionType, types.MethodType)):
                 raise TypeError('Arg is not function - {}'.format(_arg))
 
         def _chained_fn(*xargs):
@@ -249,8 +249,12 @@ def last(items):
     """
     _result = []
 
-    _last = len(items) - 1
-    for _idx, _item in enumerate(items):
+    _items = items
+    if isinstance(_items, enumerate):
+        _items = list(_items)
+
+    _last = len(_items) - 1
+    for _idx, _item in enumerate(_items):
         _result.append((_idx == _last, _item))
 
     return _result

@@ -14,15 +14,15 @@ from maya_psyhive.utils import get_parent, set_namespace, restore_sel
 ICON = icons.EMOJI.find('Ghost')
 
 
-def _apply_cache_to_selected_asset(cache):
-    """Apply a cache to the selected asset.
+def _apply_caches_to_selected_asset(caches):
+    """Apply yeti caches to the selected asset.
 
     The asset can be selected by selecting any node in the reference.
 
     If the asset doesn't have a matching yeti node, it will be created.
 
     Args:
-        cache (str): path to cache file to apply
+        caches (TTOutputFileSeqBase list): caches to apply
     """
 
     # Get asset
@@ -34,23 +34,23 @@ def _apply_cache_to_selected_asset(cache):
         return
     print 'REF', _ref
 
-    # Get yeti node
-    _out = tk.get_output(cache)
-    _cache_ns = _out.output_name
-    assert _out.channel.startswith(_cache_ns+'_')
-    _node_name = _out.channel[len(_cache_ns+'_'):]
-    print 'NODE NAME', _node_name
-    _yeti = _ref.get_node(_node_name, catch=True)
-    if not _yeti:
-        _top_node = _ref.find_top_node()
-        set_namespace(':'+_ref.namespace)
-        _yeti = hom.CMDS.createNode('pgYetiMaya', name=_node_name)
-        set_namespace(':')
-        cmds.parent(get_parent(_yeti), 'chickDad:cRoot')
-    print 'YETI', _yeti
+    # Apply caches to yeti nodes
+    for _cache in caches:
+        _cache_ns = _cache.output_name
+        assert _cache.channel.startswith(_cache_ns+'_')
+        _node_name = _cache.channel[len(_cache_ns+'_'):]
+        print 'NODE NAME', _node_name
+        _yeti = _ref.get_node(_node_name, catch=True)
+        if not _yeti:
+            _top_node = _ref.find_top_node()
+            set_namespace(':'+_ref.namespace)
+            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_node_name)
+            set_namespace(':')
+            cmds.parent(get_parent(_yeti), _top_node)
+        print 'YETI', _yeti
 
-    _yeti.plug('cacheFileName').set_val(cache)
-    _yeti.plug('fileMode').set_val(1)
+        _yeti.plug('cacheFileName').set_val(_cache.path)
+        _yeti.plug('fileMode').set_val(1)
 
 
 @restore_sel
@@ -68,6 +68,8 @@ def _cache_yetis(yetis):
     _kwargs = dict(format='fur', output_type='yeti',
                    extension='fur', output_name=_ref.namespace)
     for _yeti in yetis:
+        if _yeti.object_type() == 'transform':
+            _yeti = _yeti.shp
         _out = _work.map_to(
             tk.TTShotOutputFileSeq, channel=str(_yeti).replace(':', '_'),
             **_kwargs)
@@ -101,6 +103,7 @@ def _write_cache_from_selected_asset():
 
     # Get yeti nodes
     _yetis = _ref.find_nodes(type_='pgYetiMaya')
+
     if not _yetis:
         qt.notify_warning(
             "No yeti nodes in asset {}.\n\nThis asset cannot "
@@ -113,6 +116,11 @@ def _write_cache_from_selected_asset():
 def _write_cache_from_selected_yeti():
     """Write a yeti cache from selected yeti nodes."""
     _yetis = hom.get_selected(type_='pgYetiMaya', multi=True)
+    if not _yetis:
+        qt.notify_warning("No yeti nodes selected.\n\nPlease select one or "
+                          "more yeti nodes.")
+        return
+
     _cache_yetis(_yetis)
 
 
@@ -214,12 +222,13 @@ class _YetiCacheToolsUi(qt.HUiDialog):
 
     def _callback__cache_read(self):
         _ver = self.ui.version.selected_data()
-        _out = get_single(_ver.find_outputs())
-        _apply_cache_to_selected_asset(cache=_out.path)
+        print 'VER', _ver
+        _outs = _ver.find_outputs(output_type='yeti', format_='fur')
+        _apply_caches_to_selected_asset(caches=_outs)
 
     def _callback__cache_read_help(self):
         _def = PyFile(__file__).find_def(
-            _apply_cache_to_selected_asset.__name__)
+            _apply_caches_to_selected_asset.__name__)
         qt.help_(_def.get_docs().desc_full)
 
 

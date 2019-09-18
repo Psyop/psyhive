@@ -91,7 +91,7 @@ class _TraceStep(object):
         Args:
             lines (list): traceback lines
         """
-        self.text = lines[0].strip()+'\n  '+lines[1].strip()
+        self.text = '\n  '.join([_line.strip() for _line in lines])
         self.file_ = abs_path(lines[0].split('"')[1])
         self.line_n = int(lines[0].split(',')[1].strip(' line'))
 
@@ -120,9 +120,15 @@ class Traceback(object):
             _file_lines.append(_lines.pop(0))
         _file_text = '\n'.join(_file_lines)
         _splitter = '  File "'
-        self.lines = [
-            _TraceStep((_splitter+_item).strip().split('\n'))
-            for _item in _file_text.split(_splitter)[1:]]
+        try:
+            self.lines = [
+                _TraceStep((_splitter+_item).strip().split('\n'))
+                for _item in _file_text.split(_splitter)[1:]]
+        except IndexError:
+            print '############## Traceback ##############'
+            print self.body
+            print '#######################################'
+            raise RuntimeError("Failed to parse traceback")
 
         self.clean_text = '# '+self.body.replace('\n', '\n# ')
 

@@ -294,6 +294,6 @@ def _read_refs(class_=None):
         except ValueError:
             continue
         if not _ref.path:
-        	continue
+            continue
         _refs.append(_ref)
     return _refs

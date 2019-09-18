@@ -187,6 +187,8 @@ def fr_range(count):
     Returns:
         (float list): list of floats
     """
+    if count == 1:
+        return [0]
     return [1.0*_idx/(count-1) for _idx in range(count)]
 
 

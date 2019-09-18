@@ -31,6 +31,15 @@ class BaseNode(object):
                 node, type(node).__name__))
         self.node = node
 
+    def add_to_set(self, set_, verbose=0):
+        """Add this node to a set, creating it if required.
+
+        Args:
+            set_ (str): set to add to
+            verbose (int): print process data
+        """
+        add_to_set(self, set_, verbose=verbose)
+
     def compare(self, other):
         """Compare two nodes' settings.
 
@@ -55,14 +64,25 @@ class BaseNode(object):
         """
         return HPlug(create_attr(self.node+'.'+name, *args, **kwargs))
 
-    def add_to_set(self, set_, verbose=0):
-        """Add this node to a set, creating it if required.
+    def create_enum(self, name, options, default=None):
+        """Create enum attibute.
 
         Args:
-            set_ (str): set to add to
-            verbose (int): print process data
+            name (str): attr name
+            options (str list): enum options
+            default (str): enum default value
+
+        Returns:
+            (HPlug): enum attribute
         """
-        add_to_set(self, set_, verbose=verbose)
+        if self.has_attr(name):
+            self.plug(name).delete()
+        cmds.addAttr(self, shortName=name, attributeType='enum',
+                     enumName=':'.join(options))
+        _plug = self.plug(name)
+        if default:
+            _plug.set_val(options.index(default))
+        return _plug
 
     def delete(self):
         """Delete this object."""
@@ -81,17 +101,20 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
-    def find_downstream(self, depth=1, type_=None, filter_=None, verbose=0):
-        """Find nodes downstream from this one.
+    def find_connected(self, depth=1, type_=None, filter_=None,
+                       source=True, destination=True, verbose=0):
+        """Recursively traverse connected nodes in graph.
 
         Args:
-            depth (int): max
-            type_ (str): apply type filter
-            filter_ (str): apply node name filter
+            depth (int): traversal depth
+            type_ (str): filter by node type
+            filter_ (str): filter by node name
+            source (bool): traverse upstream nodes
+            destination (bool): traverse downstream nodes
             verbose (int): print process data
 
         Returns:
-            (HFnDependencyNode list): downstream nodes
+            (HFnDependencyNode list): list of connected nodes
         """
         from maya_psyhive import open_maya as hom
 
@@ -104,8 +127,9 @@ class BaseNode(object):
             _conns.add(_conn)
             lprint(' '*(5-depth), 'ADDING', _conn, verbose=0)
             if depth > 0:
-                _conns |= set(_conn.find_downstream(
-                    depth=depth-1, verbose=verbose))
+                _conns |= set(_conn.find_connected(
+                    depth=depth-1, source=source, destination=destination,
+                    verbose=verbose))
         _conns = sorted(_conns)
 
         # Apply filters
@@ -117,6 +141,40 @@ class BaseNode(object):
             _conns = apply_filter(_conns, filter_, key=str)
 
         return _conns
+
+    def find_downstream(self, depth=1, type_=None, filter_=None, verbose=0):
+        """Find nodes downstream from this one.
+
+        Args:
+            depth (int): traversal depth
+            type_ (str): apply type filter
+            filter_ (str): apply node name filter
+            verbose (int): print process data
+
+        Returns:
+            (HFnDependencyNode list): downstream nodes
+        """
+        _kwargs = locals()
+        del _kwargs['self']
+        _kwargs['source'] = False
+        return self.find_connected(**_kwargs)
+
+    def find_upstream(self, depth=1, type_=None, filter_=None, verbose=0):
+        """Find nodes upstream from this one.
+
+        Args:
+            depth (int): traversal depth
+            type_ (str): apply type filter
+            filter_ (str): apply node name filter
+            verbose (int): print process data
+
+        Returns:
+            (HFnDependencyNode list): downstream nodes
+        """
+        _kwargs = locals()
+        del _kwargs['self']
+        _kwargs['destination'] = False
+        return self.find_connected(**_kwargs)
 
     def _get_tmp_preset_path(self, use_mel):
         """Get path to tmp preset file.

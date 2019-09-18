@@ -548,8 +548,6 @@ class TTWorkFileBase(TTBase, File):
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
 
-        assert self.exists()
-
         _tk_workspace = _mod.get_workspace_from_path(
             app=_fileops, path=self.path)
         _tk_workfile = _mod.WorkfileModel(
@@ -641,10 +639,14 @@ class TTOutputVersionBase(TTDirBase):
         _path = self.tmpl.apply_fields(_data)
         return self.__class__(_path)
 
-    def find_outputs(self, thumbs=False, verbose=0):
+    def find_outputs(self, output_type=None, output_name=None, format_=None,
+                     thumbs=False, verbose=0):
         """Find outputs in this version.
 
         Args:
+            output_type (str): filter by output_type
+            output_name (str): filter by output_name
+            format_ (str): filter by format
             thumbs (bool): include thumbs
             verbose (int): print process data
 
@@ -693,9 +695,18 @@ class TTOutputVersionBase(TTDirBase):
                     lprint('   - NOT OUTPUT FILE', _file,
                            verbose=verbose > 1)
 
-            if _output:
-                lprint(' - ADDED OUTPUT', _output, verbose=verbose)
-                _outputs.append(_output)
+            # Apply filters
+            if not _output:
+                continue
+            elif output_name and not _output.output_name == output_name:
+                continue
+            elif output_type and not _output.output_type == output_type:
+                continue
+            elif format_ and not _output.format == format_:
+                continue
+
+            lprint(' - ADDED OUTPUT', _output, verbose=verbose)
+            _outputs.append(_output)
 
         # Apply frames cache
         for _seq, _frames in _seqs.items():

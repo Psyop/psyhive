@@ -14,9 +14,7 @@ from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode)
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
-from psyhive.qt.wrapper.widgets import (
-    HCheckBox, HLabel, HTextBrowser, HPushButton, HMenu, HListWidget,
-    HTabWidget, HComboBox)
+from psyhive.qt.wrapper.widgets import HMenu
 from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
@@ -517,14 +515,16 @@ def get_ui_loader():
     Returns:
         (QUiLoader): ui loader
     """
+    from psyhive import qt
     _loader = QtUiTools.QUiLoader()
-    _loader.registerCustomWidget(HCheckBox)
-    _loader.registerCustomWidget(HComboBox)
-    _loader.registerCustomWidget(HLabel)
-    _loader.registerCustomWidget(HListWidget)
-    _loader.registerCustomWidget(HPushButton)
-    _loader.registerCustomWidget(HTextBrowser)
-    _loader.registerCustomWidget(HTabWidget)
+    _loader.registerCustomWidget(qt.HCheckBox)
+    _loader.registerCustomWidget(qt.HComboBox)
+    _loader.registerCustomWidget(qt.HLabel)
+    _loader.registerCustomWidget(qt.HListWidget)
+    _loader.registerCustomWidget(qt.HPushButton)
+    _loader.registerCustomWidget(qt.HTabWidget)
+    _loader.registerCustomWidget(qt.HTextBrowser)
+    _loader.registerCustomWidget(qt.HTreeWidget)
     return _loader
 
 

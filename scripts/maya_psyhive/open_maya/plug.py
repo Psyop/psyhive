@@ -77,6 +77,14 @@ class HPlug(om.MPlug):
         """
         return HPlug(add_node(self, input_, output))
 
+    def attribute_query(self, **kwargs):
+        """Wrapper for cmds.attributeQuery command.
+
+        Returns:
+            (str list): result
+        """
+        return cmds.attributeQuery(self.attr, node=self.node, **kwargs)
+
     def break_connections(self, verbose=0):
         """Break incoming connections on this plug.
 
@@ -112,6 +120,10 @@ class HPlug(om.MPlug):
             other (str|HPlug): target for connection
         """
         cmds.connectAttr(self, other, **kwargs)
+
+    def delete(self):
+        """Delete this attribute."""
+        cmds.deleteAttr(self)
 
     def divide_node(self, input_, output=None):
         """Connect this plug as the first input in a divide node.
@@ -178,6 +190,15 @@ class HPlug(om.MPlug):
         """
         _col = qt.get_col(val)
         cmds.setAttr(self, *_col.to_tuple(mode='float'))
+
+    def set_enum(self, val):
+        """Set value of an enum.
+
+        Args:
+            val (str): value to select
+        """
+        _vals = get_single(self.attribute_query(listEnum=True)).split(':')
+        self.set_val(_vals.index(val))
 
     def set_keyframe(self, **kwargs):
         """Set keyframe on this attr."""

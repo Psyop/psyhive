@@ -56,6 +56,7 @@ ignore:
         maya_psyhive/tools/batch_rerender/
         maya_psyhive/tools/yeti/cache.py
         psyhive/py_gui/qt_.py
+        psyhive/qt/wrapper/widgets.py
         psyhive/tk/templates/base.py
         psyhive/tools/batch_rerender/interface.py
         psyhive/tools/err_catcher.py
@@ -141,7 +142,7 @@ ignore:
         hv_test/diary/
     unsubscriptable-object:
         hv_test/diary/y19/d0726/_machi/game.py
-        psyhive/scripts/maya_psyhive/tools/yeti/cache.py
+        maya_psyhive/tools/yeti/cache.py
     unused-argument:
         hv_test/diary/
         maya_psyhive/tools/fkik_switcher/system.py
@@ -149,6 +150,7 @@ ignore:
         psyhive/qt/wrapper/gui.py
         psyhive/qt/wrapper/gui/pixmap.py
         psyhive/py_gui/base.py
+        maya_psyhive/open_maya/base_node.py
         psyhive/utils/cache.py
         sanity_check/checks/
         /tests/

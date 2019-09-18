@@ -329,6 +329,40 @@ class HTextBrowser(QtWidgets.QTextBrowser, HWidgetBase):
     """Override for QTextBrowser object."""
 
 
+class HTreeWidget(QtWidgets.QTreeWidget):
+    """Override for QTreeWidget object with shift collapse/expand."""
+
+    def __init__(self, *args, **kwargs):
+        """Constructor."""
+        super(HTreeWidget, self).__init__(*args, **kwargs)
+        self.itemCollapsed.connect(self._collapse_callback)
+        self.itemExpanded.connect(self._expand_callback)
+
+    def _collapse_callback(self, item):
+        """Callback to apply recursive collapse.
+
+        Args:
+            item (HTreeWidgetItem): item being collapsed
+        """
+        from psyhive import qt
+        _mods = qt.get_application().keyboardModifiers()
+        if _mods == qt.Qt.ShiftModifier:
+            for _child in item.children():
+                _child.setExpanded(False)
+
+    def _expand_callback(self, item):
+        """Callback to apply recursive expand.
+
+        Args:
+            item (HTreeWidgetItem): item being expanded
+        """
+        from psyhive import qt
+        _mods = qt.get_application().keyboardModifiers()
+        if _mods == qt.Qt.ShiftModifier:
+            for _child in item.children():
+                _child.setExpanded(True)
+
+
 class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
     """Override for QTreeWidgetItem object."""
 

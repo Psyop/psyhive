@@ -107,7 +107,7 @@ def cast_result(func, verbose=0):
     return _casted_result_fn
 
 
-def get_selected(type_=None, multi=False, verbose=1):
+def get_selected(type_=None, class_=None, multi=False, verbose=1):
     """Get selected node.
 
     Unless the multi flag is using, this will error if there isn't
@@ -115,6 +115,7 @@ def get_selected(type_=None, multi=False, verbose=1):
 
     Args:
         type_ (str): filter nodes by type
+        class_ (class): only return nodes that cast to this class
         multi (bool): return multiple nodes
         verbose (int): print process data
 
@@ -137,11 +138,18 @@ def get_selected(type_=None, multi=False, verbose=1):
 
         # Apply type filter
         if type_:
-            if type_ != 'transform' and _type == 'transform':
+            if type_ != 'transform' and _type == 'transform' and _node.shp:
                 _type = _node.shp.object_type()
                 lprint(' - SHAPE TYPE', _type, verbose=verbose > 1)
             if not _type == type_:
                 lprint(' - REJECTED', type_, _type, verbose=verbose > 1)
+                continue
+
+        if class_:
+            try:
+                _node = class_(str(_node))
+            except ValueError:
+                lprint(' - CLASS FAIL', class_, verbose=verbose > 1)
                 continue
 
         lprint(' - ADDED', verbose=verbose > 1)

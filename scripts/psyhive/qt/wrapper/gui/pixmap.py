@@ -127,6 +127,9 @@ class HPixmap(QtGui.QPixmap):
             anchor (str): anchor position
             operation (str): overlay mode
             resize (int|QSize): apply resize to overlay
+
+        Returns:
+            (QRect): rectangle that was drawn
         """
         from psyhive import qt
         _pix = qt.get_pixmap(pix)
@@ -153,6 +156,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.set_operation(operation)
         _pnt.drawPixmap(_pos.x(), _pos.y(), _pix)
         _pnt.end()
+
+        return QtCore.QRect(_pos, _pix.size())
 
     def add_path(self, pts, col='black', thickness=None, pen=None):
         """Draw a path on this pixmap.
@@ -335,11 +340,15 @@ class HPixmap(QtGui.QPixmap):
 
         Args:
             factor (float): how much to darken
+            
+        Returns:
+        	(HPixmap): this pixmap
         """
         from psyhive import qt
         _tmp = HPixmap(self.size())
         _tmp.fill(qt.HColor(0, 0, 0, 255*factor))
-        self.add_overlay(_tmp, operation='mult')
+        self.add_overlay(_tmp, operation='over')
+        return self
 
     def get_aspect(self):
         """Get aspect ratio of this image.
@@ -378,7 +387,7 @@ class HPixmap(QtGui.QPixmap):
             width (int): width in pixels
             height (int): height in pixels
         """
-        if isinstance(width, int):
+        if isinstance(width, (int, float)):
             _width = width
             _height = height or width
         elif isinstance(width, QtCore.QSize):
@@ -434,3 +443,21 @@ class HPixmap(QtGui.QPixmap):
         self.save_as(_tmp_file, verbose=1, force=True)
         self.save_as(_pics_file, verbose=1, force=True)
         return _pics_file
+
+    def whiten(self, factor):
+        """Whiten this pixmap (1 makes the pixmap white).
+
+        Args:
+            factor (float): how much to whiten
+
+            
+        Returns:
+        	(HPixmap): this pixmap
+        """
+        from psyhive import qt
+        _tmp = HPixmap(self.size())
+        _fill = qt.HColor(255, 255, 255, 255*factor)
+        print 'FILL', _fill
+        _tmp.fill(_fill)
+        self.add_overlay(_tmp, operation='over')
+        return self

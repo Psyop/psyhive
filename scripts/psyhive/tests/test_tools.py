@@ -54,13 +54,33 @@ Traceback (most recent call last):
   File "<unknown>", line 10
     os.environ['MANIM_SITE'] = 'local'
     ^
-IndentationError: unexpected indent""".strip()
+IndentationError: unexpected indent
+""".strip()
+
+
+_TRACEBACK_3 = r"""
+Traceback (most recent call last):
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\psyhive\tools\err_catcher.py", line 227, in _catch_error_fn
+    _result = func(*args, **kwargs)
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\psyhive\tools\usage.py", line 102, in _usage_tracked_fn
+    return func(*args, **kwargs)
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\maya_psyhive\tools\yeti\cache.py", line 213, in _callback__cache_write_node
+    _write_cache_from_selected_yeti()
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\maya_psyhive\tools\yeti\cache.py", line 121, in _write_cache_from_selected_yeti
+    _cache_yetis(_yetis)
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\maya_psyhive\utils.py", line 507, in _restore_sel_fn
+    _result = func(*args, **kwargs)
+  File "Z:/dev/global/code/primary/addons/maya/modules/psyhive/scripts\maya_psyhive\tools\yeti\cache.py", line 85, in _cache_yetis
+    writeCache=_out_path, range=host.t_range(), samples=3)
+  File "<string>", line 2, in pgYetiCommand
+RuntimeError: [Tue Sep 17 16:04:16 2019] Yeti 3.1.6: ERROR P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/fx/output/yeti/yeti_test/v004/fur/test_pgYetiMaya1Shape/dev0000_yeti_test_test_pgYetiMaya1Shape_v004.%04d.fur directory doesn't exist!
+""".strip()
 
 
 class TestErrCatcher(unittest.TestCase):
 
     def test(self):
-        for _tb in [_TRACEBACK_1, _TRACEBACK_2]:
+        for _tb in [_TRACEBACK_1, _TRACEBACK_2, _TRACEBACK_3]:
             Traceback(_tb)
 
 

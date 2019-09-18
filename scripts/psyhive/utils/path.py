@@ -187,6 +187,18 @@ class Dir(Path):
 class File(Path):
     """Represents a file on disk."""
 
+    def copy_to(self, file_):
+        """Copy this file to another location.
+
+        Args:
+            file_ (str): target path
+        """
+        from psyhive import qt
+        test_path(os.path.dirname(file_))
+        if os.path.exists(file_):
+            qt.ok_cancel("Replace existing file?\n\n"+file_)
+        shutil.copy(self.path, file_)
+
     def delete(self, force=False):
         """Delete this file.
 

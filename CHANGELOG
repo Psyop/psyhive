@@ -1,3 +1,33 @@
+#### v0.36.0 ####
+
+    Released: Wed 18th Sep 2019
+
+    yeti tools:
+        bugfix error on read multiple caches in single asset,
+        allow select transform on cache selected nodes,
+    
+    maya_psyhive:
+        open_maya.BaseNode create_enum/find_upstream/find_connected added,
+        open_maya.HPlug attribute_query/delete/set_enum added,
+        open_maya.get_selected added class_ arg,
+        tex.build_texture_path added timestamp/extn args,
+        tools.yeti allow multi caches in version on apply,
+        tools.yeti allow ignore renders in apply version,
+        tools.yeti cache selected allow select transforms,
+        tools.yeti cache selected warning dialog on none selected,
+    psyhive:
+        qt HTreeWidget/HTabWidget/HTextBrowser added,
+        qt.HPixmap.add_overlay returns QRect,
+        qt.HPixmap added whiten + fixed darken,
+        tk.TTOutputVersionBase.find_outputs added format_/output_name/output_type filters,
+        tools.err_catcher bugfix single line step,
+        tools.err_catcher better error on fail to parse output,
+        utils.chain_fns allow methods as args,
+        utils.last allow items as enumerate,
+        utils.File.copy_to added,
+        utils.fr_range added handling for single item,
+
+
 #### v0.35.1 ####
 
     Released: Mon 16th Sep 2019

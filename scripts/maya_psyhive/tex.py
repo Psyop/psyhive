@@ -79,14 +79,20 @@ class _BaseShader(object):
         lprint('SETS', _sets, verbose=verbose)
         return get_single(_sets, catch=True)
 
-    def read_texture(self):
+    def read_texture(self, verbose=0):
         """Read the path to this shader's file texture (if any).
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (str|None): texture path
         """
-        _file = get_single(cmds.listConnections(
-            self.col_attr, type='file', destination=False), catch=True)
+        lprint("READING", self.col_attr, verbose=verbose)
+        _conns = cmds.listConnections(
+            self.col_attr, type='file', destination=False)
+        lprint("CONNS", _conns, verbose=verbose)
+        _file = get_single(_conns, catch=True)
         if _file:
             return cmds.getAttr(_file+'.fileTextureName')
         return None
@@ -181,18 +187,22 @@ def ai_ambient_occlusion(name='aiAmbientOcclusion'):
     return _shd
 
 
-def build_texture_path(namespace):
+def build_texture_path(namespace, timestamp=True, extn='jpg'):
     """Build a texture path in the current workspace.
 
     Args:
         namespace (str): name for texture file
+        timestamp (bool): include timestamp in path
+        extn (str): file format
 
     Returns:
         (str): texture path
     """
     _tex_ws = cmds.workspace(fileRuleEntry='textures')
     _tex_dir = cmds.workspace(expandName=_tex_ws)
-    return time.strftime('{}/{}_%H%M%S.jpg'.format(_tex_dir, namespace))
+    return '{dir}/{base}{timestamp}.{extn}'.format(
+        dir=_tex_dir, base=namespace, extn=extn,
+        timestamp=time.strftime('_%H%M%S') if timestamp else '')
 
 
 def connect_place_2d(node_, place=None):
