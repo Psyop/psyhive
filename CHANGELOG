@@ -1,3 +1,24 @@
+#### v0.37.0 ####
+
+    Released: Mon 23rd Sep 2019
+
+    yeti tools:
+        added option to read/write caches in assets,
+        added option to read caches into root namespace,
+    
+    maya_psyhive:
+        ref.import_nodes added,
+        tex.apply_texture create file node if not present,
+        yeti added apply caches in root namespace,
+        yeti allow read/write in assets,
+    psyhive:
+        py_gui.load_settings catch setting missing from current ui,
+        qt.safe_timer_event added,
+        tk _TTAssetCpntBase/_TTShotCpntBase added root property,
+        tk.TTWorkFileBase.update_output_paths added env disable,
+        tk.TTOutputVersionBase find_outputs search moved to _read_outputs,
+
+
 #### v0.36.0 ####
 
     Released: Wed 18th Sep 2019

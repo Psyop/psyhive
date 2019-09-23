@@ -53,6 +53,34 @@ def _apply_caches_to_selected_asset(caches):
         _yeti.plug('fileMode').set_val(1)
 
 
+def _apply_caches_in_root_namespace(caches):
+    """Apply yeti caches in the root namespace.
+
+    Yeti nodes which don't currently exist will be created with no namespace.
+
+    Args:
+        caches (TTOutputFileSeqBase list): caches to apply
+    """
+    for _cache in caches:
+
+        # Get node name
+        _cache_ns = _cache.output_name
+        assert _cache.channel.startswith(_cache_ns+'_')
+        _node_name = _cache.channel[len(_cache_ns+'_'):]
+        print 'NODE NAME', _node_name
+
+        # Get yeti node
+        if cmds.objExists(_node_name):
+            _yeti = hom.HFnDependencyNode(_node_name)
+        else:
+            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_node_name)
+        print 'YETI', _yeti
+
+        # Apply cache
+        _yeti.plug('cacheFileName').set_val(_cache.path)
+        _yeti.plug('fileMode').set_val(1)
+
+
 @restore_sel
 def _cache_yetis(yetis):
     """Cache a list of yeti nodes.
@@ -71,7 +99,8 @@ def _cache_yetis(yetis):
         if _yeti.object_type() == 'transform':
             _yeti = _yeti.shp
         _out = _work.map_to(
-            tk.TTShotOutputFileSeq, channel=str(_yeti).replace(':', '_'),
+            _work.output_file_seq_type,
+            channel=str(_yeti).replace(':', '_'),
             **_kwargs)
         print 'OUT', _out
         if _out.exists():
@@ -81,7 +110,7 @@ def _cache_yetis(yetis):
     # Generate caches
     cmds.select(yetis)
     _out_path = _work.map_to(
-        tk.TTShotOutputFileSeq, channel='<NAME>', **_kwargs).path
+        _work.output_file_seq_type, channel='<NAME>', **_kwargs).path
     print "OUT PATH", _out_path
     cmds.pgYetiCommand(
         writeCache=_out_path, range=host.t_range(), samples=3)
@@ -130,7 +159,6 @@ class _YetiCacheToolsUi(qt.HUiDialog):
     def __init__(self):
         """Constructor."""
         self.work = tk.cur_work()
-        self.shot = self.work.shot
         self.names = []
 
         _ui_file = abs_path(
@@ -138,14 +166,16 @@ class _YetiCacheToolsUi(qt.HUiDialog):
         super(_YetiCacheToolsUi, self).__init__(ui_file=_ui_file)
         self.set_icon(ICON)
 
-        self.ui.step.currentTextChanged.connect(self.ui.asset.redraw)
-        self.ui.asset.currentTextChanged.connect(self.ui.version.redraw)
-        self.ui.version.currentIndexChanged.connect(self.ui.cache_read.redraw)
+        self.ui.step.currentTextChanged.connect(
+            self.ui.asset.redraw)
+        self.ui.asset.currentTextChanged.connect(
+            self.ui.version.redraw)
+        self.ui.version.currentIndexChanged.connect(
+            self.ui.cache_read_asset.redraw)
 
-    # @qt.list_redrawer
     def _redraw__step(self, widget):
 
-        _steps = self.shot.find_step_roots()
+        _steps = self.work.root.find_step_roots()
         print 'WIDGET', widget
 
         # Update widget
@@ -186,7 +216,7 @@ class _YetiCacheToolsUi(qt.HUiDialog):
         if not _name:
             _vers = []
         else:
-            _vers = _name.find(depth=1, class_=tk.TTShotOutputVersion)
+            _vers = _name.find(depth=1, class_=self.work.output_version_type)
 
         # Update widget
         widget.clear()
@@ -198,7 +228,7 @@ class _YetiCacheToolsUi(qt.HUiDialog):
             widget.addItem('<None>')
         widget.setEnabled(bool(_vers))
 
-        self.ui.cache_read.redraw()
+        self.ui.cache_read_asset.redraw()
 
     def _redraw__cache_read(self, widget):
         _ver = self.ui.version.selected_data()
@@ -220,15 +250,24 @@ class _YetiCacheToolsUi(qt.HUiDialog):
             _write_cache_from_selected_yeti.__name__)
         qt.help_(_def.docs)
 
-    def _callback__cache_read(self):
+    def _callback__cache_read_asset(self):
         _ver = self.ui.version.selected_data()
-        print 'VER', _ver
         _outs = _ver.find_outputs(output_type='yeti', format_='fur')
         _apply_caches_to_selected_asset(caches=_outs)
 
-    def _callback__cache_read_help(self):
+    def _callback__cache_read_asset_help(self):
         _def = PyFile(__file__).find_def(
             _apply_caches_to_selected_asset.__name__)
+        qt.help_(_def.get_docs().desc_full)
+
+    def _callback__cache_read_root(self):
+        _ver = self.ui.version.selected_data()
+        _outs = _ver.find_outputs(output_type='yeti', format_='fur')
+        _apply_caches_in_root_namespace(caches=_outs)
+
+    def _callback__cache_read_root_help(self):
+        _def = PyFile(__file__).find_def(
+            _apply_caches_in_root_namespace.__name__)
         qt.help_(_def.get_docs().desc_full)
 
 

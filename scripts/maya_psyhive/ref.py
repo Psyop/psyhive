@@ -91,6 +91,10 @@ class FileRef(object):
                 return None
             raise ValueError("Missing node "+_name)
 
+    def import_nodes(self):
+        """Import nodes from this reference."""
+        cmds.file(self._file, importReference=True)
+
     def is_loaded(self):
         """Check if this reference is loaded.
 

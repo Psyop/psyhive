@@ -205,17 +205,17 @@ class _CTTShotOutputVersion(TTShotOutputVersion):
         return _work
 
     @store_result_on_obj
-    def find_outputs(self, thumbs=False, verbose=0):
-        """Find outputs in this version.
+    def _read_outputs(self, verbose=0):
+        """Read outputs in this version.
 
         Args:
-            thumbs (bool): include thumbs
             verbose (int): print process data
 
         Returns:
-            (TTOutputFileBase|TTOutputFileSeqBase list): outputs
+            (TTOutputBase list): outputs
         """
-        return super(_CTTShotOutputVersion, self).find_outputs()
+        return super(_CTTShotOutputVersion, self).find_outputs(
+            verbose=verbose)
 
 
 class _CTTWorkAreaBase(object):
@@ -413,7 +413,7 @@ class _CTTWorkFileBase(Cacheable):
             if isinstance(_output, Seq)]
 
     @store_result_on_obj
-    def get_metadata(self, data=None, force=False, verbose=1):
+    def get_metadata(self, data=None, force=False, verbose=0):
         """Get metadata for this workfile.
 
         Args:

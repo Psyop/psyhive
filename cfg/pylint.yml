@@ -5,12 +5,11 @@ ignore:
         hv_test/diary/y19/d0528/bro_tools_tests.py
         hv_test/diary/y19/d0717/make_littlezoo_zip.py
     anomalous-unicode-escape-in-string:
-        hv_test/diary/y19/d0517/pinterest_rip.py
-        hv_test/diary/y19/d0724/pinterest_rip_2.py
+        pinterest_rip
     arguments-differ:
         hv_test/diary/entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
-        hv_test/diary/y19/d0726/_machi/deck.py
+        _machi/deck.py
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
@@ -122,7 +121,7 @@ ignore:
         psyhive/utils/py_file/base.py
         psyhive/utils/py_file/docs.py
     too-many-lines:
-        hv_test/diary/y19/d0726/_machi/tests.py
+        /tests
     too-many-locals: '*'
     too-many-statements:
         hv_test/diary/
@@ -141,7 +140,7 @@ ignore:
     unreachable:
         hv_test/diary/
     unsubscriptable-object:
-        hv_test/diary/y19/d0726/_machi/game.py
+        _machi/game.py
         maya_psyhive/tools/yeti/cache.py
     unused-argument:
         hv_test/diary/

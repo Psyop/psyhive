@@ -340,9 +340,9 @@ class HPixmap(QtGui.QPixmap):
 
         Args:
             factor (float): how much to darken
-            
+
         Returns:
-        	(HPixmap): this pixmap
+            (HPixmap): this pixmap
         """
         from psyhive import qt
         _tmp = HPixmap(self.size())
@@ -378,7 +378,7 @@ class HPixmap(QtGui.QPixmap):
         """
         _tfm = QtGui.QTransform()
         _tfm.rotate(degrees)
-        return self.transformed(_tfm)
+        return HPixmap(self.transformed(_tfm))
 
     def resize(self, width, height=None):
         """Return a resized version of this pixmap.
@@ -450,14 +450,12 @@ class HPixmap(QtGui.QPixmap):
         Args:
             factor (float): how much to whiten
 
-            
         Returns:
-        	(HPixmap): this pixmap
+            (HPixmap): this pixmap
         """
         from psyhive import qt
         _tmp = HPixmap(self.size())
         _fill = qt.HColor(255, 255, 255, 255*factor)
-        print 'FILL', _fill
         _tmp.fill(_fill)
         self.add_overlay(_tmp, operation='over')
         return self

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>236</width>
-    <height>285</height>
+    <height>374</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -244,14 +244,60 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="cache_read">
+        <widget class="HPushButton" name="cache_read_asset">
          <property name="text">
           <string>Apply cache to select asset</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cache_read_help">
+        <widget class="HPushButton" name="cache_read_asset_help">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="HPushButton" name="cache_read_root">
+         <property name="text">
+          <string>Apply cache to root namespace</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="HPushButton" name="cache_read_root_help">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -293,6 +339,11 @@
    <class>HComboBox</class>
    <extends>QComboBox</extends>
    <header>hcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HPushButton</class>
+   <extends>QPushButton</extends>
+   <header>hpushbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

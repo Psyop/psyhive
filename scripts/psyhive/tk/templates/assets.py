@@ -12,6 +12,7 @@ from psyhive.tk.templates.base import (
 class _TTAssetCpntBase(object):
     """Base class for any asset component tank template."""
 
+    path = None
     work_area_maya_hint = 'asset_work_area_maya'
 
     @property
@@ -48,6 +49,11 @@ class _TTAssetCpntBase(object):
     def output_file_seq_type(self):
         """Get output file seq type."""
         return TTAssetOutputFileSeq
+
+    @property
+    def root(self):
+        """Get asset root."""
+        return TTAssetRoot(self.path)
 
     @property
     def step_root_type(self):

@@ -19,7 +19,7 @@ from psyhive.qt.constants import COLS, NICE_COLS
 
 from psyhive.qt.interface import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
-    reset_interface_settings, get_ui_loader)
+    reset_interface_settings, get_ui_loader, safe_timer_event)
 
 from psyhive.qt.dialog import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,

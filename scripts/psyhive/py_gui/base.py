@@ -271,7 +271,15 @@ class BasePyGui(object):
             for _name, _settings in _attr_settings.items():
                 lprint(' - NAME', _name, verbose=verbose)
                 for _arg_name, _val in _settings.items():
-                    _set_fn = self.set_settings_fns[_attr][_name][_arg_name]
+
+                    # Find set fn
+                    _set_fns = self.set_settings_fns
+                    try:
+                        _set_fn = _set_fns[_attr][_name][_arg_name]
+                    except KeyError:
+                        _set_fn = None
+
+                    # Apply value
                     _applied = False
                     if _set_fn:
                         lprint(

@@ -53,6 +53,11 @@ class _TTShotCpntBase(object):
         return TTShotOutputFile
 
     @property
+    def root(self):
+        """This object's shot."""
+        return self.shot
+
+    @property
     def shot(self):
         """This object's shot."""
         return TTShotRoot(self.path)

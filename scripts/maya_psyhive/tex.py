@@ -33,9 +33,12 @@ class _BaseShader(object):
         Args:
             path (str): texture file to apply
         """
-        assert not cmds.listConnections(self.col_attr, destination=False)
-        _file = hom.CMDS.shadingNode('file', asShader=True)
-        cmds.connectAttr(_file+'.outColor', self.col_attr)
+        _file = get_single(cmds.listConnections(
+            self.col_attr, destination=False, type='file'), catch=True)
+        if not _file:
+            assert not cmds.listConnections(self.col_attr, destination=False)
+            _file = hom.CMDS.shadingNode('file', asShader=True)
+            cmds.connectAttr(_file+'.outColor', self.col_attr)
         cmds.setAttr(_file+'.fileTextureName', path, type='string')
         cmds.setAttr(_file+'.colorSpace', 'linear', type='string')
         return _file
@@ -121,6 +124,8 @@ class _BaseShader(object):
             self.col_attr, *_col.to_tuple(mode='float'), type='double3')
 
     def __cmp__(self, other):
+        if not hasattr(other, 'shd'):
+            return cmp(self.shd, other)
         return cmp(self.shd, other.shd)
 
     def __hash__(self):

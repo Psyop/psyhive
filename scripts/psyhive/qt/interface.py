@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 import time
+import traceback
 import types
 
 import six
@@ -43,6 +44,8 @@ class HUiDialog(QtWidgets.QDialog):
             save_settings (bool): read/write settings on open/close
             verbose (int): print process data
         """
+        from psyhive import host
+
         if not os.path.exists(ui_file):
             raise OSError('Missing ui file '+ui_file)
 
@@ -69,7 +72,10 @@ class HUiDialog(QtWidgets.QDialog):
             self.setWindowTitle(self.ui.windowTitle())
         else:
             self.ui.rejected.connect(self.closeEvent)
-            if dev_mode() and isinstance(self.ui, QtWidgets.QDialog):
+            if (
+                    dev_mode() and
+                    isinstance(self.ui, QtWidgets.QDialog) and
+                    host.NAME == 'maya'):
                 dprint("WARNING: QDialog is unstable in maya")
 
         # Setup widgets
@@ -546,3 +552,35 @@ def reset_interface_settings():
     for _ini in find(_SETTINGS_DIR, depth=1, type_='f', extn='ini'):
         print ' - REMOVING', _ini
         os.remove(_ini)
+
+
+def safe_timer_event(timer_event):
+    """Decorator to execute timer event but kill timer if it errors.
+
+    Args:
+        timer_event (fn): timerEvent method
+
+    Returns:
+        (fn): safe method
+    """
+
+    def _safe_exec_timer(dialog, event):
+
+        # Try and exec timer event
+        _destroy = False
+        try:
+            _result = timer_event(dialog, event)
+        except Exception as _exc:
+            _tb = traceback.format_exc().strip()
+            print 'TIMER EVENT FAILED\n# '+'\n# '.join(_tb.split('\n'))
+            _destroy = True
+            _result = 1
+
+        # Destroy if event has failed or interface no longer visbible
+        if _destroy or not dialog.isVisible():
+            dialog.killTimer(dialog.timer)
+            dialog.deleteLater()
+
+        return _result
+
+    return _safe_exec_timer

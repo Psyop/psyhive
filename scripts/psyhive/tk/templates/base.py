@@ -9,7 +9,7 @@ import shutil
 import sgtk
 import tank
 
-from psyhive import pipe, host
+from psyhive import pipe, host, qt
 from psyhive.utils import (
     get_single, Dir, File, abs_path, find, Path, dprint,
     lprint, read_yaml, write_yaml, diff, Seq)
@@ -536,6 +536,7 @@ class TTWorkFileBase(TTBase, File):
             self.write_text(body)
 
         # Save metadata
+        qt.get_application().processEvents()
         self.set_comment(comment)
         self.add_to_recent()
 
@@ -563,6 +564,9 @@ class TTWorkFileBase(TTBase, File):
             catch (bool): no error if update output file paths fails
         """
         from psyhive import tk
+        if os.environ.get('PSYHIVE_DISABLE_UPDATE_OUTPUT_PATHS'):
+            print 'UPDATE OUTPUT PATHS DISABLED'
+            return
 
         # Make sure outputpaths app is loaded
         _engine = tank.platform.current_engine()
@@ -655,67 +659,18 @@ class TTOutputVersionBase(TTDirBase):
         """
         lprint('SEARCHING FOR OUTPUTS', verbose=verbose)
 
-        _files = self.find(type_='f', depth=3)
-        lprint(' - FOUND {:d} FILES'.format(len(_files)), verbose=verbose)
-
-        # Map files to outputs
         _outputs = []
-        _seqs = {}
-        for _file in _files:
-
-            # Ignore files already matched in seq
-            _already_matched = False
-            for _seq in _seqs:
-                if _seq.contains(_file):
-                    _already_matched = True
-                    _frame = _seq.get_frame(_file)
-                    _seqs[_seq].add(_frame)
-                    break
-            if _already_matched:
-                continue
-
-            _output = None
-            lprint(' - TESTING', _file, verbose=verbose > 1)
-
-            # Match seq
-            try:
-                _output = self.output_file_seq_type(_file)
-            except ValueError:
-                lprint('   - NOT OUTPUT FILE SEQ', _file,
-                       verbose=verbose > 1)
-            else:
-                _frame = _output.get_frame(_file)
-                _seqs[_output] = set([_frame])
-
-            # Match file
-            if not _output:
-                try:
-                    _output = self.output_file_type(_file)
-                except ValueError:
-                    lprint('   - NOT OUTPUT FILE', _file,
-                           verbose=verbose > 1)
-
-            # Apply filters
-            if not _output:
-                continue
-            elif output_name and not _output.output_name == output_name:
+        for _output in self._read_outputs():
+            if output_name and not _output.output_name == output_name:
                 continue
             elif output_type and not _output.output_type == output_type:
                 continue
             elif format_ and not _output.format == format_:
                 continue
-
+            if not thumbs and _output.data.get('channel') == '.thumbs':
+                continue
             lprint(' - ADDED OUTPUT', _output, verbose=verbose)
             _outputs.append(_output)
-
-        # Apply frames cache
-        for _seq, _frames in _seqs.items():
-            _seq.set_frames(sorted(_frames))
-
-        if not thumbs:
-            for _output in copy.copy(_outputs):
-                if _output.data.get('channel') == '.thumbs':
-                    _outputs.remove(_output)
 
         return _outputs
 
@@ -762,6 +717,69 @@ class TTOutputVersionBase(TTDirBase):
             (str): version name
         """
         return self.filename
+
+    def _read_outputs(self, verbose=0):
+        """Find outputs in this version.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputBase list): outputs
+        """
+        lprint('SEARCHING FOR OUTPUTS', verbose=verbose)
+
+        _files = self.find(type_='f', depth=3)
+        lprint(' - FOUND {:d} FILES'.format(len(_files)), verbose=verbose)
+
+        # Map files to outputs
+        _outputs = []
+        _seqs = {}
+        for _file in _files:
+
+            # Ignore files already matched in seq
+            _already_matched = False
+            for _seq in _seqs:
+                if _seq.contains(_file):
+                    _already_matched = True
+                    _frame = _seq.get_frame(_file)
+                    _seqs[_seq].add(_frame)
+                    break
+            if _already_matched:
+                continue
+
+            _output = None
+            lprint(' - TESTING', _file, verbose=verbose > 1)
+
+            # Match seq
+            try:
+                _output = self.output_file_seq_type(_file)
+            except ValueError:
+                lprint('   - NOT OUTPUT FILE SEQ', _file,
+                       verbose=verbose > 1)
+            else:
+                _frame = _output.get_frame(_file)
+                _seqs[_output] = set([_frame])
+
+            # Match file
+            if not _output:
+                try:
+                    _output = self.output_file_type(_file)
+                except ValueError:
+                    lprint('   - NOT OUTPUT FILE', _file,
+                           verbose=verbose > 1)
+
+            if not _output:
+                continue
+
+            lprint(' - ADDED OUTPUT', _output, verbose=verbose)
+            _outputs.append(_output)
+
+        # Apply frames cache
+        for _seq, _frames in _seqs.items():
+            _seq.set_frames(sorted(_frames))
+
+        return _outputs
 
     @property
     def vers_dir(self):
