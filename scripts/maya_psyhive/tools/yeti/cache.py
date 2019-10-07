@@ -9,7 +9,8 @@ from psyhive.utils import abs_path, get_single, PyFile
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_parent, set_namespace, restore_sel
+from maya_psyhive.utils import (
+    get_parent, set_namespace, restore_sel, load_plugin)
 
 ICON = icons.EMOJI.find('Ghost')
 
@@ -70,6 +71,7 @@ def _apply_caches_in_root_namespace(caches):
         print 'NODE NAME', _node_name
 
         # Get yeti node
+        load_plugin('pgYetiMaya')
         if cmds.objExists(_node_name):
             _yeti = hom.HFnDependencyNode(_node_name)
         else:
@@ -172,6 +174,10 @@ class _YetiCacheToolsUi(qt.HUiDialog):
             self.ui.version.redraw)
         self.ui.version.currentIndexChanged.connect(
             self.ui.cache_read_asset.redraw)
+        self.ui.version.currentIndexChanged.connect(
+            self.ui.cache_read_root.redraw)
+        self.ui.version.currentIndexChanged.connect(
+            self.ui.version_label.redraw)
 
     def _redraw__step(self, widget):
 
@@ -229,10 +235,28 @@ class _YetiCacheToolsUi(qt.HUiDialog):
         widget.setEnabled(bool(_vers))
 
         self.ui.cache_read_asset.redraw()
+        self.ui.cache_read_root.redraw()
+        self.ui.version_label.redraw()
 
-    def _redraw__cache_read(self, widget):
+    def _redraw__version_label(self, widget):
+        _ver = self.ui.version.selected_data()
+        if not _ver:
+            _text = 'No versions found'
+        else:
+            _c_ver = tk.obtain_cacheable(_ver)
+            _outs = _c_ver.find_outputs(output_type='yeti', format_='fur')
+            if _outs:
+                _text = 'Found frames {:d}-{:d}'.format(
+                    *_outs[0].find_range())
+            else:
+                _text = 'No caches found'
+        widget.setText(_text)
+
+    def _redraw__cache_read_asset(self, widget):
         _ver = self.ui.version.selected_data()
         widget.setEnabled(bool(_ver))
+
+    _redraw__cache_read_root = _redraw__cache_read_asset
 
     def _callback__cache_write_asset(self):
         _write_cache_from_selected_asset()

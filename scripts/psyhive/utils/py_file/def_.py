@@ -16,6 +16,16 @@ from psyhive.utils.py_file.docs import PyDefDocs, MissingDocs
 class PyDef(PyBase):
     """Represents a python definition."""
 
+    def execute(self, *args, **kwargs):
+        """Execute this def with the given args/kwargs.
+
+        Returns:
+            (any): function result
+        """
+        _mod = self.py_file.get_module()
+        _def = getattr(_mod, self.name)
+        return _def(*args, **kwargs)
+
     def find_arg(self, filter_=None):
         """Find an arg belonging to this def.
 

@@ -1,3 +1,38 @@
+#### v0.38.0 ####
+
+    Released: Mon 7th Oct 2019
+
+    shot builder tool: fix error on build shot from different sequence (iirvin)
+    
+    maya_psyhive:
+        open_maya.HPlug.create_enum added keyable arg,
+        tools.m_shot_builder bugfix not casting new shot across sequence,
+        tools.yeti load plugin on apply caches,
+        tools.yeti interface shows frame range,
+    psyhive:
+        py_gui.set_section default is not collapsed,
+        qt.ORIGIN added,
+        qt.set_maya_palette bugfix apply in PySide2 (hou),
+        qt.get_p added handling for two args,
+        qt.HPixmap add_rounded_rect/center added,
+        tk.cache added handling for asset output version,
+        tk.TTRootBase.find_step_root added,
+        tk.TTStepRootBase find_output_name/_read_output_names added,
+        tk.TTWorkFileBase.set_comment bugfix error on new version,
+        tk.TTOutputNameBase added,
+        tk.get_work catch unhandled work file type,
+        tools.err_catcher enabled make ticket button,
+        tools.hive_bro work file icon based on task,
+        utils.Dir.test_path added,
+        utils.File.diff added label arg,
+        utils.File.read_lines added,
+        utils.PyFile fix error on global as arg default,
+        utils.PyDef.execute added,
+        utils.PyFile.get_module added reload arg,
+        utils.fr_enumerate added handling for enumerate objs,
+        utils.Seq.add_frame added,
+
+
 #### v0.37.0 ####
 
     Released: Mon 23rd Sep 2019

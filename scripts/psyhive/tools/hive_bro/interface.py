@@ -524,8 +524,9 @@ def _get_recent_work():
     _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
     _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
     return [
-        tk.obtain_work(_file['file_path'])
-        for _file in _settings.value(_setting_name, [])]
+        tk.obtain_work(_file['file_path'], catch=True)
+        for _file in _settings.value(_setting_name, [])
+        if tk.obtain_work(_file['file_path'], catch=True)]
 
 
 def _get_work_col(work):
@@ -563,7 +564,7 @@ def _get_work_icon(
     Returns:
         (str|QPixmap): work file icon
     """
-    _uid = work.ver_fmt[:-len(work.extn)]
+    _uid = work.task
     lprint('UID', _uid, verbose=verbose)
     _random = str_to_seed(_uid)
     _icon = _random.choice(icons.FRUIT.get_paths())

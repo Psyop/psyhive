@@ -13,6 +13,7 @@ ignore:
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
+        hv_test/dev.py
         hv_test/diary/
         maya_psyhive/utils.py
         psyhive/qt/interface.py
@@ -112,6 +113,7 @@ ignore:
         psyhive/utils/range_.py
     too-many-instance-attributes:
         hv_test/diary/
+        hv_test/toolkits/_tank_app.py
         hv_test/toolkits/tank_tools.py
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/pipe/asset.py
@@ -122,6 +124,7 @@ ignore:
         psyhive/utils/py_file/docs.py
     too-many-lines:
         /tests
+        hv_test/diary/y19/d0911/machi5.py
     too-many-locals: '*'
     too-many-statements:
         hv_test/diary/
@@ -185,7 +188,16 @@ no_member_libs:
     OpenEXR
     psyop.env
     pymel.core
+
+    PySide.QtCore
+    PySide.QtGui
+    PySide.QtWidgets
+    PySide.QtUiTools
+
     PySide2.QtCore
+    PySide2.QtGui
     PySide2.QtWidgets
+    PySide2.QtUiTools
+
     sgtk
     shiboken2

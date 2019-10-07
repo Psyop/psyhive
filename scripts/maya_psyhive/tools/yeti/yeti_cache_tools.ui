@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>236</width>
+    <width>248</width>
     <height>374</height>
    </rect>
   </property>
@@ -237,6 +237,16 @@
         <widget class="HComboBox" name="version"/>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="version_label">
+       <property name="text">
+        <string>No cache found</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_6">

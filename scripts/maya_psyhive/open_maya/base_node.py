@@ -64,13 +64,14 @@ class BaseNode(object):
         """
         return HPlug(create_attr(self.node+'.'+name, *args, **kwargs))
 
-    def create_enum(self, name, options, default=None):
+    def create_enum(self, name, options, default=None, keyable=True):
         """Create enum attibute.
 
         Args:
             name (str): attr name
             options (str list): enum options
             default (str): enum default value
+            keyable (bool): create enum as keyable
 
         Returns:
             (HPlug): enum attribute
@@ -78,7 +79,7 @@ class BaseNode(object):
         if self.has_attr(name):
             self.plug(name).delete()
         cmds.addAttr(self, shortName=name, attributeType='enum',
-                     enumName=':'.join(options))
+                     enumName=':'.join(options), keyable=keyable)
         _plug = self.plug(name)
         if default:
             _plug.set_val(options.index(default))

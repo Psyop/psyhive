@@ -9,7 +9,7 @@ from psyhive.tk.templates.misc import get_template
 from psyhive.tk.templates.base import (
     TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
     TTRootBase, TTStepRootBase, TTOutputFileSeqBase, TTWorkIncrementBase,
-    TTOutputFileBase)
+    TTOutputFileBase, TTOutputNameBase)
 
 
 class _TTShotCpntBase(object):
@@ -227,7 +227,7 @@ class TTShotOutputType(_TTShotCpntBase, TTDirBase):
     hint = 'shot_output_type'
 
 
-class TTShotOutputName(_TTShotCpntBase, TTDirBase):
+class TTShotOutputName(_TTShotCpntBase, TTOutputNameBase):
     """Represents a shot output name tank template path.
 
     This is the tank template for the versions dir.

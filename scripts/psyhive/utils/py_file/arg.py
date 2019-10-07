@@ -41,6 +41,9 @@ def _read_ast_default(default):
         _default = {}
         for _key, _val in safe_zip(default.keys, default.values):
             _default[_read_ast_default(_key)] = _read_ast_default(_val)
+    elif isinstance(default, ast.Attribute):
+        # Not implemented
+        _default = None
     else:
         raise RuntimeError(default)
 

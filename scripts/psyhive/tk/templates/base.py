@@ -111,6 +111,18 @@ class TTRootBase(TTDirBase):
 
     step_root_type = None
 
+    def find_step_root(self, step):
+        """Find step root matching the given name.
+
+        Args:
+            step (str): step to search for
+
+        Returns:
+            (TTStepRootBase): matching step root
+        """
+        return get_single([_root for _root in self.find_step_roots()
+                           if _root.step == step])
+
     def find_step_roots(self, class_=None, filter_=None):
         """Find steps in this shot.
 
@@ -154,18 +166,38 @@ class TTStepRootBase(TTDirBase):
         super(TTStepRootBase, self).__init__(path)
         self.name = self.step
 
-    def find_output_names(self, verbose=1):
+    def find_output_name(self, output_name=None, task=None):
+        """Find output name within this step root.
+
+        Args:
+            output_name (str): filter by output name
+            task (str): filter by task
+
+        Returns:
+            (TTOutputNameBase): matching output name
+        """
+        _names = self.find_output_names(
+            output_name=output_name, task=task, verbose=0)
+        return get_single(_names, verbose=1)
+
+    def find_output_names(self, output_name=None, task=None, verbose=1):
         """Find output names within this step root.
 
         Args:
+            output_name (str): filter by output name
+            task (str): filter by task
             verbose (int): print process data
 
         Returns:
             (TTOutputNameBase list): output names list
         """
-        lprint('SEARCHING FOR OUTPUT NAMES', self, verbose=verbose)
-        _root = self.map_to(self.output_root_type)
-        return _root.find(depth=2, type_='d', class_=self.output_name_type)
+        _names = self._read_output_names(verbose=verbose)
+        if output_name:
+            _names = [_name for _name in _names
+                      if _name.output_name == output_name]
+        if task:
+            _names = [_name for _name in _names if _name.task == task]
+        return _names
 
     def find_renders(self):
         """Find renders in this step root.
@@ -208,6 +240,19 @@ class TTStepRootBase(TTDirBase):
             _tmpl = get_template(self.work_area_maya_hint)
             return self.work_area_maya_type(_tmpl.apply_fields(self.data))
         raise ValueError(dcc)
+
+    def _read_output_names(self, verbose=1):
+        """Find output names within this step root.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputNameBase list): output names list
+        """
+        lprint('SEARCHING FOR OUTPUT NAMES', self, verbose=verbose)
+        _root = self.map_to(self.output_root_type)
+        return _root.find(depth=2, type_='d', class_=self.output_name_type)
 
 
 class TTWorkAreaBase(TTDirBase):
@@ -551,9 +596,8 @@ class TTWorkFileBase(TTBase, File):
 
         _tk_workspace = _mod.get_workspace_from_path(
             app=_fileops, path=self.path)
-        _tk_workfile = _mod.WorkfileModel(
-            workspace=_tk_workspace, template=self.tmpl,
-            path=self.path)
+        _tk_workfile = _tk_workspace.get_workfile(
+            name=self.task, version=self.version)
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
 
@@ -615,12 +659,50 @@ class TTWorkIncrementBase(TTBase, File):
             _work_file, open=True, force=True, change_context=True)
 
 
+class TTOutputNameBase(TTDirBase):
+    """Base class for any tank template output name."""
+
+    output_version_type = None
+
+    def find_latest(self, catch=False):
+        """Find latest version of this output.
+
+        Args:
+            catch (bool): no error if no versions found
+
+        Returns:
+            (TTOutputVersionBase): latest version
+        """
+        _vers = self.find_vers(catch=catch)
+        if not _vers:
+            return None
+        return _vers[-1]
+
+    def find_vers(self, catch=False):
+        """Find versions in this output.
+
+        Args:
+            catch (bool): no error if no versions found
+
+        Returns:
+            (TTOutputVersionBase list): versions
+        """
+        _vers = find(self.path, depth=1, type_='d',
+                     class_=self.output_version_type)
+        if not _vers:
+            if catch:
+                return None
+            raise OSError("No versions found")
+        return _vers
+
+
 class TTOutputVersionBase(TTDirBase):
     """Base class for any tank template version dir."""
 
     maya_work_type = None
     output_file_seq_type = None
     output_file_type = None
+    output_name_type = None
     task = None
     version = None
 
@@ -633,15 +715,8 @@ class TTOutputVersionBase(TTDirBase):
         Returns:
             (TTOutputVersionBase): latest version
         """
-        _vers = find(self.vers_dir, depth=1, type_='d', full_path=False)
-        _data = copy.copy(self.data)
-        if not _vers:
-            if catch:
-                return None
-            raise OSError("No versions found")
-        _data['version'] = int(_vers[-1][1:])
-        _path = self.tmpl.apply_fields(_data)
-        return self.__class__(_path)
+        _name = self.map_to(self.output_name_type)
+        return _name.find_latest(catch=catch)
 
     def find_outputs(self, output_type=None, output_name=None, format_=None,
                      thumbs=False, verbose=0):

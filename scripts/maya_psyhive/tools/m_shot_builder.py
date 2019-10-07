@@ -28,7 +28,8 @@ def build_shot_from_template(shot, template, force=False):
     host.set_range(*_rng)
 
     # Save scene
-    _shot_work = _tmpl_work.map_to(Shot=_shot.name).find_next()
+    _shot_work = _tmpl_work.map_to(
+        Shot=_shot.name, Sequence=_shot.sequence).find_next()
     print 'SHOT WORK', _shot_work
     if not force:
         qt.ok_cancel("Save new work file?\n\n"+_shot_work.path)

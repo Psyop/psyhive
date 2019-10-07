@@ -97,7 +97,17 @@ def get_work(file_, class_=None, catch=True, verbose=0):
     """
     _file = File(file_)
     _inc = not _file.basename.split("_")[-1].startswith('v')
-    _class = class_ or _get_work_type(file_=_file, inc=_inc, catch=catch)
+
+    # Get work file class
+    if class_:
+        _class = class_
+    else:
+        try:
+            _class = _get_work_type(file_=_file, inc=_inc, catch=catch)
+        except ValueError as _exc:
+            if catch:
+                return None
+            raise _exc
     lprint("CLASS", _class, verbose=verbose)
     if not _class:
         return None
@@ -105,6 +115,7 @@ def get_work(file_, class_=None, catch=True, verbose=0):
     if _inc:
         return _class(file_).get_work()
 
+    # Process file as work file
     try:
         return _class(file_)
     except ValueError as _exc:

@@ -6,7 +6,7 @@ from psyhive.utils import find
 from psyhive.tk.templates.base import (
     TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
     TTRootBase, TTStepRootBase, TTDirBase, TTOutputFileSeqBase,
-    TTWorkIncrementBase, TTOutputFileBase)
+    TTWorkIncrementBase, TTOutputFileBase, TTOutputNameBase)
 
 
 class _TTAssetCpntBase(object):
@@ -105,7 +105,7 @@ class TTAssetOutputRoot(_TTAssetCpntBase, TTDirBase):
     hint = 'asset_output_root'
 
 
-class TTAssetOutputName(_TTAssetCpntBase, TTDirBase):
+class TTAssetOutputName(_TTAssetCpntBase, TTOutputNameBase):
     """Represents a tank asset output name."""
 
     hint = 'asset_output_name'

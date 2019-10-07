@@ -90,11 +90,12 @@ class PyFile(File, PyBase):
             print 'INDENTATION ERROR', self.path
             raise _exc
 
-    def get_module(self, catch=False, verbose=0):
+    def get_module(self, catch=False, reload_=False, verbose=0):
         """Get the python module associated with this py file.
 
         Args:
             catch (bool): no error if module fails to import
+            reload_ (bool): reload module
             verbose (int): print process data
 
         Returns:
@@ -128,7 +129,11 @@ class PyFile(File, PyBase):
                     return None
                 raise _exc
 
-        return sys.modules[_mod_name]
+        _mod = sys.modules[_mod_name]
+        if reload_:
+            reload(_mod)
+
+        return _mod
 
 
 def text_to_py_file(text):

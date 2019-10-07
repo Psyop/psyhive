@@ -65,22 +65,25 @@ def get_icon(icon):
     raise ValueError(icon)
 
 
-def get_p(pos):
+def get_p(*args):
     """Get a point object from the given data.
 
-    Args:
-        pos (tuple|list|QPoint): point data
+    A QPoint, QSize, tuple, list or pair of values can be provided.
 
     Returns:
         (QPoint): point object
     """
-    if isinstance(pos, (tuple, list)) and len(pos) == 2:
-        return QtCore.QPoint(*pos)
-    elif isinstance(pos, (QtCore.QPoint, QtCore.QPointF)):
-        return pos
-    elif isinstance(pos, QtCore.QSize):
-        return QtCore.QPoint(pos.width(), pos.height())
-    raise ValueError(pos)
+    if len(args) == 1:
+        _arg = args[0]
+        if isinstance(_arg, (tuple, list)) and len(_arg) == 2:
+            return QtCore.QPoint(*_arg)
+        elif isinstance(_arg, (QtCore.QPoint, QtCore.QPointF)):
+            return _arg
+        elif isinstance(_arg, QtCore.QSize):
+            return QtCore.QPoint(_arg.width(), _arg.height())
+    elif len(args) == 2:
+        return QtCore.QPoint(args[0], args[1])
+    raise ValueError(args)
 
 
 def get_size(size):

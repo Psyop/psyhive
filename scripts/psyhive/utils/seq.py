@@ -27,6 +27,16 @@ class Seq(object):
         if frames:
             self.set_frames(frames)
 
+    def add_frame(self, frame):
+        """Add frame the given frame to the cached frames list.
+
+        Args:
+            frame (int): frame to add
+        """
+        _frames = set(self.get_frames())
+        _frames.add(frame)
+        self.set_frames(sorted(_frames))
+
     def contains(self, file_):
         """Test if the given file is contained in this seq.
 

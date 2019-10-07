@@ -15,3 +15,4 @@ except ImportError:
 
 X_AXIS = QtCore.QPoint(1, 0)
 Y_AXIS = QtCore.QPoint(0, 1)
+ORIGIN = QtCore.QPoint(0, 0)

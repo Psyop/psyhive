@@ -267,6 +267,43 @@ class HPixmap(QtGui.QPixmap):
 
         return _rect
 
+    def add_rounded_rect(self, pos, size, col, bevel=5, anchor='TL'):
+        """Draw a rounded rectangle on this pixmap.
+
+        Args:
+            pos (QPoint): position
+            size (QSize): rectangle size
+            col (str): rectangle fill colour
+            bevel (int): edge bevel
+            anchor (str): position anchor point
+
+        Returns:
+            (QPixmap): updated pixmap
+        """
+        from psyhive import qt
+
+        _pos = qt.get_p(pos)
+        _size = qt.get_size(size)
+        _col = qt.get_col(col)
+        _brush = QtGui.QBrush(qt.get_col(_col))
+
+        if anchor == 'TL':
+            pass
+        elif anchor == 'C':
+            _pos = _pos - qt.get_p(_size)/2
+        else:
+            raise ValueError(anchor)
+        _rect = QtCore.QRect(_pos, _size)
+
+        _pnt = qt.HPainter()
+        _pnt.begin(self)
+        _pnt.setBrush(_brush)
+        _pnt.drawRoundedRect(
+            _pos.x(), _pos.y(), _size.width(), _size.height(), bevel, bevel)
+        _pnt.end()
+
+        return _rect
+
     def add_square(self, pos, size, col='black', thickness=None):
         """Draw a square.
 
@@ -323,6 +360,14 @@ class HPixmap(QtGui.QPixmap):
         _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.add_text(**_kwargs)
         _pnt.end()
+
+    def center(self):
+        """Get centrepoint of this pixmap.
+
+        Returns:
+            (QPoint): centre
+        """
+        return self.rect().center()
 
     def contains(self, pos):
         """Check if the point falls inside this pixmap.

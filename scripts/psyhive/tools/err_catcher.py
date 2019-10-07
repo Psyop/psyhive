@@ -4,8 +4,10 @@ import functools
 import os
 import sys
 import traceback
+import urllib
+import webbrowser
 
-from psyhive import qt, icons
+from psyhive import qt, icons, host, pipe
 from psyhive.utils import (
     abs_path, check_heart, File, FileError, lprint, dprint, dev_mode,
     copy_text)
@@ -52,9 +54,6 @@ class _ErrDialog(qt.HUiDialog):
             ui_file=_UI_FILE, catch_error_=False)
         self.setWindowTitle('Error')
 
-    def _redraw__er_make_ticket(self, widget):
-        widget.setEnabled(False)
-
     def _redraw__er_message(self, widget):
         _text = 'There has been an error ({})'.format(self.type_)
         if not self.message:
@@ -73,6 +72,21 @@ class _ErrDialog(qt.HUiDialog):
 
     def _callback__er_copy_text(self):
         copy_text('```\n{}\n```'.format(self.traceback.clean_text))
+
+    def _callback__er_make_ticket(self):
+
+        _desc = '\n'.join([
+            'HOST: {}'.format(host.NAME),
+            'PROJECT: {}'.format(pipe.cur_project().name),
+            'SCENE: {}'.format(host.cur_scene()),
+            '',
+            'TRACEBACK:',
+            '```',
+            self.traceback.clean_text,
+            '```'])
+        _make_ticket(
+            summary='[PSYHIVE] Error: {}'.format(self.message),
+            description=_desc)
 
     def _callback__er_view_code(self):
         _line = self.ui.er_traceback.currentItem().data(qt.QtCore.Qt.UserRole)
@@ -131,6 +145,10 @@ class Traceback(object):
             raise RuntimeError("Failed to parse traceback")
 
         self.clean_text = '# '+self.body.replace('\n', '\n# ')
+        for _token in self.clean_text.split('"'):
+            if os.path.exists(_token):
+                _path = abs_path(_token)
+                self.clean_text = self.clean_text.replace(_token, _path)
 
     def pprint(self):
         """Print this traceback in maya format."""
@@ -240,6 +258,23 @@ def get_error_catcher(exit_on_error=True, verbose=1):
         return _catch_error_fn
 
     return _error_catcher
+
+
+def _make_ticket(summary, description):
+    """Open a browser at the create YouTrack ticket page.
+
+    The fields should be filled out with summary/description/assignee.
+
+    Args:
+        summary (str): ticket summary/title
+        description (str): ticket description
+    """
+    _url = ('https://ticket.ny.psyop.tv/newIssue?'
+            'summary={}&description={}'
+            '&c=Type%20Performance%20Problem'
+            '&c=Assignee%20hvanderbeek')
+    webbrowser.open(_url.format(
+        urllib.quote_plus(summary), urllib.quote_plus(description)))
 
 
 def _pass_exception_to_sentry(exc):

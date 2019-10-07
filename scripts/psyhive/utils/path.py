@@ -183,6 +183,10 @@ class Dir(Path):
         os.chdir(self.path)
         system('explorer .', verbose=1)
 
+    def test_path(self):
+        """Test this dir exists, creating if needed."""
+        test_path(self.path)
+
 
 class File(Path):
     """Represents a file on disk."""
@@ -210,13 +214,14 @@ class File(Path):
             qt.ok_cancel("Delete file?\n\n"+self.path)
         os.remove(self.path)
 
-    def diff(self, other):
+    def diff(self, other, label=None):
         """Show diffs between this and another text file.
 
         Args:
             other (str): path to other file
+            label (str): pass label to diff app
         """
-        diff(self.path, other)
+        diff(self.path, other, label=label)
 
     def edit(self, line_n=None, verbose=0):
         """Edit this file in a text editor.
@@ -245,6 +250,14 @@ class File(Path):
     def read(self):
         """Read the text contents of this file."""
         return read_file(self.path)
+
+    def read_lines(self):
+        """Read text lines of this file.
+
+        Returns:
+            (str list): list of lines
+        """
+        return self.read().split('\n')
 
     def set_writable(self, writable=True):
         """Set writable state of this path.

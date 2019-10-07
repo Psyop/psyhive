@@ -1,6 +1,6 @@
 """Tools for mimicing maya's palette outside maya."""
 
-from psyhive.qt.wrapper.mgr import QtGui
+from psyhive.qt.wrapper.mgr import QtGui, QtWidgets
 
 HIGHLIGHT_COLOR = QtGui.QColor(103, 141, 178)
 BRIGHTNESS_SPREAD = 2.5
@@ -92,7 +92,7 @@ def set_maya_palette():
     _widget_palettes["QTabBar"] = _tab_palette
     _widget_palettes["QTabWidget"] = _tab_palette
 
-    QtGui.QApplication.setStyle("Plastique")
-    QtGui.QApplication.setPalette(_base_palette)
+    QtWidgets.QApplication.setStyle("Plastique")
+    QtWidgets.QApplication.setPalette(_base_palette)
     for _name, _palette in _widget_palettes.items():
-        QtGui.QApplication.setPalette(_palette, _name)
+        QtWidgets.QApplication.setPalette(_palette, _name)

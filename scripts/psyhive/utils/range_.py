@@ -201,7 +201,10 @@ def fr_enumerate(list_):
     Returns:
         (list): fractionally enumerated values
     """
-    return zip(fr_range(len(list_)), list_)
+    _list = list_
+    if isinstance(_list, enumerate):
+        _list = list(_list)
+    return zip(fr_range(len(_list)), _list)
 
 
 def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):

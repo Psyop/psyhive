@@ -10,7 +10,7 @@ from psyhive.qt.wrapper import (
     HListWidget, HComboBox, HTreeWidget, HTabWidget, HTextBrowser,
 
     # QtCore/QtGui overrides
-    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS)
+    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN)
 
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (

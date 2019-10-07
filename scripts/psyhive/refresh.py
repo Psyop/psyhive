@@ -223,7 +223,8 @@ def reload_libs(
                 _sort(_mod_name), _name, _dur, abs_path(_file)),
             verbose=verbose > 1)
 
-        if check_root and not abs_path(_file).startswith(check_root):
+        if check_root and not abs_path(_file).startswith(
+                abs_path(check_root)):
             _fails += 1
 
     # Print summary
@@ -251,7 +252,8 @@ def remove_sys_path(path):
             sys.path.remove(_sys_path)
 
 
-def update_libs(check_root, mod_names=None, sort=None, close_interfaces=True):
+def update_libs(check_root, mod_names=None, sort=None, close_interfaces=True,
+                verbose=1):
     """Update a list of modules to a new location.
 
     Args:
@@ -259,12 +261,13 @@ def update_libs(check_root, mod_names=None, sort=None, close_interfaces=True):
         mod_names (str list): list of modules to update
         sort (fn): module sort function
         close_interfaces (bool): close interfaces before refresh
+        verbose (int): print process data
     """
     for _idx in range(6):
         dprint('Updating modules - attempt', _idx+1)
         _result = reload_libs(
             catch=True, check_root=check_root, mod_names=mod_names,
-            sort=sort, close_interfaces=close_interfaces)
+            sort=sort, close_interfaces=close_interfaces, verbose=verbose)
         dprint('Updating modules:', 'success' if _result else 'failed')
         if _result:
             break

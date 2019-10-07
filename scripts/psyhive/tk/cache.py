@@ -11,7 +11,8 @@ from psyhive.utils import (
     lprint, dprint, store_result_content_dependent, Seq)
 
 from psyhive.tk.templates.assets import (
-    TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile)
+    TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile,
+    TTAssetOutputVersion)
 from psyhive.tk.templates.shots import (
     TTMayaShotWork, TTShotWorkAreaMaya, TTShotRoot, TTShotStepRoot,
     TTShotOutputName, TTShotOutputVersion, TTNukeShotWork)
@@ -44,6 +45,7 @@ def _map_class_to_cacheable(class_):
     return {
         tk.TTAssetWorkAreaMaya: _CTTAssetWorkAreaMaya,
         tk.TTAssetOutputFile: _CTTAssetOutputFile,
+        tk.TTAssetOutputVersion: _CTTAssetOutputVersion,
         tk.TTShotOutputName: _CTTShotOutputName,
         tk.TTShotOutputVersion: _CTTShotOutputVersion,
         tk.TTShotRoot: _CTTShotRoot,
@@ -86,17 +88,20 @@ def obtain_cacheable(source):
     return _CACHEABLES[_type][source]
 
 
-def obtain_work(file_):
+def obtain_work(file_, catch=False):
     """Factory for cacheable work file object.
 
     Args:
         file_ (str): path to work file
+        catch (bool): no error if file fails to map to work
 
     Returns:
         (_CTTWorkFileBase): cacheable work file
     """
     global _WORK_FILES
-    _work = get_work(file_, catch=False)
+    _work = get_work(file_, catch=catch)
+    if not _work:
+        return None
     if _work not in _WORK_FILES:
         _type = _map_class_to_cacheable(_work.__class__)
         _WORK_FILES[_work] = _type(_work.path)
@@ -148,7 +153,7 @@ class _CTTShotStepRoot(TTShotStepRoot):
     """Cacheable TTShotStepRoot object."""
 
     @store_result_on_obj
-    def find_output_names(self, verbose=0):
+    def _read_output_names(self, verbose=0):
         """Find output names.
 
         Args:
@@ -159,30 +164,58 @@ class _CTTShotStepRoot(TTShotStepRoot):
         """
         return [
             obtain_cacheable(_name)
-            for _name in super(_CTTShotStepRoot, self).find_output_names(
+            for _name in super(_CTTShotStepRoot, self)._read_output_names(
                 verbose=verbose)]
 
 
 class _CTTShotOutputName(TTShotOutputName):
     """Cacheable TTShotOutputName object."""
 
-    def find_latest(self):
-        """Find latest version.
-
-        Returns:
-            (TTShotOutputVersion): latest version
-        """
-        return obtain_cacheable(self.find_vers()[-1])
-
     @store_result_on_obj
-    def find_vers(self):
+    def find_vers(self, catch=False):
         """Find versions.
+
+        Args:
+            catch (bool): no error if no versions found
 
         Returns:
             (TTShotOutputVersion list): versions
         """
-        _vers = self.find(depth=1, type_='d', class_=TTShotOutputVersion)
-        return _vers
+        _vers = super(_CTTShotOutputName, self).find_vers(catch=catch)
+        return [obtain_cacheable(_ver) for _ver in _vers]
+
+
+class _CTTAssetOutputVersion(TTAssetOutputVersion):
+    """Cacheable asset output version."""
+
+    @store_result_on_obj
+    def find_work_file(self, verbose=0):
+        """Find work file associated with this version.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (_CTTWorkFileBase|None): work file (if any)
+        """
+        _work = super(_CTTAssetOutputVersion, self).find_work_file(
+            verbose=verbose)
+        if _work:
+            _work = obtain_cacheable(_work)
+        return _work
+
+    @store_result_on_obj
+    def _read_outputs(self, verbose=0):
+        """Read outputs in this version.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputBase list): outputs
+        """
+        return super(_CTTAssetOutputVersion, self)._read_outputs(
+            verbose=verbose)
 
 
 class _CTTShotOutputVersion(TTShotOutputVersion):
@@ -214,7 +247,7 @@ class _CTTShotOutputVersion(TTShotOutputVersion):
         Returns:
             (TTOutputBase list): outputs
         """
-        return super(_CTTShotOutputVersion, self).find_outputs(
+        return super(_CTTShotOutputVersion, self)._read_outputs(
             verbose=verbose)
 
 
