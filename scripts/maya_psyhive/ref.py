@@ -91,6 +91,10 @@ class FileRef(object):
                 return None
             raise ValueError("Missing node "+_name)
 
+    def get_plug(self, plug):
+        from maya_psyhive import open_maya as hom
+        return hom.HPlug(self.get_attr(plug))
+
     def import_nodes(self):
         """Import nodes from this reference."""
         cmds.file(self._file, importReference=True)
@@ -156,7 +160,7 @@ class FileRef(object):
             type(self).__name__.strip('_'), self.namespace)
 
 
-def create_ref(file_, namespace, class_=None):
+def create_ref(file_, namespace, class_=None, force=False):
     """Create a reference.
 
     Args:
@@ -173,7 +177,13 @@ def create_ref(file_, namespace, class_=None):
     # Test for existing
     cmds.namespace(set=":")
     if cmds.namespace(exists=namespace):
-        raise NotImplementedError
+        _ref = find_ref(namespace)
+        if _ref:
+            if not force:
+                qt.ok_cancel('Replace existing {} reference?'.format(namespace))
+            _ref.remove(force=True)
+        else:
+            raise NotImplementedError
 
     # Create the reference
     _cur_refs = set(cmds.ls(type='reference'))

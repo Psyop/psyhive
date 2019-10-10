@@ -146,9 +146,20 @@ class HPlug(om.MPlug):
         from maya_psyhive import open_maya as hom
         _anim = get_single(
             cmds.listConnections(
-                self.node, type='animCurve', destination=False),
+                self, type='animCurve', destination=False),
             catch=True)
         return hom.HFnAnimCurve(_anim) if _anim else None
+
+    def get_default(self):
+        return get_single(self.attribute_query(listDefault=True))
+
+    def get_key_frames(self):
+        _anim = self.find_anim()
+        return _anim.get_key_frames()
+
+    def get_key_range(self):
+        _anim = self.find_anim()
+        return _anim.get_key_range()
 
     def get_val(self):
         """Get the value of this attribute.
@@ -181,6 +192,11 @@ class HPlug(om.MPlug):
             (HPlug): output plug
         """
         return multiply_node(self, input_, output)
+
+    def reset(self, break_connections=False):
+        self.set_val(self.get_default())
+        if break_connections:
+            self.break_connections()
 
     def set_col(self, val):
         """Apply a colour value to this attribute.

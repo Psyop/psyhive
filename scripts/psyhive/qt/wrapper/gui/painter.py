@@ -34,6 +34,9 @@ class HPainter(QtGui.QPainter):
         elif anchor == 'BR':
             _rect = QtCore.QRect(0, 0, _x, _y)
             _align = Qt.AlignRight | Qt.AlignBottom
+        elif anchor == 'B':
+            _rect = QtCore.QRect(0, 0, 2*_x, _y)
+            _align = Qt.AlignHCenter | Qt.AlignBottom
         elif anchor == 'C':
             _rect = QtCore.QRect(0, 0, 2*_x, 2*_y)
             _align = Qt.AlignHCenter | Qt.AlignVCenter

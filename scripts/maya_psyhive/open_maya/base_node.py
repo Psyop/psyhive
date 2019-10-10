@@ -9,7 +9,8 @@ from maya import cmds, mel
 import six
 
 from psyhive.utils import (
-    abs_path, diff, store_result, test_path, lprint, apply_filter)
+    abs_path, diff, store_result, test_path, lprint, apply_filter,
+    passes_filter)
 from maya_psyhive.utils import create_attr, get_unique, add_to_set
 from maya_psyhive.open_maya.plug import HPlug
 
@@ -160,6 +161,25 @@ class BaseNode(object):
         _kwargs['source'] = False
         return self.find_connected(**_kwargs)
 
+    def find_plugs(self, filter_=None, keyable=True):
+        """Find plugs on this node.
+
+        Args:
+            filter_ (str): filter by attr name
+            keyable (bool): search for keyable plugs
+
+        Returns:
+            (HPlug list): list of plugs
+        """
+        from maya_psyhive import open_maya as hom
+        _plugs = []
+        for _attr in cmds.listAttr(self, keyable=keyable):
+            if not passes_filter(_attr, filter_):
+                continue
+            _plug = hom.HPlug('{}.{}'.format(self, _attr))
+            _plugs.append(_plug)
+        return _plugs
+
     def find_upstream(self, depth=1, type_=None, filter_=None, verbose=0):
         """Find nodes upstream from this one.
 
@@ -212,6 +232,13 @@ class BaseNode(object):
             (bool): whether attr exists
         """
         return cmds.attributeQuery(attr, node=self, exists=True)
+
+    def list_children(self, type_=None, class_=None):
+
+        _children = self.list_relatives(type=type_, allDescendents=True)
+        if class_:
+            _children = [class_(_child) for _child in _children]
+        return _children
 
     def list_connections(self, **kwargs):
         """Wrapper for cmds.listConnections command.
@@ -291,6 +318,11 @@ class BaseNode(object):
         """
         _type = self.__class__
         return _type(cmds.rename(self, name))
+
+    def reset(self, filter_=None, break_connections=False, verbose=0):
+        for _plug in self.find_plugs(filter_=filter_):
+            lprint(' - RESETTING', _plug, _plug.get_default(), verbose=verbose)
+            _plug.reset(break_connections=break_connections)
 
     def save_preset(self, file_=None, use_mel=True, verbose=0):
         """Save preset for this node.

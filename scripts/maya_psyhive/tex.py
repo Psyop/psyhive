@@ -49,12 +49,12 @@ class _BaseShader(object):
         Args:
             geo (str): geo transform
         """
-        _shp = get_single(cmds.listRelatives(geo, shapes=True))
         _se = self.get_se()
         if not _se:
             _se = self.create_se()
         print "SE", _se
-        cmds.sets(_shp, edit=True, forceElement=_se)
+        for _shp in cmds.listRelatives(geo, shapes=True):
+            cmds.sets(_shp, edit=True, forceElement=_se)
 
     def create_se(self):
         """Create shading engine for this shader.
@@ -150,6 +150,20 @@ class _AiAmbientOcclusion(_BaseShader):
         self.out_col_attr = self.shd.plug('outColor')
 
 
+class _AiStandardSurface(_BaseShader):
+    """Represents an aiStandardSurface shader."""
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. lambert1)
+        """
+        super(_AiStandardSurface, self).__init__(shd)
+        self.col_attr = self.shd.plug('baseColor')
+        self.out_col_attr = self.shd.plug('outColor')
+
+
 class _Lambert(_BaseShader):
     """Represents an lambert shader."""
 
@@ -189,6 +203,20 @@ def ai_ambient_occlusion(name='aiAmbientOcclusion'):
     """
     _shd = _AiAmbientOcclusion(cmds.shadingNode(
         'aiAmbientOcclusion', asShader=True, name=name))
+    return _shd
+
+
+def ai_standard_surface(name='aiStandardSurface'):
+    """Create an aiStandardSurface shader.
+
+    Args:
+        name (str): node name
+
+    Returns:
+        (_AiStandardSurface): shader
+    """
+    _shd = _AiStandardSurface(cmds.shadingNode(
+        'aiStandardSurface', asShader=True, name=name))
     return _shd
 
 

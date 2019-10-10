@@ -236,6 +236,7 @@ class File(Path):
         _cmds = [
             r'C:\Program Files\Sublime Text 3\subl.exe',
             _path]
+        _cmds = ['subl', _path]
 
         system(_cmds, verbose=verbose)
 

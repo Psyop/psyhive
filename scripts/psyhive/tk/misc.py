@@ -44,7 +44,7 @@ def find_tank_app(name, catch=True):
     raise RuntimeError('Could not find tank app '+name)
 
 
-def find_tank_mod(name, app=None):
+def find_tank_mod(name, app=None, catch=False):
     """Find a tank mod in sys.modules dict.
 
     Args:
@@ -55,6 +55,8 @@ def find_tank_mod(name, app=None):
         _mod for _mod in refresh.find_mods(filter_=name, file_filter=app)
         if _mod.__name__.endswith(name)]
     if not _mods:
+        if catch:
+            return None
         raise ValueError("Failed to find module "+name)
     return _mods[0]
 

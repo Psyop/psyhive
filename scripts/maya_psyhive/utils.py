@@ -48,6 +48,24 @@ def restore_ns(func):
     return _restore_ns_fn
 
 
+def reset_ns(func):
+    """Decorator to execute a function, restoring the original namespace.
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+
+    def _reset_ns_fn(*args, **kwargs):
+        _result = func(*args, **kwargs)
+        cmds.namespace(set=':')
+        return _result
+
+    return _reset_ns_fn
+
+
 def add_node(input1, input2, output=None, name='add', force=False):
     """Create an add node.
 
@@ -382,7 +400,7 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
     elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double',
-                   'double3']:
+                   'double3', 'time']:
         pass
     else:
         raise ValueError(_type)

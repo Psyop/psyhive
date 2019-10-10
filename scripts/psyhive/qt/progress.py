@@ -73,6 +73,7 @@ class ProgressBar(QtWidgets.QDialog):
         self.counter = 0
         self.last_update = time.time()
         self.durs = []
+        self.info = ''
 
         _args = [parent] if parent else []
         super(ProgressBar, self).__init__(*_args)
@@ -116,12 +117,12 @@ class ProgressBar(QtWidgets.QDialog):
         _avg_dur = sum(_durs) / len(_durs)
         _etr = _avg_dur * _n_remaining
         _eta = time.time() + _etr
-        print _n_remaining, _avg_dur
         dprint(
             'Beginning {}/{}, frame_t={:.02f}s, etr={:.00f}s, '
-            'eta={}'.format(
+            'eta={}{}'.format(
                 self.counter, len(self.items), _avg_dur, _etr,
-                time.strftime('%H:%M:%S', get_time_t(_eta))))
+                time.strftime('%H:%M:%S', get_time_t(_eta)),
+                self.info))
 
     def __iter__(self):
         return self

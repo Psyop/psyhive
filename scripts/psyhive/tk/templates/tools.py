@@ -96,7 +96,7 @@ def get_work(file_, class_=None, catch=True, verbose=0):
         (TTWorkFileBase): work file
     """
     _file = File(file_)
-    _inc = not _file.basename.split("_")[-1].startswith('v')
+    _inc = file_ and not _file.basename.split("_")[-1].startswith('v')
 
     # Get work file class
     if class_:
@@ -113,7 +113,12 @@ def get_work(file_, class_=None, catch=True, verbose=0):
         return None
 
     if _inc:
-        return _class(file_).get_work()
+        try:
+            return _class(file_).get_work()
+        except ValueError as _exc:
+            if catch:
+                return None
+            raise _exc
 
     # Process file as work file
     try:
@@ -135,5 +140,5 @@ def cur_work(class_=None):
     """
     _cur_scene = host.cur_scene()
     if not _cur_scene:
-        return _cur_scene
-    return get_work(_cur_scene, class_=class_)
+        return None
+    return get_work(_cur_scene, class_=class_, catch=True)

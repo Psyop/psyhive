@@ -118,6 +118,29 @@ def _cache_yetis(yetis):
         writeCache=_out_path, range=host.t_range(), samples=3)
 
 
+def _find_yeti_caches(root):
+    """Find yeti caches in the given root.
+
+    This finds all output names which are yeti caches in all steps in
+    the given asset/shot root.
+
+    Args:
+        root (TTRootBase): root to search
+
+    Returns:
+        (TTOutputNameBase list): caches
+    """
+    tk.clear_caches()
+    _steps = root.find_step_roots()
+    _names = []
+    for _step in _steps:
+        _names += [tk.obtain_cacheable(_name)
+                   for _name in _step.find_output_names()
+                   if _name.output_type == 'yeti']
+    _names = [_name for _name in _names if _name.find_vers()]
+    return _names
+
+
 def _write_cache_from_selected_asset():
     """Cache selected asset.
 
@@ -161,7 +184,7 @@ class _YetiCacheToolsUi(qt.HUiDialog):
     def __init__(self):
         """Constructor."""
         self.work = tk.cur_work()
-        self.names = []
+        self._yeti_caches = []
 
         _ui_file = abs_path(
             '{}/yeti_cache_tools.ui'.format(os.path.dirname(__file__)))
@@ -181,10 +204,12 @@ class _YetiCacheToolsUi(qt.HUiDialog):
 
     def _redraw__step(self, widget):
 
-        _steps = self.work.root.find_step_roots()
-        print 'WIDGET', widget
+        self._yeti_caches = _find_yeti_caches(root=self.work.root)
 
         # Update widget
+        _steps = sorted(set([
+            tk.obtain_cacheable(_name.get_step_root())
+            for _name in self._yeti_caches]))
         for _step in _steps:
             widget.add_item(_step.name, data=_step)
         if not _steps:
@@ -194,35 +219,26 @@ class _YetiCacheToolsUi(qt.HUiDialog):
     def _redraw__asset(self, widget):
 
         _step = self.ui.step.selected_data()
+        print 'STEP', _step
 
-        self.names = []
-        if not _step:
-            _assets = []
-        else:
-            self.names = [_name for _name in _step.find_output_names()
-                          if _name.output_type == 'yeti']
-            _assets = sorted(set([_name.output_name for _name in self.names]))
+        _caches = [_cache for _cache in self._yeti_caches
+                   if _cache.get_step_root() == _step]
 
         # Update widget
         widget.clear()
-        widget.addItems(_assets)
-        if not _assets:
+        for _cache in _caches:
+            widget.add_item(_cache.output_name, data=_cache)
+        if not _caches:
             widget.addItem('<None>')
-        widget.setEnabled(bool(_assets))
+        widget.setEnabled(bool(_caches))
 
         self.ui.version.redraw()
 
     def _redraw__version(self, widget):
 
-        _asset = self.ui.asset.currentText()
-        print 'ASSET', _asset
-        _name = get_single(
-            [_name for _name in self.names if _name.output_name == _asset],
-            catch=True)
-        if not _name:
-            _vers = []
-        else:
-            _vers = _name.find(depth=1, class_=self.work.output_version_type)
+        _cache = self.ui.asset.selected_data()
+        print 'CACHE', _cache
+        _vers = _cache.find_vers() if _cache else []
 
         # Update widget
         widget.clear()
@@ -240,16 +256,16 @@ class _YetiCacheToolsUi(qt.HUiDialog):
 
     def _redraw__version_label(self, widget):
         _ver = self.ui.version.selected_data()
+        print 'VER', _ver
         if not _ver:
             _text = 'No versions found'
         else:
-            _c_ver = tk.obtain_cacheable(_ver)
-            _outs = _c_ver.find_outputs(output_type='yeti', format_='fur')
+            _outs = _ver.find_outputs(output_type='yeti', format_='fur')
             if _outs:
                 _text = 'Found frames {:d}-{:d}'.format(
                     *_outs[0].find_range())
             else:
-                _text = 'No caches found'
+                _text = 'No cache data found'
         widget.setText(_text)
 
     def _redraw__cache_read_asset(self, widget):

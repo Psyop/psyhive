@@ -364,6 +364,8 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         menu.add_label("Jump to")
         for _work in sorted(_get_recent_work()):
             _work = _work.find_latest()
+            if not _work:
+                continue
             _label = _get_work_label(_work)
             _icon = _get_work_icon(_work, mode='basic')
             _fn = wrap_fn(self.select_path, _work.path)
@@ -564,13 +566,19 @@ def _get_work_icon(
     Returns:
         (str|QPixmap): work file icon
     """
+
+    # Get base icon
     _uid = work.task
     lprint('UID', _uid, verbose=verbose)
-    _random = str_to_seed(_uid)
-    _icon = _random.choice(icons.FRUIT.get_paths())
+    if _uid == 'test':
+        _icon = icons.EMOJI.find('Alembic')
+    else:
+        _random = str_to_seed(_uid)
+        _icon = _random.choice(icons.FRUIT.get_paths())
     lprint('ICON', _icon, verbose=verbose)
     if mode == 'basic':
         return _icon
+
     _random = str_to_seed(work.path)
     _rotate = _random.random()*360
 

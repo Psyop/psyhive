@@ -3,7 +3,7 @@
 from psyhive.qt.wrapper import (
 
     # Raw qt libs
-    QtCore, QtGui, QtWidgets, QtUiTools, Qt,
+    QtCore, QtGui, QtWidgets, QtUiTools, QtMultimedia, Qt,
 
     # QtWidgets overrides
     HPushButton, HCheckBox, HLabel, HTreeWidgetItem, HListWidgetItem,

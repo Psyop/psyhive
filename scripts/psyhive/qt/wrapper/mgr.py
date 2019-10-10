@@ -6,10 +6,10 @@ To allow this library to be used by LittleZoo, Qt/Qt_py is not used.
 """
 
 try:
-    from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
+    from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets, QtMultimedia
     from PySide2.QtCore import Qt
 except ImportError:
-    from PySide import QtUiTools, QtCore, QtGui
+    from PySide import QtUiTools, QtCore, QtGui, QtMultimedia
     from PySide import QtGui as QtWidgets
     from PySide.QtCore import Qt
 

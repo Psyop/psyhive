@@ -3,8 +3,9 @@
 import copy
 import os
 import pprint
-import tempfile
 import shutil
+import tempfile
+import time
 
 import sgtk
 import tank
@@ -342,14 +343,12 @@ class TTWorkFileBase(TTBase, File):
         """Add this file to tank recent file list for this show."""
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
-
-        assert self.exists()
-
         _tk_workspace = _mod.get_workspace_from_path(
             app=_fileops, path=self.path)
         _tk_workfile = _mod.WorkfileModel(
             workspace=_tk_workspace, template=self.tmpl,
             path=self.path)
+        _tk_workfile._modified_time = time.time()
         _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
 
     def find_latest(self, vers=None):
@@ -663,6 +662,7 @@ class TTOutputNameBase(TTDirBase):
     """Base class for any tank template output name."""
 
     output_version_type = None
+    step_root_type = None
 
     def find_latest(self, catch=False):
         """Find latest version of this output.
@@ -694,6 +694,14 @@ class TTOutputNameBase(TTDirBase):
                 return None
             raise OSError("No versions found")
         return _vers
+
+    def get_step_root(self):
+        """Get step root from this output name.
+
+        Returns:
+            (TTStepRootBase): step root
+        """
+        return self.step_root_type(self.path)
 
 
 class TTOutputVersionBase(TTDirBase):
