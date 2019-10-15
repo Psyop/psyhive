@@ -5,9 +5,11 @@ import re
 import six
 
 from psyhive import tk, qt, farm
+from psyhive.tools import get_usage_tracker
 from psyhive.utils import File, get_single, abs_path
 
 
+@get_usage_tracker(name='shot_builder_ma', args=True)
 def submit_update_ma(template, shot):
     """Submit maya file update to farm.
 
@@ -217,6 +219,7 @@ def _update_nk_reads(nk_file, shot):
         print
 
 
+@get_usage_tracker(name='shot_builder_nk', args=True)
 def update_nk(template, shot, diff=True, force=True):
     """Update nk template to new shot.
 

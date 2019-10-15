@@ -50,6 +50,7 @@ def find_tank_mod(name, app=None, catch=False):
     Args:
         name (str): mod name search
         app (str): filename search
+        catch (bool): no error on unable to find mod
     """
     _mods = [
         _mod for _mod in refresh.find_mods(filter_=name, file_filter=app)

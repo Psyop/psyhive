@@ -96,6 +96,8 @@ ignore:
     superfluous-parens:
         psyhive/utils/misc.py
     too-few-public-methods: '*'
+    too-many-public-methods:
+        maya_psyhive/open_maya/base_node.py
     too-many-ancestors:
         hv_test/diary/y19/d0516/batch_cache_test.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
@@ -157,6 +159,7 @@ ignore:
         sanity_check/checks/
         /tests/
     unused-import:
+        psyhive/host.py
         psyhive/qt/wrapper/mgr.py
     unused-variable:
         hv_test/diary/

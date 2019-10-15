@@ -1,3 +1,44 @@
+#### v0.39.0 ####
+
+    Released: Tue 15th Oct 2019
+
+    shot builder tool:
+        maya always build shot in defaultRenderLayer (cbach),
+        bugfix error on update abc outside shot (srivet),
+    yeti tools:
+        hide steps with no caches in (ecunha),
+    
+    maya_psyhive:
+        open_maya.HFnAnimCurve added connect/get_key_frames/get_key_range/get_plug/is_static/loop/output,
+        open_maya.BaseNode added find_children/find_plugs/reset,
+        open_maya.HFnNurbsCurve.motion_path added follow/up axis args,
+        open_maya.HPlug added get_default/get_key_frames/get_key_range/reset,
+        ref.FileRef.get_plug added,
+        ref.create_ref implemented replace existing ref + fix fbx timeline bug,
+        tex.BaseShader.assign_to added handling for multiple shapes,
+        tex.ai_standard_surface added,
+        tools.m_shot_builder make sure using defaultRenderLayer,
+        tools.yeti hide steps with no caches,
+        utils.reset_ns added,
+        utils.get_val added time type handling,
+    psyhive:
+        host.get_fps added,
+        qt.QMultimedia added,
+        qt.get_size allow 640x640 style string,
+        qt.progress_bar added info attr for print_eta func,
+        qt.HPainter.add_text added B anchor handling,
+        tk.find_tank_mod added catch arg,
+        tk.TTBase.shot added so every TT object has shot arg,
+        tk.TTWorkFileBase.add_to_recent bugfix error on new task,
+        tk.TTOutputNameBase.get_step_root added,
+        tk.get_work catch error on unhandled inc file passed,
+        tools.hive_bro fix error on unhandled work in recents,
+        tools.hive_bro use alembic for test task,
+        tools.shot_builder added usage tracker with args,
+        tools.get_usage_track added args option,
+        utils.path.edit bugfix subl uses x64 dir,
+
+
 #### v0.38.0 ####
 
     Released: Mon 7th Oct 2019

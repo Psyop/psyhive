@@ -151,13 +151,28 @@ class HPlug(om.MPlug):
         return hom.HFnAnimCurve(_anim) if _anim else None
 
     def get_default(self):
+        """Get default value of this plug.
+
+        Returns:
+            (any): default value
+        """
         return get_single(self.attribute_query(listDefault=True))
 
     def get_key_frames(self):
+        """Get a list of keyed frames for this plug.
+
+        Returns:
+            (float list): key frame value
+        """
         _anim = self.find_anim()
         return _anim.get_key_frames()
 
     def get_key_range(self):
+        """Get keyed range on this plug.
+
+        Returns:
+            (type): start/end frames
+        """
         _anim = self.find_anim()
         return _anim.get_key_range()
 
@@ -194,6 +209,11 @@ class HPlug(om.MPlug):
         return multiply_node(self, input_, output)
 
     def reset(self, break_connections=False):
+        """Reset this plug - set value to default.
+
+        Args:
+            break_connections (bool): break connections on reset
+        """
         self.set_val(self.get_default())
         if break_connections:
             self.break_connections()

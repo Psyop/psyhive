@@ -1,5 +1,7 @@
 """Tools for building updating a template file to a different shot."""
 
+from maya import cmds
+
 from psyhive import tk, host, qt
 from psyhive.utils import dprint, lprint
 from maya_psyhive import open_maya as hom
@@ -18,6 +20,9 @@ def build_shot_from_template(shot, template, force=False):
     _tmpl_work = tk.get_work(template)
     if not host.cur_scene() == _tmpl_work.path:
         _tmpl_work.load()
+
+    # Make sure we're on default render layer
+    cmds.editRenderLayerGlobals(currentRenderLayer='defaultRenderLayer')
 
     _update_assets()
     _update_abcs(shot=shot)

@@ -2,6 +2,7 @@
 
 import datetime
 import functools
+import getpass
 import os
 import pprint
 import platform
@@ -16,6 +17,8 @@ _INDEX_MAPPING = {
     'mappings': {
         _ES_DATA_TYPE: {
             'properties': {
+                'args': {'type': 'string', 'index': 'not_analyzed'},
+                'cwd': {'type': 'string', 'index': 'not_analyzed'},
                 'filename': {'type': 'string', 'index': 'not_analyzed'},
                 'function': {'type': 'string', 'index': 'not_analyzed'},
                 'project': {'type': 'string', 'index': 'not_analyzed'},
@@ -28,13 +31,48 @@ _INDEX_MAPPING = {
 }
 
 
-def _write_usage_to_kibana(func, name=None, catch=True, verbose=0):
+def _build_usage_dict(name, args):
+    """Build dict of usage data.
+
+    Args:
+        name (str): function name
+        args (tuple): args data
+
+    Returns:
+        (dict): usage dict
+    """
+    _usage = {
+        'function': name,
+        'machine_name': platform.node(),
+        'project': os.environ.get('PSYOP_PROJECT'),
+        'timestamp': datetime.datetime.utcnow(),
+        'username': getpass.getuser(),
+    }
+
+    if args:
+        _usage['args'] = str(args)
+
+    # Add filename
+    if host.NAME == 'maya':
+        from maya import cmds
+        _usage['filename'] = cmds.file(query=True, location=True)
+
+    # Add cwd
+    try:
+        _usage['cwd'] = os.getcwd()
+    except OSError:
+        pass
+
+    return _usage
+
+
+def _write_usage_to_kibana(name=None, catch=True, args=None, verbose=0):
     """Write usage data to kibana index.
 
     Args:
-        func (fn): function that was executed
         name (str): override function name
         catch (bool): on fail continue and disable usage tracking
+        args (tuple): args data to write to usage
         verbose (int): print process data
     """
 
@@ -47,22 +85,13 @@ def _write_usage_to_kibana(func, name=None, catch=True, verbose=0):
     except ImportError:
         return
 
-    # Build usage dict
     _start = time.time()
     _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
-    _data = {
-        'function': name or func.__name__,
-        'machine_name': platform.node(),
-        'project': os.environ.get('PSYOP_PROJECT'),
-        'timestamp': datetime.datetime.utcnow(),
-        'username': os.environ.get('USER'),
-    }
-    if host.NAME == 'maya':
-        from maya import cmds
-        _data['filename'] = cmds.file(query=True, location=True)
+    _usage = _build_usage_dict(name=name, args=args)
+
     if verbose > 1:
         print _index_name
-        pprint.pprint(_data)
+        pprint.pprint(_usage)
 
     # Send to kibana
     _conn = Elasticsearch([_ELASTIC_URL])
@@ -75,18 +104,19 @@ def _write_usage_to_kibana(func, name=None, catch=True, verbose=0):
     if not _conn.indices.exists(_index_name):
         _conn.indices.create(index=_index_name, body=_INDEX_MAPPING)
     _res = _conn.index(
-        index=_index_name, doc_type=_ES_DATA_TYPE, body=_data,
-        id=_data.pop('_id', None))
-    _data['_id'] = _res['_id']
+        index=_index_name, doc_type=_ES_DATA_TYPE, body=_usage,
+        id=_usage.pop('_id', None))
+    _usage['_id'] = _res['_id']
     _dur = time.time() - _start
     dprint('Wrote usage to kibana ({:.02f}s)'.format(_dur), verbose=verbose)
 
 
-def get_usage_tracker(name=None, verbose=0):
+def get_usage_tracker(name=None, args=False, verbose=0):
     """Build usage tracker decorator.
 
     Args:
         name (str): override function name
+        args (bool): store args/kwargs data
         verbose (int): print process data
 
     Returns:
@@ -96,10 +126,12 @@ def get_usage_tracker(name=None, verbose=0):
     def _track_usage(func):
 
         @functools.wraps(func)
-        def _usage_tracked_fn(*args, **kwargs):
+        def _usage_tracked_fn(*args_, **kwargs):
             if not os.environ.get('PSYHIVE_DISABLE_USAGE'):
-                _write_usage_to_kibana(func, name=name, verbose=verbose)
-            return func(*args, **kwargs)
+                _write_usage_to_kibana(
+                    name=name or func.__name__, verbose=verbose,
+                    args=(args_, kwargs) if args else None)
+            return func(*args_, **kwargs)
 
         return _usage_tracked_fn
 

@@ -22,6 +22,7 @@ from psyhive.tk.misc import find_tank_mod, find_tank_app, get_current_engine
 class TTBase(Path):
     """Base class for any tank template object."""
 
+    shot = None
     step = None
     hint = None
 

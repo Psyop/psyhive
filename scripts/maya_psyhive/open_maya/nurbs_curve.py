@@ -99,7 +99,8 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
 
         return self.length()*_scale.x
 
-    def motion_path(self, trg, add_u_length=False, follow_axis='y', up_axis='z'):
+    def motion_path(self, trg, add_u_length=False, follow_axis='y',
+                    up_axis='z'):
         """Attach the target mode this curve using a motion path.
 
         This uses the pathAnimation command, and deletes the default
@@ -108,6 +109,8 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         Args:
             trg (str|HFnTransform): transform to attach
             add_u_length (bool): add uLength attr to get abs uValue
+            follow_axis (str): front axis
+            up_axis (str): up axis
 
         Returns:
             (MFnDependencyNode): motion path node
@@ -118,9 +121,9 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
             upAxis=up_axis)
         _u_val = _mpath.plug('uValue')
         _u_val.break_connections()
-        
+
         # Add uLength attr
-        if add_u_length == False:
+        if add_u_length is False:
             pass
         elif add_u_length == 'driven':
             _ci = self.obtain_curve_info()

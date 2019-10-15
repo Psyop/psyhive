@@ -92,6 +92,14 @@ class FileRef(object):
             raise ValueError("Missing node "+_name)
 
     def get_plug(self, plug):
+        """Get plug within this reference.
+
+        Args:
+            plug (str|HPlug): plug name
+
+        Returns:
+            (HPlug): plug mapped to this reference's namespace
+        """
         from maya_psyhive import open_maya as hom
         return hom.HPlug(self.get_attr(plug))
 
@@ -167,12 +175,20 @@ def create_ref(file_, namespace, class_=None, force=False):
         file_ (str): path to reference
         namespace (str): reference namespace
         class_ (type): override FileRef class
+        force (bool): force replace any existing ref
 
     Returns:
         (FileRef): reference
     """
+    from psyhive import host
+    from maya_psyhive.utils import load_plugin
+
     _file = File(file_)
     _class = class_ or FileRef
+    _rng = host.t_range()
+
+    if _file.extn == 'abc':
+        load_plugin('AbcImport')
 
     # Test for existing
     cmds.namespace(set=":")
@@ -180,7 +196,8 @@ def create_ref(file_, namespace, class_=None, force=False):
         _ref = find_ref(namespace)
         if _ref:
             if not force:
-                qt.ok_cancel('Replace existing {} reference?'.format(namespace))
+                qt.ok_cancel('Replace existing {} reference?'.format(
+                    namespace))
             _ref.remove(force=True)
         else:
             raise NotImplementedError
@@ -196,6 +213,10 @@ def create_ref(file_, namespace, class_=None, force=False):
 
     # Find new reference node
     _ref = get_single(set(cmds.ls(type='reference')).difference(_cur_refs))
+
+    # Fbx ref seems to update timeline (?)
+    if host.t_range() != _rng:
+        host.set_range(*_rng)
 
     return _class(_ref)
 

@@ -103,6 +103,23 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
+    def find_children(self, type_=None, class_=None, all_descendents=True):
+        """Find child nodes.
+
+        Args:
+            type_ (str): listRelative type filter
+            class_ (class): cast node to class
+            all_descendents (bool): search all descendents
+
+        Returns:
+            (BaseNode list): list of child nodes
+        """
+        _children = self.list_relatives(
+            type=type_, allDescendents=all_descendents)
+        if class_:
+            _children = [class_(_child) for _child in _children]
+        return _children
+
     def find_connected(self, depth=1, type_=None, filter_=None,
                        source=True, destination=True, verbose=0):
         """Recursively traverse connected nodes in graph.
@@ -233,13 +250,6 @@ class BaseNode(object):
         """
         return cmds.attributeQuery(attr, node=self, exists=True)
 
-    def list_children(self, type_=None, class_=None):
-
-        _children = self.list_relatives(type=type_, allDescendents=True)
-        if class_:
-            _children = [class_(_child) for _child in _children]
-        return _children
-
     def list_connections(self, **kwargs):
         """Wrapper for cmds.listConnections command.
 
@@ -314,12 +324,19 @@ class BaseNode(object):
             name (str): new name
 
         Returns:
-            ():
+            (BaseNode): renamed node
         """
         _type = self.__class__
         return _type(cmds.rename(self, name))
 
     def reset(self, filter_=None, break_connections=False, verbose=0):
+        """Reset node plugs to default values.
+
+        Args:
+            filter_ (str): filter plugs by attr name
+            break_connections (bool): break connections on reset
+            verbose (int): print process data
+        """
         for _plug in self.find_plugs(filter_=filter_):
             lprint(' - RESETTING', _plug, _plug.get_default(), verbose=verbose)
             _plug.reset(break_connections=break_connections)

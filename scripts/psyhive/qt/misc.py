@@ -101,6 +101,8 @@ def get_size(size):
         return QtCore.QSize(size.x(), size.y())
     elif isinstance(size, (tuple, list)):
         return QtCore.QSize(size[0], size[1])
+    elif isinstance(size, six.string_types):
+        return QtCore.QSize(*[int(_token) for _token in size.split('x')])
     raise ValueError(size)
 
 
