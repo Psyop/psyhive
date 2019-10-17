@@ -51,7 +51,7 @@ class BasePyGui(object):
         _mod = self.py_file.get_module(verbose=1)
 
         self.mod_name = _mod.__name__
-        self.title = title or self.mod_name
+        self.title = title or getattr(_mod, 'PYGUI_TITLE', self.mod_name)
         self.ui_name = self.mod_name.replace(".", "_")+"_ui"
         self.settings_file = abs_path(
             '{}/Psyop/settings/py_gui/{}.yml'.format(
@@ -74,7 +74,9 @@ class BasePyGui(object):
             'FOUND {:d} DEFS TO ADD'.format(len(_defs_data)), verbose=verbose)
         for _last, (_fn, _opts) in last(_defs_data):
             _def = self.py_file.find_def(_fn.__name__, catch=True)
+            lprint(" - TESTING DEF", _fn, _opts, _def, verbose=verbose)
             if _def:
+                lprint(" - ADDING DEF", _def, _opts, verbose=verbose)
                 self.add_def(_def, opts=_opts, last_=_last)
         self.finalise_ui()
         if os.path.exists(self.settings_file):

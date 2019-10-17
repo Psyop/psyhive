@@ -51,7 +51,7 @@ class Seq(object):
         _frame = self.get_frame(file_)
         return _frame is not None
 
-    def delete(self, wording='Remove', force=False):
+    def delete(self, wording='Remove', force=False, frames=None):
         """Delete this sequence's frames.
 
         The user is asked to confirm before deletion.
@@ -59,11 +59,14 @@ class Seq(object):
         Args:
             wording (str): wording for confirmation dialog
             force (bool): force delete with no confirmation
+            frames (int list): list of frames to delete (if not all)
         """
         from psyhive import qt
         from psyhive.utils import ints_to_str, get_plural
 
         _frames = self.get_frames(force=True)
+        if frames:
+            _frames = sorted(set(_frames).intersection(frames))
         if not _frames:
             return
         if not force:
@@ -71,8 +74,8 @@ class Seq(object):
                 '{} existing frame{} {} of seq?\n\n{}'.format(
                     wording, get_plural(_frames), ints_to_str(_frames),
                     self.path))
-        for _path in self.get_paths():
-            os.remove(_path)
+        for _frame in _frames:
+            os.remove(self[_frame])
         self.get_frames(force=True)
 
     def exists(self, force=False):

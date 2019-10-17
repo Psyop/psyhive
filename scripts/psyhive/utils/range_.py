@@ -247,6 +247,9 @@ def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):
 
             # Convert to list of ints
             if _rng.endswith(rng_sep):
+                from psyhive import host
+                if end is None and host.NAME:
+                    end = int(round(host.t_end(), 0))
                 assert end is not None
                 _rng_start = _tokens[0]
                 _rng_end = end

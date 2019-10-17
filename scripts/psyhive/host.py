@@ -1,6 +1,5 @@
 """Tools for managing executing host across multiple host applications."""
 
-from psyhive import icons
 from psyhive.utils import wrap_fn
 
 NAME = None
@@ -56,6 +55,7 @@ def open_scene(file_):
         file_ (str): file to open
     """
     from psyhive import qt
+    from psyhive import icons
 
     if _scene_modified():
         _result = qt.raise_dialog(

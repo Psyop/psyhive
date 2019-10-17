@@ -2,7 +2,7 @@
 
 from maya import cmds
 
-from psyhive.utils import get_single
+from psyhive.utils import get_single, lprint
 from maya_psyhive.utils import add_to_grp, set_col
 
 from maya_psyhive.open_maya.base_node import BaseNode
@@ -13,19 +13,22 @@ from maya_psyhive.open_maya.point import ORIGIN
 class BaseTransform(BaseNode):
     """Base class for any transform object."""
 
-    def __init__(self, node):
+    def __init__(self, node, verbose=0):
         """Constructor.
 
         Args:
             node (str): tranform node name
+            verbose (int): print process data
         """
         from maya_psyhive import open_maya as hom
         super(BaseTransform, self).__init__(node)
 
         # Get shape (if any)
-        _shps = cmds.listRelatives(self.node, shapes=True, path=True) or []
+        _shps = cmds.listRelatives(
+            self.node, shapes=True, path=True, noIntermediate=True) or []
         _shp = get_single([str(_shp) for _shp in _shps], catch=True)
         self.shp = hom.HFnDependencyNode(_shp) if _shp else None
+        lprint('SHAPE', self.shp, _shps, verbose=verbose)
 
         # Create plugs
         for _param in 'trs':

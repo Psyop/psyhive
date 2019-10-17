@@ -120,11 +120,12 @@ def find_projects(filter_=None):
     return _projects
 
 
-def find_project(name):
+def find_project(name, verbose=0):
     """Find a project matching the given name.
 
     Args:
         name (str): project name to search for
+        verbose (int): print process data
 
     Returns:
         (Project): matching project
@@ -132,11 +133,12 @@ def find_project(name):
     _projs = find_projects()
     _ematch = get_single(
         [_project for _project in _projs if _project.name == name],
-        catch=True)
+        catch=True, verbose=verbose)
     if _ematch:
         return _ematch
     _fmatch = get_single(
-        apply_filter(_projs, name, key=operator.attrgetter('name')))
+        apply_filter(_projs, name, key=operator.attrgetter('name')),
+        verbose=verbose)
     return _fmatch
 
 

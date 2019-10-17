@@ -8,8 +8,11 @@ from psyhive import icons, refresh, qt, py_gui
 from psyhive.tools import track_usage
 from psyhive.utils import (
     dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile)
+
 from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher
+from maya_psyhive.toolkits import anim
+
 _BUTTONS = {
     'IKFK': {
         'cmd': '\n'.join([
@@ -121,6 +124,15 @@ def _build_psyhive_menu():
             'yeti.launch_cache_tools()']).format(yeti.__name__)
         cmds.menuItem(
             command=_cmd, image=yeti.ICON, label='Yeti cache tools')
+
+    # Add anim tools
+    _cmd = '\n'.join([
+        'import {} as anim',
+        'import {} as py_gui',
+        'py_gui.MayaPyGui(anim.__file__)']).format(
+            anim.__name__, py_gui.__name__)
+    cmds.menuItem(
+        command=_cmd, image=anim.ICON, label='Anim tools')
 
     # Add show toolkits
     cmds.menuItem(divider=True)

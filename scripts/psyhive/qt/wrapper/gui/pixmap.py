@@ -232,7 +232,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawPolygon(_poly)
         _pnt.end()
 
-    def add_rect(self, pos, size, col, outline='black', operation=None):
+    def add_rect(self, pos, size, col='white', outline='black', operation=None,
+                 anchor='TL'):
         """Draw a rectangle on this pixmap.
 
         Args:
@@ -241,20 +242,20 @@ class HPixmap(QtGui.QPixmap):
             col (str): rectangle colour
             outline (str): outline colour
             operation (str): overlay mode
+            anchor (str): position anchor point
         """
-        from psyhive.qt import get_p, get_size, get_col
+        from psyhive import qt
 
-        _col = get_col(col)
+        _col = qt.get_col(col)
         _brush = QtGui.QBrush(_col)
-        _pos = get_p(pos)
-        _size = get_size(size)
+        _rect = _get_rect(pos=pos, size=size, anchor=anchor)
+
+        # Set outline
         if outline:
             _pen = QtGui.QPen(outline)
         else:
             _pen = QtGui.QPen()
             _pen.setStyle(Qt.NoPen)
-
-        _rect = QtCore.QRect(_pos, _size)
 
         _pnt = HPainter()
         _pnt.begin(self)
@@ -282,24 +283,14 @@ class HPixmap(QtGui.QPixmap):
         """
         from psyhive import qt
 
-        _pos = qt.get_p(pos)
-        _size = qt.get_size(size)
         _col = qt.get_col(col)
         _brush = QtGui.QBrush(qt.get_col(_col))
-
-        if anchor == 'TL':
-            pass
-        elif anchor == 'C':
-            _pos = _pos - qt.get_p(_size)/2
-        else:
-            raise ValueError(anchor)
-        _rect = QtCore.QRect(_pos, _size)
+        _rect = _get_rect(pos=pos, size=size, anchor=anchor)
 
         _pnt = qt.HPainter()
         _pnt.begin(self)
         _pnt.setBrush(_brush)
-        _pnt.drawRoundedRect(
-            _pos.x(), _pos.y(), _size.width(), _size.height(), bevel, bevel)
+        _pnt.drawRoundedRect(_rect, bevel, bevel)
         _pnt.end()
 
         return _rect
@@ -504,3 +495,29 @@ class HPixmap(QtGui.QPixmap):
         _tmp.fill(_fill)
         self.add_overlay(_tmp, operation='over')
         return self
+
+
+def _get_rect(anchor, pos, size):
+    """Get rect for the given pos/size and anchor position.
+
+    Args:
+        anchor (str): anchor point
+        pos (QPoint): anchor position
+        size (QSize): rect size
+
+    Returns:
+        (QRect): rectangle
+    """
+    from psyhive import qt
+
+    _size = qt.get_size(size)
+    if anchor == 'C':
+        _pos = pos - qt.get_p(_size)/2
+    elif anchor == 'L':
+        _pos = pos - qt.get_p(0, _size.height()/2)
+    elif anchor == 'TL':
+        _pos = pos
+    else:
+        raise ValueError(anchor)
+
+    return QtCore.QRect(_pos, _size)

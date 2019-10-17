@@ -5,7 +5,6 @@ import os
 
 from maya import cmds
 
-from psyhive import qt
 from psyhive.utils import File, get_single, lprint, apply_filter
 
 
@@ -66,7 +65,12 @@ class FileRef(object):
         Args:
             attr (str): attribute name
         """
-        return '{}:{}'.format(self.namespace, attr)
+        from maya_psyhive import open_maya as hom
+        _attr = attr
+        if isinstance(attr, hom.HPlug):
+            _attr = str(attr)
+        _attr = _attr.split(":")[-1]
+        return '{}:{}'.format(self.namespace, _attr)
 
     def get_node(self, name, class_=None, catch=False):
         """Get node from this ref matching the given name.
@@ -137,6 +141,7 @@ class FileRef(object):
         Args:
             force (bool): remove without confirmation
         """
+        from psyhive import qt
         if not force:
             _msg = (
                 'Are you sure you want to remove the reference {}?\n\n'
@@ -180,6 +185,7 @@ def create_ref(file_, namespace, class_=None, force=False):
     Returns:
         (FileRef): reference
     """
+    from psyhive import qt
     from psyhive import host
     from maya_psyhive.utils import load_plugin
 
@@ -260,12 +266,13 @@ def find_refs(namespace=None, filter_=None, class_=None):
     return _refs
 
 
-def get_selected(catch=False, multi=False, verbose=0):
+def get_selected(catch=False, multi=False, class_=None, verbose=0):
     """Get selected ref.
 
     Args:
         catch (bool): no error on None
         multi (bool): allow multiple selections
+        class_ (class): override ref class
         verbose (int): print process data
 
     Returns:
@@ -279,9 +286,10 @@ def get_selected(catch=False, multi=False, verbose=0):
         _node.split(":")[0] for _node in cmds.ls(selection=True)
         if ":" in _node]))
     lprint('SEL NAMESPACES', _nss, verbose=verbose)
-    _refs = [find_ref(_ns) for _ns in _nss]
+    _refs = [find_ref(_ns, class_=class_) for _ns in _nss]
+    _class = class_ or FileRef
     _sel_ref_nodes = [
-        FileRef(_ref_node) for _ref_node in cmds.ls(
+        _class(_ref_node) for _ref_node in cmds.ls(
             selection=True, type='reference')]
     lprint('SEL REF NODES', _sel_ref_nodes, verbose=verbose)
     _refs += _sel_ref_nodes

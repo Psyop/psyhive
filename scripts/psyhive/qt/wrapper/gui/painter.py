@@ -47,7 +47,7 @@ class HPainter(QtGui.QPainter):
             _rect = QtCore.QRect(0, 0, _x, 2*_y)
             _align = Qt.AlignRight | Qt.AlignVCenter
         elif anchor in ('T', 'TC'):
-            _rect = QtCore.QRect(0, _y, _w, _h)
+            _rect = QtCore.QRect(0, _y, 2*_x, _h)
             _align = Qt.AlignHCenter | Qt.AlignTop
         elif anchor == 'TL':
             _rect = QtCore.QRect(_x, _y, _w, _h)

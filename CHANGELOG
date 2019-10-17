@@ -1,3 +1,29 @@
+#### v0.40.0 ####
+
+    Released: Thu 17th Oct 2019
+
+    animation: added tool to duplicate rig with anim [TOOLS-173]
+    
+    maya_psyhive:
+        m_pipe added with RigRef/get_selected_rig,
+        open_maya.BaseNode.find_plugs fix error on node has no plugs,
+        open_maya.BaseTransform ignore intermediate shapes on init,
+        ref.get_attr strip namespace from arg,
+        ref.get_selected added class_ arg,
+        startup added anim tools,
+        toolkits.anim added with duplicate selected rig,
+        utils restore_ns/reset_ns added functools.wraps to fix py_gui,
+    psyhive:
+        py_gui added PYGUI_TITLE global handling,
+        qt.PixmapUi added,
+        qt.HPainter.add_text fix T/TC anchor,
+        qt.HPixmap.add_rect added anchor flag,
+        qt.HPixmap add_rect/add_rounded_rect shared anchor handling,
+        tk.tools added with reference_publish,
+        utils.str_to_ints open end uses host.t_end,
+        utils.Seq.delete added frames arg,
+
+
 #### v0.39.0 ####
 
     Released: Tue 15th Oct 2019

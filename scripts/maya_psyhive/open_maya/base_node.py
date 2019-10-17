@@ -190,7 +190,7 @@ class BaseNode(object):
         """
         from maya_psyhive import open_maya as hom
         _plugs = []
-        for _attr in cmds.listAttr(self, keyable=keyable):
+        for _attr in (cmds.listAttr(self, keyable=keyable) or []):
             if not passes_filter(_attr, filter_):
                 continue
             _plug = hom.HPlug('{}.{}'.format(self, _attr))

@@ -39,6 +39,7 @@ def restore_ns(func):
         (fn): decorated function
     """
 
+    @functools.wraps(func)
     def _restore_ns_fn(*args, **kwargs):
         _ns = ':'+cmds.namespaceInfo(currentNamespace=True)
         _result = func(*args, **kwargs)
@@ -58,6 +59,7 @@ def reset_ns(func):
         (fn): decorated function
     """
 
+    @functools.wraps(func)
     def _reset_ns_fn(*args, **kwargs):
         _result = func(*args, **kwargs)
         cmds.namespace(set=':')
@@ -362,16 +364,18 @@ def get_parent(node):
     return get_single(_parents, catch=True)
 
 
-def get_shp(node):
+def get_shp(node, verbose=0):
     """Get the shape of the given node.
 
     Args:
         node (str): node to read
+        verbose (int): print process data
 
     Returns:
         (str): shape node
     """
     _shps = cmds.listRelatives(node, shapes=True, noIntermediate=True)
+    lprint('SHAPES', _shps, verbose=verbose)
     if not len(_shps) == 1:
         raise ValueError("Multiple shapes found on {} - {}".format(
             node, ', '.join(_shps)))
