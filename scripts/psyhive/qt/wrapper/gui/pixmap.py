@@ -132,6 +132,7 @@ class HPixmap(QtGui.QPixmap):
             (QRect): rectangle that was drawn
         """
         from psyhive import qt
+
         _pix = qt.get_pixmap(pix)
         if resize:
             _pix = _pix.resize(resize)
@@ -516,7 +517,7 @@ def _get_rect(anchor, pos, size):
     elif anchor == 'L':
         _pos = pos - qt.get_p(0, _size.height()/2)
     elif anchor == 'TL':
-        _pos = pos
+        _pos = qt.get_p(pos)
     else:
         raise ValueError(anchor)
 

@@ -5,6 +5,15 @@ from psyhive.utils import wrap_fn
 NAME = None
 
 
+def batch_mode():
+    """Test for host being in batch mode (always False with no host).
+
+    Returns:
+        (bool): False
+    """
+    return False
+
+
 def _get_cur_scene():
     """None if no dcc."""
 

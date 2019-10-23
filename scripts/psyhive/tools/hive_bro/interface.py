@@ -20,7 +20,7 @@ class _HiveBroAssets(object):
     """Assets tab of HiveBro."""
 
     ui = None
-    _get_work_ctx_opts = None
+    _add_work_ctx_opts = None
 
     def __init__(self):
         """Constructor."""
@@ -62,7 +62,7 @@ class _HiveBroShots(object):
     """Shots tab of HiveBro."""
 
     ui = None
-    _get_work_ctx_opts = None
+    _add_work_ctx_opts = None
 
     def __init__(self):
         """Constructor."""
@@ -354,7 +354,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
     def _context__work(self, menu):
         _ver = get_single(self.ui.work.selected_data(), catch=True)
         if _ver:
-            self._get_work_ctx_opts(ver=_ver, menu=menu)
+            self._add_work_ctx_opts(ver=_ver, menu=menu)
 
     def _context__work_jump_to(self, menu):
 
@@ -419,7 +419,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             self.ui.task.select_text([_work.task])
             self.ui.work.select_data([_work])
 
-    def _get_work_ctx_opts(self, ver, menu):
+    def _add_work_ctx_opts(self, ver, menu):
         """Add context options for the given work file.
 
         Args:
@@ -436,18 +436,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             'Set comment', _set_comment_fn, icon=icons.EDIT)
 
         # Add output options
-        _outputs = ver.find_outputs()
-        menu.addSeparator()
-        if _outputs:
-            menu.add_label("Ouputs")
-            for _output in _outputs:
-                _label = '{} ({}/{})'.format(
-                    '_'.join(_output.basename.split("_")[1:-1]),
-                    _output.format, _output.extn)
-                _menu = menu.add_menu(_label)
-                _add_path_menu_items(menu=_menu, obj=_output)
-        else:
-            menu.add_label("No ouputs found")
+        self._add_work_ctx_outputs(ver=ver, menu=menu)
 
         # Add increments
         _incs = ver.find_increments()
@@ -460,6 +449,51 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
                 _add_path_menu_items(menu=_inc_menu, obj=_inc)
         else:
             menu.add_label('No increments found')
+
+    def _add_work_ctx_outputs(self, ver, menu):
+        """Add work file output context options.
+
+        Args:
+            ver (TTWorkFileBase): work file
+            menu (QMenu): menu to add to
+        """
+        _outputs = ver.find_outputs()
+        menu.addSeparator()
+
+        # No outputs found
+        if not _outputs:
+            menu.add_label("No ouputs found")
+            return
+
+        menu.add_label("Outputs")
+
+        # For short list add individual outputs
+        if len(_outputs) < 10:
+            for _output in _outputs:
+                self._add_work_ctx_output(menu=menu, output=_output)
+            return
+
+        # Organise into names
+        _names = sorted(set([_output.output_name for _output in _outputs]))
+        for _name in _names:
+            _name_menu = menu.add_menu(_name)
+            _name_outputs = [_output for _output in _outputs
+                             if _output.output_name == _name]
+            for _output in _name_outputs:
+                self._add_work_ctx_output(menu=_name_menu, output=_output)
+
+    def _add_work_ctx_output(self, menu, output):
+        """Add work file context options for the given output.
+
+        Args:
+            menu (QMenu): menu to add to
+            output (TTOutputBase): output to add options for
+        """
+        _label = '{} ({}/{})'.format(
+            '_'.join(output.basename.split("_")[1:-1]),
+            output.format, output.extn)
+        _menu = menu.add_menu(_label)
+        _add_path_menu_items(menu=_menu, obj=output)
 
 
 class _HiveBroStandalone(qt.HUiDialog, _HiveBro):
@@ -481,6 +515,16 @@ def _add_path_menu_items(menu, obj):
         menu (QMenu): menu to add items to
         obj (Path): path object
     """
+
+    # Add label
+    if isinstance(obj, Seq):
+        _start, _end = obj.find_range()
+        _join = '...' if obj.has_missing_frames() else '-'
+        _label = 'Seq {:d}{}{:d}'.format(_start, _join, _end)
+    else:
+        _label = 'File'
+    menu.add_label(_label)
+
     menu.add_action(
         'Copy path', wrap_fn(copy_text, obj.path),
         icon=icons.COPY)
@@ -508,7 +552,7 @@ def _add_path_menu_items(menu, obj):
 
         # Reference asset
         if isinstance(obj, tk.TTOutputFileBase):
-            _fn = wrap_fn(_reference_publish, obj.path)
+            _fn = wrap_fn(tk.reference_publish, obj.path)
             menu.add_action('Reference publish', _fn, icon=_pix)
 
     if isinstance(obj, Seq):
@@ -674,24 +718,24 @@ def _get_work_text(work, data):
     return _text
 
 
-def _reference_publish(file_, verbose=0):
-    """Reference a publish into the current scene.
+# def _reference_publish(file_, verbose=0):
+#     """Reference a publish into the current scene.
 
-    Args:
-        file_ (str): path to reference
-        verbose (int): print process data
-    """
-    _mgr = tk.find_tank_app('assetmanager')
-    _ref_util = tk.find_tank_mod('tk_multi_assetmanager.reference_util')
-    lprint('REF UTIL', _ref_util, verbose=verbose)
+#     Args:
+#         file_ (str): path to reference
+#         verbose (int): print process data
+#     """
+#     _mgr = tk.find_tank_app('assetmanager')
+#     _ref_util = tk.find_tank_mod('tk_multi_assetmanager.reference_util')
+#     lprint('REF UTIL', _ref_util, verbose=verbose)
 
-    _ref_list = _mgr.reference_list
-    _pub_dir = _ref_list.asset_manager.publish_directory
-    _publish = _pub_dir.publish_from_path(file_)
-    lprint('PUBLISH', _publish, verbose=verbose)
+#     _ref_list = _mgr.reference_list
+#     _pub_dir = _ref_list.asset_manager.publish_directory
+#     _publish = _pub_dir.publish_from_path(file_)
+#     lprint('PUBLISH', _publish, verbose=verbose)
 
-    _ref = _ref_util.reference_publish(_publish)
-    lprint('REF', _ref, verbose=verbose)
+#     _ref = _ref_util.reference_publish(_publish)
+#     lprint('REF', _ref, verbose=verbose)
 
 
 def _read_asset_work_files(path):

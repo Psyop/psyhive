@@ -38,6 +38,7 @@ ignore:
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
+        hv_test/diary/y19/d1021/scripts_manager.py
     invalid-unary-operand-type:
         maya_psyhive/tools/fkik_switcher/system.py
     line-too-long:
@@ -80,6 +81,7 @@ ignore:
         hv_test/diary/
     protected-access:
         /tests/
+        hv-test/bin/machi5
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
         psyhive/farm/psyq_plugin/mayapy_worker.p
@@ -174,11 +176,13 @@ allowed_names:
     keyPressEvent
     mouseMoveEvent
     mousePressEvent
+    mouseReleaseEvent
     objectName
     resizeEvent
     timerEvent
     ui
     userSetup
+    wheelEvent
 no_member_libs:
     cv2
     email

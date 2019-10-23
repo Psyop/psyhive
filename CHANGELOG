@@ -1,3 +1,25 @@
+#### v0.41.0 ####
+
+    Released: Wed 23rd Oct 2019
+
+    startup: added load/save to project script editor options (kcassidy)
+    
+    maya_psyhive:
+        startup added script editor project load/save options,
+    psyhive:
+        host.batch_mode added for no host,
+        icons.SAVE added,
+        pipe.project.maya_scripts_path added,
+        qt.get_size allow multiple args,
+        qt.PixmapUi remove existing before launch,
+        qt.PixmapUi.update_pixmap fill pixmap in redraw,
+        tools.hive_bro separate outputs by name if more than 10,
+        utils added ReadError/seq_from_frame,
+        utils.check_heart limit to 1 check per second,
+        utils.Seq ValueError on missing frame str,
+        utils.Seq.has_missing_frames added,
+
+
 #### v0.40.0 ####
 
     Released: Thu 17th Oct 2019

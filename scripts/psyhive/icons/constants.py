@@ -17,6 +17,7 @@ EDIT = EMOJI.find('Pencil')
 FILTER = EMOJI.find('Potable Water')
 OPEN = EMOJI.find('Open File Folder')
 REFRESH = EMOJI.find('Counterclockwise Arrows Button')
+SAVE = EMOJI.find('Floppy Disk')
 
 # Collections
 ANIMALS = Collection([

@@ -21,7 +21,8 @@ class Seq(object):
         _file = File(self.path)
         self.dir = _file.dir
         self.extn = _file.extn
-        assert _file.filename.count('.%04d.') == 1
+        if not _file.filename.count('.%04d.') == 1:
+            raise ValueError(path)
         self.frame_expr = '%04d'
         self.basename = _file.filename.split('.%04d.')[0]
         if frames:
@@ -165,6 +166,17 @@ class Seq(object):
         """
         return [self[_frame] for _frame in self.get_frames()]
 
+    def has_missing_frames(self):
+        """Test if this sequence has missing frames.
+
+        ie. every frame exists between the start and end frames.
+
+        Returns:
+            (bool): whether missing frames
+        """
+        _start, _end = self.find_range()
+        return self.get_frames() != range(_start, _end+1)
+
     def set_frames(self, frames):
         """Set cached list of frames.
 
@@ -220,3 +232,24 @@ class Collection(object):
 
     def __len__(self):
         return len(self.get_paths())
+
+
+def seq_from_frame(file_):
+    """Get a sequence object from the given file path.
+
+    Args:
+        file_ (str): path to frame of a sequence
+
+    Returns:
+        (Seq): file's sequence
+    """
+    _file = File(file_)
+    _tokens = _file.basename.split('.')
+    if not len(_tokens) >= 2:
+        raise ValueError(file_)
+    _frame = _tokens[-1]
+    if not _frame.isdigit():
+        raise ValueError(file_)
+    _base = '.'.join(_tokens[:-1])
+    return Seq('{}/{}.%0{:d}d.{}'.format(
+        _file.dir, _base, len(_frame), _file.extn))

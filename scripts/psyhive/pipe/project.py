@@ -5,7 +5,7 @@ import os
 
 from psyhive.utils import (
     find, store_result, Dir, get_single, lprint, passes_filter,
-    apply_filter, read_yaml, File)
+    apply_filter, read_yaml, File, abs_path)
 
 PROJECTS_ROOT = 'P:/projects'
 _PSYLAUNCH_CFG_FMT = r'{}\code\primary\config\psylaunch\settings.yml'
@@ -25,11 +25,16 @@ class Project(Dir):
         """
         _tokens = Dir(PROJECTS_ROOT).rel_path(path).split('/')
         _path = '/'.join([PROJECTS_ROOT, _tokens[0]])
+
         super(Project, self).__init__(_path)
+
         self.name = _tokens[0]
         if self.name.startswith('~'):
             raise ValueError
+
         self.seqs_path = '/'.join([self.path, 'sequences'])
+        self.maya_scripts_path = '{}/code/primary/addons/maya/scripts'.format(
+            os.environ['PSYOP_PROJECT_PATH'])
 
     def find_shot(self, name):
         """Find shot matching the given name.
@@ -78,7 +83,7 @@ class Project(Dir):
         Returns:
             (dict): psylaunch config data
         """
-        _yaml = _PSYLAUNCH_CFG_FMT.format(self.path)
+        _yaml = abs_path(_PSYLAUNCH_CFG_FMT.format(self.path))
         lprint('PSYLAUNCH YAML', _yaml, verbose=verbose)
         if edit:
             File(_yaml).edit()

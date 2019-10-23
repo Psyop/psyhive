@@ -86,24 +86,25 @@ def get_p(*args):
     raise ValueError(args)
 
 
-def get_size(size):
+def get_size(*args):
     """Get a size from the given object.
-
-    Args:
-        size (QSize|QPoint): object to convert
 
     Returns:
         (QSize): size object
     """
-    if isinstance(size, QtCore.QSize):
-        return size
-    elif isinstance(size, QtCore.QPoint):
-        return QtCore.QSize(size.x(), size.y())
-    elif isinstance(size, (tuple, list)):
-        return QtCore.QSize(size[0], size[1])
-    elif isinstance(size, six.string_types):
-        return QtCore.QSize(*[int(_token) for _token in size.split('x')])
-    raise ValueError(size)
+    if len(args) == 1:
+        _size = args[0]
+        if isinstance(_size, QtCore.QSize):
+            return _size
+        elif isinstance(_size, QtCore.QPoint):
+            return QtCore.QSize(_size.x(), _size.y())
+        elif isinstance(_size, (tuple, list)):
+            return QtCore.QSize(_size[0], _size[1])
+        elif isinstance(_size, six.string_types):
+            return QtCore.QSize(*[int(_token) for _token in _size.split('x')])
+    elif len(args) == 2:
+        return QtCore.QSize(*args)
+    raise ValueError(args)
 
 
 def get_pixmap(pix):

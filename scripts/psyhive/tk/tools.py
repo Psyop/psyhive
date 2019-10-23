@@ -12,8 +12,14 @@ def reference_publish(file_, verbose=0):
     """
     from psyhive import tk
 
+    # Find ref util module
     _mgr = tk.find_tank_app('assetmanager')
-    _ref_util = tk.find_tank_mod('tk_multi_assetmanager.reference_util')
+    _ref_util = tk.find_tank_mod(
+        'tk_multi_assetmanager.reference_util', catch=True)
+    if not _ref_util:
+        _mgr.init_app()
+        _ref_util = tk.find_tank_mod(
+            'tk_multi_assetmanager.reference_util')
     lprint('REF UTIL', _ref_util, verbose=verbose)
 
     _ref_list = _mgr.reference_list

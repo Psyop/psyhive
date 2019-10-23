@@ -2,16 +2,16 @@
 
 import logging
 
-from maya import cmds
+from maya import cmds, mel
 
-from psyhive import icons, refresh, qt, py_gui
+from psyhive import icons, refresh, qt, py_gui, pipe
 from psyhive.tools import track_usage
 from psyhive.utils import (
-    dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile)
+    dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile,
+    write_file)
 
 from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher
-from maya_psyhive.toolkits import anim
 
 _BUTTONS = {
     'IKFK': {
@@ -126,13 +126,18 @@ def _build_psyhive_menu():
             command=_cmd, image=yeti.ICON, label='Yeti cache tools')
 
     # Add anim tools
-    _cmd = '\n'.join([
-        'import {} as anim',
-        'import {} as py_gui',
-        'py_gui.MayaPyGui(anim.__file__)']).format(
-            anim.__name__, py_gui.__name__)
-    cmds.menuItem(
-        command=_cmd, image=anim.ICON, label='Anim tools')
+    try:
+        from maya_psyhive.toolkits import anim
+    except ImportError:
+        pass
+    else:
+        _cmd = '\n'.join([
+            'import {} as anim',
+            'import {} as py_gui',
+            'py_gui.MayaPyGui(anim.__file__)']).format(
+                anim.__name__, py_gui.__name__)
+        cmds.menuItem(
+            command=_cmd, image=anim.ICON, label='Anim tools')
 
     # Add show toolkits
     cmds.menuItem(divider=True)
@@ -163,6 +168,94 @@ def _build_psyhive_menu():
     return _menu
 
 
+def _script_editor_add_project_opts():
+    """Add script editor project load/save option."""
+    _menu = _script_editor_find_file_menu()
+
+    # Add divider
+    _div = 'psyProjectScriptDivider'
+    if cmds.menuItem(_div, query=True, exists=True):
+        cmds.deleteUI(_div)
+    cmds.menuItem(_div, divider=True, parent=_menu, dividerLabel='Psyop')
+
+    # Add open/save to project options
+    for _name, _label, _func, _icon in [
+            ('psyOpenFromProject',
+             'Open from Project...',
+             _script_editor_open_from_project,
+             icons.OPEN),
+            ('psySaveToProject',
+             'Save to Project...',
+             _script_editor_save_to_project,
+             icons.SAVE),
+    ]:
+        if cmds.menuItem(_name, query=True, exists=True):
+            cmds.deleteUI(_name)  # Replace existing
+        cmds.menuItem(
+            _name, label=_label, image=_icon, parent=_menu, command=_func)
+
+
+def _script_editor_save_to_project(*xargs):
+    """Execute save to project."""
+
+    del xargs  # Maya callbacks require args
+
+    # Get current editor
+    _cur_editor = [
+        _ui for _ui in cmds.lsUI(dumpWidgets=True, long=False)
+        if cmds.cmdScrollFieldExecuter(_ui, query=True, exists=True)
+        and not cmds.cmdScrollFieldExecuter(
+            _ui, query=True, isObscured=True)][0]
+
+    # Get file path
+    _src_type = cmds.cmdScrollFieldExecuter(
+        _cur_editor, query=True, sourceType=True)
+    _extn = {'mel': 'mel', 'python': 'py'}[_src_type]
+    _text = cmds.cmdScrollFieldExecuter(_cur_editor, query=True, text=True)
+    _file = cmds.fileDialog2(
+        fileMode=0,  # Single file doesn't need to exist
+        caption="Save Script", okCaption='Save',
+        startingDirectory=pipe.cur_project().maya_scripts_path,
+        fileFilter='{} Files (*.{})'.format(_extn.upper(), _extn))[0]
+
+    # Write file to disk
+    write_file(file_=_file, text=_text)
+
+
+def _script_editor_open_from_project(*xargs):
+    """Execute save to project."""
+    del xargs  # Maya callbacks require args
+
+    _cmd = '\n'.join([
+        '$gLastUsedDir = "{}";'
+        'handleScriptEditorAction "load";']).format(
+            pipe.cur_project().maya_scripts_path)
+    mel.eval(_cmd)
+
+
+def _script_editor_find_file_menu():
+    """Find script editor file menu.
+
+    Returns:
+        (str): script editor file menu name
+    """
+
+    # Find menu item
+    _menu = get_single([
+        _menu for _menu in cmds.lsUI(menus=True)
+        if cmds.menu(_menu, query=True, label=True) == 'File'
+        and not _menu == 'mainFileMenu'])
+
+    # Init menu if it has no children
+    if not cmds.menu(_menu, query=True, itemArray=True):
+        _init_cmd = cmds.menu(_menu, query=True, postMenuCommand=True)
+        print 'EXEC POST MENU CMD', _init_cmd
+        mel.eval(_init_cmd)
+        assert cmds.menu(_menu, query=True, itemArray=True)
+
+    return _menu
+
+
 @track_usage
 def user_setup():
     """User setup."""
@@ -179,3 +272,6 @@ def user_setup():
 
     # Add elements to psyop menu (deferred to make sure exists)
     cmds.evalDeferred(_add_elements_to_psyop_menu, lowestPriority=True)
+
+    # Add script editor save to project
+    cmds.evalDeferred(_script_editor_add_project_opts)

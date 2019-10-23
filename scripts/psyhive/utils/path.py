@@ -214,14 +214,16 @@ class File(Path):
             qt.ok_cancel("Delete file?\n\n"+self.path)
         os.remove(self.path)
 
-    def diff(self, other, label=None):
+    def diff(self, other, label=None, check_extn=True):
         """Show diffs between this and another text file.
 
         Args:
             other (str): path to other file
             label (str): pass label to diff app
-        """
-        diff(self.path, other, label=label)
+            check_extn (bool): check extension is approved (to avoid
+                binary compares)
+       """
+        diff(self.path, other, label=label, check_extn=check_extn)
 
     def edit(self, line_n=None, verbose=0):
         """Edit this file in a text editor.

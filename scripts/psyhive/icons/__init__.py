@@ -3,5 +3,5 @@
 from psyhive.icons.constants import (
     EMOJI,
     COPY, EDIT, FILTER, REFRESH,
-    ANIMALS, CATS, FRUIT, BROWSER, OPEN,
+    ANIMALS, CATS, FRUIT, BROWSER, OPEN, SAVE,
 )

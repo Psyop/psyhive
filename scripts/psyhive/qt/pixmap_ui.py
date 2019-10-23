@@ -1,5 +1,7 @@
 """Tools for managing interfaces controlled by a single updating pixmap."""
 
+import sys
+
 from psyhive.qt.wrapper import QtWidgets, HPixmap
 from psyhive.qt.interface import safe_timer_event
 from psyhive.qt.misc import get_size
@@ -19,6 +21,13 @@ class PixmapUi(QtWidgets.QDialog):
             title (str): interface title
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
         """
+
+        # Remove any existing intefaces
+        _dialog_stack_key = type(self).__name__
+        if _dialog_stack_key in sys.QT_DIALOG_STACK:
+            sys.QT_DIALOG_STACK[_dialog_stack_key].deleteLater()
+        sys.QT_DIALOG_STACK[_dialog_stack_key] = self
+
         super(PixmapUi, self).__init__()
         self.base_col = base_col
 
@@ -43,10 +52,15 @@ class PixmapUi(QtWidgets.QDialog):
         self.redraw()
         self.show()
 
+    def delete(self):
+        """Delete this interface."""
+        self.deleteLater()
+
     def redraw(self):
         """Redraw interface."""
         _size = self.size()
         _pix = HPixmap(_size)
+        _pix.fill(self.base_col)
         self.update_pixmap(_pix)
         self._label.setPixmap(_pix)
 
@@ -56,7 +70,6 @@ class PixmapUi(QtWidgets.QDialog):
         Args:
             pix (QPixmap): pixmap to update
         """
-        pix.fill(self.base_col)
 
     def resizeEvent(self, event):
         """Executed on resize.
