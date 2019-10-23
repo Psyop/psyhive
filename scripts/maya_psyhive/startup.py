@@ -212,14 +212,15 @@ def _script_editor_save_to_project(*xargs):
         _cur_editor, query=True, sourceType=True)
     _extn = {'mel': 'mel', 'python': 'py'}[_src_type]
     _text = cmds.cmdScrollFieldExecuter(_cur_editor, query=True, text=True)
-    _file = cmds.fileDialog2(
+    _file = get_single(cmds.fileDialog2(
         fileMode=0,  # Single file doesn't need to exist
         caption="Save Script", okCaption='Save',
         startingDirectory=pipe.cur_project().maya_scripts_path,
-        fileFilter='{} Files (*.{})'.format(_extn.upper(), _extn))[0]
+        fileFilter='{} Files (*.{})'.format(_extn.upper(), _extn)), catch=True)
 
     # Write file to disk
-    write_file(file_=_file, text=_text)
+    if _file:
+        write_file(file_=_file, text=_text)
 
 
 def _script_editor_open_from_project(*xargs):

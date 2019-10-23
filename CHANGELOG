@@ -1,3 +1,12 @@
+#### v0.41.1 ####
+
+    Released: Wed 23rd Oct 2019
+
+    script editor: catch error on cancel save to project
+    
+    maya_psyhive: startup catch error on cancel save to project
+
+
 #### v0.41.0 ####
 
     Released: Wed 23rd Oct 2019
