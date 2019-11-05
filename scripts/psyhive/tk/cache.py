@@ -10,9 +10,11 @@ from psyhive.utils import (
     Cacheable, store_result_on_obj, find,
     lprint, dprint, store_result_content_dependent, Seq)
 
+from psyhive.tk.templates.base import (
+    TTWorkFileBase, TTWorkAreaBase, TTOutputNameBase, TTStepRootBase)
 from psyhive.tk.templates.assets import (
     TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile,
-    TTAssetOutputVersion)
+    TTAssetOutputVersion, TTAssetOutputName, TTAssetStepRoot)
 from psyhive.tk.templates.shots import (
     TTMayaShotWork, TTShotWorkAreaMaya, TTShotRoot, TTShotStepRoot,
     TTShotOutputName, TTShotOutputVersion, TTNukeShotWork)
@@ -43,17 +45,23 @@ def _map_class_to_cacheable(class_):
     """
     from psyhive import tk
     return {
-        tk.TTAssetWorkAreaMaya: _CTTAssetWorkAreaMaya,
+
         tk.TTAssetOutputFile: _CTTAssetOutputFile,
+        tk.TTAssetOutputName: _CTTAssetOutputName,
         tk.TTAssetOutputVersion: _CTTAssetOutputVersion,
+        tk.TTAssetStepRoot: _CTTAssetStepRoot,
+        tk.TTAssetWorkAreaMaya: _CTTAssetWorkAreaMaya,
+
         tk.TTShotOutputName: _CTTShotOutputName,
         tk.TTShotOutputVersion: _CTTShotOutputVersion,
         tk.TTShotRoot: _CTTShotRoot,
         tk.TTShotStepRoot: _CTTShotStepRoot,
         tk.TTShotWorkAreaMaya: _CTTShotWorkAreaMaya,
+
         tk.TTMayaAssetWork: _CTTMayaAssetWork,
         tk.TTMayaShotWork: _CTTMayaShotWork,
         tk.TTNukeShotWork: _CTTNukeShotWork,
+
     }[class_]
 
 
@@ -149,11 +157,11 @@ class _CTTShotRoot(TTShotRoot):
             for _step in super(_CTTShotRoot, self).find_step_roots()]
 
 
-class _CTTShotStepRoot(TTShotStepRoot):
-    """Cacheable TTShotStepRoot object."""
+class _CTTStepRootBase(object):
+    """Base class for any cacheable step root."""
 
     @store_result_on_obj
-    def _read_output_names(self, verbose=0):
+    def read_output_names(self, verbose=0):
         """Find output names.
 
         Args:
@@ -162,14 +170,20 @@ class _CTTShotStepRoot(TTShotStepRoot):
         Returns:
             (_CTTShotOutputName list): output names
         """
-        return [
-            obtain_cacheable(_name)
-            for _name in super(_CTTShotStepRoot, self)._read_output_names(
-                verbose=verbose)]
+        _names = TTStepRootBase.read_output_names(self, verbose=verbose)
+        return [obtain_cacheable(_name) for _name in _names]
 
 
-class _CTTShotOutputName(TTShotOutputName):
-    """Cacheable TTShotOutputName object."""
+class _CTTAssetStepRoot(_CTTStepRootBase, TTAssetStepRoot):
+    """Cacheable TTShotStepRoot object."""
+
+
+class _CTTShotStepRoot(_CTTStepRootBase, TTShotStepRoot):
+    """Cacheable TTShotStepRoot object."""
+
+
+class _CTTOutputNameBase(object):
+    """Base class for any cacheable output name."""
 
     @store_result_on_obj
     def find_vers(self, catch=False):
@@ -181,8 +195,16 @@ class _CTTShotOutputName(TTShotOutputName):
         Returns:
             (TTShotOutputVersion list): versions
         """
-        _vers = super(_CTTShotOutputName, self).find_vers(catch=catch)
+        _vers = TTOutputNameBase.find_vers(self, catch=catch)
         return [obtain_cacheable(_ver) for _ver in _vers]
+
+
+class _CTTAssetOutputName(_CTTOutputNameBase, TTAssetOutputName):
+    """Cacheable TTAssetOutputName object."""
+
+
+class _CTTShotOutputName(_CTTOutputNameBase, TTShotOutputName):
+    """Cacheable TTShotOutputName object."""
 
 
 class _CTTAssetOutputVersion(TTAssetOutputVersion):
@@ -269,20 +291,7 @@ class _CTTWorkAreaBase(object):
         Returns:
             (TTWorkIncrementBase list): increment files
         """
-        _tmp_inc = self.map_to(
-            self.maya_inc_type, Task='blah', increment=0, extension='mb',
-            version=0)
-        print 'FINDING INCREMENTS'
-
-        _incs = []
-        for _path in find(_tmp_inc.dir, depth=1, type_='f'):
-            try:
-                _inc = self.maya_inc_type(_path)
-            except ValueError:
-                continue
-            _incs.append(_inc)
-
-        return _incs
+        return TTWorkAreaBase.find_increments(self)
 
     @store_result_on_obj
     def find_work(self, force=False, verbose=1):
@@ -394,11 +403,7 @@ class _CTTWorkFileBase(Cacheable):
         Returns:
             (TTWorkIncrementBase list): list of incs
         """
-        _area = self.get_work_area()
-        _incs = [
-            _inc for _inc in _area.find_increments(force=force)
-            if _inc.version == self.version and _inc.task == self.task]
-        return _incs
+        return TTWorkFileBase.find_increments(self)
 
     @store_result_on_obj
     def find_latest(self, vers=None):

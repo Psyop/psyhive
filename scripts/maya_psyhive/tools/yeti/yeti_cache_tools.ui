@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>248</width>
-    <height>374</height>
+    <width>282</width>
+    <height>497</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,19 +44,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="apply_on_complete">
+       <property name="text">
+        <string>Apply cache to yeti nodes on completion</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="spacing">
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="cache_write_asset">
+        <widget class="QPushButton" name="cache_write_assets">
          <property name="text">
-          <string>Cache selected asset</string>
+          <string>Cache selected assets</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cache_write_asset_help">
+        <widget class="QPushButton" name="cache_write_assets_help">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -103,6 +110,52 @@
        </item>
        <item>
         <widget class="QPushButton" name="cache_write_node_help">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="cache_write_all_nodes">
+         <property name="text">
+          <string>Cache all yeti nodes</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cache_write_all_nodes_help">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -326,6 +379,141 @@
        </item>
        <item>
         <widget class="HPushButton" name="cache_read_root_help">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="minimumSize">
+        <size>
+         <width>37</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Utils</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="HPushButton" name="apply_viewport_updates">
+         <property name="text">
+          <string>Set up viewport updates</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="HPushButton" name="apply_viewport_updates_help">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="HPushButton" name="disable_viewport_updates">
+         <property name="text">
+          <string>Disable viewport updates</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="HPushButton" name="disable_viewport_updates_help">
          <property name="minimumSize">
           <size>
            <width>0</width>

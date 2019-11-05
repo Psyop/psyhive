@@ -1,5 +1,7 @@
 """Constants for qt tools."""
 
+from psyhive.qt.wrapper import QtGui
+
 COLS = [
     "AliceBlue",
     "AntiqueWhite",
@@ -167,3 +169,5 @@ NICE_COLS = [
     'mediumorchid', 'darkmagenta', 'magenta', 'plum', 'purple', 'thistle',
     'violet', 'orchid', 'mediumvioletred', 'deeppink', 'hotpink',
     'palevioletred', 'crimson', 'pink', 'lightpink']
+
+BLANK = QtGui.QColor(0, 0, 0, 0)

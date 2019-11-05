@@ -4,14 +4,9 @@ The local flag allows the job to be executed on the local machine.
 
 To set this up:
 
-    Start
-        > services
-        > qubeworker (right-click)
-        > stop
-    Explorer
-        > C:/Program Files/pfx/qube/sbin (shift-right-click)
-        > Open Powershell window here
-        > Enter "worker --desktop"
+    Start > services > qubeworker (right-click) > stop
+    In Powershell:
+        cd "C:/Program Files/pfx/qube/sbin"; worker --desktop
 
 """
 

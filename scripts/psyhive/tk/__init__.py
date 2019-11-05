@@ -10,7 +10,8 @@ from psyhive.tk.templates.base import TTWorkFileBase, TTOutputFileBase
 from psyhive.tk.templates.assets import (
     TTAssetOutputFile, TTAssetOutputVersion, TTAssetRoot,
     TTMayaAssetWork, find_asset_roots, TTAssetOutputName,
-    TTAssetWorkAreaMaya, TTMayaAssetIncrement, TTAssetOutputFileSeq)
+    TTAssetWorkAreaMaya, TTMayaAssetIncrement, TTAssetOutputFileSeq,
+    TTAssetStepRoot)
 from psyhive.tk.templates.shots import (
     TTShotOutputName, TTShotOutputVersion, TTMayaShotWork,
     TTMayaShotIncrement, find_shots, find_sequences, TTShotRoot,

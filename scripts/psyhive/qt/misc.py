@@ -1,5 +1,6 @@
 """Miscellaneous tools for managing qt."""
 
+import os
 import six
 
 from psyhive.utils import get_result_storer
@@ -116,14 +117,16 @@ def get_pixmap(pix):
     Returns:
         (HPixmap): pixmap object
     """
-    from psyhive import qt
+    from psyhive import qt, icons
 
     if isinstance(pix, qt.HPixmap):
         return pix
     elif isinstance(pix, QtGui.QPixmap):
         return qt.HPixmap(pix)
     elif isinstance(pix, six.string_types):
-        return qt.HPixmap(pix)
+        if os.path.exists(pix):
+            return qt.HPixmap(pix)
+        return qt.HPixmap(icons.EMOJI.find(pix))
     raise ValueError(pix)
 
 

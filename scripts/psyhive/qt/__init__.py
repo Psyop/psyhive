@@ -15,7 +15,7 @@ from psyhive.qt.wrapper import (
 from psyhive.qt.maya_palette import set_maya_palette
 from psyhive.qt.misc import (
     get_application, get_col, get_p, get_size, get_pixmap, get_icon)
-from psyhive.qt.constants import COLS, NICE_COLS
+from psyhive.qt.constants import COLS, NICE_COLS, BLANK
 
 from psyhive.qt.interface import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,

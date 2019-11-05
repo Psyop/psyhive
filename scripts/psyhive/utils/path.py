@@ -417,6 +417,9 @@ def find(
     _results = []
     _dir = abs_path(dir_ or os.getcwd())
 
+    if extn and extn.startswith('.'):
+        raise ValueError("Extn should not start with period - "+extn)
+
     # Get a list of files in dir
     try:
         _files = os.listdir(_dir)
@@ -435,38 +438,10 @@ def find(
             if _depth:
                 _results += find(_path, depth=_depth, **_kwargs)
 
-        # Apply type filter
-        if type_ is None:
-            pass
-        elif type_ == 'd':
-            if not _is_dir:
-                continue
-        elif type_ == 'f':
-            if not os.path.isfile(_path):
-                lprint(' - NOT FILE', verbose=verbose)
-                continue
-        elif type_ == 'l':
-            if not os.path.islink(_path):
-                continue
-        elif type_:
-            raise ValueError(type_)
-
-        # Apply extn filter
-        if extn and not Path(_path).extn == extn:
-            lprint(' - BAD EXTN', verbose=verbose)
-            continue
-
-        # Apply base filter
-        if base and not _file.startswith(base):
-            continue
-
-        # Apply filter
-        if filter_ and not passes_filter(_path, filter_):
-            lprint(' - FILTERED', verbose=verbose)
-            continue
-
-        if name and not _file == name:
-            lprint(' - NAME FILTER', verbose=verbose)
+        # Apply filters
+        if not _find_path_passes_filters(
+                path=_path, is_dir=_is_dir, type_=type_, name=name,
+                filter_=filter_, base=base, extn=extn):
             continue
 
         _results.append(_path)
@@ -481,6 +456,59 @@ def find(
             results=_results, class_=class_)
 
     return sorted(_results)
+
+
+def _find_path_passes_filters(path, is_dir, type_, extn, base, filter_,
+                              name, verbose=0):
+    """Test if a path passes find filters.
+
+    Args:
+        path (str): path to test
+        is_dir (bool): whether path is a dir
+        type_ (str): filter by path type (f=files, d=dirs, l=links)
+        extn (str): filter by extension
+        base (str): filter by file basename
+        filter_ (str): apply filter to the list
+        name (str): match exact file/dir name
+        verbose (int): print process data
+
+    Returns:
+        (bool): whether path passes filters
+    """
+
+    # Apply type filter
+    if type_ is None:
+        pass
+    elif type_ == 'd':
+        if not is_dir:
+            return False
+    elif type_ == 'f':
+        if not os.path.isfile(path):
+            lprint(' - NOT FILE', verbose=verbose)
+            return False
+    elif type_ == 'l':
+        if not os.path.islink(path):
+            return False
+    elif type_:
+        raise ValueError(type_)
+
+    # Apply other filters
+    _path = Path(path)
+    if extn and not _path.extn == extn:
+        lprint(' - BAD EXTN', verbose=verbose)
+        _result = False
+    elif base and not _path.filename.startswith(base):
+        _result = False
+    elif filter_ and not passes_filter(path, filter_):
+        lprint(' - FILTERED', verbose=verbose)
+        _result = False
+    elif name and not _path.filename == name:
+        lprint(' - NAME FILTER', verbose=verbose)
+        _result = False
+    else:
+        _result = True
+
+    return _result
 
 
 def get_copy_path_fn(path):

@@ -1,6 +1,6 @@
 """General tools relating to tank."""
 
-from psyhive.utils import lprint, get_single
+from psyhive.utils import lprint
 
 
 def reference_publish(file_, verbose=0):
@@ -30,4 +30,4 @@ def reference_publish(file_, verbose=0):
     _ref = _ref_util.reference_publish(_publish)
     lprint('REF', _ref, verbose=verbose)
 
-    return get_single(_ref)
+    return _ref[0]

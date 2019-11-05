@@ -193,7 +193,7 @@ class TTStepRootBase(TTDirBase):
         Returns:
             (TTOutputNameBase list): output names list
         """
-        _names = self._read_output_names(verbose=verbose)
+        _names = self.read_output_names(verbose=verbose)
         if output_name:
             _names = [_name for _name in _names
                       if _name.output_name == output_name]
@@ -243,7 +243,7 @@ class TTStepRootBase(TTDirBase):
             return self.work_area_maya_type(_tmpl.apply_fields(self.data))
         raise ValueError(dcc)
 
-    def _read_output_names(self, verbose=1):
+    def read_output_names(self, verbose=1):
         """Find output names within this step root.
 
         Args:
@@ -261,6 +261,28 @@ class TTWorkAreaBase(TTDirBase):
     """Base class for any work area tank template."""
 
     work_type = None
+    maya_inc_type = None
+
+    def find_increments(self):
+        """Find increments belonging to this work area.
+
+        Returns:
+            (TTWorkIncrementBase list): increment files
+        """
+        _tmp_inc = self.map_to(
+            self.maya_inc_type, Task='blah', increment=0, extension='mb',
+            version=0)
+        print 'FINDING INCREMENTS'
+
+        _incs = []
+        for _path in find(_tmp_inc.dir, depth=1, type_='f'):
+            try:
+                _inc = self.maya_inc_type(_path)
+            except ValueError:
+                continue
+            _incs.append(_inc)
+
+        return _incs
 
     def find_work_files(self):
         """Find work files in this shot area.
@@ -351,6 +373,18 @@ class TTWorkFileBase(TTBase, File):
             path=self.path)
         _tk_workfile._modified_time = time.time()
         _fileops.user_settings.add_workfile_to_recent_settings(_tk_workfile)
+
+    def find_increments(self):
+        """Find increments of this work file.
+
+        Returns:
+            (TTWorkIncrementBase list): list of incs
+        """
+        _area = self.get_work_area()
+        _incs = [
+            _inc for _inc in _area.find_increments()
+            if _inc.version == self.version and _inc.task == self.task]
+        return _incs
 
     def find_latest(self, vers=None):
         """Find latest version of this work file stream.

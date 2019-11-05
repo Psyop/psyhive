@@ -29,6 +29,26 @@ _FPS_LOOKUP = {
     60.0: "ntscf"}
 
 
+def restore_frame(func):
+    """Decorator to execute a function, restoring the original frame.
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _restore_frame_fn(*args, **kwargs):
+        _frame = cmds.currentTime(query=True)
+        _result = func(*args, **kwargs)
+        cmds.currentTime(_frame)
+        return _result
+
+    return _restore_frame_fn
+
+
 def restore_ns(func):
     """Decorator to execute a function, restoring the original namespace.
 

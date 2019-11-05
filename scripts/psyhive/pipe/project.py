@@ -34,7 +34,7 @@ class Project(Dir):
 
         self.seqs_path = '/'.join([self.path, 'sequences'])
         self.maya_scripts_path = '{}/code/primary/addons/maya/scripts'.format(
-            os.environ['PSYOP_PROJECT_PATH'])
+            os.environ.get('PSYOP_PROJECT_PATH'))
 
     def find_shot(self, name):
         """Find shot matching the given name.

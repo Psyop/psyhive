@@ -3,7 +3,7 @@
 import os
 
 from psyhive.utils.cache import store_result_on_obj
-from psyhive.utils.path import File, abs_path, find, test_path
+from psyhive.utils.path import File, abs_path, find, test_path, Dir
 from psyhive.utils.misc import system
 
 
@@ -177,6 +177,14 @@ class Seq(object):
         _start, _end = self.find_range()
         return self.get_frames() != range(_start, _end+1)
 
+    def parent(self):
+        """Get parent dir of this seq.
+
+        Returns:
+            (Dir): parent
+        """
+        return Dir(self.dir)
+
     def set_frames(self, frames):
         """Set cached list of frames.
 
@@ -234,11 +242,12 @@ class Collection(object):
         return len(self.get_paths())
 
 
-def seq_from_frame(file_):
+def seq_from_frame(file_, catch=False):
     """Get a sequence object from the given file path.
 
     Args:
         file_ (str): path to frame of a sequence
+        catch (bool): no error on fail to find seq
 
     Returns:
         (Seq): file's sequence
@@ -249,6 +258,8 @@ def seq_from_frame(file_):
         raise ValueError(file_)
     _frame = _tokens[-1]
     if not _frame.isdigit():
+        if catch:
+            return False
         raise ValueError(file_)
     _base = '.'.join(_tokens[:-1])
     return Seq('{}/{}.%0{:d}d.{}'.format(

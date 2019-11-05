@@ -244,13 +244,12 @@ def _script_editor_find_file_menu():
     # Find menu item
     _menu = get_single([
         _menu for _menu in cmds.lsUI(menus=True)
-        if cmds.menu(_menu, query=True, label=True) == 'File'
-        and not _menu == 'mainFileMenu'])
+        if cmds.menu(_menu, query=True, label=True) == 'File' and
+        'ScriptEditor' in cmds.menu(_menu, query=True, postMenuCommand=True)])
 
     # Init menu if it has no children
     if not cmds.menu(_menu, query=True, itemArray=True):
         _init_cmd = cmds.menu(_menu, query=True, postMenuCommand=True)
-        print 'EXEC POST MENU CMD', _init_cmd
         mel.eval(_init_cmd)
         assert cmds.menu(_menu, query=True, itemArray=True)
 
