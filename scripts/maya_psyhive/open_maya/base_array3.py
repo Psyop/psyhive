@@ -59,6 +59,10 @@ class BaseArray3(object):
         return self.__class__(
             self[0]/other, self[1]/other, self[2]/other)
 
+    def __mul__(self, other):
+        return self.__class__(
+            self[0]*other, self[1]*other, self[2]*other)
+
     def __str__(self):
         return '<{}:({})>'.format(
             type(self).__name__.strip('_'),

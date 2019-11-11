@@ -28,6 +28,7 @@ except ImportError:
     pass
 else:
     from maya_psyhive import ref
+    from maya_psyhive.utils import get_fps, save_as
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
@@ -40,7 +41,6 @@ else:
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
     set_start = wrap_fn(cmds.playbackOptions, arg_to_kwarg='minTime')
     set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
-    from maya_psyhive.utils import get_fps
 
 
 def cur_scene():

@@ -5,7 +5,7 @@ import copy
 from maya import cmds
 from maya.api import OpenMaya as om
 
-from psyhive.utils import lprint
+from psyhive.utils import lprint, get_single
 
 from maya_psyhive.open_maya.utils import IndexedAttrGetter
 from maya_psyhive.open_maya.base_transform import BaseTransform
@@ -76,6 +76,18 @@ class HFnMesh(BaseTransform, om.MFnMesh):
             return _mesh_to_ray_intersection(mesh=self, ray=other)
         else:
             raise ValueError(other)
+
+    @property
+    def make(self):
+        """Find make node for this mesh (if any).
+
+        TODO: extend this for other mesh types.
+
+        Returns:
+            (HFnDependencyNode): make node
+        """
+        return get_single(self.shp.find_connected(type_='polyPlane'),
+                          catch=True)
 
 
 def _mesh_to_ray_intersection(

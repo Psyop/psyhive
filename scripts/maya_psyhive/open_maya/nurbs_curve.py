@@ -99,6 +99,18 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
 
         return self.length()*_scale.x
 
+    @property
+    def make(self):
+        """Find make node for this curve (if any).
+
+        TODO: extend for other curve types.
+
+        Returns:
+            (HFnDependencyNode): make node
+        """
+        return get_single(self.shp.find_connected(type_='makeNurbCircle'),
+                          catch=True)
+
     def motion_path(self, trg, add_u_length=False, follow_axis='y',
                     up_axis='z'):
         """Attach the target mode this curve using a motion path.

@@ -63,7 +63,7 @@ ignore:
         psyhive/tools/err_catcher.py
         psyhive/tools/hive_bro/interface.py
         hv_test/diary/
-        hv_test/release/misc.py
+        hv_test/release/rel_misc.py
         hv_test/toolkits/release_tools.py
         hv_test/tools/cod_bro.py
         hv_test/tools/qube/hive_qube.py

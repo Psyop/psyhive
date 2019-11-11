@@ -191,6 +191,17 @@ class Dir(Path):
 class File(Path):
     """Represents a file on disk."""
 
+    def apply_extn(self, extn):
+        """Update this file path with a different extension.
+
+        Args:
+            extn (str): new extension
+
+        Returns:
+            (File): new file path
+        """
+        return File('{}/{}.{}'.format(self.dir, self.basename, extn))
+
     def copy_to(self, file_):
         """Copy this file to another location.
 

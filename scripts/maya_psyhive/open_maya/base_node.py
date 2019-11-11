@@ -140,7 +140,7 @@ class BaseNode(object):
         # Find connections
         _conns = set()
         _this_conns = set(self.list_connections(
-            source=False, shapes=True) or [])
+            source=source, destination=destination, shapes=True) or [])
         for _conn in _this_conns:
             _conn = hom.HFnDependencyNode(_conn)
             _conns.add(_conn)

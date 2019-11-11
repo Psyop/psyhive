@@ -8,7 +8,7 @@ from maya import cmds
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint
+from psyhive.utils import get_single, lprint, test_path
 
 COLS = (
     "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
@@ -551,6 +551,21 @@ def restore_sel(func):
         return _result
 
     return _restore_sel_fn
+
+
+def save_as(file_, revert_filename=True):
+    """Save the current scene at the given path without changing cur filename.
+
+    Args:
+        file_ (str): path to save file to
+        revert_filename (bool): disable revert filename
+    """
+    test_path(os.path.dirname(file_))
+    _filename = cmds.file(query=True, location=True)
+    cmds.file(rename=file_)
+    cmds.file(save=True)
+    if revert_filename:
+        cmds.file(rename=_filename)
 
 
 def set_col(node, col):

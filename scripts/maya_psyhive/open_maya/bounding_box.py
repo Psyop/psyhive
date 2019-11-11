@@ -91,6 +91,26 @@ class HBoundingBox(om.MBoundingBox):
                 return True
         return False
 
+    @property
+    def max(self):
+        """Get bbox max point.
+
+        Returns:
+            (HPoint): max
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HPoint(super(HBoundingBox, self).max)
+
+    @property
+    def min(self):
+        """Get bbox min point.
+
+        Returns:
+            (HPoint): min
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HPoint(super(HBoundingBox, self).min)
+
     def size(self):
         """Get size of this bbox.
 

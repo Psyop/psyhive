@@ -159,3 +159,17 @@ def get_selected(type_=None, class_=None, multi=False, verbose=1):
     if multi:
         return _nodes
     return get_single(_nodes, name='selected object', verbose=verbose)
+
+
+def lerp(fr_, pt1, pt2):
+    """Linear interpolate between two points.
+
+    Args:
+        fr_ (float): interpolation fraction
+        pt1 (HPoint): start point
+        pt2 (HPoint): end point
+
+    Returns:
+        (HPoint): interpolated point
+    """
+    return pt1 + (pt2 - pt1) * fr_

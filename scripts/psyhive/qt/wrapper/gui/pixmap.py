@@ -39,7 +39,6 @@ class HPixmap(QtGui.QPixmap):
         _pnt = HPainter()
         _pnt.begin(self)
         _pnt.set_operation(operation)
-        _pnt.setRenderHint(HPainter.Antialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.drawArc(_rect, 0, 360*16)
         _pnt.end()
@@ -73,7 +72,6 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.Antialiasing, 1)
         _pnt.setBrush(_brush)
         _pnt.setPen(_pen)
         _pnt.drawEllipse(
@@ -82,7 +80,7 @@ class HPixmap(QtGui.QPixmap):
 
     def add_line(
             self, pt1, pt2, col='black', thickness=None, operation=None,
-            pen=None):
+            pen=None, verbose=0):
         """Draw a straight line on this pixmap.
 
         Args:
@@ -92,6 +90,7 @@ class HPixmap(QtGui.QPixmap):
             thickness (float): line thickness
             operation (str): compositing operation
             pen (QPen): override pen (ignores all other pen attrs)
+            verbose (int): print process data
         """
         from psyhive import qt
 
@@ -109,11 +108,12 @@ class HPixmap(QtGui.QPixmap):
             if thickness:
                 _pen.setWidthF(thickness)
 
+            lprint("COL", _col, verbose=verbose)
+
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.set_operation(operation)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
+        _pnt.set_operation(operation)
         _pnt.drawLine(_pt1.x(), _pt1.y(), _pt2.x(), _pt2.y())
         _pnt.end()
 
@@ -192,7 +192,6 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
         _pnt.drawPath(_path)
@@ -227,7 +226,6 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setBrush(_brush)
         _pnt.setPen(_pen)
         _pnt.drawPolygon(_poly)
@@ -261,7 +259,6 @@ class HPixmap(QtGui.QPixmap):
         _pnt = HPainter()
         _pnt.begin(self)
         _pnt.set_operation(operation)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
         _pnt.drawRect(_rect)
@@ -319,7 +316,6 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = qt.HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
         _pnt.drawRect(_rect)
@@ -349,7 +345,6 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = HPainter()
         _pnt.begin(self)
-        _pnt.setRenderHint(HPainter.HighQualityAntialiasing, 1)
         _pnt.add_text(**_kwargs)
         _pnt.end()
 
@@ -434,7 +429,7 @@ class HPixmap(QtGui.QPixmap):
             raise ValueError(width)
         _pix = QtGui.QPixmap.scaled(
             self, _width, _height,
-            transformMode=QtCore.Qt.SmoothTransformation)
+            transformMode=Qt.SmoothTransformation)
         return HPixmap(_pix)
 
     def save_as(self, path, force=False, verbose=0):
