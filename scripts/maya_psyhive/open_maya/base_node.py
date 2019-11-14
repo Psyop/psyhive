@@ -114,8 +114,9 @@ class BaseNode(object):
         Returns:
             (BaseNode list): list of child nodes
         """
+        _kwargs = {'type': type_} if type_ else {}
         _children = self.list_relatives(
-            type=type_, allDescendents=all_descendents)
+            allDescendents=all_descendents, **_kwargs)
         if class_:
             _children = [class_(_child) for _child in _children]
         return _children

@@ -16,7 +16,7 @@ class HPixmap(QtGui.QPixmap):
 
     def add_circle(
             self, pos, col='black', radius=10, thickness=None,
-            operation=None):
+            operation=None, pen=None):
         """Draw a circle on this pixmap.
 
         Args:
@@ -25,12 +25,13 @@ class HPixmap(QtGui.QPixmap):
             radius (int): circle radius
             thickness (float): line thickness
             operation (str): compositing operation
+            pen (QPen): override pen
         """
         from psyhive import qt
 
         _pos = qt.get_p(pos)
         _col = qt.get_col(col)
-        _pen = QtGui.QPen(_col)
+        _pen = pen or QtGui.QPen(_col)
         if thickness:
             _pen.setWidthF(thickness)
         _rect = QtCore.QRect(
@@ -43,7 +44,10 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawArc(_rect, 0, 360*16)
         _pnt.end()
 
-    def add_dot(self, pos, col='black', radius=1.0, outline=None):
+        return _rect
+
+    def add_dot(self, pos, col='black', radius=1.0, outline=None,
+                thickness=None, operation=None):
         """Draw a circle on this pixmap.
 
         Args:
@@ -51,6 +55,8 @@ class HPixmap(QtGui.QPixmap):
             col (str): dot colour
             radius (float): dot radius
             outline (QPen): apply outline pen
+            thickness (float): line thickness
+            operation (str): compositing operation
         """
         from psyhive import qt
 
@@ -59,9 +65,12 @@ class HPixmap(QtGui.QPixmap):
         _brush = QtGui.QBrush(_col)
 
         # Set outline
-        if not outline:
+        if thickness:
+            _pen = QtGui.QPen(qt.get_col('Black'))
+            _pen.setWidthF(thickness)
+        elif not outline:
             _pen = QtGui.QPen(_col)
-            _pen.setStyle(QtCore.Qt.NoPen)
+            _pen.setStyle(Qt.NoPen)
         elif isinstance(outline, QtGui.QPen):
             _pen = outline
         elif isinstance(outline, six.string_types):
@@ -74,6 +83,7 @@ class HPixmap(QtGui.QPixmap):
         _pnt.begin(self)
         _pnt.setBrush(_brush)
         _pnt.setPen(_pen)
+        _pnt.set_operation(operation)
         _pnt.drawEllipse(
             _pos.x()-radius, _pos.y()-radius, radius*2, radius*2)
         _pnt.end()
@@ -103,8 +113,8 @@ class HPixmap(QtGui.QPixmap):
         else:
             _col = qt.get_col(col)
             _pen = QtGui.QPen(_col)
-            _pen.setCapStyle(QtCore.Qt.RoundCap)
-            _pen.setJoinStyle(QtCore.Qt.RoundJoin)
+            _pen.setCapStyle(Qt.RoundCap)
+            _pen.setJoinStyle(Qt.RoundJoin)
             if thickness:
                 _pen.setWidthF(thickness)
 
@@ -177,12 +187,12 @@ class HPixmap(QtGui.QPixmap):
         else:
             _col = qt.get_col(col)
             _pen = pen or QtGui.QPen(_col)
-            _pen.setCapStyle(QtCore.Qt.RoundCap)
+            _pen.setCapStyle(Qt.RoundCap)
             if thickness:
                 _pen.setWidthF(thickness)
 
         _brush = QtGui.QBrush()
-        _brush.setStyle(QtCore.Qt.NoBrush)
+        _brush.setStyle(Qt.NoBrush)
 
         # Make path object
         _path = QtGui.QPainterPath()
@@ -232,7 +242,7 @@ class HPixmap(QtGui.QPixmap):
         _pnt.end()
 
     def add_rect(self, pos, size, col='white', outline='black', operation=None,
-                 anchor='TL'):
+                 anchor='TL', thickness=None):
         """Draw a rectangle on this pixmap.
 
         Args:
@@ -242,6 +252,7 @@ class HPixmap(QtGui.QPixmap):
             outline (str): outline colour
             operation (str): overlay mode
             anchor (str): position anchor point
+            thickness (float): line thickness
         """
         from psyhive import qt
 
@@ -255,6 +266,8 @@ class HPixmap(QtGui.QPixmap):
         else:
             _pen = QtGui.QPen()
             _pen.setStyle(Qt.NoPen)
+        if thickness:
+            _pen.setWidthF(thickness)
 
         _pnt = HPainter()
         _pnt.begin(self)

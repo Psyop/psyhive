@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>collapseForm</class>
+ <widget class="QWidget" name="collapseForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1009</width>
+    <height>162</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="formGLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QFrame" name="collapseFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="lineWidth">
+      <number>2</number>
+     </property>
+     <layout class="QGridLayout" name="frameGLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>0</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <item row="1" column="0" colspan="2">
+       <widget class="QToolButton" name="toolBtn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>100</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Meiryo</family>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QToolButton {	color: rgb(200, 200, 200); 
+						background-color:rgb(170, 70, 90, 90);  
+						border-bottom: 1px solid rgb(30,30,30);
+						border-right: 1px solid rgb(30,30,30);
+						border-top: 1px solid rgb(97, 97, 97);
+						border-left: 1px solid rgb(97, 97, 97);  }
+
+QToolButton:checked {	color: rgb(200,200, 200); 
+										background-color: rgba(170, 70, 90, 120);
+										border-top: 1px solid rgb(30,30,30);
+										border-left: 1px solid rgb(30,30,30);
+										border-bottom: 1px solid rgb(97, 97, 97);
+										border-right: 1px solid rgb(97, 97, 97);  }
+
+QToolButton:hover:!checked {	color: rgb(200, 200, 200); 
+													background-color: rgba(170, 70, 90, 120);   
+													border-bottom: 1px solid rgb(30,30,30);
+													border-right: 1px solid rgb(30,30,30);
+													border-top: 1px solid rgb(97, 97, 97);
+													border-left: 1px solid rgb(97, 97, 97);  }
+
+QToolButton:hover:checked {		color: rgb(200, 200, 200); 
+													background-color: rgba(170, 70, 90, 190);
+													border-top: 1px solid rgb(30,30,30);
+													border-left: 1px solid rgb(30,30,30);
+													border-bottom: 1px solid rgb(97, 97, 97);
+													border-right: 1px solid rgb(97, 97, 97);  }</string>
+        </property>
+        <property name="text">
+         <string>Frame</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::RightArrow</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QGroupBox" name="grp">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QGroupBox{
+	border: 1px solid rgba(170, 70, 90, 120);
+	border-radius: 0px;
+	margin-top: 0ex;
+	margin-bottom: 0ex;
+	padding: 2 2px;
+
+}
+
+QGroupBox:title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+	border: 1px solid rgba(170, 70, 90, 120);
+
+    padding: 10 0px;
+}</string>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="grpGLayout" rowstretch="0">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>toolBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>grp</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>138</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

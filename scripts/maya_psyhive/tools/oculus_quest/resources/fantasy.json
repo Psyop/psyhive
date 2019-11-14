@@ -1,0 +1,11 @@
+{ 
+"OCULUS_CENTER"       : [0, 1.7, 0],
+"DISTANCE_CLAMP"      : 1,
+"OCULUS_WIDTH"        : 4.5,
+"OCULUS_DEPTH"        : 4.5,
+"OCULUS_HEIGHT"       : 4.5,
+"FAR_CLIPPING_PLANE"  : 100000,
+"NEAR_CLIPPING_PLANE" : 0.1,
+"TEXEL_DENSITY"       : 1.0,
+"manual_points"       : [ [4.768, 1.58, 1.286], [1.325, 2.326, -5.402], [0.885, 3.149, 4.623], [-4.372, 2.391, -1.029], [-4.328, 1.69, 5.108], [0, 10, 0] ]
+}

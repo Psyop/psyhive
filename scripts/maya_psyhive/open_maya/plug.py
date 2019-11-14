@@ -196,6 +196,10 @@ class HPlug(om.MPlug):
         """
         return cmds.listConnections(self, **kwargs)
 
+    def loop_anim(self, **kwargs):
+        """Loop animation on this plug."""
+        self.find_anim().loop(**kwargs)
+
     def multiply_node(self, input_, output=None):
         """Connect this plug as the first input to a multiply node.
 

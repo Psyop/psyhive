@@ -89,55 +89,18 @@ def _build_psyhive_menu():
         cmds.menuItem(
             command=_data['cmd'], image=_data['image'], label=_data['label'])
 
-    # Add batch cache (not available at LittleZoo)
-    try:
-        from maya_psyhive.tools import batch_cache
-    except ImportError:
-        pass
-    else:
-        _cmd = '\n'.join([
-            'import {} as batch_cache',
-            'batch_cache.launch()']).format(batch_cache.__name__)
-        cmds.menuItem(
-            command=_cmd, image=batch_cache.ICON, label='Batch cache')
-
-    # Add batch rerender (not available at LittleZoo)
-    try:
-        from psyhive.tools import batch_rerender
-    except ImportError:
-        pass
-    else:
-        _cmd = '\n'.join([
-            'import {} as batch_rerender',
-            'batch_rerender.launch()']).format(batch_rerender.__name__)
-        cmds.menuItem(
-            command=_cmd, image=batch_rerender.ICON, label='Batch rerender')
-
-    # Add batch rerender (not available at LittleZoo)
-    try:
-        from maya_psyhive.tools import yeti
-    except ImportError:
-        pass
-    else:
-        _cmd = '\n'.join([
-            'import {} as yeti',
-            'yeti.launch_cache_tools()']).format(yeti.__name__)
-        cmds.menuItem(
-            command=_cmd, image=yeti.ICON, label='Yeti cache tools')
-
-    # Add anim tools
-    try:
-        from maya_psyhive.toolkits import anim
-    except ImportError:
-        pass
-    else:
-        _cmd = '\n'.join([
-            'import {} as anim',
-            'import {} as py_gui',
-            'py_gui.MayaPyGui(anim.__file__)']).format(
-                anim.__name__, py_gui.__name__)
-        cmds.menuItem(
-            command=_cmd, image=anim.ICON, label='Anim tools')
+    # Catch fail to install tools for offsite (eg. LittleZoo)
+    for _func in [
+            _ph_add_batch_cache,
+            _ph_add_batch_rerender,
+            _ph_add_yeti_tools,
+            _ph_add_anim_tools,
+            _ph_add_oculus_quest_toolkit,
+    ]:
+        try:
+            _func()
+        except ImportError:
+            print ' - ADD MENU ITEM FAILED:', _func
 
     # Add show toolkits
     cmds.menuItem(divider=True)
@@ -166,6 +129,59 @@ def _build_psyhive_menu():
         image=icons.EMOJI.find('Counterclockwise Arrows Button'))
 
     return _menu
+
+
+def _ph_add_batch_cache():
+    """Add psyhive batch cache tool."""
+    from maya_psyhive.tools import batch_cache
+    _cmd = '\n'.join([
+        'import {} as batch_cache',
+        'batch_cache.launch()']).format(batch_cache.__name__)
+    cmds.menuItem(
+        command=_cmd, image=batch_cache.ICON, label='Batch cache')
+
+
+def _ph_add_batch_rerender():
+    """Add psyhive batch rerender tool."""
+    from psyhive.tools import batch_rerender
+    _cmd = '\n'.join([
+        'import {} as batch_rerender',
+        'batch_rerender.launch()']).format(batch_rerender.__name__)
+    cmds.menuItem(
+        command=_cmd, image=batch_rerender.ICON, label='Batch rerender')
+
+
+def _ph_add_yeti_tools():
+    """Add psyhive yeti tools option."""
+    from maya_psyhive.tools import yeti
+    _cmd = '\n'.join([
+        'import {} as yeti',
+        'yeti.launch_cache_tools()']).format(yeti.__name__)
+    cmds.menuItem(
+        command=_cmd, image=yeti.ICON, label='Yeti cache tools')
+
+
+def _ph_add_anim_tools():
+    """Add psyhive anim tools option."""
+    from maya_psyhive.toolkits import anim
+    _cmd = '\n'.join([
+        'import {} as anim',
+        'import {} as py_gui',
+        'py_gui.MayaPyGui(anim.__file__)']).format(
+            anim.__name__, py_gui.__name__)
+    cmds.menuItem(
+        command=_cmd, image=anim.ICON, label='Anim tools')
+
+
+def _ph_add_oculus_quest_toolkit():
+    """Add psyhive oculus quest toolkit option."""
+    from maya_psyhive.tools import oculus_quest
+    _cmd = '\n'.join([
+        'import {} as oculus_quest',
+        'oculus_quest.launch()']).format(oculus_quest.__name__)
+    cmds.menuItem(
+        command=_cmd, image=icons.EMOJI.find("Eye"),
+        label='Oculus Quest toolkit')
 
 
 def _script_editor_add_project_opts():

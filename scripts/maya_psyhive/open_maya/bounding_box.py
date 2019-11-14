@@ -37,6 +37,16 @@ class HBoundingBox(om.MBoundingBox):
 
         return _cube
 
+    @property
+    def center(self):
+        """Get bbox centrepoint.
+
+        Returns:
+            (HPoint): centre
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HPoint(super(HBoundingBox, self).center)
+
     def get_corners(self):
         """Get list of 8 corner points.
 

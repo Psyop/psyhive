@@ -1,3 +1,29 @@
+#### v0.43.0 ####
+
+    Released: Wed 13th Nov 2019
+
+    oculus tools: added oculus quest toolkit [TOOLS-186]
+    
+    maya_psyhive:
+        lerp added,
+        BaseArray3.__mul__ added,
+        BaseNode.find_children bugfix type_ as None,
+        HBoundingBox center/max/min added as HPoint,
+        HFnMesh/HFnNurbsCurve added make,
+        HPlug.loop_anim added,
+        startup added oculus quest toolkit,
+        tools.oculus_quest added,
+        utils.save_as added,
+    psyhive:
+        host.save_as added,
+        qt.HPainter.begin force smooth transform + high quality antialias,
+        qt.HPixmap.add_circle added pen arg,
+        qt.HPixmap.add_circle returns QRect,
+        qt.HPixmap.add_dot added thickness/operation args,
+        qt.HPixmap.add_rect added thickness args,
+        utils.File.apply_extn added,
+
+
 #### v0.42.0 ####
 
     Released: Tue 5th Nov 2019
