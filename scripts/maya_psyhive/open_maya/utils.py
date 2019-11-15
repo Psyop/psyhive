@@ -1,5 +1,8 @@
 """General tools for open_maya module."""
 
+import math
+import random
+
 from maya import cmds
 from maya.api import OpenMaya as om
 
@@ -173,3 +176,18 @@ def lerp(fr_, pt1, pt2):
         (HPoint): interpolated point
     """
     return pt1 + (pt2 - pt1) * fr_
+
+
+def sph_rand():
+    """Generate a random point on a sphere.
+
+    Returns:
+        (mom.MPoint): random point
+    """
+    from maya_psyhive import open_maya as hom
+    _theta = random.random()*2*math.pi
+    _phi = random.random()*math.pi
+    return hom.HPoint(
+        math.cos(_theta) * math.sin(_phi),
+        math.sin(_theta) * math.sin(_phi),
+        math.cos(_phi))

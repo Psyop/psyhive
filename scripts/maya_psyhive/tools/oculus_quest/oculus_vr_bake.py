@@ -7,7 +7,6 @@ import re
 import sys
 
 import shiboken2
-from Qt import QtUiTools, QtCore, QtGui, QtWidgets
 
 from maya import OpenMayaUI, cmds
 
@@ -17,6 +16,8 @@ import houdini_comp
 import texture_convert
 
 from psyhive import qt, tk, host
+from psyhive.qt import QtUiTools, QtCore, QtGui, QtWidgets
+from psyhive.tools import catch_error
 from psyhive.utils import File, dprint, abs_path
 
 FPS = "75fps"
@@ -595,8 +596,8 @@ def create_bake_geometry():
     abstract_maya.disable_skin_clusters(node)
 
     abstract_maya.delete_vertex_colors(BAKE)
-    #abstract_maya.assign_checker_material(BAKE)
-    abstract_maya.assign_mipmap_debug_material(BAKE)
+    # abstract_maya.assign_checker_material(BAKE)
+    # abstract_maya.assign_mipmap_debug_material(BAKE)
     reset_outliner_order()
 
 
@@ -669,7 +670,7 @@ def get_file_textures(output_directory, bake_reflection, resolution, image_forma
 
 
 def bake_textures(resolution, min_shading_rate, max_subdivs, admc_threshold, local_subdivs_mult, output_directory,
-                  image_format, do_reflection=False, render_background=False, map_list=None,
+                  image_format, do_reflection=False, map_list=None,
                   use_default_material=False, edge_padding=5):
     """
 
@@ -721,18 +722,17 @@ def bake_textures(resolution, min_shading_rate, max_subdivs, admc_threshold, loc
 
 
 def render_latlong(position, resolution, min_shading_rate, max_subdivs, admc_threshold, local_subdivs_mult,
-                   output_directory, render_background, image_format, use_default_material, stereo_latlong, render_cube_map):
+                   output_directory, image_format, use_default_material, stereo_latlong, render_cube_map):
     output_file = get_latlong_name(output_directory, resolution, image_format)
     abstract_maya.render_latlong(position, output_file, resolution, min_shading_rate, max_subdivs, admc_threshold,
-                                local_subdivs_mult, render_background,
-                                image_format, use_default_material, stereo_latlong, render_cube_map)
+                                local_subdivs_mult, image_format, use_default_material, stereo_latlong, render_cube_map)
 
 
 def qc_render(position, resolution, fov, min_shading_rate, max_subdivs, admc_threshold,
-                   output_directory, render_background, image_format):
+                   output_directory, image_format):
     output_file = get_qc_render_name(output_directory, resolution, image_format)
     abstract_maya.qc_render(position, output_file, resolution, fov, min_shading_rate, max_subdivs, admc_threshold,
-                                render_background, image_format)
+                                image_format)
 
 @abstract_maya.print_func_name
 def delete_occluded_faces(
@@ -848,7 +848,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             local_subdivs_mult,
             preset_name,
             bake_reflection,
-            render_background,
             map_count,
             skip_existing_maps,
             output_directory,
@@ -876,7 +875,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             "output_directory",
             "preset_name",
             "reflection_mix",
-            "render_background",
             "render_cube_map",
             "resolution",
             "skip_existing_maps",
@@ -948,7 +946,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
 
         self.bake_reflection = bake_reflection
         self.skip_existing_maps = skip_existing_maps
-        self.render_background = render_background
         self.use_default_material = use_default_material
         self.edge_padding = edge_padding
 
@@ -1066,7 +1063,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
                     "<html>Create parent nodes to classify bake, set frame range based on animation, create center "
                     "camera, "
                     "create oculus bounding box for scale reference.", style2],
-            ["Setup Bake", lambda x=self.setup_bake: x(),
+            ["Setup Bake", self.setup_bake,
                     "<html>Triangulate source, duplicate source geometry to bake copy, deactivate deformers, "
                     "cull occluded "
                     "faces, resize UVs based on screen space from center of bounding box, divide geometry into the "
@@ -1189,15 +1186,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
     @bake_reflection.setter
     def bake_reflection(self, value):
         self.render_bake_options.ui.bake_reflection_checkbox.setChecked(value)
-
-    @property
-    def render_background(self):
-        return self.render_global_options.ui.bake_background_render_checkbox.isChecked()
-
-    @render_background.setter
-    def render_background(self, value):
-        self.render_global_options.ui.bake_background_render_checkbox.setChecked(value)
-
+    
     @property
     def use_default_material(self):
         return self.render_global_options.ui.bake_use_default_material_checkbox.isChecked()
@@ -1319,7 +1308,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             self.admc_threshold,
             self.local_subdivs_mult,
             self.output_directory,
-            self.render_background,
             self.image_format,
             self.use_default_material,
             self.stereo_render,
@@ -1338,7 +1326,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             self.max_subdivs,
             self.admc_threshold,
             self.output_directory,
-            self.render_background,
             self.image_format
         )
 
@@ -1351,7 +1338,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             map_list = self.get_active_map_list()
             bake_textures(self.resolution, self.min_shading_rate, self.max_subdivs, self.admc_threshold,
                           self.local_subdivs_mult, self.output_directory, self.image_format, self.bake_reflection,
-                          self.render_background, map_list, self.use_default_material, self.edge_padding)
+                          map_list, self.use_default_material, self.edge_padding)
             self.bake_finished()
         except:
             self.update_output_files()
@@ -1378,7 +1365,6 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
 
     @abstract_maya.print_func_name
     @abstract_maya.keep_current_camera
-    
     def setup_bake(self, struct=True, geo=True, occ=True, uv=True):
         # Auto-runs create bake structure
         if struct:
@@ -1545,6 +1531,14 @@ def get_main_window():
 def launch():
     preset_name = "default"
     image_format = "png"
+    
+    # Check for current work
+    if not tk.cur_work():
+        qt.notify_warning(
+            'No current work file.\n\nPlease save your scene so '
+            'the toolkit know where to export data to.',
+            title='No work file')
+        return
 
     filename_lower = get_file_base()
     for preset in get_bake_preset_names():
@@ -1564,7 +1558,6 @@ def launch():
         local_subdivs_mult=3,
         preset_name=preset_name,
         bake_reflection=True,
-        render_background=False,
         map_count=3,
         skip_existing_maps=True,
         output_directory=output_directory,

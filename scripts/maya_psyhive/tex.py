@@ -10,7 +10,7 @@ import six
 from psyhive import qt
 from psyhive.utils import get_single, lprint
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_shp
+from maya_psyhive.utils import get_shp, load_plugin
 
 
 class _BaseShader(object):
@@ -206,17 +206,21 @@ def ai_ambient_occlusion(name='aiAmbientOcclusion'):
     return _shd
 
 
-def ai_standard_surface(name='aiStandardSurface'):
+def ai_standard_surface(name='aiStandardSurface', col=None):
     """Create an aiStandardSurface shader.
 
     Args:
         name (str): node name
+        col (str|tuple|QColor): colour to apply
 
     Returns:
         (_AiStandardSurface): shader
     """
+    load_plugin('mtoa')
     _shd = _AiStandardSurface(cmds.shadingNode(
         'aiStandardSurface', asShader=True, name=name))
+    if col:
+        _shd.set_col(col)
     return _shd
 
 

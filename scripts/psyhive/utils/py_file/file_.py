@@ -89,6 +89,9 @@ class PyFile(File, PyBase):
         except IndentationError as _exc:
             print 'INDENTATION ERROR', self.path
             raise _exc
+        except SyntaxError as _exc:
+            raise FileError('Syntax error in file '+self.path,
+                            file_=self.path, line_n=_exc.lineno)
 
     def get_module(self, catch=False, reload_=False, verbose=0):
         """Get the python module associated with this py file.

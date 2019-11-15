@@ -1,3 +1,31 @@
+#### v0.44.0 ####
+
+    Released: Fri 15th Nov 2019
+
+    oculus tools [TOOLS-186]:
+        fixed debug material being applied to bake geo,
+        removed render in background option,
+        fixed presets with tiny bounding boxes,
+        warning on launch with no current work file,
+    
+    maya_psyhive:
+        open_maya added shp_rand/CpntMesh,
+        open_maya.cpnt_mesh added,
+        open_maya.CMDS added polyPrimitive/polyCBoolOp,
+        open_maya.HFnMesh added difference/triangulate,
+        tex.ai_standard_surface added col + bugfix missing mtoa,
+        tools.oculus_quest use psyhive.qt,
+        tools.oculus_quest disable debug material,
+        tools.oculus_quest removed render background option,
+        tools.oculus_quest added warning for no current scene,
+        tools.oculus_quest fixed presets with tiny bbox,
+    psyhive:    
+        qt.get_col allow 255 int cols,
+        tools.hive_bro.get_recent_work made public,
+        utils.PyFile.get_ast raise FileError on SyntaxError,
+        utils fr_range/fr_enumerate added last_ arg,
+
+
 #### v0.43.0 ####
 
     Released: Wed 13th Nov 2019

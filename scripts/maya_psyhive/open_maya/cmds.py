@@ -140,7 +140,7 @@ class _CmdsMapper(object):
         # Other
         elif name in [
                 'polyCube', 'polyCylinder', 'polyPlane', 'polySphere',
-                'polyPyramid']:
+                'polyPyramid', 'polyPrimitive', 'polyCBoolOp']:
             _result = _get_result_mapper(
                 _fn, list_idx=0, class_=hom.HFnMesh)
         elif name in ['camera']:

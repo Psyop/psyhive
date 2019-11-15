@@ -362,7 +362,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
         # Add jump to recent options
         menu.add_label("Jump to")
-        for _work in sorted(_get_recent_work()):
+        for _work in sorted(get_recent_work()):
             _work = _work.find_latest()
             if not _work:
                 continue
@@ -561,7 +561,7 @@ def _add_path_menu_items(menu, obj):
             'View images', obj.view, icon=_icon)
 
 
-def _get_recent_work():
+def get_recent_work():
     """Read list of recent work file from tank.
 
     Returns:
@@ -790,7 +790,7 @@ def launch(path=None):
     if not _path:
         _path = host.cur_scene()
     if not _path:
-        _recent = _get_recent_work()
+        _recent = get_recent_work()
         if _recent:
             _path = _recent[0].path
     if _path:

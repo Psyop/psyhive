@@ -43,6 +43,8 @@ def get_col(col):
         assert len(col) == 3
         if isinstance(col[0], float):
             _col = HColor(QtGui.QColor.fromRgbF(*col))
+        elif isinstance(col[0], int):
+            _col = HColor(*col)
         else:
             raise ValueError(col)
     else:

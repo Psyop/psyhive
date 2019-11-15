@@ -7,7 +7,7 @@ from maya.api import OpenMaya as om
 
 from psyhive.utils import lprint, get_single
 
-from maya_psyhive.open_maya.utils import IndexedAttrGetter
+from maya_psyhive.open_maya.utils import IndexedAttrGetter, get_unique
 from maya_psyhive.open_maya.base_transform import BaseTransform
 from maya_psyhive.open_maya.dag_path import HDagPath
 
@@ -28,6 +28,22 @@ class HFnMesh(BaseTransform, om.MFnMesh):
         self.vtx = IndexedAttrGetter(node=self, attr='vtx')
         self.edge = IndexedAttrGetter(node=self, attr='e')
         self.map = IndexedAttrGetter(node=self, attr='map')
+
+    def difference(self, other):
+        """Apply boolean difference with another mesh.
+
+        Args:
+            other (HFnMesh): other mesh
+
+        Returns:
+            (HFnMesh): new mesh
+        """
+        from maya_psyhive import open_maya as hom
+        _name = str(self)
+        _result = hom.CMDS.polyCBoolOp(
+            self, other, operation=2, constructionHistory=False)
+        _result = _result.rename(get_unique(_name))
+        return self.__class__(str(_result))
 
     def get_edges(self):
         """Get list of edges in this mesh.
@@ -88,6 +104,10 @@ class HFnMesh(BaseTransform, om.MFnMesh):
         """
         return get_single(self.shp.find_connected(type_='polyPlane'),
                           catch=True)
+
+    def triangulate(self):
+        """Triangulate this mesh."""
+        cmds.polyTriangulate(self, constructionHistory=False)
 
 
 def _mesh_to_ray_intersection(

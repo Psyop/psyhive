@@ -176,27 +176,30 @@ def ints_to_str(values, rng_sep="-", chunk_sep=","):
     return _val_str
 
 
-def fr_range(count):
+def fr_range(count, last_=True):
     """Get a list of floating point value in the range 0 to 1.
 
     The range is evenly broken into the number of results.
 
     Args:
         count (int): number of values to return
+        last_ (bool): include last/loop value (ie. include 1.0)
 
     Returns:
         (float list): list of floats
     """
     if count == 1:
         return [0]
-    return [1.0*_idx/(count-1) for _idx in range(count)]
+    _end = count-1 if last_ else count
+    return [1.0*_idx/_end for _idx in range(count)]
 
 
-def fr_enumerate(list_):
+def fr_enumerate(list_, last_=True):
     """Enumerate the given list with fractional values 0.0 to 1.0.
 
     Args:
         list_ (list): values to enumerate
+        last_ (bool): include last/loop value (ie. include 1.0)
 
     Returns:
         (list): fractionally enumerated values
@@ -204,7 +207,7 @@ def fr_enumerate(list_):
     _list = list_
     if isinstance(_list, enumerate):
         _list = list(_list)
-    return zip(fr_range(len(_list)), _list)
+    return zip(fr_range(len(_list), last_=last_), _list)
 
 
 def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):

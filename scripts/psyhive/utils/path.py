@@ -369,7 +369,7 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
     if check_extn and not File(left).extn in [
-            None, 'py', 'yml', 'ui', 'nk']:
+            None, 'py', 'yml', 'ui', 'nk', 'json']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

@@ -1,4 +1,3 @@
-import cv2
 import functools
 import imath
 import inspect
@@ -13,13 +12,13 @@ import sys
 import tempfile
 import time
 
-from Qt import QtCore
 
 import mtoa
 from maya import cmds, mel
 from maya import OpenMaya as om
 
 from psyhive import qt
+from psyhive.qt import QtCore
 from psyhive.utils import dprint, File, abs_path, test_path
 from maya_psyhive.utils import get_shp, load_plugin
 
