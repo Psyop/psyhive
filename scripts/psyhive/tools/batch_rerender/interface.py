@@ -172,6 +172,10 @@ class _BatchRerenderUi(qt.HUiDialog):
             lprint(verbose=verbose)
         return _ranges
 
+    def close(self):
+        """Close interface."""
+        self.ui.close()
+
 
 def _rerender_work_files(work_files, ranges, passes):
     """Rerender the given work files on qube.

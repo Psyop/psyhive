@@ -1,7 +1,4 @@
-from Qt import QtCore
-from Qt import QtGui
-from Qt import QtWidgets
-from Qt import QtUiTools
+from psyhive.qt import QtCore, QtGui, QtWidgets, QtUiTools
 
 
 class UICollapseForm(QtWidgets.QWidget):
@@ -130,7 +127,7 @@ class UICollapseForm(QtWidgets.QWidget):
                                     padding: 10 0px;}}"""
                  }
         default_style = """QToolButton {{
-                                background-color:rgb({tint}, 90); 
+                                background-color:rgb({tint}, 90);
                                 color: rgb(200, 200, 200);}}
                             QToolButton:checked {{
                                 background-color: rgba({tint}, 120);

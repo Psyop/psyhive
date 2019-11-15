@@ -17,7 +17,6 @@ import texture_convert
 
 from psyhive import qt, tk, host
 from psyhive.qt import QtUiTools, QtCore, QtGui, QtWidgets
-from psyhive.tools import catch_error
 from psyhive.utils import File, dprint, abs_path
 
 FPS = "75fps"
@@ -686,7 +685,7 @@ def bake_textures(resolution, min_shading_rate, max_subdivs, admc_threshold, loc
     _bake_modes = get_bake_modes(do_reflection)
     _fails = []
     for node_group in qt.progress_bar(sorted(node_group_dict)):
-        
+
         _bake_nodes = node_group_dict.get(node_group)
         print 'BAKE NODES', _bake_modes
 
@@ -708,7 +707,7 @@ def bake_textures(resolution, min_shading_rate, max_subdivs, admc_threshold, loc
         # if map_list is not None and _default_file not in map_list:
         #     print("Skipping because unchecked: '{}' ...".format(_default_file))
         #     continue
-        
+
         # Execute bake
         _texs = abstract_maya.bake_textures(
             node_group, _bake_nodes, default_file=_default_file,
@@ -1033,10 +1032,10 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
         }
             QPushButton:hover {
             background: qlineargradient(
-            x1 : 0, y1 : 0, x2 : 0, y2 :   1, 
+            x1 : 0, y1 : 0, x2 : 0, y2 :   1,
             stop :   0.0 #679489,
-            stop :   0.5 #70a195, 
-            stop :   0.55 #70a195, 
+            stop :   0.5 #70a195,
+            stop :   0.55 #70a195,
             stop :   1.0 #679489);
         }
         '''
@@ -1050,10 +1049,10 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
         }
             QPushButton:hover {
             background: qlineargradient(
-            x1 : 0, y1 : 0, x2 : 0, y2 :   1, 
+            x1 : 0, y1 : 0, x2 : 0, y2 :   1,
             stop :   0.0 #7eb5a7,
-            stop :   0.5 #a0d6ca, 
-            stop :   0.55 #a0d6ca, 
+            stop :   0.5 #a0d6ca,
+            stop :   0.55 #a0d6ca,
             stop :   1.0 #7eb5a7);
         }
         '''
@@ -1186,7 +1185,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
     @bake_reflection.setter
     def bake_reflection(self, value):
         self.render_bake_options.ui.bake_reflection_checkbox.setChecked(value)
-    
+
     @property
     def use_default_material(self):
         return self.render_global_options.ui.bake_use_default_material_checkbox.isChecked()
@@ -1298,7 +1297,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
                 map_list.append(str(item.text()))
         return map_list
 
-    
+
     def render_latlong(self):
         render_latlong(
             self.OCULUS_CENTER,
@@ -1314,7 +1313,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             self.render_cube_map
         )
 
-    
+
     def qc_render(self):
         horizontal_resolution = 1280
         horizontal_fov = 110
@@ -1331,7 +1330,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
 
     @abstract_maya.print_func_name
     @abstract_maya.keep_current_camera
-    
+
     def bake_textures(self):
         try:
             self.create_bake_structure()
@@ -1425,19 +1424,18 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
         layout_uvs_for_bake_geometry_groups(self.resolution)
         self.update_output_files()
 
-    
+
     def enable_mipmaps(self):
         # Disable mipmaps first to force reevaluation of everything
         swap_mipmap_textures(False)
         mipmap_textures()
 
-    
+
     def disable_mipmaps(self):
         swap_mipmap_textures(False)
 
     @abstract_maya.print_func_name
     @abstract_maya.keep_current_camera
-    
     def composite_maps(self):
         create_export_geometry()
         result = composite_maps(self.output_directory, self.resolution, self.image_format, self.reflection_mix, self.bake_reflection)
@@ -1531,7 +1529,7 @@ def get_main_window():
 def launch():
     preset_name = "default"
     image_format = "png"
-    
+
     # Check for current work
     if not tk.cur_work():
         qt.notify_warning(
@@ -1575,8 +1573,3 @@ def launch():
     maya_optimize_uv.show()
 
     return maya_optimize_uv
-
-
-
-
-

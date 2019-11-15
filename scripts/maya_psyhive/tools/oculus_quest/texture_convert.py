@@ -116,4 +116,3 @@ def mipmap_texture(input_texture, output_texture, colorspace):
         mipmap_texture_colorsafe(input_texture, output_texture)
     else:
         raise Exception("Colorspace '{}' not recognized for texture '{}'".format(colorspace, input_texture))
-

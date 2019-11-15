@@ -1,3 +1,16 @@
+#### v0.44.1 ####
+
+    Released: Fri 15th Nov 2019
+
+    oculus tools [TOOLS-186]: conformed line endings to match dev code,
+    
+    maya_psyhive:
+        tools.oculus_quest use psyhive.qt,
+        tools.oculus_quest applied autofix to conform line endings,
+    psyhive:    
+        tools.batch_rerender added close to close ui element,
+
+
 #### v0.44.0 ####
 
     Released: Fri 15th Nov 2019
