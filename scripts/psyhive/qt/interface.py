@@ -3,6 +3,7 @@
 import ctypes
 import functools
 import os
+import re
 import sys
 import tempfile
 import time
@@ -11,8 +12,10 @@ import types
 
 import six
 
+from psyhive import icons
 from psyhive.utils import (
-    wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode)
+    wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode,
+    read_file)
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
 from psyhive.qt.wrapper.widgets import HMenu
@@ -30,7 +33,7 @@ class HUiDialog(QtWidgets.QDialog):
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
             dialog_stack_key=None, connect_widgets=True, show=True,
-            parent=None, save_settings=True, verbose=0):
+            parent=None, save_settings=True, localise_imgs=False, verbose=0):
         """Constructor.
 
         Args:
@@ -42,6 +45,7 @@ class HUiDialog(QtWidgets.QDialog):
             show (bool): show interface
             parent (QDialog): parent dialog
             save_settings (bool): read/write settings on open/close
+            localise_imgs (bool): map images to match current pipeline
             verbose (int): print process data
         """
         from psyhive import host
@@ -62,7 +66,10 @@ class HUiDialog(QtWidgets.QDialog):
         # Load ui file
         _loader = get_ui_loader()
         assert os.path.exists(ui_file)
-        self.ui = _loader.load(ui_file, self)
+        _ui_file = ui_file
+        if localise_imgs:
+            _ui_file = _localise_ui_imgs(_ui_file)
+        self.ui = _loader.load(_ui_file, self)
         self._is_widget_ui = type(self.ui) is QtWidgets.QWidget
         if self._is_widget_ui:
             _layout = self.ui.layout()
@@ -115,7 +122,10 @@ class HUiDialog(QtWidgets.QDialog):
             _result = QtWidgets.QDialog.closeEvent(self, event)
 
         if hasattr(self, 'write_settings'):
-            self.write_settings()
+            try:
+                self.write_settings()
+            except RuntimeError:
+                pass
 
         return _result
 
@@ -412,6 +422,7 @@ def _build_redraw_method(redraw):
     """
 
     def _redraw_method(widget):
+
         widget.blockSignals(True)
         redraw(widget=widget)
         widget.blockSignals(False)
@@ -544,6 +555,45 @@ def list_redrawer(func):
         (fn): decorated function
     """
     return get_list_redrawer()(func)
+
+
+def _localise_ui_imgs(ui_file):
+    """Localise imgs in ui file.
+
+    Args:
+        ui_file (str): ui file to localise
+
+    Returns:
+        (str): path to localised ui file
+    """
+    _body = read_file(ui_file)
+    _paths = [
+        _item.strip() for _item in re.split('[<>]', _body)
+        if _item.strip() and "EMOJI" in _item]
+
+    # Check for paths that need replacing
+    _replacements = []
+    for _path in _paths:
+        if not icons.EMOJI.contains(_path):
+            _idx = int(_path.split('.')[-2])
+            _name = icons.EMOJI.find_emoji(_idx).name
+            _new_path = icons.EMOJI.find(_name)
+            _replacements.append((_path, _new_path))
+
+    if not _replacements:
+        return ui_file
+
+    _tmp_ui = abs_path('{}/psyhive/qt/{}'.format(
+        tempfile.gettempdir(), ui_file.replace(':', '')))
+    print 'TMP UI', _tmp_ui
+
+    for _old, _new in _replacements:
+        print _old
+        print _new
+        _body = _body.replace(_old, _new)
+    File(_tmp_ui).write_text(_body, force=True)
+
+    return _tmp_ui
 
 
 def reset_interface_settings():

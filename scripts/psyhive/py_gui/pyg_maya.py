@@ -7,7 +7,7 @@ from maya import cmds
 from psyhive import icons, qt, refresh
 from psyhive.utils import wrap_fn, copy_text, lprint, chain_fns, get_single
 
-from psyhive.py_gui import base, install
+from psyhive.py_gui import pyg_base, pyg_install
 
 from maya_psyhive import ui
 
@@ -31,7 +31,22 @@ def get_selection_reader(type_):
                 _sel.append(_node)
         return get_single(_sel, catch=True)
 
-    return install.ArgUpdater(_get_sel, label='Get selected')
+    return pyg_install.ArgUpdater(_get_sel, label='Get selected')
+
+
+def _apply_browser_path(target, default, title="Select file"):
+    """Launch a browser dialog and apply the selected path to the given field.
+
+    Args:
+        target (str): field to apply path to
+        default (str): default directory for browser
+        title (str): title for browser
+    """
+    _file = get_single(cmds.fileDialog2(
+        fileMode=1,  # Single existing file
+        caption=title, okCaption='Select',
+        startingDirectory=default))
+    cmds.textField(target, edit=True, text=_file)
 
 
 def _get_update_fn(set_fn, update, field):
@@ -58,7 +73,7 @@ def _get_update_fn(set_fn, update, field):
     return _update_fn
 
 
-class MayaPyGui(base.BasePyGui):
+class MayaPyGui(pyg_base.BasePyGui):
     """Pygui interface built using maya.cmds interface tools."""
 
     def init_ui(self, rebuild_fn=None):
@@ -95,7 +110,7 @@ class MayaPyGui(base.BasePyGui):
 
     def add_arg(
             self, arg, default, label=None, choices=None, label_width=None,
-            update=None, verbose=0):
+            update=None, browser=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
@@ -105,6 +120,8 @@ class MayaPyGui(base.BasePyGui):
             choices (dict): list of options to show in the interface
             label_width (int): label width in pixels
             update (ArgUpdater): updater for this arg
+            browser (BrowserLauncher): allow this field to be populated
+                with a browser dialog
             verbose (int): print process data
         """
         lprint('ADDING', arg, verbose=verbose)
@@ -114,6 +131,11 @@ class MayaPyGui(base.BasePyGui):
             cmds.rowLayout(
                 numberOfColumns=3,
                 columnWidth=((1, _label_width), (2, 100), (3, update.width)),
+                adjustableColumn3=2)
+        elif browser:
+            cmds.rowLayout(
+                numberOfColumns=3,
+                columnWidth=((1, _label_width), (2, 100), (3, 19)),
                 adjustableColumn3=2)
         else:
             cmds.rowLayout(
@@ -157,6 +179,12 @@ class MayaPyGui(base.BasePyGui):
             cmds.button(
                 label=update.label, height=19, command=_get_update_fn(
                     set_fn=_set_fn, update=update, field=_field))
+        elif browser:
+            _icon = cmds.iconTextButton(
+                image1=icons.OPEN, width=19, height=19,
+                style='iconOnly', command=wrap_fn(
+                    _apply_browser_path, target=_field, title=browser.title,
+                    default=browser.get_default_dir()))
 
         cmds.setParent('..')
 
@@ -317,7 +345,7 @@ class MayaPyGui(base.BasePyGui):
         """
 
         # Avoid super for reload
-        base.BasePyGui.reset_settings(self, def_=def_)
+        pyg_base.BasePyGui.reset_settings(self, def_=def_)
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=True)
 

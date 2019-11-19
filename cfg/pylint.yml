@@ -63,7 +63,7 @@ ignore:
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
         maya_psyhive/tools/yeti/cache.py
-        psyhive/py_gui/qt_.py
+        psyhive/py_gui/pyg_qt.py
         psyhive/qt/wrapper/widgets.py
         psyhive/tk/templates/base.py
         psyhive/tools/batch_rerender/interface.py
@@ -104,6 +104,7 @@ ignore:
     too-many-public-methods:
         maya_psyhive/open_maya/base_node.py
         maya_psyhive/open_maya/plug.py
+        psyhive/scripts/psyhive/qt/wrapper/gui/pixmap.py
     too-many-ancestors:
         hv_test/diary/y19/d0516/batch_cache_test.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
@@ -127,7 +128,7 @@ ignore:
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/pipe/asset.py
         psyhive/pipe/work_file.py
-        psyhive/py_gui/base.py
+        psyhive/py_gui/pyg_base.py
         psyhive/qt/progress.py
         psyhive/utils/py_file/base.py
         psyhive/utils/py_file/docs.py
@@ -157,12 +158,13 @@ ignore:
     unused-argument:
         hv_test/diary/
         hv_test/toolkits/check_code.py
+        hv_test/tools/colour_bro/cb_ui.py
         maya_psyhive/open_maya/base_node.py
         maya_psyhive/tools/fkik_switcher/system.py
         maya_psyhive/tools/batch_cache/sg_handler.py
         psyhive/qt/wrapper/gui.py
         psyhive/qt/wrapper/gui/pixmap.py
-        psyhive/py_gui/base.py
+        psyhive/py_gui/pyg_base.py
         psyhive/utils/cache.py
         sanity_check/checks/
         /tests/

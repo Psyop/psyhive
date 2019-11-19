@@ -72,11 +72,12 @@ class FileRef(object):
         _attr = _attr.split(":")[-1]
         return '{}:{}'.format(self.namespace, _attr)
 
-    def get_node(self, name, class_=None, catch=False):
+    def get_node(self, name, strip_ns=True, class_=None, catch=False):
         """Get node from this ref matching the given name.
 
         Args:
             name (str): name of node
+            strip_ns (bool): strip namespace from node name
             class_ (class): override node class
             catch (bool): no error if node is missing
 
@@ -85,15 +86,16 @@ class FileRef(object):
         """
         from maya_psyhive import open_maya as hom
         _class = class_ or hom.HFnDependencyNode
-        _name = '{}:{}'.format(self.namespace, name)
+        _name = name.split(":")[-1] if strip_ns else name
+        _node = '{}:{}'.format(self.namespace, _name)
         if _class is str:
-            return _name
+            return _node
         try:
-            return _class(_name)
+            return _class(_node)
         except RuntimeError as _exc:
             if catch:
                 return None
-            raise ValueError("Missing node "+_name)
+            raise ValueError("Missing node "+_node)
 
     def get_plug(self, plug):
         """Get plug within this reference.

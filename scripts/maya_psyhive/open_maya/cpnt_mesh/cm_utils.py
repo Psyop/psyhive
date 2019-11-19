@@ -1,11 +1,13 @@
 """Utilties for managing mesh components."""
 
+import pprint
+
 from maya import cmds
 
-from psyhive.utils import str_to_ints
+from psyhive.utils import str_to_ints, lprint
 
 
-def _flatten(cpnts):
+def _flatten(cpnts, verbose=0):
     """Separate a lists of compounded components.
 
     eg. ['geo.map[0:1]', 'geo.map[3]']
@@ -13,6 +15,7 @@ def _flatten(cpnts):
 
     Args:
         cpnts (str list): component list
+        verbose (int): print process data
 
     Returns:
         (str list): flattened list
@@ -23,20 +26,28 @@ def _flatten(cpnts):
         if _rng.isdigit():
             _flat.append(str(_cpnt))
         elif _rng == '*':
+
             _root = _cpnt.split('[')[0]
             _mesh, _attr = _root.split('.')
             _eval = cmds.polyEvaluate(_mesh)
+
+            if verbose:  # For speed
+                lprint('EVAL', pprint.pformat(_eval))
+
             _count = _eval[{
                 'e': 'edge',
                 'f': 'face',
                 'vtx': 'vertex',
+                'map': 'uvcoord',
             }[_attr]]
             _flat += ['{}[{:d}]'.format(_root, _idx)
                       for _idx in range(_count)]
+
         else:
             _idxs = str_to_ints(_rng, rng_sep=':')
             _root = _cpnt.split('[')[0]
             _flat += ['{}[{:d}]'.format(_root, _idx) for _idx in _idxs]
+
     return _flat
 
 

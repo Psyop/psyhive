@@ -13,8 +13,8 @@ from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
     read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase,
     wrap_fn)
-from psyhive.py_gui import install
-from psyhive.py_gui.misc import (
+from psyhive.py_gui import pyg_install
+from psyhive.py_gui.pyg_misc import (
     NICE_COLS, get_def_icon, get_exec_fn, get_help_fn, get_code_fn)
 
 _EMPTY_SETTINGS = {
@@ -127,7 +127,7 @@ class BasePyGui(object):
         raise NotImplementedError
 
     def add_arg(self, arg, default, label=None, choices=None, label_width=None,
-                update=None, verbose=0):
+                update=None, browser=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
@@ -137,6 +137,7 @@ class BasePyGui(object):
             choices (dict): list of options to show in the interface
             label_width (int): label width in pixels
             update (ArgUpdater): updater for this arg
+            browser (BrowserLauncher): add launch browser button
             verbose (int): print process data
         """
         raise NotImplementedError
@@ -154,6 +155,7 @@ class BasePyGui(object):
             last_ (bool): whether this is last def in interface
             verbose (int): print process data
         """
+        _browser = opts.get('browser') or {}
         _update = opts.get('update') or {}
         _choices = opts.get('choices') or {}
         _hide = opts.get('hide') or []
@@ -178,9 +180,10 @@ class BasePyGui(object):
             _default = _arg.default
             _arg_choices = _choices.get(_arg.name)
             _arg_update = _update.get(_arg.name)
-            if _arg_update and not isinstance(_arg_update, install.ArgUpdater):
+            if _arg_update and not isinstance(
+                    _arg_update, pyg_install.ArgUpdater):
                 # Convert function to updater
-                _arg_update = install.ArgUpdater(get_choices=_arg_update)
+                _arg_update = pyg_install.ArgUpdater(get_choices=_arg_update)
             if _arg_update:
                 _arg_choices = _arg_update.get_choices() or _arg_choices
                 _default = _arg_update.get_default() or _default
@@ -191,7 +194,8 @@ class BasePyGui(object):
                 label=to_nice(_arg.name),
                 choices=_arg_choices,
                 label_width=opts.get('label_width') or self.label_width,
-                update=_arg_update)
+                update=_arg_update,
+                browser=_browser.get(_arg.name))
             self.read_settings_fns['def'][def_.name][_arg.name] = _read_fn
             self.set_settings_fns['def'][def_.name][_arg.name] = _set_fn
 
@@ -249,7 +253,7 @@ class BasePyGui(object):
         """
 
         # Get list of defs to add
-        _defs_data, _sections, _hidden = install.get_installed_data(
+        _defs_data, _sections, _hidden = pyg_install.get_installed_data(
             self.py_file)
         _mod = self.py_file.get_module()
 

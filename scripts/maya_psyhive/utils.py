@@ -424,10 +424,10 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
     elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double',
-                   'double3', 'time']:
+                   'double3', 'time', 'byte', 'bool']:
         pass
     else:
-        raise ValueError(_type)
+        raise ValueError('Unhandled type {} on attr {}'.format(_type, attr))
 
     _result = cmds.getAttr(attr, **_kwargs)
     lprint('RESULT:', _result, verbose=verbose)

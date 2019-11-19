@@ -99,7 +99,10 @@ def cur_project():
     Returns:
         (Project): current project
     """
-    return Project(os.environ['PSYOP_PROJECT_PATH'])
+    _name = os.environ.get('PSYOP_PROJECT_PATH')
+    if not _name:
+        return None
+    return Project(_name)
 
 
 @store_result

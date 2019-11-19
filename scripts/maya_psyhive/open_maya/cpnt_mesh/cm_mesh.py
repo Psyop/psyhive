@@ -1,7 +1,8 @@
 """Tools for managing component meshes."""
 
 from maya_psyhive.open_maya import mesh
-from maya_psyhive.open_maya.cpnt_mesh import cm_vtx, cm_edge, cm_face, cm_utils
+from maya_psyhive.open_maya.cpnt_mesh import (
+    cm_vtx, cm_edge, cm_face, cm_utils, cm_uv)
 
 
 class CpntMesh(mesh.HFnMesh):
@@ -41,3 +42,11 @@ class CpntMesh(mesh.HFnMesh):
             (CpntVtx list): list of vertices
         """
         return [cm_vtx.CpntVtx(_vtx) for _vtx in cm_utils.to_vtxs(self)]
+
+    def to_uvs(self):
+        """Get mesh vertices.
+
+        Returns:
+            (CpntVtx list): list of vertices
+        """
+        return [cm_uv.CpntUV(_vtx) for _vtx in cm_utils.to_uvs(self)]

@@ -44,6 +44,28 @@ class ArgUpdater(object):
         return self._get_default() if self._get_default else None
 
 
+class BrowserLauncher(object):
+    """Hook to facilitate adding a browser button to an arg field."""
+
+    def __init__(self, title=None, get_default_dir=None):
+        """Constructor.
+
+        Args:
+            title (str): title for browser
+            get_default_dir (fn): function to get default dir for browser
+        """
+        self.title = title
+        self._get_default_dir = get_default_dir
+
+    def get_default_dir(self):
+        """Get default dir for browser.
+
+        Returns:
+            (str): path to start browser in
+        """
+        return self._get_default_dir()
+
+
 def get_installed_data(py_file):
     """Read py_gui installation data associated with the given py file.
 
@@ -87,7 +109,7 @@ def hide_from_gui(func):
 def install_gui(
         icon=None, choices=None, hide=None, label=None, label_width=None,
         col=None, update=None, disable_reload=False, catch_error_=True,
-        verbose=0):
+        browser=None, verbose=0):
     """Build a decorator which installs a def into a py_gui inteface.
 
     Any decorated def will appear in the py_gui interface for that file.
@@ -103,6 +125,8 @@ def install_gui(
             to be updated on the fly
         disable_reload (bool): no reload when this def is executed
         catch_error_ (bool): apply error catch decorator
+        browser (dict): dict BrowserLauncher objects for any args
+            that need to have a launch browser button
         verbose (int): print process data
     """
 
@@ -112,6 +136,7 @@ def install_gui(
         if _RECORD_DATA:
             global _DEFS
             _opts = {
+                'browser': browser,
                 'icon': icon,
                 'choices': choices,
                 'hide': hide,

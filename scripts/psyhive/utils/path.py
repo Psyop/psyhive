@@ -328,6 +328,7 @@ def abs_path(path, win=False, root=None, verbose=0):
         lprint('ADDING ROOT', _root, verbose=verbose)
         _path = '{}/{}'.format(_root, _path)
 
+    # Unify different dir separators
     _path = _path.\
         replace('\\\\', '/').\
         replace('\\', '/').\
@@ -335,6 +336,11 @@ def abs_path(path, win=False, root=None, verbose=0):
         replace('/./', '/').\
         replace('c:/users/hvande~1', 'C:/users/hvanderbeek')
     lprint('CLEANED', _path, verbose=verbose)
+
+    # Fix MINGW64 style single drive letters with leading /
+    _tokens = _path.split('/')
+    if len(_tokens) > 1 and len(_tokens[1]) == 1:
+        _path = '/'.join([_tokens[1]+':']+_tokens[2:])
 
     # Fix embedded relative dir up
     while '../' in _path:

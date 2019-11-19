@@ -16,6 +16,7 @@ ignore:
         hv_test/diary/y19/d1114/foliage.py
         hv_test/tools/colour_bro/cb_ui.py
         psyhive/host.py
+        /tests/
     E722:  # Bare except
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     W605:  # Redundant escape char

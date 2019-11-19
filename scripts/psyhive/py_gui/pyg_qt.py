@@ -8,13 +8,13 @@ from psyhive import qt, icons, host
 from psyhive.qt import QtWidgets, QtGui, Qt
 from psyhive.utils import wrap_fn
 
-from psyhive.py_gui.base import BasePyGui
+from psyhive.py_gui import pyg_base
 
 if not hasattr(sys, 'QT_PYGUI_INTERFACES'):
     sys.QT_PYGUI_INTERFACES = {}
 
 
-class QtPyGui(QtWidgets.QMainWindow, BasePyGui):
+class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
     """Interface built from a python file."""
 
     def __init__(self, *args, **kwargs):
@@ -26,7 +26,7 @@ class QtPyGui(QtWidgets.QMainWindow, BasePyGui):
         if not host.NAME:
             qt.set_maya_palette()
         super(QtPyGui, self).__init__()
-        BasePyGui.__init__(self, *args, **kwargs)
+        pyg_base.BasePyGui.__init__(self, *args, **kwargs)
 
         self.resize(300, 64)
         self.show()
@@ -65,7 +65,7 @@ class QtPyGui(QtWidgets.QMainWindow, BasePyGui):
 
     def add_arg(
             self, arg, default, label=None, choices=None, label_width=None,
-            update=None, verbose=0):
+            update=None, browser=None, verbose=0):
         """Add an arg to the interface.
 
         Args:
@@ -75,6 +75,8 @@ class QtPyGui(QtWidgets.QMainWindow, BasePyGui):
             choices (dict): list of options to show in the interface
             label_width (int): label width in pixels
             update (ArgUpdater): updater for this arg
+            browser (BrowserLauncher): allow this field to be populated
+                with a browser dialog
             verbose (int): print process data
         """
         _widgets = []

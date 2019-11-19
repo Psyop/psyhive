@@ -92,7 +92,7 @@ class TestTools(unittest.TestCase):
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
-            _time_ctrl = _ref.get_node(_time_ctrl)
+            _time_ctrl = _ref.get_node(_time_ctrl, strip_ns=True)
             restore_img_plane(time_control=str(_time_ctrl), abc=_path)
         assert cmds.ls(type='imagePlane')
 

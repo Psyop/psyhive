@@ -380,6 +380,14 @@ class HPixmap(QtGui.QPixmap):
         """
         return self.rect().contains(pos)
 
+    def copy(self, *args, **kwargs):
+        """Make a duplicate of this pixmap.
+
+        Returns:
+            (HPixmap): duplicate
+        """
+        return HPixmap(super(HPixmap, self).copy(*args, **kwargs))
+
     def darken(self, factor):
         """Darken this pixmap (1 makes the pixmap black).
 
@@ -469,12 +477,13 @@ class HPixmap(QtGui.QPixmap):
         self.save(abs_path(path, win=True), format=_fmt, quality=100)
         assert _file.exists()
 
-    def save_test(self, file_=None):
+    def save_test(self, file_=None, timestamp=True):
         """Save test image and copy it to pictures dir.
 
         Args:
             file_ (str): override save file path - this can be used
                 to switch this method with a regular save
+            timestamp (bool): write timestamped file
 
         Returns:
             (str): path to saved file
@@ -482,12 +491,18 @@ class HPixmap(QtGui.QPixmap):
         if file_:
             self.save_as(file_, force=True)
             return file_
+
         _tmp_file = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
-        _pics_file = abs_path(time.strftime(
-            '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
         self.save_as(_tmp_file, verbose=1, force=True)
-        self.save_as(_pics_file, verbose=1, force=True)
-        return _pics_file
+        _file = _tmp_file
+
+        if timestamp:
+            _timestamp_file = abs_path(time.strftime(
+                '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
+            self.save_as(_timestamp_file, verbose=1, force=True)
+            _file = _timestamp_file
+
+        return _file
 
     def whiten(self, factor):
         """Whiten this pixmap (1 makes the pixmap white).

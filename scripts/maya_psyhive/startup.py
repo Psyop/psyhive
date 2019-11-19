@@ -68,7 +68,7 @@ def _add_show_toolkits(parent):
             continue
         _mod = _file.get_module()
         _rand = str_to_seed(_file.basename)
-        _icon = _rand.choice(icons.ANIMALS)
+        _icon = getattr(_mod, 'ICON', _rand.choice(icons.ANIMALS))
         _label = getattr(_mod, 'LABEL', _file.basename)
         _title = '{} tools'.format(_label)
         _cmd = '\n'.join([

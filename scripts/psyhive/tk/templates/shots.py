@@ -38,6 +38,11 @@ class _TTShotCpntBase(object):
         return TTShotOutputName
 
     @property
+    def output_type_type(self):
+        """Get output name type."""
+        return TTShotOutputType
+
+    @property
     def output_version_type(self):
         """Get output version type."""
         return TTShotOutputVersion

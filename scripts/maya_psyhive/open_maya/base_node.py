@@ -103,6 +103,23 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
+    def find_attrs(self, filter_=None):
+        """Find attributes on this node.
+
+        This finds attributes as strings - for plugs use the find_plugs
+        method.
+
+        Args:
+            filter_ (str): apply filter to the list
+
+        Returns:
+            (str list): list of attribute names
+        """
+        _attrs = sorted(['{}.{}'.format(self, _attr)
+                         for _attr in self.list_attr()
+                         if passes_filter(_attr, filter_)])
+        return _attrs
+
     def find_children(self, type_=None, class_=None, all_descendents=True):
         """Find child nodes.
 
@@ -250,6 +267,14 @@ class BaseNode(object):
             (bool): whether attr exists
         """
         return cmds.attributeQuery(attr, node=self, exists=True)
+
+    def list_attr(self, **kwargs):
+        """Wrapper for cmds.listAttr command.
+
+        Returns:
+            (list): attrs
+        """
+        return cmds.listAttr(self, **kwargs)
 
     def list_connections(self, **kwargs):
         """Wrapper for cmds.listConnections command.

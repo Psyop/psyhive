@@ -16,7 +16,7 @@ import houdini_comp
 import texture_convert
 
 from psyhive import qt, tk, host
-from psyhive.qt import QtUiTools, QtCore, QtGui, QtWidgets
+from psyhive.qt import QtUiTools, QtCore, QtGui, QtWidgets, Qt
 from psyhive.utils import File, dprint, abs_path
 
 FPS = "75fps"
@@ -893,7 +893,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
             self.restoreGeometry(settings_obj.value("windowGeometry"))
             self.move(self.pos()+QtCore.QPoint(8, 31))
 
-        self.setWindowFlags(QtCore.Qt.Window)
+        self.setWindowFlags(Qt.Window)
 
         # Dynamic UI Load
         uifile = get_uipath("bake_ui3.ui")
@@ -967,7 +967,7 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
         # Bake Execution ---------------------------------------
         self.bake_execution = cframe.MayaFrameWidget(name="Bake Execution", state=True, win=self, ui=get_uipath("bake_execution.ui"))
         self.ui.bake_tab_layout.addWidget(self.bake_execution)
-        self.ui.bake_tab_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.ui.bake_tab_layout.setAlignment(Qt.AlignTop)
         self.ui.bake_tab_layout.addStretch()
         self.ui.bake_tab_layout.setStretch(self.ui.bake_tab_layout.count()-1, 1)
 
@@ -1355,11 +1355,11 @@ class MayaOptimizeUV(QtWidgets.QMainWindow):
         for file in output_files:
             item = QListWidgetItemTextureMap()
             item.setText(file)
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             if self.skip_existing_maps and os.path.exists(file):
-                item.setCheckState(QtCore.Qt.Unchecked)
+                item.setCheckState(Qt.Unchecked)
             else:
-                item.setCheckState(QtCore.Qt.Checked)
+                item.setCheckState(Qt.Checked)
             self.render_bake_options.ui.bake_maps_to_bake_listwidget.addItem(item)
 
     @abstract_maya.print_func_name

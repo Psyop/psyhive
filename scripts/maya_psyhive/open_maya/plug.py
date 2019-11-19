@@ -150,13 +150,21 @@ class HPlug(om.MPlug):
             catch=True)
         return hom.HFnAnimCurve(_anim) if _anim else None
 
+    def get_attr(self, *args, **kwargs):
+        """Wrapper for cmds.getAttr as applied to this plug.
+
+        Returns:
+            (any): attribute value
+        """
+        return cmds.getAttr(self, *args, **kwargs)
+
     def get_default(self):
         """Get default value of this plug.
 
         Returns:
             (any): default value
         """
-        return get_single(self.attribute_query(listDefault=True))
+        return get_single(self.attribute_query(listDefault=True), catch=True)
 
     def get_key_frames(self):
         """Get a list of keyed frames for this plug.
@@ -176,13 +184,24 @@ class HPlug(om.MPlug):
         _anim = self.find_anim()
         return _anim.get_key_range()
 
-    def get_val(self):
+    def get_type(self):
+        """Get type name of this attribute.
+
+        Returns:
+            (str): type name (assigned by maya)
+        """
+        return self.attribute_query(attributeType=True)
+
+    def get_val(self, type_=None):
         """Get the value of this attribute.
+
+        Args:
+            type_ (str): force attr type (eg. for enums)
 
         Returns:
             (any): attribute value
         """
-        return get_val(self.name)
+        return get_val(self.name, type_=type_)
 
     def hide(self):
         """Hide this attribute in the channel box."""

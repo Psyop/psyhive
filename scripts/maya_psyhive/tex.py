@@ -80,7 +80,8 @@ class _BaseShader(object):
         """
         _sets = cmds.listConnections(self.shd, type='objectSet', source=False)
         lprint('SETS', _sets, verbose=verbose)
-        return get_single(_sets, catch=True)
+        _se = get_single(_sets, catch=True)
+        return hom.HFnDependencyNode(_se) if _se else None
 
     def read_texture(self, verbose=0):
         """Read the path to this shader's file texture (if any).
