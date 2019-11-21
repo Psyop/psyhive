@@ -11,7 +11,6 @@ class HPainter(QtGui.QPainter):
         """Begin painting."""
         super(HPainter, self).begin(*args, **kwargs)
         self.setRenderHint(self.SmoothPixmapTransform, True)
-        self.setRenderHint(self.HighQualityAntialiasing, True)
 
     def add_text(
             self, text, pos=(0, 0), anchor='TL', col='white', font=None,

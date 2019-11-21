@@ -5,7 +5,8 @@ import os
 
 from maya import cmds
 
-from psyhive.utils import File, get_single, lprint, apply_filter
+from psyhive.utils import File, get_single, lprint, apply_filter, abs_path
+from maya_psyhive.utils import restore_ns, get_parent
 
 
 class FileRef(object):
@@ -27,21 +28,38 @@ class FileRef(object):
         except RuntimeError:
             return None
 
-    def find_nodes(self, type_=None):
+    def find_nodes(self, type_=None, class_=None):
         """Find nodes within this reference.
 
         Args:
             type_ (str): filter nodes by type
+            class_ (class): override node class
 
         Returns:
             (HFnDepenencyNode list): list of nodes
         """
         from maya_psyhive import open_maya as hom
         _kwargs = {'referencedNodes': True}
+        _class = class_ or hom.HFnDependencyNode
         if type_:
             _kwargs['type'] = type_
-        return [hom.HFnDependencyNode(_node)
+        return [_class(_node)
                 for _node in cmds.ls(self.namespace+":*", **_kwargs)]
+
+    def find_meshes(self):
+        """Find meshes in this reference.
+
+        Returns:
+            (HFnMesh list): meshes
+        """
+        from maya_psyhive import open_maya as hom
+        _meshes = []
+        for _shp in self.find_nodes(type_='mesh'):
+            if _shp.plug('intermediateObject').get_val():
+                continue
+            _mesh = hom.HFnMesh(get_parent(_shp))
+            _meshes.append(_mesh)
+        return _meshes
 
     def find_top_node(self):
         """Find top node of this reference.
@@ -175,6 +193,7 @@ class FileRef(object):
             type(self).__name__.strip('_'), self.namespace)
 
 
+@restore_ns
 def create_ref(file_, namespace, class_=None, force=False):
     """Create a reference.
 
@@ -191,7 +210,9 @@ def create_ref(file_, namespace, class_=None, force=False):
     from psyhive import host
     from maya_psyhive.utils import load_plugin
 
-    _file = File(file_)
+    _file = File(abs_path(file_))
+    if not _file.exists():
+        raise OSError("File does not exist: "+_file.path)
     _class = class_ or FileRef
     _rng = host.t_range()
 

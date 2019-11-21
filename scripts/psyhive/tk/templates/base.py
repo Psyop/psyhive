@@ -575,49 +575,53 @@ class TTWorkFileBase(TTBase, File):
         _fileops.open_file(self.path, force=force)
         self.update_output_paths(catch=True)
 
-    def save(self, comment, body=None):
+    def save(self, comment):
         """Save this version.
 
         Args:
             comment (str): comment for version
-            body (str): override work file body
         """
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
         _prev = self.find_latest()
 
-        assert not self.exists()  # Must be version up
+        if self.exists():
 
-        # Get prev workfile
-        if _prev:
-            assert _prev.version == self.version - 1
-            _tk_workspace = _mod.get_workspace_from_path(
-                app=_fileops, path=_prev.path)
-            _tk_workfile = _mod.WorkfileModel(
-                workspace=_tk_workspace, template=_prev.tmpl,
-                path=_prev.path)
-            _tk_workfile = _tk_workfile.get_next_version()
+            self._save_inc(comment=comment)
+
         else:
-            assert self.version == 1
-            _tk_workspace = _mod.get_workspace_from_path(
-                app=_fileops, path=self.path)
-            _tk_workfile = _tk_workspace.get_workfile(
-                name=self.task, version=1)
 
-        # Save
-        if not body:
-            try:
-                self.update_output_paths()
-            except (AttributeError, tank.TankError):
-                print 'FAILED TO UPDATE OUTPUT PATHS'
+            # Get prev workfile
+            if _prev:
+                assert _prev.version == self.version - 1
+                _tk_workspace = _mod.get_workspace_from_path(
+                    app=_fileops, path=_prev.path)
+                _tk_workfile = _mod.WorkfileModel(
+                    workspace=_tk_workspace, template=_prev.tmpl,
+                    path=_prev.path)
+                _tk_workfile = _tk_workfile.get_next_version()
+            else:
+                assert self.version == 1
+                _tk_workspace = _mod.get_workspace_from_path(
+                    app=_fileops, path=self.path)
+                _tk_workfile = _tk_workspace.get_workfile(
+                    name=self.task, version=1)
+
             _tk_workfile.save()
-        else:
-            self.write_text(body)
 
         # Save metadata
         qt.get_application().processEvents()
         self.set_comment(comment)
         self.add_to_recent()
+
+    def _save_inc(self, comment):
+        """Save increment file.
+
+        Args:
+            comment (str): comment
+        """
+        _fileops = find_tank_app('psy-multi-fileops')
+        _fileops.save_increment_file(comment=comment)
 
     def set_comment(self, comment):
         """Set comment for this version.
@@ -905,11 +909,12 @@ class TTOutputVersionBase(TTDirBase):
         return os.path.dirname(self.path)
 
 
-class _TTOutputBase(TTBase):
+class TTOutputBase(TTBase):
     """Base class for any output leaf node (eg. file/seq)."""
 
     channel = None
     output_name = None
+    output_type = None
     output_version_type = None
 
     def find_latest(self, catch=False):
@@ -948,11 +953,11 @@ class _TTOutputBase(TTBase):
         return self.find_latest() == self
 
 
-class TTOutputFileBase(_TTOutputBase, File):
+class TTOutputFileBase(TTOutputBase, File):
     """Base class for any output file tank template."""
 
 
-class TTOutputFileSeqBase(_TTOutputBase, Seq):
+class TTOutputFileSeqBase(TTOutputBase, Seq):
     """Represents a shout output file seq tank template path."""
 
     exists = Seq.exists

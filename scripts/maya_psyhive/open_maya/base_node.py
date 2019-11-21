@@ -11,7 +11,7 @@ import six
 from psyhive.utils import (
     abs_path, diff, store_result, test_path, lprint, apply_filter,
     passes_filter)
-from maya_psyhive.utils import create_attr, get_unique, add_to_set
+from maya_psyhive.utils import create_attr, get_unique, add_to_set, get_parent
 from maya_psyhive.open_maya.plug import HPlug
 
 
@@ -196,6 +196,20 @@ class BaseNode(object):
         _kwargs['source'] = False
         return self.find_connected(**_kwargs)
 
+    def find_parents(self):
+        """Find parents of this node.
+
+        Returns:
+            (HFnTransform list): parent nodes
+        """
+        _parent = self.get_parent()
+        if not _parent:
+            return []
+        _parents = [_parent]
+        if _parent:
+            _parents += _parent.find_parents()
+        return _parents
+
     def find_plugs(self, filter_=None, keyable=True):
         """Find plugs on this node.
 
@@ -231,6 +245,18 @@ class BaseNode(object):
         del _kwargs['self']
         _kwargs['destination'] = False
         return self.find_connected(**_kwargs)
+
+    def get_parent(self):
+        """Get parent of this node (if any).
+
+        Returns:
+            (HFnTransform): parent
+        """
+        from maya_psyhive import open_maya as hom
+        _parent = get_parent(self)
+        if not _parent:
+            return None
+        return hom.HFnTransform(_parent)
 
     def _get_tmp_preset_path(self, use_mel):
         """Get path to tmp preset file.

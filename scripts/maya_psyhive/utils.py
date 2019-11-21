@@ -63,7 +63,8 @@ def restore_ns(func):
     def _restore_ns_fn(*args, **kwargs):
         _ns = ':'+cmds.namespaceInfo(currentNamespace=True)
         _result = func(*args, **kwargs)
-        cmds.namespace(set=_ns)
+        if cmds.namespace(exists=_ns):
+            cmds.namespace(set=_ns)
         return _result
 
     return _restore_ns_fn
@@ -231,6 +232,18 @@ def cycle_check():
     """
     if cmds.cycleCheck(query=True, evaluation=True):
         cmds.cycleCheck(evaluation=False)
+
+
+@restore_ns
+def del_namespace(namespace):
+    """Delete the given namespace.
+
+    Args:
+        namespace (str): namespace to delete
+    """
+    set_namespace(namespace, clean=True)
+    set_namespace(":")
+    cmds.namespace(removeNamespace=namespace)
 
 
 def divide_node(input1, input2, output=None, force=False, name='divide'):

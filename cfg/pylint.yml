@@ -28,8 +28,9 @@ ignore:
     exec-used:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     expression-not-assigned:
-        psyhive/qt/interface.py
         hv_test/diary/y19/d0613/curve_to_image_test.py
+        hv_test/diary/y19/d1120/qt_threading_bug.py
+        psyhive/qt/interface.py
     global-statement: '*'
     inconsistent-return-statements:
         hv_test/diary/
@@ -112,6 +113,8 @@ ignore:
     too-many-arguments: '*'
     too-many-branches:
         hv_test/diary/
+        hv_test/toolkits/tank_tools.py
+        maya_psyhive/open_maya/cmds.py
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/qt/interface.py
         psyhive/tk/templates/base.py
@@ -149,6 +152,7 @@ ignore:
     unexpected-keyword-arg:
         diary/y19/d0726/machi4.py
     unidiomatic-typecheck:
+        hv_test/diary/y19/d1120/qt_threading_bug.py
         psyhive/qt/interface.py
     unreachable:
         hv_test/diary/

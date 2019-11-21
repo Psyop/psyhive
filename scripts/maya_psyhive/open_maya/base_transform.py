@@ -110,15 +110,6 @@ class BaseTransform(BaseNode):
         """Hide this node."""
         self.visibility.set_val(False)
 
-    def get_p(self):
-        """Get position of this transform.
-
-        Returns:
-            (HPoint): position
-        """
-        from maya_psyhive import open_maya as hom
-        return hom.get_p(self)
-
     def get_m(self):
         """Get matrix of this object's transform.
 
@@ -127,6 +118,15 @@ class BaseTransform(BaseNode):
         """
         from maya_psyhive import open_maya as hom
         return hom.get_m(self)
+
+    def get_p(self):
+        """Get position of this transform.
+
+        Returns:
+            (HPoint): position
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.get_p(self)
 
     def parent(self, *args, **kwargs):
         """Wrapper for cmds.parent command."""

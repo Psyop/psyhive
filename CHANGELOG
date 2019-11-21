@@ -1,3 +1,34 @@
+#### v0.46.0 ####
+
+    Released: Thu 21st Nov 2019
+
+    cache tool: 
+        added support function for cache tool to allow shade geo to be used for rig cache [TOOLS-194]
+    
+    maya_psyhive:
+        open_maya.BaseNode get_parent/find_parents added,
+        open_maya.CMDS.blendShape added,
+        open_maya.HPlug get_node/find_driver added,
+        open_maya.HPlug.multiply_node returns HPlug,
+        ref.FileRef.find_nodes added class_ flag,
+        ref.FileRef.find_meshes added,
+        ref.create_ref fix changing ns,
+        ref.create_ref OSError on missing file,
+        tools.drive_shade_geo_from_rig added,
+        tools.oculus_quest.oculus_vr_bake cleaned redundant shiboken,
+        utils.del_namespace added,
+        utils.restore_ns catch cur ns removed,
+    psyhive:    
+        icons.DELETE added,
+        qt.HUiDialog removed parenting to maya main window to fix thread crashing,
+        qt.HPainter.begin removed HighQualityAntialiasing by default,
+        qt.HPixap.add_dot added render_hint flag,
+        qt.HPixap.add_rounded_rect added pen flag,
+        tk.TTOutputFileBase added,
+        tk.TTWorkFileBase added save over existing handling,
+        tools.hive_bro reference output scene fix missing namespace,
+
+
 #### v0.45.0 ####
 
     Released: Tue 19th Nov 2019

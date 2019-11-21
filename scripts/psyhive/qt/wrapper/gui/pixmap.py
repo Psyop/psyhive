@@ -47,7 +47,7 @@ class HPixmap(QtGui.QPixmap):
         return _rect
 
     def add_dot(self, pos, col='black', radius=1.0, outline=None,
-                thickness=None, operation=None):
+                thickness=None, operation=None, render_hint=None):
         """Draw a circle on this pixmap.
 
         Args:
@@ -57,6 +57,7 @@ class HPixmap(QtGui.QPixmap):
             outline (QPen): apply outline pen
             thickness (float): line thickness
             operation (str): compositing operation
+            render_hint (RenderHint): add render hint
         """
         from psyhive import qt
 
@@ -83,6 +84,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.begin(self)
         _pnt.setBrush(_brush)
         _pnt.setPen(_pen)
+        if render_hint:
+            _pnt.setRenderHint(render_hint)
         _pnt.set_operation(operation)
         _pnt.drawEllipse(
             _pos.x()-radius, _pos.y()-radius, radius*2, radius*2)
@@ -279,7 +282,7 @@ class HPixmap(QtGui.QPixmap):
 
         return _rect
 
-    def add_rounded_rect(self, pos, size, col, bevel=5, anchor='TL'):
+    def add_rounded_rect(self, pos, size, col, bevel=5, anchor='TL', pen=None):
         """Draw a rounded rectangle on this pixmap.
 
         Args:
@@ -288,9 +291,10 @@ class HPixmap(QtGui.QPixmap):
             col (str): rectangle fill colour
             bevel (int): edge bevel
             anchor (str): position anchor point
+            pen (QPen): override pen
 
         Returns:
-            (QPixmap): updated pixmap
+            (QRect): draw region
         """
         from psyhive import qt
 
@@ -300,6 +304,8 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = qt.HPainter()
         _pnt.begin(self)
+        if pen:
+            _pnt.setPen(pen)
         _pnt.setBrush(_brush)
         _pnt.drawRoundedRect(_rect, bevel, bevel)
         _pnt.end()

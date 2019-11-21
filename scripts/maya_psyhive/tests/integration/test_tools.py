@@ -2,14 +2,16 @@ import os
 import unittest
 
 from maya import cmds
+from pymel.core import nodetypes as nt
 
 from psyhive import tk
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import use_tmp_ns
+from maya_psyhive.utils import use_tmp_ns, del_namespace
 
 from maya_psyhive.tools import (
-    fkik_switcher, batch_cache, export_img_plane, restore_img_plane)
+    fkik_switcher, batch_cache, export_img_plane, restore_img_plane,
+    drive_shade_geo_from_rig)
 from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.frustrum_test_blast import remove_rigs
@@ -92,9 +94,25 @@ class TestTools(unittest.TestCase):
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
-            _time_ctrl = _ref.get_node(_time_ctrl, strip_ns=True)
+            _time_ctrl = _ref.get_node(_time_ctrl, strip_ns=False)
             restore_img_plane(time_control=str(_time_ctrl), abc=_path)
         assert cmds.ls(type='imagePlane')
+
+    def test_shade_geo_for_rig(self):
+
+        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+                 'rig/output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
+        _ref = ref.obtain_ref(file_=_path, namespace='archer_test')
+        _ref.get_node('placer_Ctrl', class_=hom.HFnTransform).tz.set_val(10)
+        _bbox = _ref.get_node('hairStrand_04_Geo', class_=hom.HFnMesh).bbox()
+        _cache_set = nt.ObjectSet(_ref.get_node('bakeSet'))
+        _n_refs = len(ref.find_refs())
+        del_namespace(':tmp_archer_test')
+        drive_shade_geo_from_rig(_cache_set)
+        assert len(ref.find_refs()) == _n_refs
+        _geo = hom.HFnMesh('tmp_archer_test:hairStrand_04_Geo')
+        assert _geo.bbox().min == _bbox.min
+        assert _geo.bbox().max == _bbox.max
 
     @use_tmp_ns
     def test_write_image_plane(self):

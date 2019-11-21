@@ -12,6 +12,7 @@ EMOJI = EmojiSet(
 
 # Named icons
 COPY = EMOJI.find('Spiral Notepad')
+DELETE = EMOJI.find('Wastebasket')
 BROWSER = EMOJI.find('Card Index Dividers')
 EDIT = EMOJI.find('Pencil')
 FILTER = EMOJI.find('Potable Water')

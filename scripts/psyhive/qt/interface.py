@@ -59,8 +59,7 @@ class HUiDialog(QtWidgets.QDialog):
             sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
-        _parent = parent or _get_default_parent()
-        _args = [_parent] if _parent else []
+        _args = [parent] if parent else []
         super(HUiDialog, self).__init__(*_args)
 
         # Load ui file

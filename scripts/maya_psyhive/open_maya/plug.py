@@ -150,6 +150,17 @@ class HPlug(om.MPlug):
             catch=True)
         return hom.HFnAnimCurve(_anim) if _anim else None
 
+    def find_driver(self):
+        """Find driver if this plug.
+
+        Returns:
+            (HPlug|None): driver (if any)
+        """
+        _driver = get_single(
+            self.list_connections(plugs=True, destination=False),
+            catch=True)
+        return HPlug(_driver) if _driver else None
+
     def get_attr(self, *args, **kwargs):
         """Wrapper for cmds.getAttr as applied to this plug.
 
@@ -183,6 +194,15 @@ class HPlug(om.MPlug):
         """
         _anim = self.find_anim()
         return _anim.get_key_range()
+
+    def get_node(self):
+        """Get this plug's node.
+
+        Returns:
+            (HFnDependencyNode): node
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HFnDependencyNode(self.node)
 
     def get_type(self):
         """Get type name of this attribute.
@@ -229,7 +249,7 @@ class HPlug(om.MPlug):
         Returns:
             (HPlug): output plug
         """
-        return multiply_node(self, input_, output)
+        return HPlug(multiply_node(self, input_, output))
 
     def reset(self, break_connections=False):
         """Reset this plug - set value to default.

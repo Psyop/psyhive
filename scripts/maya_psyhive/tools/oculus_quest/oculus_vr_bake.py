@@ -6,9 +6,7 @@ import pprint
 import re
 import sys
 
-import shiboken2
-
-from maya import OpenMayaUI, cmds
+from maya import cmds
 
 import abstract_maya
 import cframe
@@ -1519,11 +1517,10 @@ def _maya_main_window():
     raise RuntimeError('Could not find MayaWindow instance')
 
 
-def get_main_window():
-    ptr = OpenMayaUI.MQtUtil.mainWindow()
-    # main_win = shiboken2.wrapInstance(long(ptr), QtWidgets.QMainWindow)
-    main_win = QtCompat.wrapInstance(long(ptr))
-    return main_win
+# def get_main_window():
+#     ptr = OpenMayaUI.MQtUtil.mainWindow()
+#     main_win = QtCompat.wrapInstance(long(ptr))
+#     return main_win
 
 
 def launch():

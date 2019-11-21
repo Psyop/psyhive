@@ -114,6 +114,9 @@ class _CmdsMapper(object):
         elif name in ['referenceQuery']:
             _result = _get_result_mapper(
                 _fn, maintain_type=True, class_=hom.HFnDependencyNode)
+        elif name in ['blendShape']:
+            _result = _get_result_mapper(
+                _fn, list_idx=0, class_=hom.HFnDependencyNode)
 
         # Transform
         elif name in ['cluster']:

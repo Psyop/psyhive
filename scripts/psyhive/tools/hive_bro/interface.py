@@ -540,9 +540,11 @@ def _add_path_menu_items(menu, obj):
         menu.add_action('Open scene', _open, icon=icons.OPEN)
 
         # Reference scene
-        _namespace = None
+        _namespace = obj.basename
         if isinstance(obj, tk.TTWorkFileBase):
             _namespace = obj.task
+        elif isinstance(obj, tk.TTOutputBase):
+            _namespace = obj.output_name
         _ref = wrap_fn(host.reference_scene, obj.path, namespace=_namespace)
         _pix = qt.HPixmap(icons.OPEN)
         _pix.add_overlay(

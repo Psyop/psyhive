@@ -6,7 +6,8 @@ from psyhive.tk.misc import (
 from psyhive.tk.tools import reference_publish
 
 from psyhive.tk.templates.misc import get_template
-from psyhive.tk.templates.base import TTWorkFileBase, TTOutputFileBase
+from psyhive.tk.templates.base import (
+    TTWorkFileBase, TTOutputBase, TTOutputFileBase)
 from psyhive.tk.templates.assets import (
     TTAssetOutputFile, TTAssetOutputVersion, TTAssetRoot,
     TTMayaAssetWork, find_asset_roots, TTAssetOutputName,
