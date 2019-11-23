@@ -24,6 +24,7 @@ ignore:
         maya_psyhive/ui.py
     eval-used:
         hv_test/diary/
+        maya_psyhive/shows/clashroyaleholi.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
     exec-used:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
@@ -108,6 +109,7 @@ ignore:
         psyhive/scripts/psyhive/qt/wrapper/gui/pixmap.py
     too-many-ancestors:
         hv_test/diary/y19/d0516/batch_cache_test.py
+        hv_test/diary/y19/d1122/arnold_update_sss_type.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
         psyhive/tk/cache.py
     too-many-arguments: '*'

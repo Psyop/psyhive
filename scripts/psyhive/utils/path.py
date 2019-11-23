@@ -220,6 +220,8 @@ class File(Path):
         Args:
             force (bool): delete with no confirmation
         """
+        if not self.exists():
+            return
         if not force:
             from psyhive import qt
             qt.ok_cancel("Delete file?\n\n"+self.path)

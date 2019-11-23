@@ -295,10 +295,21 @@ def _pass_exception_to_sentry(exc):
     _logger.exception(str(exc))
 
 
-def toggle_err_catcher():
-    """Toggle error catcher decorator."""
-    if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
-        del os.environ['EXC_DISABLE_ERR_CATCHER']
+def toggle_err_catcher(value=None):
+    """Toggle error catcher decorator.
+
+    Args:
+        value (bool): apply error catch enabled state
+    """
+    if value is not None:
+        _value = value
+    else:
+        _cur_value = bool(os.environ.get('EXC_DISABLE_ERR_CATCHER'))
+        _value = not _cur_value
+
+    if _value:
+        if 'EXC_DISABLE_ERR_CATCHER' in os.environ:
+            del os.environ['EXC_DISABLE_ERR_CATCHER']
         dprint("Enabled error catcher")
     else:
         os.environ['EXC_DISABLE_ERR_CATCHER'] = '1'

@@ -35,6 +35,7 @@ class Project(Dir):
         self.seqs_path = '/'.join([self.path, 'sequences'])
         self.maya_scripts_path = '{}/code/primary/addons/maya/scripts'.format(
             os.environ.get('PSYOP_PROJECT_PATH'))
+        self.psylaunch_cfg = abs_path(_PSYLAUNCH_CFG_FMT.format(self.path))
 
     def find_shot(self, name):
         """Find shot matching the given name.
@@ -146,7 +147,7 @@ def find_project(name, verbose=0):
         return _ematch
     _fmatch = get_single(
         apply_filter(_projs, name, key=operator.attrgetter('name')),
-        verbose=verbose)
+        verbose=verbose+1)
     return _fmatch
 
 

@@ -113,17 +113,18 @@ class TTRootBase(TTDirBase):
 
     step_root_type = None
 
-    def find_step_root(self, step):
+    def find_step_root(self, step, catch=False):
         """Find step root matching the given name.
 
         Args:
             step (str): step to search for
+            catch (bool): no error on fail to find step root
 
         Returns:
             (TTStepRootBase): matching step root
         """
         return get_single([_root for _root in self.find_step_roots()
-                           if _root.step == step])
+                           if _root.step == step], catch=catch)
 
     def find_step_roots(self, class_=None, filter_=None):
         """Find steps in this shot.

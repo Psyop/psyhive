@@ -11,9 +11,9 @@ ignore:
         /sanity_check/
     E731:  # Lambda
         hv_test/diary/y19/d0531/colour_bro.py
-        hv_test/diary/y19/d0806/qt_pygui_tests.py
         hv_test/diary/y19/d0814/boid_test.py
         hv_test/diary/y19/d1114/foliage.py
+        hv_test/diary/y19/d1122/qt_pygui_tests.py
         hv_test/tools/colour_bro/cb_ui.py
         psyhive/host.py
         /tests/

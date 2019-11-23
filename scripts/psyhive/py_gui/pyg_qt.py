@@ -13,6 +13,8 @@ from psyhive.py_gui import pyg_base
 if not hasattr(sys, 'QT_PYGUI_INTERFACES'):
     sys.QT_PYGUI_INTERFACES = {}
 
+_SECT_HEIGHT = 20
+
 
 class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
     """Interface built from a python file."""
@@ -33,7 +35,10 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
 
         # Maintain single instance
         if self.py_file.path in sys.QT_PYGUI_INTERFACES:
-            sys.QT_PYGUI_INTERFACES[self.py_file.path].deleteLater()
+            try:
+                sys.QT_PYGUI_INTERFACES[self.py_file.path].deleteLater()
+            except RuntimeError:
+                pass
         sys.QT_PYGUI_INTERFACES[self.py_file.path] = self
 
     def init_ui(self, rebuild_fn=None):
@@ -105,11 +110,14 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
 
         # Update
         if update:
+
             _btn = qt.HPushButton(update.label)
+            _btn.setMinimumSize(60, _SECT_HEIGHT)
             _btn.mousePressEvent = _get_update_fn(
                 set_fn=_set_fn, update=update, field=_field)
             _h_layout.addWidget(_btn)
             _widgets.append(_btn)
+            print 'ADDED BUTTON', _btn.size()
 
         if self.section:
             self._apply_section(*_widgets)
@@ -140,6 +148,12 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
                 _field.setText(default)
             _read_fn = _field.text
             _set_fn = _field.setText
+        elif isinstance(default, bool):
+            _field = QtWidgets.QCheckBox()
+            _field.setChecked(default)
+            _field.setMinimumHeight(_SECT_HEIGHT)
+            _read_fn = _field.isChecked
+            _set_fn = _field.setChecked
         elif isinstance(default, int):
             _field = QtWidgets.QSpinBox()
             _field.setMinimum(-2000000000)

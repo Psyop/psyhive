@@ -18,6 +18,7 @@ class _BaseShader(object):
 
     col_attr = None
     out_col_attr = None
+    _se = None
 
     def __init__(self, shd):
         """Constructor.
@@ -78,6 +79,8 @@ class _BaseShader(object):
         Returns:
             (str): shading engine node
         """
+        if self._se:
+            return self._se
         _sets = cmds.listConnections(self.shd, type='objectSet', source=False)
         lprint('SETS', _sets, verbose=verbose)
         _se = get_single(_sets, catch=True)
@@ -100,6 +103,18 @@ class _BaseShader(object):
         if _file:
             return cmds.getAttr(_file+'.fileTextureName')
         return None
+
+    def set_se(self, se_):
+        """Set cached shading engine.
+
+        This use used where multiple shading engines are attached
+        to a shader (eg. lambert1 has initialShadingGroup/initialParticleSE)
+        but the SE is known on shader init (eg. in a read_shd call).
+
+        Args:
+            se_ (HFnDependencyNode): shading engine to apply
+        """
+        self._se = se_
 
     def set_col(self, col, verbose=0):
         """Set this node's main col attr.
@@ -162,6 +177,20 @@ class _AiStandardSurface(_BaseShader):
         """
         super(_AiStandardSurface, self).__init__(shd)
         self.col_attr = self.shd.plug('baseColor')
+        self.out_col_attr = self.shd.plug('outColor')
+
+
+class _Blinn(_BaseShader):
+    """Represents an blinn shader."""
+
+    def __init__(self, shd):
+        """Constructor.
+
+        Args:
+            shd (str): shader node (eg. blinn1)
+        """
+        super(_Blinn, self).__init__(shd)
+        self.col_attr = self.shd.plug('color')
         self.out_col_attr = self.shd.plug('outColor')
 
 
@@ -310,8 +339,12 @@ def find_shd(shd):
         return _Lambert(shd)
     elif _type == 'aiAmbientOcclusion':
         return _AiAmbientOcclusion(shd)
+    elif _type == 'aiStandardSurface':
+        return _AiStandardSurface(shd)
     elif _type == 'surfaceShader':
         return _SurfaceShader(shd)
+    elif _type == 'blinn':
+        return _Blinn(shd)
     raise ValueError(_type)
 
 
@@ -355,7 +388,9 @@ def read_shd(shp, verbose=1):
         _se+'.surfaceShader', destination=False), catch=True)
     if not _shd:
         return None
-    return find_shd(_shd)
+    _shd = find_shd(_shd)
+    _shd.set_se(hom.HFnDependencyNode(_se))
+    return _shd
 
 
 def surface_shader(name='surfaceShader', col=None):

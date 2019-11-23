@@ -1,3 +1,31 @@
+#### v0.47.0 ####
+
+    Released: Fri 22nd Nov 2019
+
+    Build aiStandin from shade/abc tool:
+        read/apply abc range from sg,
+        added special case for colour switch geo,
+    
+    maya_psyhive:
+        open_maya.HFnMesh.clean_name added,
+        shows.clashroyaleholi.create_ai_standin added col switch special case,
+        shows.clashroyaleholi.create_ai_standin use sg range + loop anim,
+        tex _BaseShader.set_se/_Blinn added,
+        tex.find_shd added _AiStandardSurface handling,
+        tex.read_shd force shading engine on shader,
+        utils.get_val added int handling,
+    psyhive:    
+        pipe.Project.psylaunch_cfg added,
+        pipe.find_project better info on fail,
+        py_gui.get_selection_reader added transform handling,
+        py_gui.QtPyGui added bool field checkbox,
+        tk.TTAssetOutputRoot made public,
+        tk.TTRootBase.find_step_root added catch,
+        tk.find_shots added filter_ arg,
+        tools.toggle_err_catcher added val override, 
+        utils.File.delete no error if file doesn't exist,
+
+
 #### v0.46.0 ####
 
     Released: Thu 21st Nov 2019

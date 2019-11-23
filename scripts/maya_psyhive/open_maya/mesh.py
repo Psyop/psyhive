@@ -22,9 +22,12 @@ class HFnMesh(BaseTransform, om.MFnMesh):
             tfm (str): curve transform
         """
         self.tfm = tfm
+        self.clean_name = self.tfm.split(':')[-1]
+
         super(HFnMesh, self).__init__(self.tfm)
         _dag_path = HDagPath(self.shp.node)
         om.MFnMesh.__init__(self, _dag_path)
+
         self.vtx = IndexedAttrGetter(node=self, attr='vtx')
         self.edge = IndexedAttrGetter(node=self, attr='e')
         self.map = IndexedAttrGetter(node=self, attr='map')

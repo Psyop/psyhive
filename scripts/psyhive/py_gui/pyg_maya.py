@@ -25,9 +25,10 @@ def get_selection_reader(type_):
     def _get_sel():
         _sel = []
         for _node in cmds.ls(selection=True):
-            _shp = get_single(
-                cmds.listRelatives(shapes=True, type=type_), catch=True)
-            if _shp:
+            if type_ != 'transform':
+                _node = get_single(
+                    cmds.listRelatives(shapes=True, type=type_), catch=True)
+            if _node:
                 _sel.append(_node)
         return get_single(_sel, catch=True)
 

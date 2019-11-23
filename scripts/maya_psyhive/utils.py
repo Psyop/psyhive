@@ -437,7 +437,7 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
     elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double',
-                   'double3', 'time', 'byte', 'bool']:
+                   'double3', 'time', 'byte', 'bool', 'int']:
         pass
     else:
         raise ValueError('Unhandled type {} on attr {}'.format(_type, attr))

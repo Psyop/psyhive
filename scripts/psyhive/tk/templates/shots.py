@@ -313,15 +313,16 @@ def find_shot(name):
         _shot for _shot in find_shots() if _shot.name == name])
 
 
-def find_shots(class_=None):
+def find_shots(class_=None, filter_=None):
     """Find shots in the current job.
 
     Args:
         class_ (class): override shot root class
+        filter_ (str): filter by shot name
 
     Returns:
         (TTShotRoot): list of shots
     """
     return sum([
-        _seq.find_shots(class_=class_)
+        _seq.find_shots(class_=class_, filter_=filter_)
         for _seq in find_sequences()], [])

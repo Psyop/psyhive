@@ -5,14 +5,15 @@ import collections
 from maya import cmds
 
 import six
+import tank
 
-from psyhive import qt, py_gui, icons, tk
+from psyhive import qt, py_gui, icons, tk, pipe
 from psyhive.tools import hive_bro
 from psyhive.utils import get_single, lprint, wrap_fn
 
 from maya_psyhive import ref, tex
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_parent, get_unique
+from maya_psyhive.utils import get_unique
 
 LABEL = "Clash Royale Holidays"
 ICON = icons.EMOJI.find('Christmas Tree')
@@ -93,26 +94,33 @@ def _get_default_browser_dir():
     return None
 
 
-def _build_aip_node(shd, standin, meshes, verbose=0):
+def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
     """Build aiSetParameter node.
 
     Args:
         shd (HFnDependencyNode): shader to apply
         standin (HFnDependencyNode): to set parameter on
         meshes (HFnDependencyNode list): meshes to apply set param to
+        ai_attrs (dict): override ai attrs to check
+        name (str): override name
         verbose (int): print process data
     """
+    _ai_attrs = ai_attrs if ai_attrs is not None else _AI_ATTRS
+    print '   - AI ATTRS', _ai_attrs
+
+    # Create standin node
     _aip = hom.CMDS.createNode(
-        'aiSetParameter', name='{}_AIP'.format(shd.name()))
-    _aip.plug('assignment[0]').set_val("shader='{}'".format(shd))
+        'aiSetParameter', name='{}_AIP'.format(name or shd.name()))
     _aip.plug('out').connect(_get_next_idx(standin.plug('operators')))
+    if shd:
+        _aip.plug('assignment[0]').set_val("shader='{}'".format(shd))
     lprint(' - AIP', _aip, verbose=verbose)
 
     # Determine AIP settings to apply
     _sels = []
     _ai_attr_vals = collections.defaultdict(set)
     for _mesh in meshes:
-        for _ai_attr in _AI_ATTRS:
+        for _ai_attr in _ai_attrs:
             _plug = _mesh.plug(_ai_attr)
             _type = 'string' if _plug.get_type() == 'enum' else None
             _val = _plug.get_val(type_=_type)
@@ -123,11 +131,11 @@ def _build_aip_node(shd, standin, meshes, verbose=0):
                     lprint(' - REJECTED DEFAULT VAL', verbose=verbose)
                     continue
             _ai_attr_vals[_ai_attr].add(_val)
-        _sels.append('/{}/{}'.format(get_parent(_mesh), _mesh))
+        _sels.append('*:{}'.format(str(_mesh).split(":")[-1]))
 
     # Apply API settings
     _aip.plug('selection').set_val(' or '.join(_sels))
-    for _ai_attr, _attr in _AI_ATTRS.items():
+    for _ai_attr, _attr in _ai_attrs.items():
         _vals = sorted(_ai_attr_vals[_ai_attr])
         lprint(' - AI ATTR', _attr, _ai_attr, _vals, verbose=verbose)
         _val = get_single(_vals, catch=True)
@@ -138,6 +146,38 @@ def _build_aip_node(shd, standin, meshes, verbose=0):
             else:
                 _val = "{}={}".format(_attr, _val)
             _get_next_idx(_aip.plug('assignment')).set_val(_val)
+
+    return _aip
+
+
+def _get_abc_range_from_sg(abc):
+    """Read abc frame range from shotgun.
+
+    Args:
+        abc (str): path to abc file
+
+    Returns:
+        (tuple|None): frame range (if any)
+    """
+    _out = tk.get_output(abc)
+    if not _out:
+        return None
+
+    _shotgun = tank.platform.current_engine().shotgun
+    _project = pipe.cur_project()
+    _shot_data = tk.get_shot_data(_out.shot)
+    _sg_data = get_single(_shotgun.find(
+        "PublishedFile", filters=[
+            ["project", "is", [tk.get_project_data(_project)]],
+            ["entity", "is", [_shot_data]],
+            ["sg_format", "is", 'alembic'],
+            ["sg_component_name", "is", _out.output_name],
+            ["version_number", "is", _out.version],
+        ],
+        fields=["code", "name", "sg_status_list", "sg_metadata", "path"]))
+    _data = eval(_sg_data['sg_metadata'])
+
+    return _data['start_frame'], _data['end_frame']
 
 
 @py_gui.install_gui(
@@ -175,36 +215,94 @@ def create_standin_from_sel_shade(
 
     # Read shader assignments
     _shds = collections.defaultdict(list)
-    for _mesh in _shade.find_nodes(type_='mesh'):
-        if cmds.getAttr(_mesh+'.intermediateObject'):
+    _col_switch = None
+    for _mesh in _shade.find_meshes():
+        if _mesh.clean_name == 'color_switch_Geo':
+            _col_switch = _mesh
             continue
         _shd = tex.read_shd(_mesh)
-        print _mesh, _shd
-        _shds[_shd].append(_mesh)
-    print
+        if not _shd:
+            continue
+        _shds[_shd].append(_mesh.shp)
+
+    # Handle colour switch special case
+    if _col_switch:
+        _aip = _build_aip_node(shd=None, meshes=[_col_switch], ai_attrs={},
+                               standin=_standin, name='col_switch')
+        for _attr in ['tx', 'ty', 'tz', 'rx']:
+            _val = '{}=0'.format(_attr)
+            _get_next_idx(_aip.plug('assignment')).set_val(_val)
 
     # Set up AIP node for each shader
     for _shd in qt.progress_bar(sorted(_shds), 'Applying {:d} shader{}'):
 
-        print 'SHD', _shd
         _meshes = _shds[_shd]
-        lprint('    '+'\n    '.join([str(_mesh) for _mesh in _meshes]),
-               verbose=verbose)
+        lprint(' - SHD', _shd, _meshes, verbose=verbose)
 
         # Read SE + arnold shader
-        lprint(' - SE', _shd.get_se(), verbose=verbose)
+        lprint('   - SE', _shd.get_se(), verbose=verbose)
         _ai_shd = get_single(
             _shd.get_se().plug('aiSurfaceShader').list_connections(),
             catch=True)
         if _ai_shd:
             _ai_shd = hom.HFnDependencyNode(_ai_shd)
-        lprint(' - AI SHD', _ai_shd, verbose=verbose)
+        lprint('   - AI SHD', _ai_shd, verbose=verbose)
         _shd_node = _ai_shd or _shd.shd
 
         _build_aip_node(shd=_shd_node, meshes=_meshes, standin=_standin)
 
-    # Rename avoiding error on frame expression node
     _standin.select()
-    _rename = wrap_fn(cmds.rename, get_parent(_standin),
-                      get_unique('{}_AIS'.format(_shade.namespace)))
-    cmds.evalDeferred(_rename)
+
+    # Init updates to happen after abc load
+    _rng = _get_abc_range_from_sg(archive)
+    _name = get_unique('{}_AIS'.format(_shade.namespace))
+    cmds.evalDeferred(
+        wrap_fn(_finalise_standin, node=_standin, range_=_rng, name=_name),
+        lowestPriority=True)
+
+    print 'CREATED', _standin
+
+
+def _finalise_standin(node, name, range_, verbose=0):
+    """Finalise new aiStandIn node.
+
+    Executes updates to be run after abc has loaded (abc loads using deferred
+    evaluation). This includes renaming the transform/shape - if they are
+    renamed before abc load the auto generated abc frame expression errors.
+    Also the frame expression is regenenerated to make the abc loop - if this
+    is generated before abc load then the auto generated expression also
+    errors.
+
+    Args:
+        node (HFnDependencyNode): aiStandIn node (shape)
+        name (str): intended node name (of transform)
+        range_ (tuple|None): range to loop (if any)
+        verbose (int): print process data
+    """
+    print 'FINALISE STANDIN', node
+    print ' - RANGE', range_
+
+    # Fix names
+    _parent = node.get_parent()
+    print ' - RENAMING', name, _parent
+    cmds.rename(_parent, name)
+    _node = node.rename(name+"Shape")
+    _plug = _node.plug('frameNumber')
+    if not range_:
+        return
+
+    # Clean frame expression
+    print ' - PLUG', _plug, _plug.find_driver()
+    print ' - BREAKING CONNECTIONS'
+    _plug.break_connections()
+
+    # Build expression
+    print ' - BUILDING EXPRESSION'
+    _str = '\n'.join([
+        '$start = {};',
+        '$end = {};',
+        '{} = ((frame - $start) % ($end - $start + 1)) + $start;',
+    ]).format(range_[0], range_[1], _plug)
+    lprint(_str, verbose=verbose)
+    _expr = cmds.expression(string=_str, timeDependent=True)
+    print ' - CREATED EXPRESSION', _expr
