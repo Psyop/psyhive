@@ -5,11 +5,14 @@ import tank
 from psyhive import pipe
 from psyhive.utils import find, passes_filter, get_single
 
-from psyhive.tk.templates.misc import get_template
-from psyhive.tk.templates.base import (
-    TTDirBase, TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
-    TTRootBase, TTStepRootBase, TTOutputFileSeqBase, TTWorkIncrementBase,
-    TTOutputFileBase, TTOutputNameBase)
+from psyhive.tk.templates.tt_misc import get_template
+from psyhive.tk.templates.tt_base import (
+    TTRootBase, TTStepRootBase, TTDirBase)
+from psyhive.tk.templates.tt_base_work import (
+    TTWorkAreaBase, TTWorkFileBase, TTWorkIncrementBase)
+from psyhive.tk.templates.tt_base_output import (
+    TTOutputVersionBase, TTOutputFileSeqBase, TTOutputFileBase,
+    TTOutputNameBase)
 
 
 class _TTShotCpntBase(object):
@@ -46,6 +49,11 @@ class _TTShotCpntBase(object):
     def output_version_type(self):
         """Get output version type."""
         return TTShotOutputVersion
+
+    @property
+    def output_type_(self):
+        """Get output type."""
+        return TTShotOutput
 
     @property
     def output_file_seq_type(self):
@@ -170,7 +178,7 @@ class TTShotStepRoot(_TTShotCpntBase, TTStepRootBase):
         return _vers
 
 
-class TTShotWorkAreaMaya(TTWorkAreaBase, _TTShotCpntBase):
+class TTShotWorkAreaMaya(_TTShotCpntBase, TTWorkAreaBase):
     """Represents a tank template shot work area for maya."""
 
     hint = 'shot_work_area_maya'
@@ -259,8 +267,14 @@ class TTShotOutputVersion(_TTShotCpntBase, TTOutputVersionBase):
             self.get_status())
 
 
+class TTShotOutput(_TTShotCpntBase, TTDirBase):
+    """Represents a shot output tank template."""
+
+    hint = 'shot_output'
+
+
 class TTShotOutputFile(_TTShotCpntBase, TTOutputFileBase):
-    """Base class for any output file tank template."""
+    """Represents a shot output file tank template."""
 
     hint = 'shot_output_file'
 

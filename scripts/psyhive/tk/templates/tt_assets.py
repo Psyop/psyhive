@@ -3,10 +3,13 @@
 from psyhive import pipe
 from psyhive.utils import find
 
-from psyhive.tk.templates.base import (
-    TTWorkAreaBase, TTWorkFileBase, TTOutputVersionBase,
-    TTRootBase, TTStepRootBase, TTDirBase, TTOutputFileSeqBase,
-    TTWorkIncrementBase, TTOutputFileBase, TTOutputNameBase)
+from psyhive.tk.templates.tt_base import (
+    TTRootBase, TTStepRootBase, TTDirBase)
+from psyhive.tk.templates.tt_base_work import (
+    TTWorkAreaBase, TTWorkFileBase, TTWorkIncrementBase)
+from psyhive.tk.templates.tt_base_output import (
+    TTOutputVersionBase, TTOutputFileSeqBase, TTOutputFileBase,
+    TTOutputNameBase)
 
 
 class _TTAssetCpntBase(object):
@@ -39,6 +42,11 @@ class _TTAssetCpntBase(object):
     def output_version_type(self):
         """Get output version type."""
         return TTAssetOutputVersion
+
+    @property
+    def output_type_(self):
+        """Get basic output type."""
+        return TTAssetOutput
 
     @property
     def output_file_type(self):
@@ -137,8 +145,14 @@ class TTAssetOutputVersion(_TTAssetCpntBase, TTOutputVersionBase):
         return TTAssetOutputName(self.path)
 
 
+class TTAssetOutput(_TTAssetCpntBase, TTDirBase):
+    """Represents a tank asset output."""
+
+    hint = 'asset_output'
+
+
 class TTAssetOutputFile(_TTAssetCpntBase, TTOutputFileBase):
-    """Represents an tank asset output file."""
+    """Represents a tank asset output file."""
 
     hint = 'asset_output_file'
     sg_asset_type = None

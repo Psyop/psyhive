@@ -1,9 +1,112 @@
 """Tools for managing maya interface."""
 
+import tempfile
+
 from maya import cmds, mel, OpenMayaUI
 
-from psyhive import qt
-from psyhive.utils import lprint
+from psyhive import qt, icons
+from psyhive.utils import lprint, store_result
+
+
+class _ShelfButton(object):
+    """Represents a shelf button."""
+
+    def __init__(self, name):
+        """Constructor.
+
+        Args:
+            name (str): button ui element name
+        """
+        self.name = name
+        self.image = cmds.shelfButton(name, query=True, image=True)
+        self.command = cmds.shelfButton(name, query=True, command=True)
+
+    def delete(self):
+        """Delete this button."""
+        cmds.deleteUI(self.name)
+
+
+def _find_shelf_buttons():
+    """Find existing shelf buttons.
+
+    Returns:
+        (ShelfButton list): all shelf buttons
+    """
+    _btns = []
+    for _ctrl in sorted(cmds.lsUI(controls=True)):
+        if not cmds.shelfButton(_ctrl, query=True, exists=True):
+            continue
+        _btn = _ShelfButton(_ctrl)
+        _btns.append(_btn)
+
+    return _btns
+
+
+def add_shelf_button(name, image, command, annotation=None, parent='Henry',
+                     width=None):
+    """Add a shelf button.
+
+    Args:
+        name (str): unique button name
+        image (str): path to button image
+        command (fn): button command
+        annotation (str): button annotation (tooltip)
+        parent (str): parent shelf
+        width (int): button width
+    """
+
+    # Replace existing buttons with matching name or
+    if cmds.shelfButton(name, query=True, exists=True):
+        cmds.deleteUI(name)
+    for _existing in [
+            _btn for _btn in _find_shelf_buttons()
+            if _btn.image == image and _btn.command == command]:
+        qt.ok_cancel('Replace existing {} button?'.format(name))
+        _btn.delete()
+
+    _kwargs = {}
+    for _name, _val in [
+            ('annotation', annotation),
+            ('image', image),
+            ('command', command),
+            ('width', width),
+    ]:
+        if _val:
+            _kwargs[_name] = _val
+    cmds.shelfButton(name, parent=parent, **_kwargs)
+
+
+@store_result
+def _get_separator_icon(icon='Fleur-de-lis'):
+    """Build icon for shelf separator.
+
+    Args:
+        icon (str): emoji name for separator icon
+
+    Returns:
+        (str): path to tmp separator icon
+    """
+    _file = '{}/maya_psyhive/spacer_icon_{}.png'.format(
+        tempfile.gettempdir(), icon)
+    _pix = qt.HPixmap(70, 100)
+    _pix.fill(qt.BLANK)
+
+    _over = icons.EMOJI.find(icon)
+
+    _pix.add_overlay(_over, pos=_pix.center(), resize=30, anchor='C')
+    _pix.save_as(_file, force=True)
+    return _file
+
+
+def add_separator(name, parent):
+    """Add a shelf button separator.
+
+    Args:
+        name (str): ui element name
+        parent (str): parent shelf
+    """
+    _icon = _get_separator_icon()
+    add_shelf_button(name, image=_icon, command=None, width=10, parent=parent)
 
 
 def clear_script_editor():

@@ -1,6 +1,7 @@
 """Miscellaneous utility tools."""
 
 import copy
+import httplib
 import functools
 import os
 import pprint
@@ -271,25 +272,26 @@ def lprint(*args, **kwargs):
     print(' '.join([str(_arg) for _arg in args]))
 
 
-def read_url(url, edit=False):
+def read_url(url, edit=False, attempts=5):
     """Read url contents.
 
     Args:
         url (str): url to read
         edit (bool): save html and open in editor
+        attempts (int): number of attempts to download url
 
     Returns:
         (str): url response
     """
     from psyhive.utils import write_file, File, abs_path
 
-    # Attempt to read data 5 times
+    # Attempt to read data
     _data = None
-    for _idx in range(5):
+    for _idx in range(attempts):
         try:
             _response = urllib2.urlopen(url)
             _data = _response.read()
-        except urllib2.HTTPError as _exc:
+        except (urllib2.HTTPError, httplib.IncompleteRead) as _exc:
             print 'FAILED({}) - {:d}'.format(type(_exc).__name__, _idx+1)
             time.sleep(2)
         else:

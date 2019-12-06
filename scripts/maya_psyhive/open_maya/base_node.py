@@ -31,6 +31,7 @@ class BaseNode(object):
             raise ValueError('Non-string init {} ({})'.format(
                 node, type(node).__name__))
         self.node = node
+        self.clean_name = self.node.split(':')[-1]
 
     def add_to_set(self, set_, verbose=0):
         """Add this node to a set, creating it if required.

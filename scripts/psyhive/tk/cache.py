@@ -10,16 +10,18 @@ from psyhive.utils import (
     Cacheable, store_result_on_obj, find,
     lprint, dprint, store_result_content_dependent, Seq)
 
-from psyhive.tk.templates.base import (
-    TTWorkFileBase, TTWorkAreaBase, TTOutputNameBase, TTStepRootBase)
-from psyhive.tk.templates.assets import (
+from psyhive.tk.templates.tt_base import TTStepRootBase
+from psyhive.tk.templates.tt_base_work import (
+    TTWorkFileBase, TTWorkAreaBase)
+from psyhive.tk.templates.tt_base_output import TTOutputNameBase
+from psyhive.tk.templates.tt_assets import (
     TTMayaAssetWork, TTAssetWorkAreaMaya, TTAssetOutputFile,
     TTAssetOutputVersion, TTAssetOutputName, TTAssetStepRoot)
-from psyhive.tk.templates.shots import (
+from psyhive.tk.templates.tt_shots import (
     TTMayaShotWork, TTShotWorkAreaMaya, TTShotRoot, TTShotStepRoot,
     TTShotOutputName, TTShotOutputVersion, TTNukeShotWork)
-from psyhive.tk.templates.tools import get_work
-from psyhive.tk.templates.misc import get_template
+from psyhive.tk.templates.tt_tools import get_work
+from psyhive.tk.templates.tt_misc import get_template
 
 _CACHEABLES = {}
 _WORK_FILES = {}
@@ -234,7 +236,7 @@ class _CTTAssetOutputVersion(TTAssetOutputVersion):
             verbose (int): print process data
 
         Returns:
-            (TTOutputBase list): outputs
+            (TTOutputFileBase list): outputs
         """
         return super(_CTTAssetOutputVersion, self)._read_outputs(
             verbose=verbose)
@@ -267,7 +269,7 @@ class _CTTShotOutputVersion(TTShotOutputVersion):
             verbose (int): print process data
 
         Returns:
-            (TTOutputBase list): outputs
+            (TTOutputFileBase list): outputs
         """
         return super(_CTTShotOutputVersion, self)._read_outputs(
             verbose=verbose)

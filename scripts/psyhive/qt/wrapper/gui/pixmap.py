@@ -282,7 +282,8 @@ class HPixmap(QtGui.QPixmap):
 
         return _rect
 
-    def add_rounded_rect(self, pos, size, col, bevel=5, anchor='TL', pen=None):
+    def add_rounded_rect(self, pos, size, col='White', bevel=5, anchor='TL',
+                         pen=None, outline=True):
         """Draw a rounded rectangle on this pixmap.
 
         Args:
@@ -292,6 +293,7 @@ class HPixmap(QtGui.QPixmap):
             bevel (int): edge bevel
             anchor (str): position anchor point
             pen (QPen): override pen
+            outline (bool): show outline
 
         Returns:
             (QRect): draw region
@@ -302,10 +304,18 @@ class HPixmap(QtGui.QPixmap):
         _brush = QtGui.QBrush(qt.get_col(_col))
         _rect = _get_rect(pos=pos, size=size, anchor=anchor)
 
+        # Set pen
+        _pen = None
+        if pen:
+            _pen = pen
+        elif not outline:
+            _pen = QtGui.QPen(_col)
+            _pen.setStyle(Qt.NoPen)
+
         _pnt = qt.HPainter()
         _pnt.begin(self)
-        if pen:
-            _pnt.setPen(pen)
+        if _pen:
+            _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
         _pnt.drawRoundedRect(_rect, bevel, bevel)
         _pnt.end()

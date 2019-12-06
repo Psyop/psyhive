@@ -38,6 +38,9 @@ _RELOAD_ORDER = [
     'psyhive.pipe.shot',
     'psyhive.pipe',
     'psyhive.tk.misc',
+    'psyhive.tk.templates.tt_base',
+    'psyhive.tk.templates.tt_base_output',
+    'psyhive.tk.templates.tt_base_work',
     'psyhive.tk.templates',
     'psyhive.tk',
     'psyhive.tools',
@@ -153,7 +156,10 @@ def get_mod_sort(order):
         # Apply ordering
         _idx = 0
         for _idx, _name in enumerate(order):
-            if name.startswith(_name) or name == _name:
+            if name == _name:
+                break
+            if name.startswith(_name):
+                _val += 0.01
                 break
         _val += _idx*10
 

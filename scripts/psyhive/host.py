@@ -43,6 +43,14 @@ else:
     set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
 
 
+try:
+    import hou
+except ImportError:
+    pass
+else:
+    NAME = 'hou'
+
+
 def cur_scene():
     """Get the path to the current scene.
 

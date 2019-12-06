@@ -89,6 +89,7 @@ class EmojiSet(Seq):
         global _FOUND_EMOJIS
         _match = self.find_emoji(match, verbose=verbose)
         _FOUND_EMOJIS.add(_match.name)
+        lprint('EMOJI', _match, verbose=verbose)
         return _match.path
 
     def find_emoji(self, match, verbose=0):

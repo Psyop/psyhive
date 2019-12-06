@@ -5,7 +5,9 @@ import os
 from maya import cmds
 
 from psyhive import icons, qt, refresh
-from psyhive.utils import wrap_fn, copy_text, lprint, chain_fns, get_single
+from psyhive.utils import (
+    wrap_fn, copy_text, lprint, chain_fns, get_single, File, to_nice,
+    abs_path)
 
 from psyhive.py_gui import pyg_base, pyg_install
 
@@ -77,11 +79,12 @@ def _get_update_fn(set_fn, update, field):
 class MayaPyGui(pyg_base.BasePyGui):
     """Pygui interface built using maya.cmds interface tools."""
 
-    def init_ui(self, rebuild_fn=None):
+    def init_ui(self, rebuild_fn=None, verbose=0):
         """Initiate ui.
 
         Args:
             rebuild_fn (func): override rebuild function
+            verbose (int): print process data
         """
 
         # Init window
@@ -350,7 +353,7 @@ class MayaPyGui(pyg_base.BasePyGui):
         cmds.menuItem(
             self._save_on_close, edit=True, checkBox=True)
 
-    def _set_section(self, section, verbose=0):
+    def set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
 
         Args:
@@ -376,3 +379,94 @@ class MayaPyGui(pyg_base.BasePyGui):
         lprint(
             '[py_gui.maya] SETTING SECTION', section, section.collapse,
             verbose=verbose)
+
+
+class MayaPyShelfButton(pyg_base.BasePyGui):
+    """Manages representing a python file as a shelf button.
+
+    Clicking the button launches a MayaPyGui of the py file. The defs
+    are also avaliable as right-click options.
+    """
+
+    def __init__(self, mod, parent, image, command=None):
+        """Constructor.
+
+        Args:
+            mod (module): py module to build into button
+            parent (str): parent shelf
+            image (str): path to icon
+            command (str): override button command
+        """
+
+        # Create shelf button
+        _file = File(abs_path(mod.__file__))
+        self.button = '{}_{}_PyShelfButton'.format(parent, _file.basename)
+        _label = getattr(mod, 'PYGUI_TITLE', to_nice(_file.basename))
+        _cmd = command or '\n'.join([
+            'from {} import MayaPyGui'.format(__name__),
+            '_path = "{}"'.format(_file.path),
+            '_title = "{}"'.format(_label),
+            'MayaPyGui(_path, all_defs=True, title=_title)'])
+        ui.add_shelf_button(
+            self.button, image=image, parent=parent, command=_cmd,
+            annotation=_label)
+
+        super(MayaPyShelfButton, self).__init__(
+            _file.path, all_defs=True, mod=mod)
+
+    def init_ui(self, rebuild_fn=None, verbose=1):
+        """Not applicable.
+
+        Args:
+            rebuild_fn (func): override rebuild function
+            verbose (int): print process data
+        """
+
+    def add_arg(self, *args, **kwargs):
+        """Not applicable.
+
+        Args:
+            arg (PyArg): arg to add
+            default (any): default value for arg
+            label (str): override arg label
+            choices (dict): list of options to show in the interface
+            label_width (int): label width in pixels
+            update (ArgUpdater): updater for this arg
+            browser (BrowserLauncher): add launch browser button
+            verbose (int): print process data
+        """
+        return None, None
+
+    def add_execute(self, def_, exec_fn, code_fn, help_fn, depth=35,
+                    icon=None, label=None, col=None):
+        """Add context option for the given def.
+
+        Args:
+            def_ (PyDef): def being added
+            exec_fn (fn): function to call on execute
+            code_fn (fn): function to call on jump to code
+            help_fn (fn): function to call on launch help
+            depth (int): size in pixels of def
+            icon (str): path to icon to display
+            label (str): override label from exec button
+            col (str): colour for button
+        """
+        cmds.menuItem(label, command=exec_fn, image=icon)
+
+    def load_settings(self, verbose=0):
+        """Not applicable.
+
+        Args:
+            verbose (int): print process data
+        """
+
+    def set_section(self, section, verbose=0):
+        """Set section.
+
+        Sections are applied as labelled dividers.
+
+        Args:
+            section (_Section): section to apply
+            verbose (int): print process data
+        """
+        cmds.menuItem(divider=True, label=section.label)

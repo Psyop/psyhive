@@ -168,6 +168,19 @@ class Path(object):
 class Dir(Path):
     """Represents a directory on disk."""
 
+    def delete(self, force=False):
+        """Delete this directory.
+
+        Args:
+            force (bool): force delete with no confirmation
+        """
+        if not self.exists():
+            return
+        if not force:
+            from psyhive import qt
+            qt.ok_cancel("Delete dir?\n\n"+self.path)
+        shutil.rmtree(self.path)
+
     def find(self, **kwargs):
         """Search for files in this dir.
 

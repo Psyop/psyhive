@@ -91,6 +91,17 @@ class HComboBox(QtWidgets.QComboBox, HWidgetBase):
                 self.setCurrentIndex(_idx)
                 break
 
+    def select_text(self, text):
+        """Select item  with the given text.
+
+        Args:
+            text (str): text to select
+        """
+        for _idx in range(self.count()):
+            if self.itemText(_idx) == text:
+                self.setCurrentIndex(_idx)
+                break
+
     def selected_data(self):
         """Get data linked to the selected item.
 

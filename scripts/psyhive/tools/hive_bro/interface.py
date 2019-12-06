@@ -487,7 +487,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
         Args:
             menu (QMenu): menu to add to
-            output (TTOutputBase): output to add options for
+            output (TTOutputFileBase): output to add options for
         """
         _label = '{} ({}/{})'.format(
             '_'.join(output.basename.split("_")[1:-1]),
@@ -543,7 +543,7 @@ def _add_path_menu_items(menu, obj):
         _namespace = obj.basename
         if isinstance(obj, tk.TTWorkFileBase):
             _namespace = obj.task
-        elif isinstance(obj, tk.TTOutputBase):
+        elif isinstance(obj, tk.TTOutputFileBase):
             _namespace = obj.output_name
         _ref = wrap_fn(host.reference_scene, obj.path, namespace=_namespace)
         _pix = qt.HPixmap(icons.OPEN)

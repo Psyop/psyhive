@@ -59,7 +59,8 @@ def get_exec_fn(
             reload(_mod)
         _kwargs = {}
         for _arg_name, _arg_fn in read_arg_fns.items():
-            _kwargs[_arg_name] = _arg_fn()
+            if _arg_fn:
+                _kwargs[_arg_name] = _arg_fn()
         _fn = getattr(_mod, def_.name)
         if catch_error_:
             _fn = catch_error(_fn)

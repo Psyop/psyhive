@@ -1,3 +1,32 @@
+#### v0.48.0 ####
+
+    Released: Thu 5th Dec 2019
+
+    Yeti Tools: moved output paths to work with asset manager,
+    
+    maya_psyhive:
+        open_maya.BaseNode.clean_name added,
+        tools.yeti separated read/write/ui mods,
+        tools.yeti updated output paths to fit with asset manager,
+        ui added add_shelf_button/add_separator,
+    psyhive:    
+        host added basic hou handling,
+        icons.EmojiSet.find on verbose prints name,
+        py_gui.BasePyGui made public,
+        py_gui MayaPyShelfButton added,
+        py_gui added pyg prefix to submodules,
+        py_gui.BasePyGui.set_section made public,
+        qt.HPixmap.add_rounded_rect added outline flag,
+        qt.HComboBox.select_text added,
+        tk.templates added tt prefix to mods,
+        tk.templates separated base -> base/work/outputs,
+        tk.cur_shot added,
+        tk renamed TTOutputBase -> TTOutputInstanceBase,
+        tk added TTAssetOutput/TTShotOuput,
+        utils.read_url added attempts arg + catch httplib.IncompleteRead,
+        utils.Dir.delete added,
+
+
 #### v0.47.0 ####
 
     Released: Fri 22nd Nov 2019

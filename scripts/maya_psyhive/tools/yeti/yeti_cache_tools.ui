@@ -274,12 +274,12 @@
           </size>
          </property>
          <property name="text">
-          <string>Asset</string>
+          <string>Name</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="HComboBox" name="asset"/>
+        <widget class="HComboBox" name="name"/>
        </item>
       </layout>
      </item>

@@ -25,7 +25,8 @@ class BasePyGui(object):
     """Base class for any py_gui interface."""
 
     def __init__(
-            self, path, title=None, all_defs=False, base_col=None, verbose=0):
+            self, path, title=None, all_defs=False, base_col=None,
+            mod=None, verbose=0):
         """Constructor.
 
         Args:
@@ -35,6 +36,7 @@ class BasePyGui(object):
                 only defs decorated with the py_gui.install decorator
                 are added)
             base_col (QColor|str): override base colour for this interface
+            mod (module): py file module (to avoid reimport/calculate)
             verbose (int): print process data
         """
 
@@ -48,7 +50,7 @@ class BasePyGui(object):
         self.all_defs = all_defs
         self.section = None
 
-        _mod = self.py_file.get_module(verbose=1)
+        _mod = mod or self.py_file.get_module()
 
         self.mod_name = _mod.__name__
         self.title = title or getattr(_mod, 'PYGUI_TITLE', self.mod_name)
@@ -82,13 +84,15 @@ class BasePyGui(object):
         if os.path.exists(self.settings_file):
             self.load_settings()
 
-    def init_ui(self, rebuild_fn=None):
+    def init_ui(self, rebuild_fn=None, verbose=1):
         """Initiate ui.
 
         Args:
             rebuild_fn (func): override rebuild function
+            verbose (int): print process data
         """
-        dprint('Building ui {} ({})'.format(self.ui_name, self.base_col))
+        dprint('Building ui {} ({})'.format(self.ui_name, self.base_col),
+               verbose=verbose)
 
         # Add menu bar
         _interface = self.add_menu('Interface')
@@ -111,7 +115,6 @@ class BasePyGui(object):
         Args:
             name (str): menu name
         """
-        raise NotImplementedError
 
     def add_menu_item(self, parent, label, command=None, image=None,
                       checkbox=None):
@@ -124,7 +127,6 @@ class BasePyGui(object):
             image (str): path to item image
             checkbox (bool): item as checkbox (with this state)
         """
-        raise NotImplementedError
 
     def add_arg(self, arg, default, label=None, choices=None, label_width=None,
                 update=None, browser=None, verbose=0):
@@ -140,7 +142,6 @@ class BasePyGui(object):
             browser (BrowserLauncher): add launch browser button
             verbose (int): print process data
         """
-        raise NotImplementedError
 
     def add_def(self, def_, opts, last_, verbose=0):
         """Add a def to the interface.
@@ -164,7 +165,7 @@ class BasePyGui(object):
         _catch_error = opts.get('catch_error_', True)
 
         if _section:
-            self._set_section(_section)
+            self.set_section(_section)
 
         self.read_settings_fns['def'][def_.name] = {}
         self.set_settings_fns['def'][def_.name] = {}
@@ -376,7 +377,7 @@ class BasePyGui(object):
         dprint('Saved settings', self.settings_file, verbose=verbose)
         write_yaml(file_=self.settings_file, data=_settings)
 
-    def _set_section(self, section, verbose=0):
+    def set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
 
         Args:
@@ -385,7 +386,7 @@ class BasePyGui(object):
         """
 
 
-def _read_all_defs(py_file, mod, defs_data, sections, hidden, verbose=1):
+def _read_all_defs(py_file, mod, defs_data, sections, hidden, verbose=0):
     """Read all defs data from the given file.
 
     This is complicated as any information installed to defs needs to
@@ -461,7 +462,7 @@ def _read_all_defs(py_file, mod, defs_data, sections, hidden, verbose=1):
 
         # Add section
         elif isinstance(_child, _AstSectionMatcher):
-            print " - SECTION", _child, sections
+            lprint(" - SECTION", _child, sections, verbose=verbose)
             _section = sections[_child.label]
 
     return _data

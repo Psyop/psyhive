@@ -3,12 +3,39 @@
 from psyhive import host
 from psyhive.utils import File, lprint
 
-from psyhive.tk.templates.assets import (
+from psyhive.tk.templates.tt_assets import (
     TTMayaAssetIncrement, TTMayaAssetWork, TTAssetStepRoot,
     TTAssetOutputFile)
-from psyhive.tk.templates.shots import (
+from psyhive.tk.templates.tt_shots import (
     TTMayaShotIncrement, TTMayaShotWork, get_shot, TTShotStepRoot,
     TTShotOutputFile, TTShotOutputFileSeq, TTNukeShotWork)
+
+
+def cur_shot():
+    """Get current shot.
+
+    Returns:
+        (TTShotRoot|None): current shot (if any)
+    """
+    _work = cur_work()
+    if not _work:
+        return None
+    return _work.shot
+
+
+def cur_work(class_=None):
+    """Get work file object associated with the current file.
+
+    Args:
+        class_ (type): force workfile type
+
+    Returns:
+        (TTWorkFileBase): work file
+    """
+    _cur_scene = host.cur_scene()
+    if not _cur_scene:
+        return None
+    return get_work(_cur_scene, class_=class_, catch=True)
 
 
 def get_output(path):
@@ -127,18 +154,3 @@ def get_work(file_, class_=None, catch=True, verbose=0):
         if catch:
             return None
         raise _exc
-
-
-def cur_work(class_=None):
-    """Get work file object associated with the current file.
-
-    Args:
-        class_ (type): force workfile type
-
-    Returns:
-        (TTWorkFileBase): work file
-    """
-    _cur_scene = host.cur_scene()
-    if not _cur_scene:
-        return None
-    return get_work(_cur_scene, class_=class_, catch=True)

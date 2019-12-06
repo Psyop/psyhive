@@ -64,10 +64,10 @@ ignore:
         maya_psyhive/tools/fkik_switcher/interface.py
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
-        maya_psyhive/tools/yeti/cache.py
+        maya_psyhive/tools/yeti/yeti_ui.py
         psyhive/py_gui/pyg_qt.py
         psyhive/qt/wrapper/widgets.py
-        psyhive/tk/templates/base.py
+        psyhive/tk/templates/tt_base_work.py
         psyhive/tools/batch_rerender/interface.py
         psyhive/tools/err_catcher.py
         psyhive/tools/hive_bro/interface.py
@@ -79,7 +79,9 @@ ignore:
     not-an-iterable:
         psyhive/utils/seq.py
     not-callable:
-        psyhive/tk/templates/base.py
+        psyhive/tk/templates/tt_base.py
+        psyhive/tk/templates/tt_base_output.py
+        psyhive/tk/templates/tt_base_work.py
         psyhive/tk/cache.py
         hv_test/diary/
     pointless-statement:
@@ -91,7 +93,7 @@ ignore:
         hv_test/toolkits/tank_tools.py
         psyhive/farm/psyq_plugin/mayapy_worker.p
         psyhive/tk/misc.py
-        psyhive/tk/templates/base.py
+        psyhive/tk/templates/tt_base_work.py
     raising-bad-type:
         maya_psyhive/utils.py
     redefined-outer-name:
@@ -111,6 +113,7 @@ ignore:
         hv_test/diary/y19/d0516/batch_cache_test.py
         hv_test/diary/y19/d1122/arnold_update_sss_type.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
+        psyhive/scripts/psyhive/tk/templates/shots.py
         psyhive/tk/cache.py
     too-many-arguments: '*'
     too-many-branches:
@@ -163,6 +166,7 @@ ignore:
         maya_psyhive/tools/yeti/cache.py
     unused-argument:
         hv_test/diary/
+        hv_test/startup.py
         hv_test/toolkits/check_code.py
         hv_test/tools/colour_bro/cb_ui.py
         maya_psyhive/open_maya/base_node.py
@@ -171,6 +175,7 @@ ignore:
         psyhive/qt/wrapper/gui.py
         psyhive/qt/wrapper/gui/pixmap.py
         psyhive/py_gui/pyg_base.py
+        psyhive/py_gui/pyg_maya.py
         psyhive/utils/cache.py
         sanity_check/checks/
         /tests/

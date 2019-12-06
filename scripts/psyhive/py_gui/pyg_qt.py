@@ -41,11 +41,12 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
                 pass
         sys.QT_PYGUI_INTERFACES[self.py_file.path] = self
 
-    def init_ui(self, rebuild_fn=None):
+    def init_ui(self, rebuild_fn=None, verbose=0):
         """Initiate ui.
 
         Args:
             rebuild_fn (func): override rebuild function
+            verbose (int): print process data
         """
         super(QtPyGui, self).init_ui(rebuild_fn=rebuild_fn)
 
@@ -288,7 +289,7 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
             self.section.widgets.append(_widget)
             _widget.setVisible(not self.section.collapse)
 
-    def _set_section(self, section, verbose=0):
+    def set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).
 
         Args:
