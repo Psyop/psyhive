@@ -1,5 +1,6 @@
 """Tools for Clash Royale Holdays project."""
 
+import pprint
 import collections
 
 from maya import cmds
@@ -13,7 +14,7 @@ from psyhive.utils import get_single, lprint, wrap_fn
 
 from maya_psyhive import ref, tex
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_unique
+from maya_psyhive.utils import get_unique, get_parent
 
 LABEL = "Clash Royale Holidays"
 ICON = icons.EMOJI.find('Christmas Tree')
@@ -131,7 +132,9 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
                     lprint(' - REJECTED DEFAULT VAL', verbose=verbose)
                     continue
             _ai_attr_vals[_ai_attr].add(_val)
-        _sels.append('*:{}'.format(str(_mesh).split(":")[-1]))
+
+        _tfm = get_parent(_mesh)
+        _sels.append('*:{}/*'.format(_tfm.split(":")[-1]))
 
     # Apply API settings
     _aip.plug('selection').set_val(' or '.join(_sels))
@@ -150,11 +153,15 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
     return _aip
 
 
-def _get_abc_range_from_sg(abc):
+def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
     """Read abc frame range from shotgun.
 
     Args:
         abc (str): path to abc file
+        mode (str): where to get range from
+            abc - read bake range of abc
+            shot - read cut in/out range of shot
+        verbose (int): print process data
 
     Returns:
         (tuple|None): frame range (if any)
@@ -165,19 +172,34 @@ def _get_abc_range_from_sg(abc):
 
     _shotgun = tank.platform.current_engine().shotgun
     _project = pipe.cur_project()
-    _shot_data = tk.get_shot_data(_out.shot)
-    _sg_data = get_single(_shotgun.find(
-        "PublishedFile", filters=[
-            ["project", "is", [tk.get_project_data(_project)]],
-            ["entity", "is", [_shot_data]],
-            ["sg_format", "is", 'alembic'],
-            ["sg_component_name", "is", _out.output_name],
-            ["version_number", "is", _out.version],
-        ],
-        fields=["code", "name", "sg_status_list", "sg_metadata", "path"]))
-    _data = eval(_sg_data['sg_metadata'])
 
-    return _data['start_frame'], _data['end_frame']
+    if mode == 'abc':
+        _sg_data = get_single(_shotgun.find(
+            "PublishedFile", filters=[
+                ["project", "is", [tk.get_project_data(_project)]],
+                ["entity", "is", [tk.get_shot_data(_out.shot)]],
+                ["sg_format", "is", 'alembic'],
+                ["sg_component_name", "is", _out.output_name],
+                ["version_number", "is", _out.version],
+            ],
+            fields=["code", "name", "sg_status_list", "sg_metadata", "path"]))
+        _data = eval(_sg_data['sg_metadata'])
+        _result = _data['start_frame'], _data['end_frame']
+    elif mode == 'shot':
+        _data = get_single(tank.platform.current_engine().shotgun.find(
+            'Shot', filters=[
+                ["project", "is", [tk.get_project_data(_project)]],
+                ["code", "is", [tk.get_shot_data(_out.shot)['name']]]],
+            fields=["sg_cut_in", "sg_cut_out"]), catch=True)
+        pprint.pprint(_data)
+        _result = _data['sg_cut_in'], _data['sg_cut_out'] if _data else None
+    else:
+        raise ValueError(mode)
+
+    if verbose:
+        pprint.pprint(_data)
+
+    return _result
 
 
 @py_gui.install_gui(
@@ -215,23 +237,23 @@ def create_standin_from_sel_shade(
 
     # Read shader assignments
     _shds = collections.defaultdict(list)
-    _col_switch = None
     for _mesh in _shade.find_meshes():
         if _mesh.clean_name == 'color_switch_Geo':
-            _col_switch = _mesh
             continue
         _shd = tex.read_shd(_mesh)
         if not _shd:
             continue
         _shds[_shd].append(_mesh.shp)
 
-    # Handle colour switch special case
-    if _col_switch:
-        _aip = _build_aip_node(shd=None, meshes=[_col_switch], ai_attrs={},
-                               standin=_standin, name='col_switch')
-        for _attr in ['tx', 'ty', 'tz', 'rx']:
-            _val = '{}=0'.format(_attr)
-            _get_next_idx(_aip.plug('assignment')).set_val(_val)
+    # Build col switches aip
+    _aip = _build_aip_node(
+        shd=None, ai_attrs={}, meshes=[], standin=_standin,
+        name='{}_colorSwitches'.format(_shade.namespace))
+    _aip.plug('selection').set_val('*')
+    _geo = _shade.get_node('GEO')
+    for _attr in _geo.list_attr(userDefined=True) or []:
+        _val = '{}={}'.format(_attr, _geo.plug(_attr).get_val(type_='int'))
+        _get_next_idx(_aip.plug('assignment')).set_val(_val)
 
     # Set up AIP node for each shader
     for _shd in qt.progress_bar(sorted(_shds), 'Applying {:d} shader{}'):
@@ -297,12 +319,11 @@ def _finalise_standin(node, name, range_, verbose=0):
     _plug.break_connections()
 
     # Build expression
-    print ' - BUILDING EXPRESSION'
-    _str = '\n'.join([
-        '$start = {};',
-        '$end = {};',
-        '{} = ((frame - $start) % ($end - $start + 1)) + $start;',
-    ]).format(range_[0], range_[1], _plug)
-    lprint(_str, verbose=verbose)
-    _expr = cmds.expression(string=_str, timeDependent=True)
-    print ' - CREATED EXPRESSION', _expr
+    if range_:
+        print ' - BUILDING EXPRESSION'
+        _str = '\n'.join([
+            '{plug} = ((frame - {start}) % ({end} - {start} + 1)) + {start};',
+        ]).format(start=range_[0], end=range_[1], plug=_plug)
+        lprint(_str, verbose=verbose)
+        _expr = cmds.expression(string=_str, timeDependent=True)
+        print ' - CREATED EXPRESSION', _expr

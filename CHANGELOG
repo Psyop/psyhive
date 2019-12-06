@@ -1,3 +1,23 @@
+#### v0.49.0 ####
+
+    Released: Fri 6th Dec 2019
+
+    Clash Holiday aiStandIn Tool [TOOLS-193]: 
+        use *:tfm/* format,
+        read cut in/out from sg for range,
+        create col switches AIP,
+    
+    maya_psyhive.shows.clashroyaleholi:
+        create_standin_from_sel_shade use *:tfm/* format,
+        create_standin_from_sel_shade read cut in/out from sg for range,
+        create_standin_from_sel_shade create col switches AIP,
+    maya_psyhive.ui:
+        add_shelf_button added force flag,
+    psyhive:
+        py_gui.MayaPyShelfButton added label override + force replace existing,
+        py_gui.QtPyGui dix bad cols in hou,
+
+
 #### v0.48.0 ####
 
     Released: Thu 5th Dec 2019

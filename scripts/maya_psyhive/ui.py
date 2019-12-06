@@ -20,6 +20,7 @@ class _ShelfButton(object):
         self.name = name
         self.image = cmds.shelfButton(name, query=True, image=True)
         self.command = cmds.shelfButton(name, query=True, command=True)
+        self.parent = cmds.shelfButton(name, query=True, parent=True)
 
     def delete(self):
         """Delete this button."""
@@ -43,7 +44,7 @@ def _find_shelf_buttons():
 
 
 def add_shelf_button(name, image, command, annotation=None, parent='Henry',
-                     width=None):
+                     width=None, force=True):
     """Add a shelf button.
 
     Args:
@@ -53,17 +54,20 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
         annotation (str): button annotation (tooltip)
         parent (str): parent shelf
         width (int): button width
+        force (bool): force replace any existing buttons
     """
 
-    # Replace existing buttons with matching name or
+    # Replace existing buttons with matching name or command/image
     if cmds.shelfButton(name, query=True, exists=True):
         cmds.deleteUI(name)
-    for _existing in [
-            _btn for _btn in _find_shelf_buttons()
-            if _btn.image == image and _btn.command == command]:
-        qt.ok_cancel('Replace existing {} button?'.format(name))
+    for _btn in _find_shelf_buttons():
+        if _btn.image != image or _btn.command != command:
+            continue
+        if not force:
+            qt.ok_cancel('Replace existing {} button?'.format(name))
         _btn.delete()
 
+    # Create new button
     _kwargs = {}
     for _name, _val in [
             ('annotation', annotation),

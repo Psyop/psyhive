@@ -388,31 +388,34 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
     are also avaliable as right-click options.
     """
 
-    def __init__(self, mod, parent, image, command=None):
+    def __init__(self, mod, parent, image, label=None, command=None):
         """Constructor.
 
         Args:
             mod (module): py module to build into button
             parent (str): parent shelf
             image (str): path to icon
+            label (str): override interface label
             command (str): override button command
         """
+        self._file = File(abs_path(mod.__file__))
+        self.label = label or getattr(
+            mod, 'PYGUI_TITLE', to_nice(self._file.basename))
+        self.image = image
 
         # Create shelf button
-        _file = File(abs_path(mod.__file__))
-        self.button = '{}_{}_PyShelfButton'.format(parent, _file.basename)
-        _label = getattr(mod, 'PYGUI_TITLE', to_nice(_file.basename))
+        self.button = '{}_{}_PyShelfButton'.format(parent, self._file.basename)
         _cmd = command or '\n'.join([
             'from {} import MayaPyGui'.format(__name__),
-            '_path = "{}"'.format(_file.path),
-            '_title = "{}"'.format(_label),
+            '_path = "{}"'.format(self._file.path),
+            '_title = "{}"'.format(self.label),
             'MayaPyGui(_path, all_defs=True, title=_title)'])
         ui.add_shelf_button(
             self.button, image=image, parent=parent, command=_cmd,
-            annotation=_label)
+            annotation=self.label, force=True)
 
         super(MayaPyShelfButton, self).__init__(
-            _file.path, all_defs=True, mod=mod)
+            self._file.path, all_defs=True, mod=mod)
 
     def init_ui(self, rebuild_fn=None, verbose=1):
         """Not applicable.
@@ -421,6 +424,19 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
             rebuild_fn (func): override rebuild function
             verbose (int): print process data
         """
+
+        # Add label
+        cmds.menuItem(
+            '[{}]'.format(self.label), enable=False, image=self.image)
+
+        # Open code option
+        _cmd = '\n'.join([
+            'from psyhive.utils import PyFile',
+            '_file = "{}"'.format(self._file.path),
+            'PyFile(_file).edit()'])
+        cmds.menuItem('Open {} code'.format(self._file.basename),
+                      command=_cmd, image=icons.EDIT)
+        cmds.menuItem(divider=True)
 
     def add_arg(self, *args, **kwargs):
         """Not applicable.

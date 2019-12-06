@@ -25,7 +25,7 @@ class QtPyGui(QtWidgets.QMainWindow, pyg_base.BasePyGui):
         Args:
             path (str): path to py file
         """
-        if not host.NAME:
+        if not host.NAME == 'maya':
             qt.set_maya_palette()
         super(QtPyGui, self).__init__()
         pyg_base.BasePyGui.__init__(self, *args, **kwargs)
