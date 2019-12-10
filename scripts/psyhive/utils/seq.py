@@ -255,6 +255,8 @@ def seq_from_frame(file_, catch=False):
     _file = File(file_)
     _tokens = _file.basename.split('.')
     if not len(_tokens) >= 2:
+        if catch:
+            return None
         raise ValueError(file_)
     _frame = _tokens[-1]
     if not _frame.isdigit():

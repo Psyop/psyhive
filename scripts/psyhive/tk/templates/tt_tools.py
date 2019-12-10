@@ -4,11 +4,13 @@ from psyhive import host
 from psyhive.utils import File, lprint
 
 from psyhive.tk.templates.tt_assets import (
-    TTMayaAssetIncrement, TTMayaAssetWork, TTAssetStepRoot,
-    TTAssetOutputFile)
+    TTMayaAssetIncrement, TTMayaAssetWork,
+    TTAssetStepRoot, TTAssetOutputFile)
 from psyhive.tk.templates.tt_shots import (
-    TTMayaShotIncrement, TTMayaShotWork, get_shot, TTShotStepRoot,
-    TTShotOutputFile, TTShotOutputFileSeq, TTNukeShotWork)
+    TTMayaShotIncrement, TTMayaShotWork,
+    TTNukeShotIncrement, TTNukeShotWork,
+    TTHoudiniShotIncrement, TTHoudiniShotWork,
+    get_shot, TTShotStepRoot, TTShotOutputFile, TTShotOutputFileSeq)
 
 
 def cur_shot():
@@ -95,11 +97,14 @@ def _get_work_type(file_, inc, catch):
             _class = TTMayaAssetIncrement if inc else TTMayaAssetWork
     elif file_.extn in ['nk']:
         if _shot:
-            if inc:
-                raise NotImplementedError
-            _class = TTNukeShotWork
+            _class = TTNukeShotIncrement if inc else TTNukeShotWork
         else:
-            raise NotImplementedError
+            _class = TTNukeAssetIncrement if inc else TTNukeAssetWork
+    elif file_.extn in ['hip']:
+        if _shot:
+            _class = TTHoudiniShotIncrement if inc else TTHoudiniShotWork
+        else:
+            _class = TTHoudiniAssetIncrement if inc else TTHoudiniAssetWork
     else:
         if catch:
             return None

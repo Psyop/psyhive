@@ -2,6 +2,7 @@
 
 import ast
 import sys
+import traceback
 
 from psyhive.utils.cache import store_result_on_obj
 from psyhive.utils.path import File, abs_path, rel_path, FileError
@@ -130,7 +131,10 @@ class PyFile(File, PyBase):
             except (ImportError, SyntaxError) as _exc:
                 if catch:
                     return None
-                raise _exc
+                print 'FAILED TO IMPORT MODULE', self.path
+                _trace = traceback.format_exc().strip()
+                print '# '+'\n# '.join(_trace.split('\n'))
+                sys.exit()
 
         _mod = sys.modules[_mod_name]
         if reload_:

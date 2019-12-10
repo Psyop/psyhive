@@ -110,7 +110,8 @@ def add_separator(name, parent):
         parent (str): parent shelf
     """
     _icon = _get_separator_icon()
-    add_shelf_button(name, image=_icon, command=None, width=10, parent=parent)
+    add_shelf_button(name, image=_icon, command='# '+name, width=10,
+                     parent=parent)
 
 
 def clear_script_editor():

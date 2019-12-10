@@ -94,6 +94,8 @@ ignore:
         psyhive/farm/psyq_plugin/mayapy_worker.p
         psyhive/tk/misc.py
         psyhive/tk/templates/tt_base_work.py
+        psyhive/tk2/tk_templates/tt_work.py
+        psyhive/tk2/tk_utils.py
     raising-bad-type:
         maya_psyhive/utils.py
     redefined-outer-name:

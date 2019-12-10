@@ -505,6 +505,8 @@ class _HiveBroStandalone(qt.HUiDialog, _HiveBro):
         super(_HiveBroStandalone, self).__init__(ui_file=_UI_FILE)
         self.connect_signals()
         self.set_icon(icons.EMOJI.find('Honeybee'))
+        if not host.NAME == 'maya':
+            qt.set_maya_palette()
         self.ui.show()
 
 
@@ -773,7 +775,7 @@ def _set_work_comment(ver, parent):
     ver.set_comment(_comment)
 
 
-def launch(path=None):
+def launch(path=None, verbose=0):
     """Launch HiveBro interface.
 
     Args:

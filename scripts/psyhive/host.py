@@ -49,6 +49,7 @@ except ImportError:
     pass
 else:
     NAME = 'hou'
+    _get_cur_scene = hou.hipFile.name
 
 
 def cur_scene():

@@ -178,6 +178,34 @@ class TTShotStepRoot(_TTShotCpntBase, TTStepRootBase):
         return _vers
 
 
+class TTShotWorkAreaHoudini(_TTShotCpntBase, TTWorkAreaBase):
+    """Represents a tank template shot work area for houdini."""
+
+    hint = 'shot_work_area_houdini'
+
+    @property
+    def work_type(self):
+        """Get work file object type.
+
+        Returns:
+            (class): work file type
+        """
+        return TTHoudiniShotWork
+
+
+class TTHoudiniShotWork(_TTShotCpntBase, TTWorkFileBase):
+    """Represents a houdini shot work file tank template."""
+
+    hint = 'houdini_shot_work'
+    work_area_type = TTShotWorkAreaHoudini
+
+
+class TTHoudiniShotIncrement(_TTShotCpntBase, TTWorkIncrementBase):
+    """Represents a houdini work file increment file tank template."""
+
+    hint = 'houdini_shot_increment'
+
+
 class TTShotWorkAreaMaya(_TTShotCpntBase, TTWorkAreaBase):
     """Represents a tank template shot work area for maya."""
 
@@ -226,6 +254,12 @@ class TTNukeShotWork(_TTShotCpntBase, TTWorkFileBase):
 
     hint = 'nuke_shot_work'
     work_area_type = TTShotWorkAreaNuke
+
+
+class TTNukeShotIncrement(_TTShotCpntBase, TTWorkIncrementBase):
+    """Represents a nuke work file increment file tank template."""
+
+    hint = 'nuke_shot_increment'
 
 
 class TTShotOutputRoot(_TTShotCpntBase, TTDirBase):

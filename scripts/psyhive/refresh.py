@@ -232,10 +232,10 @@ def reload_libs(
         _count += 1
         _file = _mod.__file__
         _name = _mod_name
-        if len(_name) > 43:
-            _name = _name[:40]+' ...'
+        if len(_name) > 53:
+            _name = _name[:50]+' ...'
         lprint(
-            '{:<7.02f} {:<45} {:5.02f}s    {}'.format(
+            '{:<7.02f} {:<55} {:5.02f}s    {}'.format(
                 _sort(_mod_name), _name, _dur, abs_path(_file)),
             verbose=verbose > 1)
 

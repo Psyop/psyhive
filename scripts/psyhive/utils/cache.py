@@ -148,6 +148,7 @@ def get_result_storer(
             # Catch bad kwarg provided
             for _kwarg in kwargs:
                 if _kwarg not in _arg_spec.args:
+                    lprint(' - args spec', _arg_spec.args, verbose=verbose)
                     raise TypeError(
                         "{}() got an unexpected keyword argument '{}'".format(
                             func.__name__, _kwarg))
