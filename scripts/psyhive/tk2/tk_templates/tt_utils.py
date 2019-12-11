@@ -36,6 +36,10 @@ def get_dcc(path, allow_none=False):
     _path = abs_path(path)
     if '/maya/' in path or _path.endswith('/maya'):
         return 'maya'
+    elif '/houdini/' in path or _path.endswith('/houdini'):
+        return 'houdini'
+    elif '/nuke/' in path or _path.endswith('/nuke'):
+        return 'nuke'
     elif allow_none:
         return None
 
@@ -51,7 +55,11 @@ def get_extn(dcc):
     Returns:
         (str): suggest file extn
     """
-    return {'maya': 'ma'}[dcc]
+    return {
+        'maya': 'ma',
+        'nuke': 'nk',
+        'houdini': 'hip',
+    }[dcc]
 
 
 def get_template(hint):

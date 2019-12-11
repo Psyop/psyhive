@@ -36,18 +36,18 @@ def clear_caches():
     _WORK_AREAS = {}
 
 
-def _map_class_to_cacheable(class_, catch=False):
+def _map_class_to_cacheable(class_):
     """Get cacheable version of the given tk template class.
 
     Args:
         class_ (TTBase): tank template class
-        catch (bool): no error on fail to match
 
     Returns:
         (CTT file): cacheable version
     """
     from psyhive import tk
-    _map = {
+    return {
+
         tk.TTAssetOutputFile: _CTTAssetOutputFile,
         tk.TTAssetOutputName: _CTTAssetOutputName,
         tk.TTAssetOutputVersion: _CTTAssetOutputVersion,
@@ -63,10 +63,8 @@ def _map_class_to_cacheable(class_, catch=False):
         tk.TTMayaAssetWork: _CTTMayaAssetWork,
         tk.TTMayaShotWork: _CTTMayaShotWork,
         tk.TTNukeShotWork: _CTTNukeShotWork,
-    }
-    if catch and class_ not in _map:
-        return None
-    return _map[class_]
+
+    }[class_]
 
 
 def obtain_cur_work():
@@ -115,9 +113,7 @@ def obtain_work(file_, catch=False):
     if not _work:
         return None
     if _work not in _WORK_FILES:
-        _type = _map_class_to_cacheable(_work.__class__, catch=catch)
-        if not _type:
-            return None
+        _type = _map_class_to_cacheable(_work.__class__)
         _WORK_FILES[_work] = _type(_work.path)
     return _WORK_FILES[_work]
 

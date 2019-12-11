@@ -112,16 +112,22 @@ def get_shot(path):
     return _root
 
 
-def get_step_root(path):
+def get_step_root(path, catch=True):
     """Get step root from the give path.
 
     Args:
         path (str): path to test
+        catch (bool): no error on fail to create step root object
 
     Returns:
         (TTStepRoot|None): step root (if any)
     """
-    return TTStepRoot(path)
+    try:
+        return TTStepRoot(path)
+    except ValueError as _exc:
+        if catch:
+            return None
+        raise _exc
 
 
 def get_work(file_, class_=None, catch=True):

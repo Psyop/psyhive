@@ -192,7 +192,7 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
                 ["code", "is", [tk.get_shot_data(_out.shot)['name']]]],
             fields=["sg_cut_in", "sg_cut_out"]), catch=True)
         pprint.pprint(_data)
-        _result = _data['sg_cut_in'], _data['sg_cut_out'] if _data else None
+        _result = (_data['sg_cut_in'], _data['sg_cut_out']) if _data else None
     else:
         raise ValueError(mode)
 
@@ -246,14 +246,7 @@ def create_standin_from_sel_shade(
         _shds[_shd].append(_mesh.shp)
 
     # Build col switches aip
-    _aip = _build_aip_node(
-        shd=None, ai_attrs={}, meshes=[], standin=_standin,
-        name='{}_colorSwitches'.format(_shade.namespace))
-    _aip.plug('selection').set_val('*')
-    _geo = _shade.get_node('GEO')
-    for _attr in _geo.list_attr(userDefined=True) or []:
-        _val = '{}={}'.format(_attr, _geo.plug(_attr).get_val(type_='int'))
-        _get_next_idx(_aip.plug('assignment')).set_val(_val)
+    _build_col_switches_aip(shade=_shade, standin=_standin)
 
     # Set up AIP node for each shader
     for _shd in qt.progress_bar(sorted(_shds), 'Applying {:d} shader{}'):
@@ -283,6 +276,20 @@ def create_standin_from_sel_shade(
         lowestPriority=True)
 
     print 'CREATED', _standin
+
+
+def _build_col_switches_aip(shade, standin):
+    _aip = _build_aip_node(
+        shd=None, ai_attrs={}, meshes=[], standin=standin,
+        name='{}_colorSwitches'.format(shade.namespace))
+    _aip.plug('selection').set_val('*')
+    _geo = shade.get_node('GEO')
+    for _attr in _geo.list_attr(userDefined=True) or []:
+        _plug = _geo.plug(_attr)
+        _val = '{} {}={}'.format(
+            _plug.get_type(), _attr, _plug.get_val(type_='int'))
+        _get_next_idx(_aip.plug('assignment')).set_val(_val)
+    print 'BUILT COL SWITCHES AIP', _aip
 
 
 def _finalise_standin(node, name, range_, verbose=0):

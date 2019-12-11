@@ -3,10 +3,10 @@
 import os
 import time
 
-from psyhive import qt, icons, tk, host, pipe
+from psyhive import qt, icons, host, pipe, tk2
 from psyhive.qt import QtCore, QtGui
 from psyhive.utils import (
-    find, get_single, wrap_fn, abs_path,
+    get_single, wrap_fn, abs_path, store_result,
     get_time_t, get_owner, chain_fns, passes_filter, lprint,
     safe_zip, val_map, copy_text, str_to_seed,
     launch_browser, Seq, store_result_on_obj)
@@ -24,7 +24,7 @@ class _HiveBroAssets(object):
 
     def __init__(self):
         """Constructor."""
-        self._asset_roots = tk.find_asset_roots()
+        self._asset_roots = tk2.obtain_asset_roots()
         self._asset_work_files = []
 
     def connect_signals(self):
@@ -77,7 +77,7 @@ class _HiveBroShots(object):
 
     @qt.list_redrawer
     def _redraw__sequence(self, widget):
-        _seqs = tk.find_sequences()
+        _seqs = tk2.obtain_sequences()
         for _seq in _seqs:
             _item = qt.HListWidgetItem(_seq.sequence)
             _item.set_data(_seq)
@@ -158,7 +158,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
         _sel = None
         for _step in _root.find_step_roots():
-            _work_area = _step.get_work_area()
+            _work_area = _step.get_work_area(dcc=_cur_dcc())
             _col = 'grey'
             if os.path.exists(_work_area.yaml):
                 _col = 'white'
@@ -178,7 +178,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         _step = get_single(self.ui.step.selected_data(), catch=True)
         if not _step:
             return
-        _work_area = tk.obtain_work_area(_step.get_work_area())
+        _work_area = _step.get_work_area(dcc=_cur_dcc())
         self._work_files = _work_area.find_work()
 
         # Find mtimes of latest work versions
@@ -246,8 +246,11 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         _task = self.ui.task_edit.text()
         if not _work and _task:
             _step = get_single(self.ui.step.selected_data())
+            _dcc = _cur_dcc()
+            _hint = '{dcc}_{area}_work'.format(dcc=_dcc, area=_step.area)
             _work = _step.map_to(
-                _step.maya_work_type, Task=_task, extension='ma', version=1)
+                hint=_hint, class_=tk2.TTWork, Task=_task,
+                extension=tk2.get_extn(_dcc), version=1)
         widget.setText(_work.path if _work else '')
 
     def _redraw__work_save(self, widget, verbose=0):
@@ -255,8 +258,8 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         _work_path = self.ui.work_path.text()
         _task = self.ui.task.selected_data()
 
-        _sel_work = tk.get_work(_work_path)
-        _cur_work = tk.cur_work()
+        _sel_work = tk2.get_work(_work_path)
+        _cur_work = tk2.cur_work()
         _text = 'Save As'
         lprint('REDRAW WORK SAVE\n - {}\n - {}'.format(_cur_work, _sel_work),
                verbose=verbose)
@@ -287,7 +290,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         self.ui.task.blockSignals(False)
 
     def _callback__task_refresh(self):
-        tk.clear_caches()
+        tk2.clear_caches()
         self.ui.task.redraw()
 
     def _callback__work_copy(self):
@@ -305,8 +308,8 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
     def _callback__work_refresh(self):
         _work = get_single(self.ui.work.selected_data())
-        tk.clear_caches()
-        _work.find_outputs(force=True)
+        tk2.clear_caches()
+        _work.find_outputs()
         self.ui.task.redraw()
         self.select_path(_work.path)
 
@@ -314,8 +317,8 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
         # Apply change task warning
         _work_path = self.ui.work_path.text()
-        _cur_work = tk.cur_work()
-        _next_work = tk.obtain_work(_work_path).find_next()
+        _cur_work = tk2.cur_work()
+        _next_work = tk2.obtain_work(_work_path).find_next()
         if _cur_work:
             _cur_task = _cur_work.get_work_area(), _cur_work.task
             _next_task = _next_work.get_work_area(), _next_work.task
@@ -352,13 +355,13 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
                 'Copy path', wrap_fn(copy_text, _step.path), icon=icons.COPY)
 
     def _context__work(self, menu):
-        _ver = get_single(self.ui.work.selected_data(), catch=True)
-        if _ver:
-            self._add_work_ctx_opts(ver=_ver, menu=menu)
+        _work = get_single(self.ui.work.selected_data(), catch=True)
+        if _work:
+            self._add_work_ctx_opts(work=_work, menu=menu)
 
     def _context__work_jump_to(self, menu):
 
-        _ver = get_single(self.ui.work.selected_data(), catch=True)
+        _work = get_single(self.ui.work.selected_data(), catch=True)
 
         # Add jump to recent options
         menu.add_label("Jump to")
@@ -374,7 +377,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         menu.addSeparator()
 
         # Jump to clipboard work
-        _clip_work = tk.get_work(qt.get_application().clipboard().text())
+        _clip_work = tk2.get_work(qt.get_application().clipboard().text())
         if _clip_work:
             _label = _get_work_label(_clip_work)
             _fn = wrap_fn(self.select_path, _clip_work.path)
@@ -383,9 +386,9 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             menu.add_label('No work in clipboard', icon=icons.COPY)
 
         # Add current work to recent
-        if _ver:
+        if _work:
             menu.add_action(
-                'Add selection to recent', _ver.add_to_recent,
+                'Add selection to recent', _work.add_to_recent,
                 icon=icons.EMOJI.find('Magnet'))
 
     def select_path(self, path, verbose=1):
@@ -396,9 +399,9 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             verbose (int): print process data
         """
         lprint("SELECT PATH", path, verbose=verbose)
-        _shot = tk.get_shot(path)
-        _step = tk.get_step_root(path)
-        _work = tk.get_work(path)
+        _shot = tk2.get_shot(path)
+        _step = tk2.get_step_root(path)
+        _work = tk2.get_work(path)
 
         if not _shot:
             self.ui.main_tabs.setCurrentIndex(0)
@@ -412,92 +415,96 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             else:
                 self.ui.sequence.select_text([_step.sequence])
                 self.ui.shot_filter.setText('')
-                self.ui.shot.select_text([_step.shot.name])
+                self.ui.shot.select_text([_step.shot])
             self.ui.step.select_text([_step.step])
 
         if _work:
             self.ui.task.select_text([_work.task])
             self.ui.work.select_data([_work])
 
-    def _add_work_ctx_opts(self, ver, menu):
+    def _add_work_ctx_opts(self, work, menu):
         """Add context options for the given work file.
 
         Args:
-            ver (TTWorkFileBase): work file
+            work (TTWork): work file
             menu (QMenu): menu to add options too
         """
-        _add_path_menu_items(menu=menu, obj=ver)
+        _add_path_menu_items(menu=menu, obj=work)
         menu.addSeparator()
 
         _set_comment_fn = chain_fns(
-            wrap_fn(_set_work_comment, ver, parent=self),
+            wrap_fn(_set_work_comment, work, parent=self),
             wrap_fn(self._redraw__work, self.ui.work))
         menu.add_action(
             'Set comment', _set_comment_fn, icon=icons.EDIT)
 
         # Add output options
-        self._add_work_ctx_outputs(ver=ver, menu=menu)
+        self._add_work_ctx_files(work=work, menu=menu)
 
         # Add increments
-        _incs = ver.find_increments()
+        _incs = work.find_increments()
         menu.addSeparator()
         if _incs:
             _menu = menu.add_menu('Increments')
-            _icon = _get_work_icon(ver)
+            _icon = _get_work_icon(work)
             for _inc in _incs:
                 _inc_menu = _menu.add_menu(_inc.basename, icon=_icon)
                 _add_path_menu_items(menu=_inc_menu, obj=_inc)
         else:
             menu.add_label('No increments found')
 
-    def _add_work_ctx_outputs(self, ver, menu):
+    def _add_work_ctx_files(self, work, menu):
         """Add work file output context options.
 
         Args:
-            ver (TTWorkFileBase): work file
+            work (TTWork): work file
             menu (QMenu): menu to add to
         """
-        _outputs = ver.find_outputs()
+        _files = work.find_output_files()
         menu.addSeparator()
 
         # No outputs found
-        if not _outputs:
-            menu.add_label("No ouputs found")
+        if not _files:
+            menu.add_label("No outputs found")
             return
 
         menu.add_label("Outputs")
 
-        # For short list add individual outputs
-        if len(_outputs) < 10:
-            for _output in _outputs:
-                self._add_work_ctx_output(menu=menu, output=_output)
-            return
-
         # Organise into names
-        _names = sorted(set([_output.output_name for _output in _outputs]))
+        _names = sorted(set([_file.output_name for _file in _files]))
         for _name in _names:
-            _name_menu = menu.add_menu(_name)
-            _name_outputs = [_output for _output in _outputs
-                             if _output.output_name == _name]
-            for _output in _name_outputs:
-                self._add_work_ctx_output(menu=_name_menu, output=_output)
+            _name_files = [_file for _file in _files
+                           if _file.output_name == _name]
+            if len(_name_files) == 1:
+                _file = get_single(_name_files)
+                self._add_work_ctx_file(menu=menu, file_=_file)
 
-    def _add_work_ctx_output(self, menu, output):
+            else:
+                _file = _name_files[0]
+                _label = _output_to_label(_file)
+                _icon = _output_to_icon(_file)
+                _name_menu = menu.add_menu(_label, icon=_icon)
+                for _file in _name_files:
+                    _label = '{} ({})'.format(_file.channel, _file.format)
+                    self._add_work_ctx_file(
+                        menu=_name_menu, file_=_file, label=_label)
+
+    def _add_work_ctx_file(self, menu, file_, label=None):
         """Add work file context options for the given output.
 
         Args:
             menu (QMenu): menu to add to
-            output (TTOutputFileBase): output to add options for
+            file_ (TTOutputFile): output file to add options for
+            label (str): override menu label
         """
-        _label = '{} ({}/{})'.format(
-            '_'.join(output.basename.split("_")[1:-1]),
-            output.format, output.extn)
-        _menu = menu.add_menu(_label)
-        _add_path_menu_items(menu=_menu, obj=output)
+        _icon = _output_to_icon(file_)
+        _label = label or _output_to_label(file_)
+        _menu = menu.add_menu(_label, icon=_icon)
+        _add_path_menu_items(menu=_menu, obj=file_)
 
 
 class _HiveBroStandalone(qt.HUiDialog, _HiveBro):
-    """HiveBro interface."""
+    """HiveBro interface as a standalone dialog (rather than docked)."""
 
     def __init__(self):
         """Constructor."""
@@ -543,9 +550,9 @@ def _add_path_menu_items(menu, obj):
 
         # Reference scene
         _namespace = obj.basename
-        if isinstance(obj, tk.TTWorkFileBase):
+        if isinstance(obj, tk2.TTWork):
             _namespace = obj.task
-        elif isinstance(obj, tk.TTOutputFileBase):
+        elif isinstance(obj, tk2.TTOutputFile):
             _namespace = obj.output_name
         _ref = wrap_fn(host.reference_scene, obj.path, namespace=_namespace)
         _pix = qt.HPixmap(icons.OPEN)
@@ -555,8 +562,8 @@ def _add_path_menu_items(menu, obj):
         menu.add_action('Reference scene', _ref, icon=_pix)
 
         # Reference asset
-        if isinstance(obj, tk.TTOutputFileBase):
-            _fn = wrap_fn(tk.reference_publish, obj.path)
+        if isinstance(obj, tk2.TTOutputFile):
+            _fn = wrap_fn(tk2.reference_publish, obj.path)
             menu.add_action('Reference publish', _fn, icon=_pix)
 
     if isinstance(obj, Seq):
@@ -565,25 +572,20 @@ def _add_path_menu_items(menu, obj):
             'View images', obj.view, icon=_icon)
 
 
-def get_recent_work():
-    """Read list of recent work file from tank.
+def _cur_dcc():
+    """Get current dcc name (using tank template naming).
 
     Returns:
-        (TTWorkFileBase list): list of work files
+        (str): dcc name
     """
-    _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
-    _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
-    return [
-        tk.obtain_work(_file['file_path'], catch=True)
-        for _file in _settings.value(_setting_name, [])
-        if tk.obtain_work(_file['file_path'], catch=True)]
+    return {'hou': 'houdini'}.get(host.NAME, host.NAME)
 
 
 def _get_work_col(work):
     """Get colour for work file list item.
 
     Args:
-        work (CTTWorkFileBase): work file to test
+        work (CTTWork): work file to test
 
     Returns:
         (str|None): colour for work file
@@ -604,7 +606,7 @@ def _get_work_icon(
     """Get icon for the given work file.
 
     Args:
-        work (CTTWorkFileBase): work file
+        work (CTTWork): work file
         mode (str): type of icon to build (full/basic)
         size (int): icon size
         overlay_size (int): overlay size
@@ -670,14 +672,13 @@ def _get_work_label(work):
     """Get context menu label for work file.
 
     Args:
-        work (TTWorkFileBase): work file
+        work (TTWork): work file
 
     Returns:
         (str): label
     """
     if work.shot:
-        _label = '{}/{}/{}'.format(
-            work.shot.name, work.step, work.task)
+        _label = '{}/{}/{}'.format(work.shot, work.step, work.task)
     else:
         _label = 'assets/{}/{}'.format(work.step, work.task)
     return _label
@@ -687,7 +688,7 @@ def _get_work_text(work, data):
     """Get display text for the given work file.
 
     Args:
-        work (TTWorkFileBase): work file
+        work (TTWork): work file
         data (dict): version data
 
     Returns:
@@ -722,50 +723,62 @@ def _get_work_text(work, data):
     return _text
 
 
-# def _reference_publish(file_, verbose=0):
-#     """Reference a publish into the current scene.
-
-#     Args:
-#         file_ (str): path to reference
-#         verbose (int): print process data
-#     """
-#     _mgr = tk.find_tank_app('assetmanager')
-#     _ref_util = tk.find_tank_mod('tk_multi_assetmanager.reference_util')
-#     lprint('REF UTIL', _ref_util, verbose=verbose)
-
-#     _ref_list = _mgr.reference_list
-#     _pub_dir = _ref_list.asset_manager.publish_directory
-#     _publish = _pub_dir.publish_from_path(file_)
-#     lprint('PUBLISH', _publish, verbose=verbose)
-
-#     _ref = _ref_util.reference_publish(_publish)
-#     lprint('REF', _ref, verbose=verbose)
-
-
-def _read_asset_work_files(path):
-    """Read asset work files in the given path.
+def _output_to_label(output):
+    """Get menu label for the given output.
 
     Args:
-        path (str): dir to read
+        output (TTOutput): output to read
 
     Returns:
-        (TTWorkFileBase list): work files
+        (str): label
     """
-    _works = []
-    for _file in find(path, type_='f', depth=3):
-        try:
-            _work = tk.TTMayaAssetWork(_file)
-        except ValueError:
-            continue
-        _works.append(_work)
-    return _works
+    return '{} ({}/{})'.format(
+        output.output_name, output.output_type, output.format)
+
+
+@store_result
+def _output_to_icon(output):
+    """Get icon for the given output.
+
+    Args:
+        output (TTOutput): output to get icon for
+
+    Returns:
+        (str): path to icon
+    """
+    return icons.EMOJI.find({
+        'fxcache': 'Collision',
+        'capture': 'Play Button',
+        'render': 'Play Button',
+        'animcache': 'Money Bag',
+        'camcache': 'Money Bag',
+    }.get(output.output_type, 'Blue Circle'))
+
+
+# def _read_asset_work_files(path):
+#     """Read asset work files in the given path.
+
+#     Args:
+#         path (str): dir to read
+
+#     Returns:
+#         (TTWork list): work files
+#     """
+#     _works = []
+#     for _file in find(path, type_='f', depth=3):
+#         try:
+#             _work = tk2.TTMayaAssetWork(_file)
+#         except ValueError:
+#             continue
+#         _works.append(_work)
+#     return _works
 
 
 def _set_work_comment(ver, parent):
     """Set comment for the given work file.
 
     Args:
-        ver (TTWorkFileBase): work file to set comment on
+        ver (TTWork): work file to set comment on
         parent (QDialog): parent dialog
     """
     _comment = qt.read_input(
@@ -775,15 +788,37 @@ def _set_work_comment(ver, parent):
     ver.set_comment(_comment)
 
 
-def launch(path=None, verbose=0):
+def get_recent_work():
+    """Read list of recent work file from tank.
+
+    Returns:
+        (TTWork list): list of work files
+    """
+    _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
+    _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
+    _works = []
+    for _file in _settings.value(_setting_name, []):
+        _work = tk2.obtain_work(_file['file_path'], catch=True)
+        if not _work:
+            continue
+        if not _work.dcc == _cur_dcc():
+            continue
+        _works.append(_work)
+    return _works
+
+
+def launch(path=None):
     """Launch HiveBro interface.
 
     Args:
         path (str): apply path on launch
+
+    Returns:
+        (HiveBro): hive bro instance
     """
     from psyhive.tools import hive_bro
 
-    tk.clear_caches()
+    tk2.clear_caches()
 
     print 'Launching HiveBro'
     _dialog = _HiveBroStandalone()

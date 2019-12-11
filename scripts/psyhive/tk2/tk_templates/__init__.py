@@ -8,3 +8,4 @@ from psyhive.tk2.tk_templates.tt_output import (
 from psyhive.tk2.tk_templates.tt_tools import (
     find_sequences, find_asset_roots, get_work, cur_work, get_shot,
     get_step_root)
+from psyhive.tk2.tk_templates.tt_utils import get_extn

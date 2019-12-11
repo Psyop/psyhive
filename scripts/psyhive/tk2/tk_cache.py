@@ -80,16 +80,13 @@ class _CTTWorkArea(TTWorkArea):
     """Represents a work area dir with caching."""
 
     @store_result_on_obj
-    def find_increments(self, verbose=0):
+    def find_increments(self):
         """Find increments belonging to this work area.
-
-        Args:
-            verbose (int): print process data
 
         Returns:
             (CTTIncrement list): increment files
         """
-        _incs = super(_CTTWorkArea, self).find_increments(verbose=verbose)
+        _incs = super(_CTTWorkArea, self).find_increments()
         return [obtain_cacheable(_inc) for _inc in _incs]
 
     @store_result_on_obj

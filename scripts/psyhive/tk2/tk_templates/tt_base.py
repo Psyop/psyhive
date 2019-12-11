@@ -218,6 +218,12 @@ class TTRoot(TTDirBase):
 class TTStepRoot(TTDirBase):
     """Represents a step root dir containing step folders."""
 
+    asset = None
+    sequence = None
+    shot = None
+    step = None
+    sg_asset_type = None
+
     def __init__(self, path):
         """Constructor.
 
@@ -255,11 +261,11 @@ class TTStepRoot(TTDirBase):
             (TTOutputName): matching output name
         """
         _names = self.find_output_names(
-            output_name=output_name, task=task, verbose=0)
+            output_name=output_name, task=task)
         return get_single(_names, verbose=1)
 
     def find_output_names(self, output_name=None, output_type=None,
-                          task=None, filter_=None, verbose=1):
+                          task=None, filter_=None):
         """Find output names within this step root.
 
         Args:
@@ -267,7 +273,6 @@ class TTStepRoot(TTDirBase):
             output_type (str): filter by output type
             task (str): filter by task
             filter_ (str): apply filter to paths
-            verbose (int): print process data
 
         Returns:
             (TTOutputName list): output names list
@@ -275,8 +280,7 @@ class TTStepRoot(TTDirBase):
         _names = []
         for _type in self.find_output_types(output_type=output_type):
             _names += _type.find_names(
-                output_name=output_name, filter_=filter_, task=task,
-                verbose=verbose)
+                output_name=output_name, filter_=filter_, task=task)
         return _names
 
     def find_outputs(self, filter_=None, task=None, version=None,
