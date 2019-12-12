@@ -13,7 +13,7 @@ from maya_psyhive.utils import set_namespace
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.tools.fkik_switcher import Side, Limb
 
-ICON = icons.EMOJI.find("Vampire")
+ICON = icons.EMOJI.find("Vampire: Medium-Light Skin Tone")
 LABEL = "Vampire Bloodline"
 
 
@@ -33,21 +33,23 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
             'offset': {Limb.ARM: 'Elbow', Limb.LEG: 'Knee'}[self.limb]}
 
         self.fk_ctrls = [
-            self.rig.get_node('FK{bone}_{side}'.format(bone=_bone, **_names))
+            self.rig.get_node('FK{bone}_{side}'.format(bone=_bone, **_names),
+                              class_=hom.HFnTransform)
             for _bone in _bones[self.limb]]
 
         self.ik_jnts = [
             self.rig.get_node('IKX{bone}_{side}'.format(bone=_bone, **_names))
             for _bone in _bones[self.limb]]
-        self.ik_ = self.rig.get_node('IK{limb}_{side}'.format(**_names))
+        self.ik_ = self.rig.get_node('IK{limb}_{side}'.format(**_names),
+                                     class_=hom.HFnTransform)
         self.ik_pole = self.rig.get_node('Pole{limb}_{side}'.format(**_names))
         self.ik_pole_rp = self.ik_pole.plug('rotatePivot')
         self.ik_offs = []
 
         self.gimbal = self.rig.get_node('FKIK{limb}_{side}'.format(**_names))
-        self.fk_ik_attr = self.gimbal.plug('FKIKBlend')
-        self.set_to_ik = wrap_fn(self.fk_ik_attr.set_val, 10)
-        self.set_to_fk = wrap_fn(self.fk_ik_attr.set_val, 0)
+        self.ik_fk_attr = self.gimbal.plug('FKIKBlend')
+        self.set_to_ik = wrap_fn(self.ik_fk_attr.set_val, 10)
+        self.set_to_fk = wrap_fn(self.ik_fk_attr.set_val, 0)
 
     def apply_fk_to_ik(self, pole_vect_depth=30.0, apply_=True,
                        build_tmp_geo=False, verbose=1):
@@ -87,6 +89,7 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
 
         # Read fk3 mtx
         _ik_mtx = hom.get_m(self.fk_ctrls[2])
+        _diff = None
         if self.side is Side.LEFT and self.limb is Limb.ARM:
             _offs = hom.HEulerRotation(math.pi/2, math.pi, 0)
         elif self.side is Side.LEFT and self.limb is Limb.LEG:
@@ -102,6 +105,9 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
         # Apply vals to ik ctrls
         if apply_:
             _ik_mtx.apply_to(self.ik_)
+            if _diff:
+                print 'APPLY DIFF', _diff
+                _diff.apply_to(self.ik_, relative=True)
             _pole_p.apply_to(self.ik_pole, use_constraint=True)
             self.set_to_ik()
             lprint('SET', self.ik_, 'TO IK', verbose=verbose)
@@ -125,7 +131,7 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
         _attrs += [self.ik_pole+'.t'+_axis for _axis in 'xyz']
         _attrs += [self.ik_+'.t'+_axis for _axis in 'xyz']
         _attrs += [self.ik_+'.r'+_axis for _axis in 'xyz']
-        _attrs += [self.fk_ik_attr]
+        _attrs += [self.ik_fk_attr]
         _attrs += self.ik_offs
 
         return _attrs

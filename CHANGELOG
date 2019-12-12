@@ -1,3 +1,29 @@
+#### v0.51.0 ####
+
+    Released: Thu 12th Dec 2019
+
+    Clash Holiday tools [TOOLS-193]:
+        added override for displacement,
+        bugfix interface not launching,
+        added integration test,
+    
+    maya_psyhive:
+        open_maya.HEulerRotation.apply_to added relative flag,
+        open_maya.HEulerRotation.to_tuple added,
+        shows.clashroyaleholi updated to tk2,
+        shows.clashroyaleholi added integration test,
+        shows.clashroyaleholi added displacement override,
+        shows.vampirebloodline fix bad ik/fk attr name,
+        tex.find_shd added catch,
+        tools.fkik_switcher.toggle_ik_fk use ik_fk attr,
+        utils.restore_sel catch nodes removed,
+    psyhive:
+        tk2 added get_project_sg_data/get_shot_sg_data/find_shots/find_assets,
+        tk2.TTRoot name/get_sg_data added,
+        tk2.TTOutputVersion.find_file added catch,
+        tk2.TTWork.get_shot added,
+
+
 #### v0.50.0 ####
 
     Released: Wed 11th Dec 2019

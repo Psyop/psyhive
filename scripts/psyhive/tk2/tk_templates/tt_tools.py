@@ -39,7 +39,7 @@ def cur_work(class_=None):
         return None
 
 
-def find_asset_roots():
+def find_assets():
     """Read asset roots."""
     _root = pipe.cur_project().path+'/assets'
     _roots = []

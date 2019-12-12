@@ -164,6 +164,9 @@ class TTSequenceRoot(TTDirBase):
 class TTRoot(TTDirBase):
     """Represents a shot/asset root directory."""
 
+    asset = None
+    shot = None
+
     def __init__(self, path):
         """Constructor.
 
@@ -174,6 +177,10 @@ class TTRoot(TTDirBase):
         _area = get_area(_path)
         _hint = '{}_root'.format(_area)
         super(TTRoot, self).__init__(path, hint=_hint)
+        if self.shot:
+            self.name = self.shot
+        else:
+            self.name = self.asset
 
     def find_step_root(self, step, catch=False):
         """Find step root matching the given name.
@@ -201,6 +208,17 @@ class TTRoot(TTDirBase):
         _step_root = self._read_step_roots(class_=class_)
         return apply_filter(
             _step_root, filter_, key=operator.attrgetter('path'))
+
+    def get_sg_data(self):
+        """Get shotgun data for this root.
+
+        Returns:
+            (dict): sg data
+        """
+        from psyhive import tk2
+        if self.shot:
+            return tk2.get_shot_sg_data(self)
+        raise NotImplementedError
 
     def _read_step_roots(self, class_=None):
         """Find steps in this shot.

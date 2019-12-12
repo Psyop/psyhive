@@ -13,7 +13,8 @@ from psyhive.utils import (
     write_yaml, diff)
 
 from psyhive.tk2.tk_utils import find_tank_app, find_tank_mod
-from psyhive.tk2.tk_templates.tt_base import TTDirBase, TTBase, TTStepRoot
+from psyhive.tk2.tk_templates.tt_base import (
+    TTDirBase, TTBase, TTStepRoot, TTRoot)
 from psyhive.tk2.tk_templates.tt_utils import (
     get_area, get_dcc, get_template, get_extn)
 
@@ -330,6 +331,16 @@ class TTWork(TTBase, File):
             _versions, fail_message='Missing version in metadata '+self.path)
 
         return _version
+
+    def get_shot(self):
+        """Get this work file's shot.
+
+        Returns:
+            (TTRoot|None): shot (if any)
+        """
+        if self.shot:
+            return TTRoot(self.path)
+        return None
 
     def get_step_root(self):
         """Get step root for this work file.

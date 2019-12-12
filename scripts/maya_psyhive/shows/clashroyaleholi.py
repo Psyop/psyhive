@@ -8,7 +8,7 @@ from maya import cmds
 import six
 import tank
 
-from psyhive import qt, py_gui, icons, tk, pipe
+from psyhive import qt, py_gui, icons, tk2, pipe
 from psyhive.tools import hive_bro
 from psyhive.utils import get_single, lprint, wrap_fn
 
@@ -75,21 +75,34 @@ def _get_next_idx(plug, connected=True, value=True, limit=1000, verbose=0):
     raise ValueError
 
 
-def _get_default_browser_dir():
+def _get_default_browser_dir(work=None, verbose=0):
     """Get default directory for file browser.
+
+    Args:
+        work (TTWork): override primary work
+        verbose (int): print process data
 
     Returns:
         (str): browser dir
     """
-    _works = [tk.cur_work()] + hive_bro.get_recent_work()
-    _shots = [_work.shot for _work in _works
-              if _work and _work.shot] + tk.find_shots()
+    _works = [work] + [tk2.cur_work()] + hive_bro.get_recent_work()
+    _shots = [_work.get_shot() for _work in _works
+              if _work and _work.shot] + tk2.find_shots()
+    _shots = [_shot for _idx, _shot in enumerate(_shots)
+              if _shots.index(_shot) == _idx]
+    if verbose:
+        pprint.pprint(_works)
+        pprint.pprint(_shots)
+
     _dir = None
     for _shot in _shots:
         _dir = _shot.find_step_root('animation').map_to(
-            _shot.output_type_type, output_type='animcache', Task='animation')
+            hint='shot_output_type', class_=tk2.TTOutputType,
+            output_type='animcache', Task='animation')
         if not _dir.exists():
+            lprint(' - MISSING', _dir, verbose=verbose)
             continue
+        lprint(' - MATCHED', _dir, verbose=verbose)
         return _dir.path
 
     return None
@@ -106,15 +119,16 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
         name (str): override name
         verbose (int): print process data
     """
+    print 'BULID AIP', shd, meshes
     _ai_attrs = ai_attrs if ai_attrs is not None else _AI_ATTRS
-    print '   - AI ATTRS', _ai_attrs
+    print ' - AI ATTRS', _ai_attrs
 
     # Create standin node
     _aip = hom.CMDS.createNode(
         'aiSetParameter', name='{}_AIP'.format(name or shd.name()))
     _aip.plug('out').connect(_get_next_idx(standin.plug('operators')))
     if shd:
-        _aip.plug('assignment[0]').set_val("shader='{}'".format(shd))
+        _aip.plug('assignment[0]').set_val("shader = '{}'".format(shd))
     lprint(' - AIP', _aip, verbose=verbose)
 
     # Determine AIP settings to apply
@@ -125,11 +139,11 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
             _plug = _mesh.plug(_ai_attr)
             _type = 'string' if _plug.get_type() == 'enum' else None
             _val = _plug.get_val(type_=_type)
-            lprint(' - READ', _plug, _val, verbose=verbose)
+            lprint('   - READ', _plug, _val, verbose=verbose > 1)
             if not _type:
                 _default = _plug.get_default()
                 if _default == _val:
-                    lprint(' - REJECTED DEFAULT VAL', verbose=verbose)
+                    lprint('   - REJECTED DEFAULT VAL', verbose=verbose > 1)
                     continue
             _ai_attr_vals[_ai_attr].add(_val)
 
@@ -140,17 +154,47 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
     _aip.plug('selection').set_val(' or '.join(_sels))
     for _ai_attr, _attr in _ai_attrs.items():
         _vals = sorted(_ai_attr_vals[_ai_attr])
-        lprint(' - AI ATTR', _attr, _ai_attr, _vals, verbose=verbose)
+        lprint(' - AI ATTR', _attr, _ai_attr, _vals, verbose=verbose > 1)
         _val = get_single(_vals, catch=True)
         if len(_vals) == 1 and _val not in [None, '']:
-            lprint(' - APPLY', _attr, _val, verbose=verbose)
+            lprint(' - APPLY', _attr, _val, verbose=verbose > 1)
             if isinstance(_val, six.string_types):
-                _val = "{}='{}'".format(_attr, _val)
+                _val = "{} = '{}'".format(_attr, _val)
             else:
-                _val = "{}={}".format(_attr, _val)
+                _val = "{} = {}".format(_attr, _val)
             _get_next_idx(_aip.plug('assignment')).set_val(_val)
 
+    # Read displacement
+    if shd:
+        _add_displacement_override(shd=shd, aip=_aip)
+
     return _aip
+
+
+def _add_displacement_override(shd, aip):
+    """Add displacement override if applicable.
+
+    Args:
+        shd (HFnDepedencyNode): shader node
+        aip (HFnDepedencyNode): aiSetParameter node
+    """
+    _shd = tex.find_shd(str(shd), catch=True)
+    if not _shd:
+        return
+    print ' - SHD', _shd
+    if not _shd.get_se():
+        return
+
+    print ' - SE', _shd.get_se()
+    _displ = get_single(
+        _shd.get_se().plug('displacementShader').list_connections(),
+        catch=True)
+    if not _displ:
+        return
+
+    print ' - DISPL', _displ
+    _val = "disp_map = '{}'".format(_displ)
+    _get_next_idx(aip.plug('assignment')).set_val(_val)
 
 
 def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
@@ -166,7 +210,7 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
     Returns:
         (tuple|None): frame range (if any)
     """
-    _out = tk.get_output(abc)
+    _out = tk2.get_output(abc)
     if not _out:
         return None
 
@@ -176,8 +220,8 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
     if mode == 'abc':
         _sg_data = get_single(_shotgun.find(
             "PublishedFile", filters=[
-                ["project", "is", [tk.get_project_data(_project)]],
-                ["entity", "is", [tk.get_shot_data(_out.shot)]],
+                ["project", "is", [tk2.get_project_sg_data(_project)]],
+                ["entity", "is", [tk2.get_shot_sg_data(_out.shot)]],
                 ["sg_format", "is", 'alembic'],
                 ["sg_component_name", "is", _out.output_name],
                 ["version_number", "is", _out.version],
@@ -186,12 +230,12 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
         _data = eval(_sg_data['sg_metadata'])
         _result = _data['start_frame'], _data['end_frame']
     elif mode == 'shot':
+        _shot = tk2.get_shot(_out.path)
         _data = get_single(tank.platform.current_engine().shotgun.find(
             'Shot', filters=[
-                ["project", "is", [tk.get_project_data(_project)]],
-                ["code", "is", [tk.get_shot_data(_out.shot)['name']]]],
+                ["project", "is", [tk2.get_project_sg_data(_project)]],
+                ["code", "is", [_shot.get_sg_data()['name']]]],
             fields=["sg_cut_in", "sg_cut_out"]), catch=True)
-        pprint.pprint(_data)
         if (
                 _data and
                 _data.get('sg_cut_in') is not None and
@@ -303,7 +347,7 @@ def _build_col_switches_aip(shade, standin):
         _val = '{} {} = {}'.format(
             _type, _attr, _plug.get_val(type_='int'))
         _get_next_idx(_aip.plug('assignment')).set_val(_val)
-    print 'BUILT COL SWITCHES AIP', _aip
+    print ' - BUILT COL SWITCHES AIP', _aip
 
 
 def _finalise_standin(node, name, range_, verbose=0):

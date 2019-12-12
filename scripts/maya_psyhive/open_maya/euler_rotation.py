@@ -13,15 +13,20 @@ class HEulerRotation(om.MEulerRotation):
 
     as_mtx = cast_result(om.MEulerRotation.asMatrix)
 
-    def apply_to(self, node):
+    def apply_to(self, node, relative=False):
         """Apply these rotations to the given node.
 
         Args:
             node (str): node to apply rotations to
+            relative (bool): apply relative to current rot
         """
         _degrees = [math.degrees(_val) for _val in self]
-        cmds.setAttr(str(node)+'.rotateOrder', self.order)
-        cmds.xform(node, rotation=_degrees, worldSpace=True)
+        if not relative:
+            cmds.setAttr(str(node)+'.rotateOrder', self.order)
+            cmds.xform(node, rotation=_degrees, worldSpace=True)
+        else:
+            cmds.rotate(_degrees[0], _degrees[1], _degrees[2], node,
+                        relative=True)
 
     def as_vect(self):
         """Get this rotation as a vector.
@@ -36,12 +41,20 @@ class HEulerRotation(om.MEulerRotation):
         _vect = hom.Z_AXIS
         return _vect.rotate_by(self)
 
+    def to_tuple(self):
+        """Get rot values as tuple.
+
+        Returns:
+            (float tuple): xyz values
+        """
+        return (self.x, self.y, self.z)
+
     def __neg__(self):
         return HEulerRotation(super(HEulerRotation, self).__neg__())
 
     def __str__(self):
         _order = {0: 'XYZ'}[self.order]
-        return '<{}[{}]({:.03f}, {:.03f}, {:.03f})>'.format(
+        return '<{}[{}]({:.05f}, {:.05f}, {:.05f})>'.format(
             type(self).__name__, _order, self.x, self.y, self.z)
 
     def __sub__(self, other):

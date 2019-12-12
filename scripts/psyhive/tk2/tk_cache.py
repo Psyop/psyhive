@@ -7,7 +7,7 @@ from psyhive.utils import store_result_on_obj
 from psyhive.tk2.tk_templates import (
     TTSequenceRoot, TTRoot, TTStepRoot, TTWorkArea, TTWork, TTIncrement,
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,
-    TTOutputFileSeq, find_sequences, find_asset_roots, get_work,
+    TTOutputFileSeq, find_sequences, find_assets, get_work,
     cur_work)
 
 _CACHEABLES = collections.defaultdict(dict)
@@ -287,13 +287,13 @@ def obtain_cacheable(source):
     return _CACHEABLES[_type][source]
 
 
-def obtain_asset_roots():
+def obtain_assets():
     """Factory for asset roots in the current job.
 
     Returns:
         (CTTRoot): asset roots
     """
-    return [obtain_cacheable(_root) for _root in find_asset_roots()]
+    return [obtain_cacheable(_root) for _root in find_assets()]
 
 
 def obtain_sequences():

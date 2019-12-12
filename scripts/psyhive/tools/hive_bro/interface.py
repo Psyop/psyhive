@@ -24,7 +24,7 @@ class _HiveBroAssets(object):
 
     def __init__(self):
         """Constructor."""
-        self._asset_roots = tk2.obtain_asset_roots()
+        self._asset_roots = tk2.obtain_assets()
         self._asset_work_files = []
 
     def connect_signals(self):

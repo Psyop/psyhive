@@ -311,7 +311,7 @@ class FkIkSystem(object):
             build_tmp_geo (bool): build tmp geo
             apply_ (bool): apply the switch
         """
-        if not cmds.getAttr(self.gimbal+'.FK_IK'):
+        if not self.ik_fk_attr.get_val():
             self.apply_fk_to_ik(
                 build_tmp_geo=build_tmp_geo, apply_=apply_)
         else:

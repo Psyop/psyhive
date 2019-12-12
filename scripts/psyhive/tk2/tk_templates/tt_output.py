@@ -130,18 +130,19 @@ class TTOutputVersion(TTDirBase):
         _hint = '{}_output_version'.format(_area)
         super(TTOutputVersion, self).__init__(path, hint=_hint)
 
-    def find_file(self, extn=None, format_=None):
+    def find_file(self, extn=None, format_=None, catch=False):
         """Find output file within this version dir.
 
         Args:
             extn (str): filter by extension
             format_ (str): filter by format
+            catch (bool): no error if exactly one file wasn't matched
 
         Returns:
             (TTOutputFile|TTOutputFileSeq): matching output file
         """
         _files = self.find_files(extn=extn, format_=format_)
-        return get_single(_files, verbose=1)
+        return get_single(_files, verbose=1, catch=catch)
 
     def find_files(self, extn=None, format_=None):
         """Find output files within this version dir.
@@ -185,6 +186,9 @@ class TTOutputVersion(TTDirBase):
 
 class TTOutput(TTDirBase):
     """Represents an output dir."""
+
+    output_name = None
+    version = None
 
     def __init__(self, path):
         """Constructor.

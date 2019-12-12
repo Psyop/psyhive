@@ -157,7 +157,7 @@ def get_single(
     if _err_msg:
         _err_msg = fail_message or _err_msg
         if catch:
-            lprint(_err_msg, verbose=verbose)
+            lprint(_err_msg, verbose=verbose > 1)
             return None
         if verbose:
             lprint('Found {:d} items:'.format(len(items)))

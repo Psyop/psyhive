@@ -250,18 +250,30 @@ def _script_editor_open_from_project(*xargs):
     mel.eval(_cmd)
 
 
-def _script_editor_find_file_menu():
+def _script_editor_find_file_menu(verbose=0):
     """Find script editor file menu.
+
+    Args:
+        verbose (int): print process data
 
     Returns:
         (str): script editor file menu name
     """
 
-    # Find menu item
-    _menu = get_single([
-        _menu for _menu in cmds.lsUI(menus=True)
-        if cmds.menu(_menu, query=True, label=True) == 'File' and
-        'ScriptEditor' in cmds.menu(_menu, query=True, postMenuCommand=True)])
+    # Find script editor file menu
+    _menus = []
+    for _menu in cmds.lsUI(menus=True):
+        if cmds.menu(_menu, query=True, label=True) != 'File':
+            continue
+        lprint('TESTING', _menu, verbose=verbose)
+        _post_cmd = cmds.menu(_menu, query=True, postMenuCommand=True)
+        lprint(' - POST CMD', _post_cmd, verbose=verbose)
+        if not _post_cmd or 'ScriptEditor' not in _post_cmd:
+            continue
+        lprint(' - MATCHED', verbose=verbose)
+        _menus.append(_menu)
+
+    _menu = get_single(_menus)
 
     # Init menu if it has no children
     if not cmds.menu(_menu, query=True, itemArray=True):

@@ -560,7 +560,9 @@ def restore_sel(func):
     def _restore_sel_fn(*args, **kwargs):
         _sel = cmds.ls(selection=True)
         _result = func(*args, **kwargs)
-        cmds.select(_sel)
+        _sel = [_node for _node in _sel if cmds.objExists(_node)]
+        if _sel:
+            cmds.select(_sel)
         return _result
 
     return _restore_sel_fn

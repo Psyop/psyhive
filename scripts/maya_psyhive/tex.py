@@ -325,11 +325,12 @@ def connect_place_2d(node_, place=None):
     return _place
 
 
-def find_shd(shd):
+def find_shd(shd, catch=False):
     """Build shader object from the given node name.
 
     Args:
         shd (str): node to search for
+        catch (bool): no error if fail to build shader object
 
     Returns:
         (_BaseShader): shader object
@@ -345,6 +346,8 @@ def find_shd(shd):
         return _SurfaceShader(shd)
     elif _type == 'blinn':
         return _Blinn(shd)
+    if catch:
+        return None
     raise ValueError(_type)
 
 

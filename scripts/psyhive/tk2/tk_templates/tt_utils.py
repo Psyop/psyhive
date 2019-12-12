@@ -2,7 +2,7 @@
 
 from psyhive.utils import abs_path
 
-from ..tk_utils import get_current_engine
+from psyhive.tk2.tk_utils import get_current_engine
 
 
 def get_area(path):
