@@ -17,53 +17,78 @@ import math
 
 from maya import cmds, mel
 
-from psyhive.utils import get_single, store_result, lprint
+from psyhive.utils import get_single, store_result, lprint, wrap_fn
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import single_undo, restore_sel
 
 
-class _FkIkSystem(object):
+class Side(object):
+    """Enum for side - left/right."""
+
+    LEFT = 0
+    RIGHT = 1
+
+
+class Limb(object):
+    """Enum for side - arm/leg."""
+
+    ARM = 2
+    LEG = 3
+
+
+SIDES = (Side.LEFT, Side.RIGHT)
+LIMBS = (Limb.ARM, Limb.LEG)
+
+
+class FkIkSystem(object):
     """Represents an FK/IK system."""
 
-    def __init__(self, rig, side='Lf', limb='arm'):
+    def __init__(self, rig, side='left', limb='arm'):
         """Constructor.
 
         Args:
             rig (FileRef): rig
-            side (str): which side (Lf/Rt)
+            side (str): which side (left/right)
             limb (str): which limb (arm/leg)
         """
-        if side not in ['Lf', 'Rt']:
+        if side not in SIDES:
             raise ValueError(side)
-        if limb not in ['arm', 'leg']:
-            raise ValueError(side)
+        if limb not in LIMBS:
+            raise ValueError(limb)
 
         self.rig = rig
         self.side = side
         self.limb = limb
 
+        self.setup_ctrls()
+
+    def setup_ctrls(self):
+        """Set up system controls."""
+
         _names = {
-            'side': side,
-            'limb': limb,
-            'gimbal': {'arm': 'wrist', 'leg': 'ankle'}[limb],
-            'offset': {'arm': 'Elbow', 'leg': 'Knee'}[limb]}
+            'side': {Side.LEFT: 'Lf', Side.RIGHT: 'Rt'}[self.side],
+            'limb': {Limb.ARM: 'arm', Limb.LEG: 'leg'}[self.limb],
+            'gimbal': {Limb.ARM: 'wrist', Limb.LEG: 'ankle'}[self.limb],
+            'offset': {Limb.ARM: 'Elbow', Limb.LEG: 'Knee'}[self.limb]}
         self.fk_ctrls = [
-            rig.get_node('{side}_{limb}Fk_{idx}_Ctrl'.format(
+            self.rig.get_node('{side}_{limb}Fk_{idx}_Ctrl'.format(
                 idx=_idx, **_names))
             for _idx in range(1, 4)]
         self.fk_jnts = [
-            rig.get_node('{side}_{limb}Fk_{idx}_Jnt'.format(
+            self.rig.get_node('{side}_{limb}Fk_{idx}_Jnt'.format(
                 idx=_idx, **_names))
             for _idx in range(1, 4)]
         self.ik_jnts = [
-            rig.get_node('{side}_{limb}Ik_{idx}_Jnt'.format(
+            self.rig.get_node('{side}_{limb}Ik_{idx}_Jnt'.format(
                 idx=_idx, **_names))
             for _idx in range(1, 4)]
 
-        self.ik_ = rig.get_node('{side}_{limb}Ik_Ctrl'.format(**_names))
-        self.ik_pole = rig.get_node('{side}_{limb}Pole_Ctrl'.format(**_names))
+        self.ik_ = self.rig.get_node(
+            '{side}_{limb}Ik_Ctrl'.format(**_names))
+        self.ik_pole = self.rig.get_node(
+            '{side}_{limb}Pole_Ctrl'.format(**_names))
         self.ik_pole_rp = self.ik_pole.plug('rotatePivot')
 
         self.ik_offs = ['{}.{offset}_Offset'.format(self.ik_, **_names)]
@@ -75,12 +100,14 @@ class _FkIkSystem(object):
                 "{}.Foot_Rock".format(self.ik_),
             ]
 
-        self.gimbal = rig.get_node(
+        self.gimbal = self.rig.get_node(
             '{side}_{gimbal}Gimbal_Ctrl'.format(**_names))
+        self.ik_fk_attr = self.gimbal.plug('FK_IK')
+        self.set_to_ik = wrap_fn(self.ik_fk_attr.set_val, 1)
+        self.set_to_fk = wrap_fn(self.ik_fk_attr.set_val, 0)
 
-    def apply_fk_to_ik(
-            self, pole_vect_depth=10.0, build_tmp_geo=False, apply_=True,
-            verbose=1):
+    def apply_fk_to_ik(self, pole_vect_depth=10.0, apply_=True,
+                       build_tmp_geo=False, verbose=1):
         """Apply fk to ik.
 
         First the pole vector is calculated by extending a line from the
@@ -93,8 +120,8 @@ class _FkIkSystem(object):
 
         Args:
             pole_vect_depth (float): distance of pole vector from fk_ctrls[1]
-            build_tmp_geo (bool): build tmp geo
             apply_ (bool): apply the update to gimbal ctrl
+            build_tmp_geo (bool): build tmp geo
             verbose (int): print process data
         """
         lprint('APPLYING FK -> IK', verbose=verbose)
@@ -105,9 +132,9 @@ class _FkIkSystem(object):
 
         # Calculate pole pos
         _limb_v = hom.get_p(self.fk_ctrls[2]) - hom.get_p(self.fk_ctrls[0])
-        if self.limb == 'arm':
+        if self.limb is Limb.ARM:
             _limb_bend = -hom.get_m(self.fk_ctrls[1]).ly_().normalized()
-        elif self.limb == 'leg':
+        elif self.limb == Limb.LEG:
             _limb_bend = hom.get_m(self.fk_ctrls[1]).lx_().normalized()
         else:
             raise ValueError(self.limb)
@@ -118,14 +145,14 @@ class _FkIkSystem(object):
         # Read fk3 mtx
         _ik_mtx = hom.get_m(self.fk_ctrls[2])
         _side_offs = hom.HMatrix()
-        if self.side == 'Rt':
+        if self.side == Side.RIGHT:
             _side_offs = hom.HEulerRotation(math.pi, 0, 0).as_mtx()
         _ik_mtx = _side_offs * _ik_mtx
         _ik_mtx.apply_to(self.ik_)
 
         # Apply vals to ik ctrls
         if apply_:
-            self.gimbal.plug('FK_IK').set_val(1)
+            self.set_to_ik()
             lprint('SET', self.ik_, 'TO IK', verbose=verbose)
 
         if build_tmp_geo:
@@ -136,14 +163,14 @@ class _FkIkSystem(object):
             _ik_mtx.build_geo(name='fk3')
             hom.get_m(self.ik_).build_geo(name='ik')
 
-    def apply_ik_to_fk(self, build_tmp_geo=False, apply_=True, verbose=1):
+    def apply_ik_to_fk(self, apply_=True, build_tmp_geo=False, verbose=1):
         """Apply ik to fk.
 
         The fk ctrls are moved to match the ik joint positions.
 
         Args:
-            build_tmp_geo (bool): build tmp geo
             apply_ (bool): apply update to gimbal ctrl
+            build_tmp_geo (bool): build tmp geo
             verbose (int): print process data
         """
         lprint('APPLYING IK -> FK', verbose=verbose)
@@ -153,7 +180,7 @@ class _FkIkSystem(object):
             _mtx.apply_to(self.fk_ctrls[_idx])
 
         if apply_:
-            self.gimbal.plug('FK_IK').set_val(0)
+            self.set_to_fk()
             lprint('SET', self.ik_, 'TO FK', verbose=verbose)
 
     @single_undo
@@ -298,44 +325,49 @@ class _FkIkSystem(object):
         return hash(str(self))
 
     def __repr__(self):
-        return '<{}:{}{}>'.format(
-            type(self).__name__.strip("_"), self.side,
-            self.limb.capitalize())
+        return '<{}[{}]>'.format(
+            type(self).__name__.strip("_"), self.ik_)
 
 
-def get_selected_systems():
+def get_selected_systems(class_=None):
     """Get selected FK/IK systems.
 
+    Args:
+        class_ (class): override FkIkSystem class
+
     Returns:
-        (_FkIkSystem list): selected systems
+        (FkIkSystem list): selected systems
     """
+    _class = class_ or FkIkSystem
+
     _rig = ref.get_selected(catch=True)
     if not _rig:
         return []
 
     _systems = set()
     for _node in cmds.ls(selection=True):
-        for _side in ['Lf', 'Rt']:
-            for _limb in ['arm', 'leg']:
-                _system = _FkIkSystem(rig=_rig, limb=_limb, side=_side)
+        for _side in SIDES:
+            for _limb in LIMBS:
+                _system = _class(rig=_rig, limb=_limb, side=_side)
                 if _node in _system.get_ctrls():
                     _systems.add(_system)
 
     return sorted(_systems)
 
 
-def get_selected_system(error=None):
+def get_selected_system(class_=None, error=None):
     """Get selected fk/ik system.
 
     Args:
+        class_ (class): override FkIkSystem class
         error (Exception): override exception
 
     Returns:
-        (_FkIkSystem): currently selected system
+        (FkIkSystem): currently selected system
 
     Raises:
         (ValueError): if no systems selected
     """
-    _systems = get_selected_systems()
+    _systems = get_selected_systems(class_=class_)
     return get_single(
         _systems, name='FK/IK system', verb='selected', error=error)

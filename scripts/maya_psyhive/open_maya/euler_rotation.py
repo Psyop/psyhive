@@ -36,10 +36,16 @@ class HEulerRotation(om.MEulerRotation):
         _vect = hom.Z_AXIS
         return _vect.rotate_by(self)
 
+    def __neg__(self):
+        return HEulerRotation(super(HEulerRotation, self).__neg__())
+
     def __str__(self):
         _order = {0: 'XYZ'}[self.order]
         return '<{}[{}]({:.03f}, {:.03f}, {:.03f})>'.format(
             type(self).__name__, _order, self.x, self.y, self.z)
+
+    def __sub__(self, other):
+        return HEulerRotation(super(HEulerRotation, self).__sub__(other))
 
     __repr__ = __str__
 

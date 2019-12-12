@@ -1,3 +1,31 @@
+#### v0.50.0 ####
+
+    Released: Wed 11th Dec 2019
+
+    Vampire Bloodline tools [TOOLS-214]: 
+        added IK/FK switcher for vampire rig,
+    Clash Holiday tools [TOOLS-193]:
+        fixed bad loop expression on range missing from sg,
+        colour switch attrs have types in override expressions,
+    
+    maya_psyhive:
+        open_maya.HEulerRotation added __neg__/__sub__,
+        open_maya.HMatrix.as_euler added,
+        shows.clashroyaleholi fixed cut range missing from sg,
+        shows.clashroyaleholi fixed cut range set to None in sg,
+        shows.clashroyaleholi col swatches aip has var type,
+        shows.fkik_system.FkIkSystem made public + allow override system,
+        shows.fkik_system.FkIkSystem refactored to be more modular,
+        shows.vampirebloodline added fk/ik switcher,
+        tools.misc_tank_app.drive_shade_geo_from_rig updated to use tk2,
+    psyhive:
+        host.cur_scene added for hou,
+        tk2 added,
+        tools.hive_bro updated to use tk2,
+        utils.PyFile.get_module show traceback on fail,
+        utils.seq_from_frame bugfix catch on missing frame str/int,
+
+
 #### v0.49.0 ####
 
     Released: Fri 6th Dec 2019

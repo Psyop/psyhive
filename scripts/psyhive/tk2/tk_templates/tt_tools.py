@@ -5,6 +5,7 @@ from psyhive.utils import find, get_single
 
 from psyhive.tk2.tk_templates.tt_base import TTSequenceRoot, TTRoot, TTStepRoot
 from psyhive.tk2.tk_templates.tt_work import TTWork
+from psyhive.tk2.tk_templates.tt_output import TTOutput
 
 
 def cur_shot():
@@ -94,6 +95,21 @@ def find_shots(class_=None, filter_=None):
         for _seq in find_sequences()], [])
 
 
+def get_output(path):
+    """Get output from the given path.
+
+    Args:
+        path (str): path to convert to output object
+
+    Returns:
+        (TTOutput): output tank template object
+    """
+    try:
+        return TTOutput(path)
+    except ValueError:
+        return None
+
+
 def get_shot(path):
     """Get a shot object from the given path.
 
@@ -112,12 +128,11 @@ def get_shot(path):
     return _root
 
 
-def get_step_root(path, catch=True):
+def get_step_root(path):
     """Get step root from the give path.
 
     Args:
         path (str): path to test
-        catch (bool): no error on fail to create step root object
 
     Returns:
         (TTStepRoot|None): step root (if any)
@@ -125,28 +140,21 @@ def get_step_root(path, catch=True):
     try:
         return TTStepRoot(path)
     except ValueError as _exc:
-        if catch:
-            return None
-        raise _exc
+        return None
 
 
-def get_work(file_, class_=None, catch=True):
+def get_work(file_):
     """Get work file object associated with the given file.
 
     If an increment is passed, the associated work file is returned.
 
     Args:
         file_ (str): path to file
-        class_ (type): force workfile type
-        catch (bool): no error if no work file object was created
 
     Returns:
         (TTWork): work file
     """
-    _class = class_ or TTWork
     try:
-        return _class(file_)
+        return TTWork(file_)
     except ValueError as _exc:
-        if catch:
-            return None
-        raise _exc
+        return None

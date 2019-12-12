@@ -305,17 +305,16 @@ def obtain_sequences():
     return [obtain_cacheable(_seq) for _seq in find_sequences()]
 
 
-def obtain_work(file_, catch=True):
+def obtain_work(file_):
     """Factory for work file objects.
 
     Args:
         file_ (str): path to obtain work object for
-        catch (bool): no error if no work object was created
 
     Returns:
         (CTTWorkFile): work file
     """
-    _work = get_work(file_, catch=catch)
+    _work = get_work(file_)
     if not _work:
         return None
     return obtain_cacheable(_work)

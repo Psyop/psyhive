@@ -5,7 +5,8 @@ import operator
 import tank
 
 from psyhive.utils import (
-    File, abs_path, lprint, apply_filter, Seq, seq_from_frame)
+    File, abs_path, lprint, apply_filter, Seq, seq_from_frame,
+    get_single)
 
 from psyhive.tk2.tk_templates.tt_base import TTDirBase, TTBase
 from psyhive.tk2.tk_templates.tt_utils import get_area, get_template
@@ -77,6 +78,17 @@ class TTOutputName(TTDirBase):
         _hint = '{}_output_name'.format(_area)
         super(TTOutputName, self).__init__(path, hint=_hint)
 
+    def find_latest(self):
+        """Find latest version of this output.
+
+        Returns:
+            (TTOutputVersionBase): latest version
+        """
+        _vers = self.find_versions()
+        if not _vers:
+            return None
+        return _vers[-1]
+
     def find_versions(self, class_=None, version=None):
         """Find versions of this output name.
 
@@ -117,6 +129,32 @@ class TTOutputVersion(TTDirBase):
         _area = get_area(_path)
         _hint = '{}_output_version'.format(_area)
         super(TTOutputVersion, self).__init__(path, hint=_hint)
+
+    def find_file(self, extn=None, format_=None):
+        """Find output file within this version dir.
+
+        Args:
+            extn (str): filter by extension
+            format_ (str): filter by format
+
+        Returns:
+            (TTOutputFile|TTOutputFileSeq): matching output file
+        """
+        _files = self.find_files(extn=extn, format_=format_)
+        return get_single(_files, verbose=1)
+
+    def find_files(self, extn=None, format_=None):
+        """Find output files within this version dir.
+
+        Args:
+            extn (str): filter by extension
+            format_ (str): filter by format
+
+        Returns:
+            (TTOutputFile|TTOutputFileSeq list): matching output files
+        """
+        return sum([_out.find_files(extn=extn, format_=format_)
+                    for _out in self.find_outputs()], [])
 
     def find_outputs(self, filter_=None):
         """Find outputs within this version dir.
@@ -159,16 +197,23 @@ class TTOutput(TTDirBase):
         _hint = '{}_output'.format(_area)
         super(TTOutput, self).__init__(path, hint=_hint)
 
-    def find_files(self, verbose=0):
+    def find_files(self, extn=None, format_=None, verbose=0):
         """Find output files/seqs within this output dir.
 
         Args:
+            extn (str): filter by extension
+            format_ (str): filter by format
             verbose (int): print process data
 
         Returns:
             (TTOutputFile|TTOutputFileSeq list): output files/seqs
         """
-        return self._read_files(verbose=verbose)
+        _files = self._read_files(verbose=verbose)
+        if extn is not None:
+            _files = [_file for _file in _files if _file.extn == extn]
+        if format_ is not None:
+            _files = [_file for _file in _files if _file.format == format_]
+        return _files
 
     def _read_files(self, verbose=0):
         """Read files/seqs within this output from disk.

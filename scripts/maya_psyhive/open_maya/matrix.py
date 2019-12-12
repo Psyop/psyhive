@@ -38,6 +38,15 @@ class HMatrix(om.MMatrix):
 
         cmds.xform(node, matrix=self, worldSpace=True)
 
+    def as_euler(self):
+        """Get this matrix as euler rotations.
+
+        Returns:
+            (HEulerRotation): euler rotations
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HEulerRotation(om.MTransformationMatrix(self).rotation())
+
     def build_geo(self, scale=1.0, name='HMatrix'):
         """Build geo to display this matrix.
 

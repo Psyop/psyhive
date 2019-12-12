@@ -6,7 +6,7 @@ from psyhive.tk2.tk_templates import (
     TTSequenceRoot, TTRoot, TTStepRoot, TTWorkArea, TTWork, TTIncrement,
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,
     TTOutputFileSeq, get_work, cur_work, get_shot, get_step_root,
-    get_extn)
+    get_extn, get_output)
 
 from psyhive.tk2.tk_cache import (
     obtain_work, obtain_cur_work, obtain_sequences, obtain_cacheable,

@@ -14,11 +14,12 @@ from psyhive.py_gui import pyg_base, pyg_install
 from maya_psyhive import ui
 
 
-def get_selection_reader(type_):
+def get_selection_reader(type_, verbose=0):
     """Get updater to get node transform with shape matching given type.
 
     Args:
         type_ (str): shape type to match (eg. nurbsCurve)
+        verbose (int): print process data
 
     Returns:
         (ArgUpdater): pygui arg updater
@@ -27,11 +28,19 @@ def get_selection_reader(type_):
     def _get_sel():
         _sel = []
         for _node in cmds.ls(selection=True):
-            if type_ != 'transform':
+
+            _type = cmds.objectType(_node)
+            lprint('TESTING SEL NODE', _node, _type, verbose=verbose)
+
+            if _type == 'transform' and type_ == 'mesh':
                 _node = get_single(
                     cmds.listRelatives(shapes=True, type=type_), catch=True)
+                lprint(' - MAPPED TO', _node, verbose=verbose)
+
             if _node:
+                lprint(' - ACCEPTED NODE', _node, verbose=verbose)
                 _sel.append(_node)
+
         return get_single(_sel, catch=True)
 
     return pyg_install.ArgUpdater(_get_sel, label='Get selected')

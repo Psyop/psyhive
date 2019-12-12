@@ -87,7 +87,7 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     Returns:
         (HFnMesh list): list of driven shade geo
     """
-    from psyhive import tk
+    from psyhive import tk2
 
     # Get anim rig
     _cache_set = cache_set or nt.ObjectSet(u'archer_rig2:bakeSet')
@@ -97,15 +97,17 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     print 'RIG PATH', _rig.path
 
     # Find/import tmp shade asset
-    _rig_out = tk.get_output(_rig.path)
+    _rig_out = tk2.TTOutputName(_rig.path)
     print 'RIG OUT', _rig_out.path
     _shade_out = _rig_out.map_to(
         Step='shade', output_type='shadegeo', Task='shade').find_latest()
     print 'SHADE OUT', _shade_out.path
     if not _shade_out.exists():
         raise RuntimeError("Missing shade file "+_shade_out.path)
+    _shade_file = _shade_out.find_file(extn='mb', format_='maya')
+    print 'SHADE FILE', _shade_file
     _shade = ref.create_ref(
-        _shade_out.path, namespace='psyhive_tmp', force=True)
+        _shade_file.path, namespace='psyhive_tmp', force=True)
 
     # Duplicate geo and bind to rig
     _bake_geo = []

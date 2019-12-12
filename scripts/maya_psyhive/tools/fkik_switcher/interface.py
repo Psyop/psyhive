@@ -11,7 +11,7 @@ from psyhive.utils import abs_path, wrap_fn
 from maya_psyhive.tools.fkik_switcher import system
 
 _DIALOG = None
-_UI_FILE = abs_path('fkik_switcher.ui', root=os.path.dirname(__file__))
+UI_FILE = abs_path('fkik_switcher.ui', root=os.path.dirname(__file__))
 ICON = icons.EMOJI.find('Left-Right Arrow')
 
 
@@ -29,9 +29,15 @@ class _NoSystemSelected(HandledError):
 
 class _FkIkSwitcherUi(qt.HUiDialog):
     """Interface for FK/IK switcher."""
-    def __init__(self):
-        """Constructor."""
-        super(_FkIkSwitcherUi, self).__init__(ui_file=_UI_FILE)
+
+    def __init__(self, system_=None):
+        """Constructor.
+
+        Args:
+            system_ (class): override FkIkSystem type
+        """
+        self.system = system_
+        super(_FkIkSwitcherUi, self).__init__(ui_file=UI_FILE)
         self.set_icon(ICON)
 
     def _callback__fk_to_ik(self):
@@ -43,13 +49,14 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         self._execute_switch(mode='ik_to_fk')
 
     def _callback__keyframe(self):
-        _system = system.get_selected_system(error=HandledError)
+        _system = system.get_selected_system(
+            class_=self.system, error=HandledError)
         cmds.setKeyframe(_system.get_key_attrs())
 
     def _context__keyframe(self, menu):
         menu.setStyleSheet('background-color:DimGrey; color:white')
         try:
-            _system = system.get_selected_system()
+            _system = system.get_selected_system(class_=self.system)
         except ValueError as _exc:
             menu.add_label(_exc.message)
         else:
@@ -62,7 +69,8 @@ class _FkIkSwitcherUi(qt.HUiDialog):
         Args:
             mode (str): transition to make
         """
-        _system = system.get_selected_system(error=HandledError)
+        _system = system.get_selected_system(
+            class_=self.system, error=HandledError)
         _system.exec_switch_and_key(
             switch_mode=mode,
             switch_key=self.ui.switch_key.isChecked(),
@@ -78,8 +86,15 @@ class _FkIkSwitcherUi(qt.HUiDialog):
 
 
 @get_usage_tracker(name='launch_fkik_switcher')
-def launch_interface():
-    """Launch FK/IK switcher interface."""
+def launch_interface(system_=None):
+    """Launch FK/IK switcher interface.
+
+    Args:
+        system_ (class): override FkIkSystem type
+
+    Returns:
+        (FkIkSwitcherUi): dialog instance
+    """
     global _DIALOG
-    _DIALOG = _FkIkSwitcherUi()
+    _DIALOG = _FkIkSwitcherUi(system_=system_)
     return _DIALOG

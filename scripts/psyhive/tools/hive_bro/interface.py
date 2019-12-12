@@ -798,7 +798,7 @@ def get_recent_work():
     _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
     _works = []
     for _file in _settings.value(_setting_name, []):
-        _work = tk2.obtain_work(_file['file_path'], catch=True)
+        _work = tk2.obtain_work(_file['file_path'])
         if not _work:
             continue
         if not _work.dcc == _cur_dcc():

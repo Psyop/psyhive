@@ -192,7 +192,13 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
                 ["code", "is", [tk.get_shot_data(_out.shot)['name']]]],
             fields=["sg_cut_in", "sg_cut_out"]), catch=True)
         pprint.pprint(_data)
-        _result = (_data['sg_cut_in'], _data['sg_cut_out']) if _data else None
+        if (
+                _data and
+                _data.get('sg_cut_in') is not None and
+                _data.get('sg_cut_out') is not None):
+            _result = _data['sg_cut_in'], _data['sg_cut_out']
+        else:
+            _result = None
     else:
         raise ValueError(mode)
 
@@ -279,6 +285,12 @@ def create_standin_from_sel_shade(
 
 
 def _build_col_switches_aip(shade, standin):
+    """Build col switches override node.
+
+    Args:
+        shade (FileRef): shade reference
+        standin (HFnDependencyNode): aiStandIn node
+    """
     _aip = _build_aip_node(
         shd=None, ai_attrs={}, meshes=[], standin=standin,
         name='{}_colorSwitches'.format(shade.namespace))
@@ -286,8 +298,10 @@ def _build_col_switches_aip(shade, standin):
     _geo = shade.get_node('GEO')
     for _attr in _geo.list_attr(userDefined=True) or []:
         _plug = _geo.plug(_attr)
-        _val = '{} {}={}'.format(
-            _plug.get_type(), _attr, _plug.get_val(type_='int'))
+        _type = _plug.get_type()
+        _type = {'enum': 'int'}.get(_type, _type)
+        _val = '{} {} = {}'.format(
+            _type, _attr, _plug.get_val(type_='int'))
         _get_next_idx(_aip.plug('assignment')).set_val(_val)
     print 'BUILT COL SWITCHES AIP', _aip
 
