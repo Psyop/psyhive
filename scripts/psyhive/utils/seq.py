@@ -4,7 +4,7 @@ import os
 
 from psyhive.utils.cache import store_result_on_obj
 from psyhive.utils.path import File, abs_path, find, test_path, Dir
-from psyhive.utils.misc import system
+from psyhive.utils.misc import system, dprint
 
 
 class Seq(object):
@@ -52,7 +52,7 @@ class Seq(object):
         _frame = self.get_frame(file_)
         return _frame is not None
 
-    def delete(self, wording='Remove', force=False, frames=None):
+    def delete(self, wording='remove', force=False, frames=None):
         """Delete this sequence's frames.
 
         The user is asked to confirm before deletion.
@@ -72,9 +72,10 @@ class Seq(object):
             return
         if not force:
             qt.ok_cancel(
-                '{} existing frame{} {} of seq?\n\n{}'.format(
-                    wording, get_plural(_frames), ints_to_str(_frames),
-                    self.path))
+                '{} existing frame{} {} of image sequence?\n\n{}'.format(
+                    wording.capitalize(), get_plural(_frames),
+                    ints_to_str(_frames), self.path),
+                title='Confirm '+wording)
         for _frame in _frames:
             os.remove(self[_frame])
         self.get_frames(force=True)
@@ -197,10 +198,22 @@ class Seq(object):
         """Test this sequence's parent directory exists."""
         test_path(self.dir)
 
-    def view(self):
-        """View this image sequence."""
-        _path = self.path.replace("%04d", "#")
-        system('djv_view {}'.format(_path), verbose=1, result=False)
+    def view(self, viewer=None):
+        """View this image sequence.
+
+        Args:
+            viewer (str): viewer to use
+        """
+        _viewer = viewer or os.environ.get('VIEWER', 'rv')
+        if _viewer == 'djv_viewer':
+            _path = self.path.replace("%04d", "#")
+            system('djv_view {}'.format(_path), verbose=1, result=False)
+        elif _viewer == 'rv':
+            import psylaunch
+            dprint('Launching psylaunch rv')
+            psylaunch.launch_app('rv', args=[self.path, '-play'])
+        else:
+            raise ValueError(_viewer)
 
     def __getitem__(self, idx):
         return self.get_path(idx)

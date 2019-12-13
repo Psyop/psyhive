@@ -169,17 +169,21 @@ class Path(object):
 class Dir(Path):
     """Represents a directory on disk."""
 
-    def delete(self, force=False):
+    def delete(self, force=False, wording='delete'):
         """Delete this directory.
 
         Args:
             force (bool): force delete with no confirmation
+            wording (str): override wording for dialog
         """
         if not self.exists():
             return
         if not force:
             from psyhive import qt
-            qt.ok_cancel("Delete dir?\n\n"+self.path)
+            qt.ok_cancel(
+                "{} this directory?\n\n{}".format(
+                    wording.capitalize(), self.path),
+                title='Confirm '+wording)
         shutil.rmtree(self.path)
 
     def find(self, **kwargs):
@@ -259,15 +263,23 @@ class File(Path):
             line_n (int): line of the file to open
             verbose (int): print process data
         """
-        _path = self.path
+        _arg = self.path
         if line_n:
-            _path += ':{:d}'.format(line_n)
-        _cmds = [
-            r'C:\Program Files\Sublime Text 3\subl.exe',
-            _path]
-        _cmds = ['subl', _path]
+            _arg += ':{:d}'.format(line_n)
 
-        system(_cmds, verbose=verbose)
+        # Try using sublime executable
+        _subl_exe = r'C:\Program Files\Sublime Text 3\subl.exe'
+        if os.path.exists(_subl_exe):
+            _cmds = [_subl_exe, _arg]
+            _cmds = ['subl', _arg]
+            system(_cmds, verbose=verbose)
+            return
+
+        # Try using psylaunch
+        dprint('Using psylaunch sublime - it may be quicker to install it '
+               'locally on your machine.')
+        import psylaunch
+        psylaunch.launch_app('sublimetext', args=[_arg])
 
     def is_writable(self):
         """Check if this path is writable.

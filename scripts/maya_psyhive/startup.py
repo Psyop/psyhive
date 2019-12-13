@@ -8,7 +8,7 @@ from psyhive import icons, refresh, qt, py_gui, pipe
 from psyhive.tools import track_usage
 from psyhive.utils import (
     dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile,
-    write_file)
+    write_file, to_nice)
 
 from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher
@@ -90,20 +90,21 @@ def _build_psyhive_menu():
             command=_data['cmd'], image=_data['image'], label=_data['label'])
 
     # Catch fail to install tools for offsite (eg. LittleZoo)
-    for _func in [
-            _ph_add_batch_cache,
-            _ph_add_batch_rerender,
-            _ph_add_yeti_tools,
-            _ph_add_anim_tools,
-            _ph_add_oculus_quest_toolkit,
-    ]:
-        try:
-            _func()
-        except ImportError:
-            print ' - ADD MENU ITEM FAILED:', _func
+    for _grp in (
+            [_ph_add_batch_cache,
+             _ph_add_batch_rerender,
+             _ph_add_yeti_tools,
+             _ph_add_oculus_quest_toolkit],
+            [_ph_add_anim_toolkit,
+             _ph_add_tech_anim_toolkit]):
+        for _func in _grp:
+            try:
+                _func()
+            except ImportError:
+                print ' - ADD MENU ITEM FAILED:', _func
+        cmds.menuItem(divider=True)
 
     # Add show toolkits
-    cmds.menuItem(divider=True)
     _add_show_toolkits(_menu)
 
     # Add reset settings
@@ -161,16 +162,34 @@ def _ph_add_yeti_tools():
         command=_cmd, image=yeti.ICON, label='Yeti cache tools')
 
 
-def _ph_add_anim_tools():
-    """Add psyhive anim tools option."""
-    from maya_psyhive.toolkits import anim
+def _ph_add_toolkit(toolkit):
+    """Add PsyHive toolkit option.
+
+    Args:
+        toolkit (mod): toolkit module to add
+    """
+    _name = getattr(
+        toolkit, 'PYGUI_TITLE',
+        to_nice(toolkit.__name__.split('.')[-1])+' tools')
     _cmd = '\n'.join([
-        'import {} as anim',
+        'import {} as toolkit',
         'import {} as py_gui',
-        'py_gui.MayaPyGui(anim.__file__)']).format(
-            anim.__name__, py_gui.__name__)
+        'py_gui.MayaPyGui(toolkit.__file__)']).format(
+            toolkit.__name__, py_gui.__name__)
     cmds.menuItem(
-        command=_cmd, image=anim.ICON, label='Anim tools')
+        command=_cmd, image=toolkit.ICON, label=_name)
+
+
+def _ph_add_anim_toolkit():
+    """Add PsyHive Anim toolkit option."""
+    from maya_psyhive.toolkits import anim
+    _ph_add_toolkit(anim)
+
+
+def _ph_add_tech_anim_toolkit():
+    """Add PsyHive TechAnim toolkit option."""
+    from maya_psyhive.toolkits import tech_anim
+    _ph_add_toolkit(tech_anim)
 
 
 def _ph_add_oculus_quest_toolkit():

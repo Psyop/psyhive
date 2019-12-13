@@ -227,6 +227,10 @@ def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):
     if not string:
         return []
 
+    if string == '*':
+        from psyhive import host
+        return host.t_frames()
+
     _ints = []
     for _rng in string.split(chunk_sep):
 

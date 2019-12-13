@@ -1,3 +1,20 @@
+#### v0.53.0 ####
+
+    Released: Fri 13th Dec 2019
+
+    Tech Anim tools: added blast + cache tool [TOOLS-209],
+    
+    maya_psyhive:
+        startup added TechAnim toolkit,
+        toolkits.tech_anim added,
+    psyhive:
+        utils.Dir.delete added wording arg,
+        utils.File.edit use psylaunch subl if no local install,
+        utils.str_to_ints use host.t_range for *,
+        utils.Seq.delete added wording arg,
+        utils.Seq.view allow rv view using psylaunch,
+
+
 #### v0.52.0 ####
 
     Released: Thu 12th Dec 2019
