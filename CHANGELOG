@@ -1,3 +1,18 @@
+#### v0.52.0 ####
+
+    Released: Thu 12th Dec 2019
+
+    Clash Holiday tools [TOOLS-193]:
+        bugfix not finding sg shot with cid00Aid000 naming,
+    
+    psyhive:
+        tk2.find_shot added,
+        tk2.get_shot_sg_data bugfix not appling _get_shot_sg_name,
+        tk2.TTBase.hint_fmt added,
+        tk2.TTBase.map_to hint arg is optional,
+        path.File.write_text added diff option to confirm dialog,
+
+
 #### v0.51.0 ####
 
     Released: Thu 12th Dec 2019

@@ -22,6 +22,8 @@ from psyhive.tk2.tk_templates.tt_utils import (
 class TTWorkArea(TTDirBase):
     """Represents a work area within a step root for a dcc."""
 
+    hint_fmt = '{area}_work_area_{dcc}'
+
     def __init__(self, path):
         """Constructor.
 
@@ -31,7 +33,7 @@ class TTWorkArea(TTDirBase):
         _path = abs_path(path)
         _area = get_area(_path)
         _dcc = get_dcc(_path)
-        _hint = '{}_work_area_{}'.format(_area, _dcc)
+        _hint = self.hint_fmt.format(area=_area, dcc=_dcc)
         super(TTWorkArea, self).__init__(path, hint=_hint)
 
     def find_increments(self):
@@ -59,7 +61,7 @@ class TTWorkArea(TTDirBase):
         _hint = '{}_{}_work'.format(self.dcc, self.area)
         _tmpl = get_template(_hint)
         _test_work = self.map_to(
-            _hint, class_=_class, Task=self.step,
+            hint=_hint, class_=_class, Task=self.step,
             extension=get_extn(self.dcc), version=1)
         _works = find(_test_work.dir, depth=1, type_='f', class_=_class)
         return _works
@@ -106,6 +108,8 @@ class TTWork(TTBase, File):
     task = None
     version = None
 
+    hint_fmt = '{dcc}_{area}_work'
+
     def __init__(self, file_):
         """Constructor.
 
@@ -118,7 +122,7 @@ class TTWork(TTBase, File):
         _path = abs_path(file_)
         _dcc = get_dcc(_path)
         _area = get_area(_path)
-        _hint = '{}_{}_work'.format(_dcc, _area)
+        _hint = self.hint_fmt.format(dcc=_dcc, area=_area)
 
         super(TTWork, self).__init__(file_, hint=_hint)
 
@@ -437,6 +441,8 @@ class TTWork(TTBase, File):
 class TTIncrement(TTBase, File):
     """Represents a work file increment."""
 
+    hint_fmt = '{dcc}_{area}_increment'
+
     def __init__(self, path):
         """Constructor.
 
@@ -446,5 +452,5 @@ class TTIncrement(TTBase, File):
         _path = abs_path(path)
         _area = get_area(_path)
         _dcc = get_dcc(_path)
-        _hint = '{}_{}_increment'.format(_dcc, _area)
+        _hint = self.hint_fmt.format(dcc=_dcc, area=_area)
         super(TTIncrement, self).__init__(path, hint=_hint)

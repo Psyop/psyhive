@@ -65,4 +65,4 @@ def get_shot_sg_data(shot):
     if not _data:
         raise RuntimeError('Shot missing from shotgun {}'.format(shot.name))
     _id = get_single(_data)['id']
-    return {'type': 'Shot', 'id': _id, 'name': shot.name}
+    return {'type': 'Shot', 'id': _id, 'name': _get_shot_sg_name(shot.name)}

@@ -15,6 +15,8 @@ from psyhive.tk2.tk_templates.tt_utils import get_area, get_template
 class TTOutputType(TTDirBase):
     """Represents an output type directory."""
 
+    hint_fmt = '{area}_output_type'
+
     def __init__(self, path):
         """Constructor.
 
@@ -23,7 +25,7 @@ class TTOutputType(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_output_type'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTOutputType, self).__init__(path, hint=_hint)
 
     def find_names(self, class_=None, filter_=None, output_name=None,
@@ -67,6 +69,8 @@ class TTOutputType(TTDirBase):
 class TTOutputName(TTDirBase):
     """Represents an output name dir on disk."""
 
+    hint_fmt = '{area}_output_name'
+
     def __init__(self, path):
         """Constructor.
 
@@ -75,7 +79,7 @@ class TTOutputName(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_output_name'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTOutputName, self).__init__(path, hint=_hint)
 
     def find_latest(self):
@@ -119,6 +123,8 @@ class TTOutputName(TTDirBase):
 class TTOutputVersion(TTDirBase):
     """Represents an output version dir."""
 
+    hint_fmt = '{area}_output_version'
+
     def __init__(self, path):
         """Constructor.
 
@@ -127,7 +133,7 @@ class TTOutputVersion(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_output_version'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTOutputVersion, self).__init__(path, hint=_hint)
 
     def find_file(self, extn=None, format_=None, catch=False):
@@ -187,6 +193,8 @@ class TTOutputVersion(TTDirBase):
 class TTOutput(TTDirBase):
     """Represents an output dir."""
 
+    hint_fmt = '{area}_output'
+
     output_name = None
     version = None
 
@@ -198,7 +206,7 @@ class TTOutput(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_output'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTOutput, self).__init__(path, hint=_hint)
 
     def find_files(self, extn=None, format_=None, verbose=0):
@@ -293,6 +301,7 @@ class TTOutputFile(TTBase, File):
     """Represents an output file."""
 
     channel = None
+    hint_fmt = '{area}_output_file'
 
     def __init__(self, file_):
         """Constructor.
@@ -303,7 +312,7 @@ class TTOutputFile(TTBase, File):
         File.__init__(self, file_)
         _path = abs_path(file_)
         _area = get_area(_path)
-        _hint = '{}_output_file'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTOutputFile, self).__init__(file_, hint=_hint)
 
 
@@ -311,6 +320,7 @@ class TTOutputFileSeq(TTBase, Seq):
     """Represents an output file sequence."""
 
     channel = None
+    hint_fmt = '{area}_output_file_seq'
 
     def __init__(self, path, verbose=0):
         """Constructor.
@@ -321,7 +331,7 @@ class TTOutputFileSeq(TTBase, Seq):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_output_file_seq'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
 
         _tmpl = get_template(_hint)
         try:
@@ -332,5 +342,5 @@ class TTOutputFileSeq(TTBase, Seq):
         _data["SEQ"] = "%04d"
         _path = abs_path(_tmpl.apply_fields(_data))
 
-        Seq.__init__(self, path)
         super(TTOutputFileSeq, self).__init__(_path, hint=_hint)
+        Seq.__init__(self, path)

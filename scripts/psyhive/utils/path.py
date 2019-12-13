@@ -4,6 +4,7 @@ import filecmp
 import functools
 import os
 import shutil
+import tempfile
 import time
 
 import ctypes
@@ -312,7 +313,24 @@ class File(Path):
             text (str): text to write
             force (bool): overwrite existing file with no warning
         """
-        write_file(file_=self.path, text=text, force=force)
+        _force = force
+        if not force:
+            from psyhive import qt, icons
+            _result = qt.raise_dialog(
+                'Overwrite file?\n\n{}'.format(self.path),
+                title='Confirm overwrite',
+                icon=icons.EMOJI.find('Worried Face'),
+                buttons=['Yes', 'Diff', 'Cancel'])
+            if _result == 'Yes':
+                _force = True
+            elif _result == 'Diff':
+                _tmp = File('{}/_{}_diff_tmp.{}'.format(
+                    tempfile.gettempdir(), self.basename, self.extn))
+                _tmp.write_text(text, force=True)
+                _tmp.diff(self.path, check_extn=False)
+            else:
+                raise ValueError(_result)
+        write_file(file_=self.path, text=text, force=_force)
 
 
 def abs_path(path, win=False, root=None, verbose=0):

@@ -212,6 +212,7 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
     """
     _out = tk2.get_output(abc)
     if not _out:
+        lprint('NO OUTPUT', abc, verbose=verbose)
         return None
 
     _shotgun = tank.platform.current_engine().shotgun
@@ -236,6 +237,8 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
                 ["project", "is", [tk2.get_project_sg_data(_project)]],
                 ["code", "is", [_shot.get_sg_data()['name']]]],
             fields=["sg_cut_in", "sg_cut_out"]), catch=True)
+        if verbose:
+            print 'SHOT DATA', _shot.get_sg_data()
         if (
                 _data and
                 _data.get('sg_cut_in') is not None and

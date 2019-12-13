@@ -22,6 +22,8 @@ class TTBase(Path):
     step = None
     hint = None
 
+    hint_fmt = None
+
     def __init__(
             self, path, hint, tmpl=None, data=None, verbose=0):
         """Constructor.
@@ -59,7 +61,7 @@ class TTBase(Path):
         self.area = get_area(_path)
         self.dcc = get_dcc(_path, allow_none=True)
 
-    def map_to(self, hint=None, class_=None, **kwargs):
+    def map_to(self, class_=None, hint=None, verbose=0, **kwargs):
         """Map this template's values to a different template.
 
         For example, this could be used to map a maya work file to
@@ -67,14 +69,16 @@ class TTBase(Path):
         be passed in the kwargs.
 
         Args:
-            hint (str): hint to map to
             class_ (TTBase): template type to map to
+            hint (str): hint to map to
+            verbose (int): print process data
 
         Returns:
             (TTBase): new template instance
         """
-        _hint = hint or self.hint
         _class = class_ or self.__class__
+        lprint('CLASS', _class, class_, verbose=verbose)
+        _hint = hint or _class.hint_fmt.format(area=self.area, dcc=self.dcc)
         _data = copy.copy(self.data)
         for _key, _val in kwargs.items():
             _data[_key] = _val
@@ -116,6 +120,7 @@ class TTSequenceRoot(TTDirBase):
     """Represents a sequence root containing shot folders."""
 
     sequence = None
+    hint_fmt = 'sequence_root'
 
     def __init__(self, path):
         """Constructor.
@@ -123,7 +128,7 @@ class TTSequenceRoot(TTDirBase):
         Args:
             path (str): path to sequence root
         """
-        super(TTSequenceRoot, self).__init__(path, hint='sequence_root')
+        super(TTSequenceRoot, self).__init__(path, hint=self.hint_fmt)
 
     def find_shots(self, filter_=None, class_=None):
         """Find shots in this sequence.
@@ -166,6 +171,7 @@ class TTRoot(TTDirBase):
 
     asset = None
     shot = None
+    hint_fmt = '{area}_root'
 
     def __init__(self, path):
         """Constructor.
@@ -175,7 +181,7 @@ class TTRoot(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_root'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTRoot, self).__init__(path, hint=_hint)
         if self.shot:
             self.name = self.shot
@@ -242,6 +248,8 @@ class TTStepRoot(TTDirBase):
     step = None
     sg_asset_type = None
 
+    hint_fmt = '{area}_step_root'
+
     def __init__(self, path):
         """Constructor.
 
@@ -250,7 +258,7 @@ class TTStepRoot(TTDirBase):
         """
         _path = abs_path(path)
         _area = get_area(_path)
-        _hint = '{}_step_root'.format(_area)
+        _hint = self.hint_fmt.format(area=_area)
         super(TTStepRoot, self).__init__(path, hint=_hint)
 
     def find_output_types(self, output_type=None):

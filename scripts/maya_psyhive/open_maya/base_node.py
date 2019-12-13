@@ -450,7 +450,8 @@ class BaseNode(object):
         return self.node
 
     def __repr__(self):
-        return '<{}:"{}">'.format(type(self).__name__, self.node)
+        return '<{}:"{}">'.format(
+            type(self).__name__.strip('_'), self.node)
 
 
 @store_result
