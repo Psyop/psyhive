@@ -29,6 +29,20 @@ _AI_ATTRS = {
 py_gui.install_gui('Crowd standins')
 
 
+def _user_attr_sort(attr):
+    """Sorting for shade GEO node user attr overrides.
+
+    Args:
+        attr (str): attribute name
+
+    Returns:
+        (str): sort key
+    """
+    _order = ['colorSwitch', 'paint', 'paintPattern', 'burnt']
+    _idx = _order.index(attr) if attr in _order else len(_order)
+    return '{:04d}{}'.format(_idx, attr)
+
+
 def _get_next_idx(plug, connected=True, value=True, limit=1000, verbose=0):
     """Get next avaliable index for mult indexed attributes.
 
@@ -269,7 +283,9 @@ def _build_col_switches_aip(shade, merge):
 
     # Add override for user defined attrs on shade GEO node
     _geo = shade.get_node('GEO')
-    for _attr in _geo.list_attr(userDefined=True) or []:
+    _attrs = _geo.list_attr(userDefined=True) or []
+    _attrs.sort(key=_user_attr_sort)
+    for _attr in _attrs:
         _plug = _geo.plug(_attr)
         _type = _plug.get_type()
         _type = {'enum': 'int'}.get(_type, _type)
@@ -374,7 +390,8 @@ def create_standin_from_sel_shade(
         archive=('P:/projects/clashroyale2019_34814P/sequences/'
                  'crowdCycles25Fps/cid00Aid001/animation/output/animcache/'
                  'animation_archer/v014/'
-                 'alembic/cid00Aid001_animation_archer_v014.abc')):
+                 'alembic/cid00Aid001_animation_archer_v014.abc'),
+        verbose=0):
     """Create aiStandIn from selected shade asset.
 
     The shader is read from all mesh nodes in the shade asset, and then this
@@ -384,6 +401,7 @@ def create_standin_from_sel_shade(
 
     Args:
         archive (str): path to archive to apply to standin
+        verbose (int): print process data
     """
     _shade = ref.get_selected(catch=True)
     if not _shade:
@@ -401,7 +419,7 @@ def create_standin_from_sel_shade(
     _merge.plug('out').connect(_standin.plug('operators[0]'))
 
     _build_col_switches_aip(shade=_shade, merge=_merge)
-    _build_shader_overrides(shade=_shade, merge=_merge)
+    _build_shader_overrides(shade=_shade, merge=_merge, verbose=verbose)
 
     # Init updates to happen after abc load
     _standin.select()

@@ -1,3 +1,13 @@
+#### v0.54.1 ####
+
+    Released: Fri 13th Dec 2019
+
+    Clash Holiday tools: added aiMerge node to pass overrides though [TOOLS-193],
+    
+    maya_psyhive:
+        shows.clashroyaleholi.create_standin_from_sel_shade added user attr sorting,
+
+
 #### v0.54.0 ####
 
     Released: Fri 13th Dec 2019
@@ -5,7 +15,7 @@
     Clash Holiday tools: added aiMerge node to pass overrides though [TOOLS-193],
     
     maya_psyhive:
-        shows.clashroyaleholi.create_standin_from_sel_shade
+        shows.clashroyaleholi.create_standin_from_sel_shade added merge node,
 
 
 #### v0.53.0 ####
