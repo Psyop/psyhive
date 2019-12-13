@@ -108,12 +108,12 @@ def _get_default_browser_dir(work=None, verbose=0):
     return None
 
 
-def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
+def _build_aip_node(shd, merge, meshes, ai_attrs=None, name=None, verbose=0):
     """Build aiSetParameter node.
 
     Args:
         shd (HFnDependencyNode): shader to apply
-        standin (HFnDependencyNode): to set parameter on
+        merge (HFnDependencyNode): merge node to connect output to
         meshes (HFnDependencyNode list): meshes to apply set param to
         ai_attrs (dict): override ai attrs to check
         name (str): override name
@@ -126,7 +126,7 @@ def _build_aip_node(shd, standin, meshes, ai_attrs=None, name=None, verbose=0):
     # Create standin node
     _aip = hom.CMDS.createNode(
         'aiSetParameter', name='{}_AIP'.format(name or shd.name()))
-    _aip.plug('out').connect(_get_next_idx(standin.plug('operators')))
+    _aip.plug('out').connect(_get_next_idx(merge.plug('inputs')))
     if shd:
         _aip.plug('assignment[0]').set_val("shader = '{}'".format(shd))
     lprint(' - AIP', _aip, verbose=verbose)
@@ -255,51 +255,52 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
     return _result
 
 
-@py_gui.install_gui(
-    label='Create aiStandIn from selected shade',
-    browser={'archive': py_gui.BrowserLauncher(
-        get_default_dir=_get_default_browser_dir, title='Select archive')},
-    hide=['verbose'])
-def create_standin_from_sel_shade(
-        archive=('P:/projects/clashroyale2019_34814P/sequences/'
-                 'crowdCycles25Fps/cid00Aid001/animation/output/animcache/'
-                 'animation_archer/v014/'
-                 'alembic/cid00Aid001_animation_archer_v014.abc'),
-        verbose=0):
-    """Create aiStandIn from selected shade asset.
-
-    The shader is read from all mesh nodes in the shade asset, and then this
-    is used to create an aiSetParameter node on the standin for each shader.
-    If all the meshes using the shader has matching values for ai attrs,
-    these values are applied as overrides on the aiSetParameter node.
+def _build_col_switches_aip(shade, merge):
+    """Build col switches override node.
 
     Args:
-        archive (str): path to archive to apply to standin
+        shade (FileRef): shade reference
+        merge (HFnDependencyNode): merge node to connect output to
+    """
+    _aip = _build_aip_node(
+        shd=None, ai_attrs={}, meshes=[], merge=merge,
+        name='{}_colorSwitches'.format(shade.namespace))
+    _aip.plug('selection').set_val('*')
+
+    # Add override for user defined attrs on shade GEO node
+    _geo = shade.get_node('GEO')
+    for _attr in _geo.list_attr(userDefined=True) or []:
+        _plug = _geo.plug(_attr)
+        _type = _plug.get_type()
+        _type = {'enum': 'int'}.get(_type, _type)
+        _val = '{} {} = {}'.format(
+            _type, _attr, _plug.get_val(type_='int'))
+        _get_next_idx(_aip.plug('assignment')).set_val(_val)
+
+    print ' - BUILT COL SWITCHES AIP', _aip
+
+
+def _build_shader_overrides(shade, merge, verbose=0):
+    """Build shader overrides.
+
+    Each shader has an aiSetParameter node which applies overrides
+    for the geometry in the abc which that shader is applied to.
+
+    Args:
+        shade (FileRef): shade reference
+        merge (HFnDependencyNode): merge node to connect output to
         verbose (int): print process data
     """
-    _shade = ref.get_selected(catch=True)
-    if not _shade:
-        qt.notify_warning('No shade asset selected.\n\nPlease select a shade '
-                          'asset to read shaders from.')
-        return
-
-    # Create standin
-    _standin = hom.CMDS.createNode('aiStandIn')
-    _standin.plug('dso').set_val(archive)
-    _standin.plug('useFrameExtension').set_val(True)
+    _shds = collections.defaultdict(list)
 
     # Read shader assignments
-    _shds = collections.defaultdict(list)
-    for _mesh in _shade.find_meshes():
+    for _mesh in shade.find_meshes():
         if _mesh.clean_name == 'color_switch_Geo':
             continue
         _shd = tex.read_shd(_mesh)
         if not _shd:
             continue
         _shds[_shd].append(_mesh.shp)
-
-    # Build col switches aip
-    _build_col_switches_aip(shade=_shade, standin=_standin)
 
     # Set up AIP node for each shader
     for _shd in qt.progress_bar(sorted(_shds), 'Applying {:d} shader{}'):
@@ -317,40 +318,7 @@ def create_standin_from_sel_shade(
         lprint('   - AI SHD', _ai_shd, verbose=verbose)
         _shd_node = _ai_shd or _shd.shd
 
-        _build_aip_node(shd=_shd_node, meshes=_meshes, standin=_standin)
-
-    _standin.select()
-
-    # Init updates to happen after abc load
-    _rng = _get_abc_range_from_sg(archive)
-    _name = get_unique('{}_AIS'.format(_shade.namespace))
-    cmds.evalDeferred(
-        wrap_fn(_finalise_standin, node=_standin, range_=_rng, name=_name),
-        lowestPriority=True)
-
-    print 'CREATED', _standin
-
-
-def _build_col_switches_aip(shade, standin):
-    """Build col switches override node.
-
-    Args:
-        shade (FileRef): shade reference
-        standin (HFnDependencyNode): aiStandIn node
-    """
-    _aip = _build_aip_node(
-        shd=None, ai_attrs={}, meshes=[], standin=standin,
-        name='{}_colorSwitches'.format(shade.namespace))
-    _aip.plug('selection').set_val('*')
-    _geo = shade.get_node('GEO')
-    for _attr in _geo.list_attr(userDefined=True) or []:
-        _plug = _geo.plug(_attr)
-        _type = _plug.get_type()
-        _type = {'enum': 'int'}.get(_type, _type)
-        _val = '{} {} = {}'.format(
-            _type, _attr, _plug.get_val(type_='int'))
-        _get_next_idx(_aip.plug('assignment')).set_val(_val)
-    print ' - BUILT COL SWITCHES AIP', _aip
+        _build_aip_node(shd=_shd_node, meshes=_meshes, merge=merge)
 
 
 def _finalise_standin(node, name, range_, verbose=0):
@@ -395,3 +363,52 @@ def _finalise_standin(node, name, range_, verbose=0):
         lprint(_str, verbose=verbose)
         _expr = cmds.expression(string=_str, timeDependent=True)
         print ' - CREATED EXPRESSION', _expr
+
+
+@py_gui.install_gui(
+    label='Create aiStandIn from selected shade',
+    browser={'archive': py_gui.BrowserLauncher(
+        get_default_dir=_get_default_browser_dir, title='Select archive')},
+    hide=['verbose'])
+def create_standin_from_sel_shade(
+        archive=('P:/projects/clashroyale2019_34814P/sequences/'
+                 'crowdCycles25Fps/cid00Aid001/animation/output/animcache/'
+                 'animation_archer/v014/'
+                 'alembic/cid00Aid001_animation_archer_v014.abc')):
+    """Create aiStandIn from selected shade asset.
+
+    The shader is read from all mesh nodes in the shade asset, and then this
+    is used to create an aiSetParameter node on the standin for each shader.
+    If all the meshes using the shader has matching values for ai attrs,
+    these values are applied as overrides on the aiSetParameter node.
+
+    Args:
+        archive (str): path to archive to apply to standin
+    """
+    _shade = ref.get_selected(catch=True)
+    if not _shade:
+        qt.notify_warning('No shade asset selected.\n\nPlease select a shade '
+                          'asset to read shaders from.')
+        return
+
+    # Create standin
+    _standin = hom.CMDS.createNode('aiStandIn')
+    _standin.plug('dso').set_val(archive)
+    _standin.plug('useFrameExtension').set_val(True)
+
+    _merge = hom.CMDS.createNode(
+        'aiMerge', name='{}_mergeOperators'.format(_shade.namespace))
+    _merge.plug('out').connect(_standin.plug('operators[0]'))
+
+    _build_col_switches_aip(shade=_shade, merge=_merge)
+    _build_shader_overrides(shade=_shade, merge=_merge)
+
+    # Init updates to happen after abc load
+    _standin.select()
+    _rng = _get_abc_range_from_sg(archive)
+    _name = get_unique('{}_AIS'.format(_shade.namespace))
+    cmds.evalDeferred(
+        wrap_fn(_finalise_standin, node=_standin, range_=_rng, name=_name),
+        lowestPriority=True)
+
+    print 'CREATED', _standin
