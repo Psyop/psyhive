@@ -28,6 +28,21 @@ class FileRef(object):
         except RuntimeError:
             return None
 
+    def find_meshes(self):
+        """Find meshes in this reference.
+
+        Returns:
+            (HFnMesh list): meshes
+        """
+        from maya_psyhive import open_maya as hom
+        _meshes = []
+        for _shp in self.find_nodes(type_='mesh'):
+            if _shp.plug('intermediateObject').get_val():
+                continue
+            _mesh = hom.HFnMesh(get_parent(_shp))
+            _meshes.append(_mesh)
+        return _meshes
+
     def find_nodes(self, type_=None, class_=None):
         """Find nodes within this reference.
 
@@ -45,21 +60,6 @@ class FileRef(object):
             _kwargs['type'] = type_
         return [_class(_node)
                 for _node in cmds.ls(self.namespace+":*", **_kwargs)]
-
-    def find_meshes(self):
-        """Find meshes in this reference.
-
-        Returns:
-            (HFnMesh list): meshes
-        """
-        from maya_psyhive import open_maya as hom
-        _meshes = []
-        for _shp in self.find_nodes(type_='mesh'):
-            if _shp.plug('intermediateObject').get_val():
-                continue
-            _mesh = hom.HFnMesh(get_parent(_shp))
-            _meshes.append(_mesh)
-        return _meshes
 
     def find_top_node(self):
         """Find top node of this reference.

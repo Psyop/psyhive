@@ -368,8 +368,7 @@ class TTWork(TTBase, File):
         Args:
             force (bool): open with no scene modified warning
         """
-        from psyhive import tk
-        _fileops = tk.find_tank_app('psy-multi-fileops')
+        _fileops = find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
     def save(self, comment):

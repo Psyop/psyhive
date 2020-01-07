@@ -232,17 +232,19 @@ class File(Path):
             qt.ok_cancel("Replace existing file?\n\n"+file_)
         shutil.copy(self.path, file_)
 
-    def delete(self, force=False):
+    def delete(self, force=False, wording='delete'):
         """Delete this file.
 
         Args:
             force (bool): delete with no confirmation
+            wording (str): wording for confirmation dialog
         """
         if not self.exists():
             return
         if not force:
             from psyhive import qt
-            qt.ok_cancel("Delete file?\n\n"+self.path)
+            qt.ok_cancel("{} file?\n\n{}".format(
+                wording.capitalize(), self.path))
         os.remove(self.path)
 
     def diff(self, other, label=None, check_extn=True):
@@ -420,7 +422,7 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
     if check_extn and not File(left).extn in [
-            None, 'py', 'yml', 'ui', 'nk', 'json']:
+            None, 'py', 'yml', 'ui', 'nk', 'json', 'mel']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

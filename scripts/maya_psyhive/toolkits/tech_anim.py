@@ -119,7 +119,7 @@ def _do_create_cache(
     _args[14] = int(use_float)
     _args[15] = "mcx"
 
-    _cmd = 'doCreateNclothCache 5 {{ {} }};'.format(', '.join([
+    _cmd = 'PSY_doCreateNclothCache 5 {{ {} }};'.format(', '.join([
         '"{}"'.format(_arg) for _arg in _args]))
     lprint(_cmd, verbose=verbose)
     mel.eval(_cmd)
@@ -186,7 +186,7 @@ def _attach_caches(n_cloths=None):
         _mel('string $cacheDirectory = "{}";'.format(
             _n_cloth.get_cache_xml().dir))
         _mel('string $replaceMode = "replace";')
-        _mel('attachOneCachePerGeometry($cacheFiles, $objsToCache, '
+        _mel('PSY_attachOneCachePerGeometry($cacheFiles, $objsToCache, '
              '$cacheDirectory, $replaceMode);')
         print
 
@@ -247,7 +247,7 @@ def _blast(start, end, res, verbose=0):
     choices={'resolution': ['720x576', '1020x720', 'Use render globals']})
 def blast_and_cache(
         force_overwrite=False, attach_cache=True, view_blast=True,
-        resolution=None):
+        resolution='Use render globals'):
     """Execute playblast and cache nCloth nodes.
 
     This allows blasting and caching to happen with a single pass of

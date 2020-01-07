@@ -4,7 +4,6 @@ import os
 import sys
 import time
 
-import sgtk
 import tank
 
 from psyhive import pipe, refresh, qt, icons
@@ -77,7 +76,7 @@ def get_current_engine():
 
     # Create shell engine
     _project_path = os.getenv('PSYOP_PROJECT_PATH')
-    _tk = sgtk.Sgtk(_project_path)
+    _tk = tank.Sgtk(_project_path)
     _ctx = _tk.context_from_path(_project_path)
     _shell = tank.platform.start_engine('tk-shell', _tk, _ctx)
     return _shell
@@ -153,7 +152,7 @@ def restart_tank(force=True, verbose=0):
         verbose (int): print process data
     """
     _start = time.time()
-    sgtk.platform.restart()
+    tank.platform.restart()
     _clean_leftover_modules(force=force, verbose=verbose)
     dprint("RESTARTED TANK ({:.02f}s)".format(time.time() - _start))
 

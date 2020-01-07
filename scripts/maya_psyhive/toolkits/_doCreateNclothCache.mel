@@ -11,21 +11,21 @@
 //
 //  Description:
 //      Create Ncloth Disk Cache
-//
+//		
 //
 
 
 proc string getFileDirFlag( string $cacheFile,
-                            string $cacheDirectory )
+							string $cacheDirectory )
 {
-    string $fileDirFlag = ("-fileName \"" + $cacheFile+"\"" );
-    if ($cacheDirectory != "") {
-        $fileDirFlag += (" -directory \""+$cacheDirectory+"\" ");
-    }
-    return $fileDirFlag;
+	string $fileDirFlag = ("-fileName \"" + $cacheFile+"\"" );
+	if ($cacheDirectory != "") {
+		$fileDirFlag += (" -directory \""+$cacheDirectory+"\" ");
+	}
+	return $fileDirFlag;
 }
 
-global proc attachOneCachePerGeometry( string $cacheFiles[],
+global proc PSY_attachOneCachePerGeometry( string $cacheFiles[],
                                 string $objsToCache[],
                                 string $cacheDirectory,
                                 string $replaceMode )
@@ -43,395 +43,395 @@ global proc attachOneCachePerGeometry( string $cacheFiles[],
     // print(" - CACHE DIR "+$cacheDirectory+"\n");
     // print(" - REPLACE MODE "+$replaceMode+"\n");
 
-    int $ii;
-    for ($ii = 0; $ii < size($cacheFiles); $ii++) {
-        string $currObj = $objsToCache[$ii];
-        string $fileDirFlag = getFileDirFlag( $cacheFiles[$ii], $cacheDirectory );
-        $cacheFiles[$ii] = getCacheFilePath( $cacheDirectory, $cacheFiles[$ii] );
-        string $objs[] = { $currObj } ;
-        string $cacheBlend[] = getCacheBlend( $objs, $replaceMode );
+	int $ii;
+	for ($ii = 0; $ii < size($cacheFiles); $ii++) {
+		string $currObj = $objsToCache[$ii];
+		string $fileDirFlag = getFileDirFlag( $cacheFiles[$ii], $cacheDirectory );
+		$cacheFiles[$ii] = getCacheFilePath( $cacheDirectory, $cacheFiles[$ii] );
+		string $objs[] = { $currObj } ;		
+		string $cacheBlend[] = getCacheBlend( $objs, $replaceMode );	
+		
+		string $channels[];
+		string $attributes[];
+		int $useChannels = 1;
 
-        string $channels[];
-        string $attributes[];
-        int $useChannels = 1;
+		if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 2 ){
+			$attributes = { ($currObj+".positions"),($currObj+".velocities"),($currObj+".internalState")  };
+			$channels = { ($currObj+"_positions"), ($currObj+"_velocities"), ($currObj+"_internalState")};
+		} else 	if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
+			$attributes = { ($currObj+".positions"),($currObj+".velocities")  };
+			$channels = { ($currObj+"_positions"), ($currObj+"_velocities")};
+		} else if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` >= 2 ){
+			// the internal state now has twist information
+			$attributes = {($currObj+".hairCounts"),($currObj+".vertexCounts"),
+			       		        ($currObj+".positions"),($currObj+".velocities"),($currObj+".internalState")};
+			$channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"),
+			       		      ($currObj+"_positions"), ($currObj+"_velocities"), ($currObj+"_internalState")};
+		} else if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
+			$attributes = {($currObj+".hairCounts"),($currObj+".vertexCounts"),
+			       		        ($currObj+".positions"),($currObj+".velocities")};
+			$channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"),
+			       		      ($currObj+"_positions"), ($currObj+"_velocities")};
+		} else 	if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` == 0 ){
+			$attributes = {($currObj+".hairCounts") ,($currObj+".vertexCounts"), ($currObj+".positions")};
+			$channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"), ($currObj+"_positions")};
+		} else {
+			$attributes = { ($currObj+".positions") };
+			$useChannels = 0;
+		}
 
-        if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 2 ){
-            $attributes = { ($currObj+".positions"),($currObj+".velocities"),($currObj+".internalState")  };
-            $channels = { ($currObj+"_positions"), ($currObj+"_velocities"), ($currObj+"_internalState")};
-        } else  if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
-            $attributes = { ($currObj+".positions"),($currObj+".velocities")  };
-            $channels = { ($currObj+"_positions"), ($currObj+"_velocities")};
-        } else if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` >= 2 ){
-            // the internal state now has twist information
-            $attributes = {($currObj+".hairCounts"),($currObj+".vertexCounts"),
-                                ($currObj+".positions"),($currObj+".velocities"),($currObj+".internalState")};
-            $channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"),
-                              ($currObj+"_positions"), ($currObj+"_velocities"), ($currObj+"_internalState")};
-        } else if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
-            $attributes = {($currObj+".hairCounts"),($currObj+".vertexCounts"),
-                                ($currObj+".positions"),($currObj+".velocities")};
-            $channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"),
-                              ($currObj+"_positions"), ($currObj+"_velocities")};
-        } else  if(`nodeType $currObj` == "hairSystem" && `getAttr( $currObj + ".cacheableAttributes")` == 0 ){
-            $attributes = {($currObj+".hairCounts") ,($currObj+".vertexCounts"), ($currObj+".positions")};
-            $channels = {($currObj+"_hairCounts"), ($currObj+"_vertexCounts"), ($currObj+"_positions")};
-        } else {
-            $attributes = { ($currObj+".positions") };
-            $useChannels = 0;
-        }
+		if (size($cacheBlend) > 0) {
+			string $createCmd = ("cacheFile -createCacheNode " + $fileDirFlag );
 
-        if (size($cacheBlend) > 0) {
-            string $createCmd = ("cacheFile -createCacheNode " + $fileDirFlag );
-
-            if($useChannels) {
-                for ($obj in $objs) {
-                    $createCmd += (" -cnd \"" + $obj + "\"" );
-                }
-                for ($ch in $channels) {
-                    $createCmd += (" -cnm \"" + $ch + "\"" );
-                }
-            } else {
-                   // in the single channel case, the channels are named by the object
-                for ($obj in $objs) {
-                    $createCmd += (" -cnm \"" + $obj + "\"" );
-                }
-            }
-            string $cacheFile = `eval $createCmd`;
-            doCacheConnect( $cacheBlend[0], $cacheFile, $objs, $channels);
-        } else {
-            if($useChannels) {
-                // multiple channel per object
-                doCacheAttach( $objs, $fileDirFlag, $attributes, $channels);
-            } else {
-                // single channel per object
-                doCacheAttach( $objs, $fileDirFlag, $attributes, $objs);
-            }
-        }
-        // We cannot hide nCloth nodes after caching any more because
-        // they are now displayed for width draw.
-        // hide $objsToCache[$ii];
-    }
+			if($useChannels) {
+				for ($obj in $objs) {
+					$createCmd += (" -cnd \"" + $obj + "\"" );
+				}
+				for ($ch in $channels) {
+					$createCmd += (" -cnm \"" + $ch + "\"" );
+				}
+			} else {
+			       // in the single channel case, the channels are named by the object
+				for ($obj in $objs) {
+					$createCmd += (" -cnm \"" + $obj + "\"" );
+				}
+			}
+			string $cacheFile = `eval $createCmd`;
+			doCacheConnect( $cacheBlend[0], $cacheFile, $objs, $channels);
+		} else {
+			if($useChannels) {
+				// multiple channel per object
+				doCacheAttach( $objs, $fileDirFlag, $attributes, $channels);
+			} else {
+				// single channel per object
+				doCacheAttach( $objs, $fileDirFlag, $attributes, $objs);
+			}
+		}
+		// We cannot hide nCloth nodes after caching any more because
+		// they are now displayed for width draw. 
+		// hide $objsToCache[$ii];
+	}
 }
 
 proc attachOneCache( string $cacheFile,
-                     string $objsToCache[],
-                     string $cacheDirectory,
-                     string $replaceMode )
+					 string $objsToCache[], 
+					 string $cacheDirectory, 
+					 string $replaceMode )
 //
 // This method  is used when the user did not request one file per geometry.
 // In this case, we use a single cacheFile node (and associated xml file)
 // to drive the array passed into this method.
 //
 {
-    string $fileDirFlag = getFileDirFlag( $cacheFile, $cacheDirectory );
-    int $ii, $objCount = size($objsToCache);
-    string $cacheBlend[] = getCacheBlend( $objsToCache, $replaceMode );
-    if (size($cacheBlend) > 0) {
-        string $createCmd = ("cacheFile -createCacheNode " + $fileDirFlag );
-        for ($obj in $objsToCache) {
-            $createCmd += (" -cnm \"" + $obj + "\"" );
-        }
-        string $cacheFileNode = `eval $createCmd`;
-        doCacheConnect($cacheBlend[0],$cacheFileNode,$objsToCache,$objsToCache);
-    } else {
-        string $attrs[];
-        string $channels[];
-        int $ci = 0;
-        // we need a separate channelCount if there is more than one channel per object
-        for( $ii = 0; $ii < $objCount; $ii++ )
-        {
-            string $currObj =  $objsToCache[$ii];
-            if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 2 ){
-                $attrs[$ci] = ($objsToCache[$ii]+".positions");
-                $channels[$ci++] = ($objsToCache[$ii]+"_positions");
-                $attrs[$ci] = ($objsToCache[$ii]+".velocities");
-                $channels[$ci++] = ($objsToCache[$ii]+"_velocities");
-                $attrs[$ci] = ($objsToCache[$ii]+".internalState");
-                $channels[$ci++] = ($objsToCache[$ii]+"_internalState");
-            } else  if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
-                $attrs[$ci] = ($objsToCache[$ii]+".positions");
-                $channels[$ci++] = ($objsToCache[$ii]+"_positions");
-                $attrs[$ci] = ($objsToCache[$ii]+".velocities");
-                $channels[$ci++] = ($objsToCache[$ii]+"_velocities");
-            } else if(`nodeType $currObj` == "hairSystem" ){
-                $attrs[$ci] = ($objsToCache[$ii]+".hairCounts");
-                $channels[$ci++] = ($objsToCache[$ii]+"_hairCounts");
-                $attrs[$ci] = ($objsToCache[$ii]+".vertexCounts");
-                $channels[$ci++] = ($objsToCache[$ii]+"_vertexCounts");
-                $attrs[$ci] = ($objsToCache[$ii]+".positions");
-                $channels[$ci++] = ($objsToCache[$ii]+"_positions");
-                if(`getAttr( $currObj + ".cacheableAttributes")` >= 1 ){
-                    $attrs[$ci] = ($objsToCache[$ii]+".velocities");
-                    $channels[$ci++] = ($objsToCache[$ii]+"_velocities");
-                }
-            } else {
-                $attrs[$ci] = ($objsToCache[$ii]+".positions");
-                $channels[$ci++] = $objsToCache[$ii];
-            }
-        }
-        doCacheAttach($objsToCache,$fileDirFlag,$attrs,$channels);
-    }
+	string $fileDirFlag = getFileDirFlag( $cacheFile, $cacheDirectory );
+	int $ii, $objCount = size($objsToCache);
+	string $cacheBlend[] = getCacheBlend( $objsToCache, $replaceMode );
+	if (size($cacheBlend) > 0) {
+		string $createCmd = ("cacheFile -createCacheNode " + $fileDirFlag );
+		for ($obj in $objsToCache) {
+			$createCmd += (" -cnm \"" + $obj + "\"" );
+		}
+		string $cacheFileNode = `eval $createCmd`;
+		doCacheConnect($cacheBlend[0],$cacheFileNode,$objsToCache,$objsToCache);
+	} else {
+		string $attrs[];
+		string $channels[];
+		int $ci = 0;
+		// we need a separate channelCount if there is more than one channel per object
+		for( $ii = 0; $ii < $objCount; $ii++ ) 
+		{
+			string $currObj =  $objsToCache[$ii];
+			if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 2 ){
+				$attrs[$ci] = ($objsToCache[$ii]+".positions");
+				$channels[$ci++] = ($objsToCache[$ii]+"_positions");
+				$attrs[$ci] = ($objsToCache[$ii]+".velocities");
+				$channels[$ci++] = ($objsToCache[$ii]+"_velocities");
+				$attrs[$ci] = ($objsToCache[$ii]+".internalState");
+				$channels[$ci++] = ($objsToCache[$ii]+"_internalState");
+			} else 	if(`nodeType $currObj` == "nCloth" && `getAttr( $currObj + ".cacheableAttributes")` == 1 ){
+				$attrs[$ci] = ($objsToCache[$ii]+".positions");
+				$channels[$ci++] = ($objsToCache[$ii]+"_positions");
+				$attrs[$ci] = ($objsToCache[$ii]+".velocities");
+				$channels[$ci++] = ($objsToCache[$ii]+"_velocities");
+			} else if(`nodeType $currObj` == "hairSystem" ){
+				$attrs[$ci] = ($objsToCache[$ii]+".hairCounts");
+				$channels[$ci++] = ($objsToCache[$ii]+"_hairCounts");
+				$attrs[$ci] = ($objsToCache[$ii]+".vertexCounts");
+				$channels[$ci++] = ($objsToCache[$ii]+"_vertexCounts");
+				$attrs[$ci] = ($objsToCache[$ii]+".positions");
+				$channels[$ci++] = ($objsToCache[$ii]+"_positions");
+				if(`getAttr( $currObj + ".cacheableAttributes")` >= 1 ){
+					$attrs[$ci] = ($objsToCache[$ii]+".velocities");
+					$channels[$ci++] = ($objsToCache[$ii]+"_velocities");
+				}
+			} else {
+				$attrs[$ci] = ($objsToCache[$ii]+".positions");
+				$channels[$ci++] = $objsToCache[$ii];
+			}
+		}
+		doCacheAttach($objsToCache,$fileDirFlag,$attrs,$channels);
+	}
 }
 
 proc attachCacheGroups( string $cacheFiles[],
-                     string $objsToCache[],
-                     string $cacheDirectory,
-                     string $replaceMode )
+					 string $objsToCache[], 
+					 string $cacheDirectory, 
+					 string $replaceMode )
 {
     // print("ATTACH CACHE GROUPS\n");
     global string $gCacheGroupSeparator;
     string $cacheGroups[] = `getObjectsByCacheGroup($objsToCache)`;
-    if (size($cacheGroups) == size($objsToCache)) {
-        attachOneCache( $cacheFiles[0], $objsToCache,
-                        $cacheDirectory, $replaceMode );
-    } else {
-        int $currGroup = 0;
-        int $nextGroup = getNextCacheGroup($cacheGroups,$currGroup);
-        string $currObjs[];
-        while ($nextGroup > $currGroup) {
-            clear($currObjs);
-            for ($ii = $currGroup; $ii < $nextGroup; $ii++) {
-                if ($cacheGroups[$ii] != $gCacheGroupSeparator) {
-                    $currObjs[size($currObjs)] = $cacheGroups[$ii];
-                }
-            }
-            if (size($currObjs) > 0) {
-                attachOneCache( $cacheFiles[0], $currObjs,
-                                $cacheDirectory, $replaceMode );
-            }
-            $currGroup = $nextGroup;
-            $nextGroup = getNextCacheGroup($cacheGroups,$currGroup);
-        }
-    }
+	if (size($cacheGroups) == size($objsToCache)) {
+		attachOneCache( $cacheFiles[0], $objsToCache, 
+						$cacheDirectory, $replaceMode );
+	} else {
+		int $currGroup = 0;
+		int $nextGroup = getNextCacheGroup($cacheGroups,$currGroup);
+		string $currObjs[];
+		while ($nextGroup > $currGroup) {
+			clear($currObjs);
+			for ($ii = $currGroup; $ii < $nextGroup; $ii++) {
+				if ($cacheGroups[$ii] != $gCacheGroupSeparator) {
+					$currObjs[size($currObjs)] = $cacheGroups[$ii];
+				}
+			}
+			if (size($currObjs) > 0) {
+				attachOneCache( $cacheFiles[0], $currObjs,
+								$cacheDirectory, $replaceMode );
+			}
+			$currGroup = $nextGroup;
+			$nextGroup = getNextCacheGroup($cacheGroups,$currGroup);
+		}
+	}
 }
 
-global proc string[] doCreateNclothCache( int $version, string $args[] )
+global proc string[] PSY_doCreateNclothCache( int $version, string $args[] )
 //
 // Description:
-//  Create cache files on disk for the select ncloth object(s) according
+//	Create cache files on disk for the select ncloth object(s) according
 //  to the specified flags described below.
 //
 // $version == 1:
-//  $args[0] = time range mode:
-//      time range mode = 0 : use $args[1] and $args[2] as start-end
-//      time range mode = 1 : use render globals
-//      time range mode = 2 : use timeline
+//	$args[0] = time range mode:
+//		time range mode = 0 : use $args[1] and $args[2] as start-end
+//		time range mode = 1 : use render globals
+//		time range mode = 2 : use timeline
 //  $args[1] = start frame (if time range mode == 0)
 //  $args[2] = end frame (if time range mode == 0)
 //
-// $version == 2:
+// $version == 2:	
 //  $args[3] = cache file distribution, either "OneFile" or "OneFilePerFrame"
-//  $args[4] = 0/1, whether to refresh during caching
+//	$args[4] = 0/1, whether to refresh during caching
 //  $args[5] = directory for cache files, if "", then use project data dir
-//  $args[6] = 0/1, whether to create a cache per geometry
-//  $args[7] = name of cache file. An empty string can be used to specify that an auto-generated name is acceptable.
-//  $args[8] = 0/1, whether the specified cache name is to be used as a prefix
+//	$args[6] = 0/1, whether to create a cache per geometry
+//	$args[7] = name of cache file. An empty string can be used to specify that an auto-generated name is acceptable.
+//	$args[8] = 0/1, whether the specified cache name is to be used as a prefix
 // $version == 3:
 //  $args[9] = action to perform: "add", "replace", "merge" or "mergeDelete"
 //  $args[10] = force save even if it overwrites existing files
-//  $args[11] = simulation rate, the rate at which the cloth simulation is forced to run
-//  $args[12] = sample mulitplier, the rate at which samples are written, as a multiple of simulation rate.
+//	$args[11] = simulation rate, the rate at which the cloth simulation is forced to run
+//	$args[12] = sample mulitplier, the rate at which samples are written, as a multiple of simulation rate.
 // $version == 4:
-//  $args[13] = 0/1, whether modifications should be inherited from the cache about to be replaced.
-//  $args[14] = 0/1, whether to store doubles as floats
+//	$args[13] = 0/1, whether modifications should be inherited from the cache about to be replaced.
+//	$args[14] = 0/1, whether to store doubles as floats
 // $version == 5:
-//  $args[15] = cache format type: mcc or mcx.
-{
-    string $cacheFiles[];
-    if(( $version > 5 ) || ( size($args) > 16 )) {
-        error( (uiRes("m_doCreateNclothCache.kBadArgsError")));
-        return $cacheFiles;
-    }
+//	$args[15] = cache format type: mcc or mcx.
+{	
+	string $cacheFiles[];
+	if(( $version > 5 ) || ( size($args) > 16 )) {
+		error( (uiRes("m_doCreateNclothCache.kBadArgsError")));
+		return $cacheFiles;
+	}
 
-    string  $cacheDirectory     = "";
-    string  $fileName           = "";
-    int     $useAsPrefix        = 0;
-    int     $perGeometry        = 0;
-    string  $replaceMode        = "replace";
-    int     $force = 0;
-    int     $inherit = 0;
-    int     $doubleToFloat = 0;
-    string $distribution = "OneFilePerFrame";
-
-    int     $rangeMode          = $args[0];
-    float   $diskCacheStartTime = $args[1];
-    float   $diskCacheEndTime   = $args[2];
-    float   $simulationRate     = 1.0;
-    int     $sampleMultiplier   = 1;
-    string  $formatCache        = "mcx";
-
-
-    float  $startTime = $diskCacheStartTime;
-    float  $endTime = $diskCacheEndTime;
-
-    if( $rangeMode == 1 ) {
-        $startTime = `getAttr defaultRenderGlobals.startFrame`;
-        $endTime = `getAttr defaultRenderGlobals.endFrame`;
-    } else if( $rangeMode == 2 ) {
-        $startTime = `playbackOptions -q -min`;
-        $endTime = `playbackOptions -q -max`;
-    }
-
-    if ($version > 1) {
-        $distribution = $args[3];
-        $cacheDirectory = $args[5];
-        $perGeometry = $args[6];
-        $fileName = $args[7];
-        $useAsPrefix = $args[8];
-    }
-
-    if ($version > 2) {
-        $replaceMode = $args[9];
-        $force = $args[10];
-        if (size($args) > 11 ) {
-            $simulationRate = $args[11];
-        }
-        if (size($args) > 12 ) {
-            $sampleMultiplier = $args[12];
-        }
-    }
-    if( $version > 3 ) {
-        $inherit = $args[13];
-        $doubleToFloat = $args[14];
-    }
-
-    if( $version > 4 ) {
-        if (size($args) > 15) {
-            $formatCache = $args[15];
-        }
-    }
-
-    // Call doMergeCache instead since it handles gaps between
-    // caches correctly.
-    if( $replaceMode == "merge" || $replaceMode == "mergeDelete" )
-    {
-        float  $startTime = $args[1];
-        float  $endTime = $args[2];
-        if( $args[0] == 1 ) {
-            $startTime = `getAttr defaultRenderGlobals.startFrame`;
-            $endTime = `getAttr defaultRenderGlobals.endFrame`;
-        } else if( $args[0] == 2 ) {
-            $startTime = `playbackOptions -q -min`;
-            $endTime = `playbackOptions -q -max`;
-        }
-        string $mergeArgs[];
-        $mergeArgs[0] = 1;
-        $mergeArgs[1] = $startTime;
-        $mergeArgs[2] = $endTime;
-        $mergeArgs[3] = $args[3];
-        $mergeArgs[4] = $cacheDirectory;
-        $mergeArgs[5] = $fileName;
-        $mergeArgs[6] = $useAsPrefix;
-        $mergeArgs[7] = $force;
-        $mergeArgs[8] = $simulationRate;
-        $mergeArgs[9] = $sampleMultiplier;
-        $mergeArgs[10] = $replaceMode;
-        $mergeArgs[11] = "ncloth";
-        $mergeArgs[12] = $formatCache;
-        return doMergeCache(2, $mergeArgs);
-    }
-
-    // If we're replacing a cache, and inheriting modifications,
-    // the new cache should have the same translation, scaling
-    // and clipping as the original. So store these values and
-    // set after cache creation.
-    //
-    float $startFrame[] = {};
-    float $sourceStart[] = {};
-    float $sourceEnd[] = {};
-    float $scale[] = {};
-
-    select -d `ls -sl -type cacheFile`;
-    string $objsToCache[] = getNclothObjectsToCache(1);
-
-    if ($replaceMode == "add" ) {
-        if (getCacheCanBeReplaced($objsToCache)) {
-            if ( cacheReplaceNotAdd($objsToCache)) {
-                $replaceMode = "replace";
-            }
-        }
-    }
-
-    string $obj;
-    if ($replaceMode == "replace" ) {
-        if (!getCacheCanBeReplaced($objsToCache)) {
-            return $cacheFiles;
-        }
-
-        if( $inherit ) {
-            string $cache;
-            for( $obj in $objsToCache ) {
-                string $existing[] = findExistingCaches($obj);
-
-                int $index = size($startFrame);
-                $startFrame[$index] = `getAttr ($existing[0]+".startFrame")`;
-                $sourceStart[$index] = `getAttr ($existing[0]+".sourceStart")`;
-                $sourceEnd[$index] = `getAttr ($existing[0]+".sourceEnd")`;
-                $scale[$index] = `getAttr ($existing[0]+".scale")`;
-            }
-        }
-    }
+	string  $cacheDirectory		= "";
+	string	$fileName			= "";
+	int		$useAsPrefix		= 0;
+	int		$perGeometry		= 0;
+	string  $replaceMode        = "replace";
+	int 	$force = 0;
+	int		$inherit = 0;
+	int     $doubleToFloat = 0;
+	string $distribution = "OneFilePerFrame";
+	
+	int 	$rangeMode 			= $args[0];
+	float  	$diskCacheStartTime = $args[1];
+	float  	$diskCacheEndTime   = $args[2];
+	float	$simulationRate		= 1.0;
+	int		$sampleMultiplier	= 1;
+	string  $formatCache        = "mcx";
 
 
-    // If the user has existing cache groups on some of the geometry,
-    // then they cannot attach new caches per geometry.
-    //
+	float  $startTime = $diskCacheStartTime;
+	float  $endTime = $diskCacheEndTime;
+
+	if( $rangeMode == 1 ) {
+        $startTime = `getAttr defaultRenderGlobals.startFrame`; 
+        $endTime = `getAttr defaultRenderGlobals.endFrame`; 
+	} else if( $rangeMode == 2 ) {
+		$startTime = `playbackOptions -q -min`;
+		$endTime = `playbackOptions -q -max`;
+	}
+	
+	if ($version > 1) {
+	    $distribution = $args[3];
+		$cacheDirectory = $args[5];
+		$perGeometry = $args[6];
+		$fileName = $args[7];
+		$useAsPrefix = $args[8];
+	}
+	
+	if ($version > 2) {
+		$replaceMode = $args[9];
+		$force = $args[10];
+		if (size($args) > 11 ) {
+			$simulationRate = $args[11];
+		}
+		if (size($args) > 12 ) {
+			$sampleMultiplier = $args[12];
+		}
+	}
+	if( $version > 3 ) {
+		$inherit = $args[13];
+		$doubleToFloat = $args[14];
+	}
+
+	if( $version > 4 ) {
+		if (size($args) > 15) {
+			$formatCache = $args[15];
+		}
+	}			
+
+	// Call doMergeCache instead since it handles gaps between
+	// caches correctly.
+	if( $replaceMode == "merge" || $replaceMode == "mergeDelete" ) 
+	{
+		float  $startTime = $args[1];
+		float  $endTime = $args[2];
+		if( $args[0] == 1 ) {
+        	$startTime = `getAttr defaultRenderGlobals.startFrame`; 
+        	$endTime = `getAttr defaultRenderGlobals.endFrame`; 
+		} else if( $args[0] == 2 ) {
+			$startTime = `playbackOptions -q -min`;
+			$endTime = `playbackOptions -q -max`;
+		}
+		string $mergeArgs[];
+		$mergeArgs[0] = 1;
+		$mergeArgs[1] = $startTime;
+		$mergeArgs[2] = $endTime;
+		$mergeArgs[3] = $args[3];
+		$mergeArgs[4] = $cacheDirectory;
+		$mergeArgs[5] = $fileName;
+		$mergeArgs[6] = $useAsPrefix;
+		$mergeArgs[7] = $force;
+		$mergeArgs[8] = $simulationRate;
+		$mergeArgs[9] = $sampleMultiplier;
+		$mergeArgs[10] = $replaceMode;
+		$mergeArgs[11] = "ncloth";
+		$mergeArgs[12] = $formatCache;
+		return doMergeCache(2, $mergeArgs);
+	}
+
+	// If we're replacing a cache, and inheriting modifications, 
+	// the new cache should have the same translation, scaling 
+	// and clipping as the original. So store these values and 
+	// set after cache creation.
+	//
+	float $startFrame[] = {};
+	float $sourceStart[] = {};
+	float $sourceEnd[] = {};
+	float $scale[] = {};
+
+	select -d `ls -sl -type cacheFile`;
+	string $objsToCache[] = getNclothObjectsToCache(1);
+
+	if ($replaceMode == "add" ) {
+		if (getCacheCanBeReplaced($objsToCache)) {
+			if ( cacheReplaceNotAdd($objsToCache)) {			
+				$replaceMode = "replace";
+			}
+		}
+	}
+
+	string $obj;
+	if ($replaceMode == "replace" ) {
+		if (!getCacheCanBeReplaced($objsToCache)) {
+			return $cacheFiles;
+		}
+		
+		if( $inherit ) {
+			string $cache;
+			for( $obj in $objsToCache ) {
+				string $existing[] = findExistingCaches($obj);
+
+				int $index = size($startFrame);
+				$startFrame[$index] = `getAttr ($existing[0]+".startFrame")`;
+				$sourceStart[$index] = `getAttr ($existing[0]+".sourceStart")`;
+				$sourceEnd[$index] = `getAttr ($existing[0]+".sourceEnd")`;
+				$scale[$index] = `getAttr ($existing[0]+".scale")`;
+			}
+		}
+	}
+
+
+	// If the user has existing cache groups on some of the geometry,
+	// then they cannot attach new caches per geometry.
+	//
     string $cacheGroups[] = `getObjectsByCacheGroup($objsToCache)`;
-    if (size($cacheGroups) != size($objsToCache)) {
-        $perGeometry = 0;
-        $args[6] = 0; // used below in generating cache file command
-        warning( (uiRes("m_doCreateNclothCache.kIgnoringPerGeometry")) );
-    }
-
-    for( $obj in $objsToCache ) {
-        if(nodeType( $obj ) == "nParticle" ) {
-            $perGeometry = 1;
-            $args[6] = 1;
-            break;
-        }
-    }
-
-    verifyWorkspaceFileRule( "fileCache", "cache/nCache" );
-    // Check if directory has caches that might be overwritten
-    //
-    $cacheDirectory = getCacheDirectory($cacheDirectory, "fileCache",
-                                                $objsToCache, $fileName,
-                                                $useAsPrefix, $perGeometry,
-                                                $replaceMode, $force, 0);
-    if ($cacheDirectory == "") {
-        return $cacheFiles;
-    }
-    else if ($cacheDirectory == "rename") {
-        // must use eval deferred to ensure the hideOptionBox call from
-        // doCreateNclothCache does not close our newly posted option box
-        //
-        string $cmdString = ("performCreateNclothCache 1 "+$replaceMode);
-        evalDeferred($cmdString);
-        error((uiRes("m_doCreateNclothCache.kNameAlreadyInUse")));
-        return $cacheFiles;
-    }
-
-
-    // if we're replacing, delete active caches.
-    //
-    if( $replaceMode == "replace" ) {
-        for( $obj in $objsToCache ) {
-            string $all[] = findExistingCaches($obj);
-            for( $cache in $all) {
-                if( `getAttr ($cache+".enable")`) {
-                    deleteCacheFile(2, {"keep",$cache});
-                }
-            }
-        }
-    }
-
-    // create the cache(s)
-    //
-    if ($replaceMode == "add" || $replaceMode == "replace") {
-        setCacheEnable(0, 1, $objsToCache);
-    }
+	if (size($cacheGroups) != size($objsToCache)) {
+		$perGeometry = 0;
+		$args[6] = 0; // used below in generating cache file command
+		warning( (uiRes("m_doCreateNclothCache.kIgnoringPerGeometry")) );
+	}
+	
+	for( $obj in $objsToCache ) {
+		if(nodeType( $obj ) == "nParticle" ) {
+			$perGeometry = 1;
+			$args[6] = 1;
+			break;
+		}
+	}
+	
+	verifyWorkspaceFileRule( "fileCache", "cache/nCache" );
+	// Check if directory has caches that might be overwritten
+	//
+	$cacheDirectory = getCacheDirectory($cacheDirectory, "fileCache", 
+												$objsToCache, $fileName,
+												$useAsPrefix, $perGeometry,
+												$replaceMode, $force, 0);
+	if ($cacheDirectory == "") {
+		return $cacheFiles;
+	}
+	else if ($cacheDirectory == "rename") {
+		// must use eval deferred to ensure the hideOptionBox call from
+		// doCreateNclothCache does not close our newly posted option box
+		//
+		string $cmdString = ("performCreateNclothCache 1 "+$replaceMode);
+		evalDeferred($cmdString);
+		error((uiRes("m_doCreateNclothCache.kNameAlreadyInUse")));
+		return $cacheFiles;
+	}
 
 
+	// if we're replacing, delete active caches.
+	//
+	if( $replaceMode == "replace" ) {
+		for( $obj in $objsToCache ) {
+			string $all[] = findExistingCaches($obj);
+			for( $cache in $all) {
+				if( `getAttr ($cache+".enable")`) {
+					deleteCacheFile(2, {"keep",$cache});
+				}
+			}
+		}
+	}
+
+	// create the cache(s)
+	//
+	if ($replaceMode == "add" || $replaceMode == "replace") {
+		setCacheEnable(0, 1, $objsToCache);
+	}
+	
+	
 
     // generate the cacheFile command to write the caches
     //
@@ -517,70 +517,69 @@ global proc string[] doCreateNclothCache( int $version, string $args[] )
         }
     }
 
-
     // // attach the caches to the ncloth
     // //
     // print("ATTACHING CACHE\n");
-    // if($useSegmentedCacheFile) {
-    //     if(size($objsToCache) == 1) {
-    //         for($ii=0;$ii<size($cacheFiles);$ii++) {
-    //             string $segmentCacheFile[];
-    //             $segmentCacheFile[0] = $cacheFiles[$ii];
-    //             attachOneCachePerGeometry(  $segmentCacheFile, $objsToCache,
-    //                                 $cacheDirectory, $replaceMode );
-    //         }
-    //     }
-    //     else {
-    //         for($ii=0;$ii<size($cacheFiles);$ii++) {
-    //             string $segmentCacheFile[];
-    //             $segmentCacheFile[0] = $cacheFiles[$ii];
-    //             attachCacheGroups( $segmentCacheFile,$objsToCache,$cacheDirectory,$replaceMode );
-    //         }
-    //     }
+	// if($useSegmentedCacheFile) {
+	//     if(size($objsToCache) == 1) {
+	//         for($ii=0;$ii<size($cacheFiles);$ii++) {
+	//             string $segmentCacheFile[];
+	//             $segmentCacheFile[0] = $cacheFiles[$ii];
+	//             attachOneCachePerGeometry( 	$segmentCacheFile, $objsToCache, 
+	// 								$cacheDirectory, $replaceMode );	            
+	//         }
+	//     }
+	//     else {
+	//         for($ii=0;$ii<size($cacheFiles);$ii++) {
+	//             string $segmentCacheFile[];
+	//             $segmentCacheFile[0] = $cacheFiles[$ii];
+	//             attachCacheGroups( $segmentCacheFile,$objsToCache,$cacheDirectory,$replaceMode );	            
+	//         }	        
+	//     }
+	    
+	// }
+	// if( $perGeometry || size($objsToCache) == 1 ) {
+	// 	attachOneCachePerGeometry( 	$cacheFiles, $objsToCache, 
+	// 								$cacheDirectory, $replaceMode );
+	// } else {
+	// 	if( size($cacheFiles) != 1 ) {
+	// 		error( (uiRes("m_doCreateNclothCache.kInvalidCacheOptions")));
+	// 	}		
+	// 	attachCacheGroups($cacheFiles,$objsToCache,$cacheDirectory,$replaceMode);
+		
+	// }
 
-    // }
-    // if( $perGeometry || size($objsToCache) == 1 ) {
-    //     attachOneCachePerGeometry(  $cacheFiles, $objsToCache,
-    //                                 $cacheDirectory, $replaceMode );
-    // } else {
-    //     if( size($cacheFiles) != 1 ) {
-    //         error( (uiRes("m_doCreateNclothCache.kInvalidCacheOptions")));
-    //     }
-    //     attachCacheGroups($cacheFiles,$objsToCache,$cacheDirectory,$replaceMode);
-
-    // }
-
-    // If we're replacing a cache and inheriting modifications,
-    // restore the translation, scaling, clipping etc.
-    if( $replaceMode == "replace" && $inherit )
-    {
-        int $i = 0;
-        for( $i = 0; $i < size($objsToCache); $i++)
-        {
-            string $cache[] = findExistingCaches($objsToCache[$i]);
+	// If we're replacing a cache and inheriting modifications,
+	// restore the translation, scaling, clipping etc.
+	if( $replaceMode == "replace" && $inherit ) 
+	{
+		int $i = 0;
+		for( $i = 0; $i < size($objsToCache); $i++) 
+		{
+			string $cache[] = findExistingCaches($objsToCache[$i]);
             // print("EXISTING CACHE");
             print($cache);
-            float $sStart = `getAttr ($cache[0]+".sourceStart")`;
-            float $sEnd = `getAttr ($cache[0]+".sourceEnd")`;
-
-            if( $sStart != $sourceStart[$i] &&
-                $sourceStart[$i] >= $sStart &&
-                $sourceStart[$i] <= $sEnd )
-            {
-                cacheClipTrimBefore( $cache[0], $sourceStart[$i] );
-            }
-
-            if( $sEnd != $sourceEnd[$i] &&
-                $sourceEnd[$i] >= $sStart &&
-                $sourceEnd[$i] <= $sEnd )
-            {
-                cacheClipTrimAfter( $cache[0], $sourceEnd[$i] );
-            }
-
-            setAttr ($cache[0] + ".startFrame") $startFrame[$i];
-            setAttr ($cache[0] + ".scale") $scale[$i];
-        }
-    }
-    select -r $objsToCache;
-    return $cacheFiles;
+			float $sStart = `getAttr ($cache[0]+".sourceStart")`;
+			float $sEnd = `getAttr ($cache[0]+".sourceEnd")`;
+			
+			if( $sStart != $sourceStart[$i] &&
+				$sourceStart[$i] >= $sStart &&
+				$sourceStart[$i] <= $sEnd )
+			{
+				cacheClipTrimBefore( $cache[0], $sourceStart[$i] );
+			}
+			
+			if( $sEnd != $sourceEnd[$i] &&
+				$sourceEnd[$i] >= $sStart &&
+				$sourceEnd[$i] <= $sEnd )
+			{
+				cacheClipTrimAfter( $cache[0], $sourceEnd[$i] );
+			}
+			
+			setAttr ($cache[0] + ".startFrame") $startFrame[$i];
+			setAttr ($cache[0] + ".scale") $scale[$i];
+		}
+	}
+	select -r $objsToCache;
+	return $cacheFiles;
 }

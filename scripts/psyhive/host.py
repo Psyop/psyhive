@@ -64,18 +64,18 @@ def cur_scene():
     return _cur_scene
 
 
-def open_scene(file_):
+def open_scene(file_, force=False):
     """Open the given scene file.
 
     A warning is raised if the current scene has been modified.
 
     Args:
         file_ (str): file to open
+        force (bool): lose current scene with no warning
     """
-    from psyhive import qt
-    from psyhive import icons
+    from psyhive import qt, icons
 
-    if _scene_modified():
+    if not force and _scene_modified():
         _result = qt.raise_dialog(
             'Save changes to current scene?\n\n{}'.format(file_),
             title='Save changes',

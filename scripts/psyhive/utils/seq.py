@@ -205,7 +205,7 @@ class Seq(object):
             viewer (str): viewer to use
         """
         _viewer = viewer or os.environ.get('VIEWER', 'rv')
-        if _viewer == 'djv_viewer':
+        if _viewer == 'djv_view':
             _path = self.path.replace("%04d", "#")
             system('djv_view {}'.format(_path), verbose=1, result=False)
         elif _viewer == 'rv':

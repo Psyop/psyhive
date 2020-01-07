@@ -1,3 +1,32 @@
+#### v0.55.0 ####
+
+    Released: Tue 7th Jan 2020
+
+    Tank Support: added support for shade aiStandIn in publish/assetmanager [
+    TOOLS-207],
+    Blast and Cache tool: bugfix overriding default maya cache behaviour [TOOLS-209],
+    
+    maya_psyhive:
+        shows.clashroyaleholi moved code to maya_psyhive.tank_support,
+        tank_support added with aiStandIn publish/assetmanager tools,
+        tex find_shd/read_shd added allow_base flag,
+        toolkits.tech_anim.blast_and_cache added PSY_ prefix to mel fn overrides + reverted reformatting,
+        tools.misc_tank_app deprecated,
+        utils.mel_ added,
+        utils.save_as added export_selection/force flags,
+    psyhive:
+        open_scene added force flag,
+        qt.PixmapUi pixmap stored as attr (not local),
+        refresh.get_mod_sort ignore name as prefix if in order,
+        tk/tk2 replace sgtk import with tank,
+        tk2 added find_tank_app/find_tank_mod/restart_tank,
+        tk2 fixed references to tk,
+        tk2.find_tank_mod added safe flag,
+        tk2.restart_tank force asset manager mods load + bugfix old tk/psy mods left in sys.modules,
+        tools.hive_bro cleaned output context menus,
+        utils.File.delete added wording flag,
+
+
 #### v0.54.1 ####
 
     Released: Fri 13th Dec 2019

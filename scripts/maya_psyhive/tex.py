@@ -17,7 +17,6 @@ class _BaseShader(object):
     """Base class for any shader."""
 
     col_attr = None
-    out_col_attr = None
     _se = None
 
     def __init__(self, shd):
@@ -27,6 +26,7 @@ class _BaseShader(object):
             shd (str): shader node (eg. lambert1)
         """
         self.shd = hom.HFnDependencyNode(shd)
+        self.out_col_attr = self.shd.plug('outColor')
 
     def apply_texture(self, path):
         """Apply a texture file to this shader's main col attr.
@@ -163,7 +163,6 @@ class _AiAmbientOcclusion(_BaseShader):
         super(_AiAmbientOcclusion, self).__init__(shd)
         self.col_attr = self.shd.plug('white')
         self.white = self.col_attr
-        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _AiStandardSurface(_BaseShader):
@@ -177,7 +176,6 @@ class _AiStandardSurface(_BaseShader):
         """
         super(_AiStandardSurface, self).__init__(shd)
         self.col_attr = self.shd.plug('baseColor')
-        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _Blinn(_BaseShader):
@@ -191,7 +189,6 @@ class _Blinn(_BaseShader):
         """
         super(_Blinn, self).__init__(shd)
         self.col_attr = self.shd.plug('color')
-        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _Lambert(_BaseShader):
@@ -205,7 +202,6 @@ class _Lambert(_BaseShader):
         """
         super(_Lambert, self).__init__(shd)
         self.col_attr = self.shd.plug('color')
-        self.out_col_attr = self.shd.plug('outColor')
 
 
 class _SurfaceShader(_BaseShader):
@@ -219,7 +215,6 @@ class _SurfaceShader(_BaseShader):
         """
         super(_SurfaceShader, self).__init__(shd)
         self.col_attr = self.shd+'.outColor'
-        self.out_col_attr = self.shd+'.outColor'
 
 
 def ai_ambient_occlusion(name='aiAmbientOcclusion'):
@@ -325,29 +320,39 @@ def connect_place_2d(node_, place=None):
     return _place
 
 
-def find_shd(shd, catch=False):
+def find_shd(shd, catch=False, allow_base=False):
     """Build shader object from the given node name.
 
     Args:
         shd (str): node to search for
         catch (bool): no error if fail to build shader object
+        allow_base (bool): return BaseShader objects for unhandled shaders
 
     Returns:
-        (_BaseShader): shader object
+        (BaseShader): shader object
     """
     _type = cmds.objectType(shd)
+
+    # Match to handled shaders
+    _shd = None
     if _type == 'lambert':
-        return _Lambert(shd)
+        _shd = _Lambert(shd)
     elif _type == 'aiAmbientOcclusion':
-        return _AiAmbientOcclusion(shd)
+        _shd = _AiAmbientOcclusion(shd)
     elif _type == 'aiStandardSurface':
-        return _AiStandardSurface(shd)
+        _shd = _AiStandardSurface(shd)
     elif _type == 'surfaceShader':
-        return _SurfaceShader(shd)
+        _shd = _SurfaceShader(shd)
     elif _type == 'blinn':
-        return _Blinn(shd)
+        _shd = _Blinn(shd)
+    if _shd:
+        return _shd
+
+    if allow_base:
+        return _BaseShader(shd)
     if catch:
         return None
+
     raise ValueError(_type)
 
 
@@ -368,11 +373,12 @@ def lambert(name='lambert', col=None):
     return _shd
 
 
-def read_shd(shp, verbose=1):
+def read_shd(shp, allow_base=False, verbose=1):
     """Read shader from the given geo shape node.
 
     Args:
         shp (str): shape node to read
+        allow_base (bool): return BaseShader objects for unhandled shaders
         verbose (int): print process data
 
     Returns:
@@ -391,7 +397,7 @@ def read_shd(shp, verbose=1):
         _se+'.surfaceShader', destination=False), catch=True)
     if not _shd:
         return None
-    _shd = find_shd(_shd)
+    _shd = find_shd(_shd, allow_base=allow_base)
     _shd.set_se(hom.HFnDependencyNode(_se))
     return _shd
 

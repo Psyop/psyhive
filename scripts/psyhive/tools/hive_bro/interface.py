@@ -439,7 +439,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             'Set comment', _set_comment_fn, icon=icons.EDIT)
 
         # Add output options
-        self._add_work_ctx_files(work=work, menu=menu)
+        self._add_work_ctx_output_files(work=work, menu=menu)
 
         # Add increments
         _incs = work.find_increments()
@@ -453,7 +453,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         else:
             menu.add_label('No increments found')
 
-    def _add_work_ctx_files(self, work, menu):
+    def _add_work_ctx_output_files(self, work, menu):
         """Add work file output context options.
 
         Args:
@@ -470,35 +470,52 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
 
         menu.add_label("Outputs")
 
+        # Show individual files if small number
+        if len(_files) < 10:
+            for _file in _files:
+                self._add_work_ctx_output_file(menu=menu, file_=_file)
+            return
+
         # Organise into names
         _names = sorted(set([_file.output_name for _file in _files]))
         for _name in _names:
             _name_files = [_file for _file in _files
                            if _file.output_name == _name]
             if len(_name_files) == 1:
-                _file = get_single(_name_files)
-                self._add_work_ctx_file(menu=menu, file_=_file)
-
+                self._add_work_ctx_output_file(
+                    menu=menu, file_=get_single(_name_files))
             else:
-                _file = _name_files[0]
-                _label = _output_to_label(_file)
-                _icon = _output_to_icon(_file)
-                _name_menu = menu.add_menu(_label, icon=_icon)
-                for _file in _name_files:
-                    _label = '{} ({})'.format(_file.channel, _file.format)
-                    self._add_work_ctx_file(
-                        menu=_name_menu, file_=_file, label=_label)
+                self._add_work_ctx_output_name(
+                    menu=menu, name=_name, files=_name_files)
 
-    def _add_work_ctx_file(self, menu, file_, label=None):
+    def _add_work_ctx_output_name(self, menu, name, files):
+        """Add work context options for the given output name.
+
+        Args:
+            menu (QMenu): menu to add options to
+            name (TTOutputName): name to add options for
+            files (TTOutputFile): files in name
+        """
+        _label = name.output_type
+        _icon = _output_to_icon(name)
+        _name_menu = menu.add_menu(_label, icon=_icon)
+
+        for _file in files:
+            self._add_work_ctx_output_file(
+                menu=_name_menu, file_=_file)
+
+    def _add_work_ctx_output_file(self, menu, file_):
         """Add work file context options for the given output.
 
         Args:
             menu (QMenu): menu to add to
             file_ (TTOutputFile): output file to add options for
-            label (str): override menu label
         """
+        if file_.channel:
+            _label = '{} ({})'.format(file_.channel, file_.format)
+        else:
+            _label = '{}/{}'.format(file_.format, file_.extn)
         _icon = _output_to_icon(file_)
-        _label = label or _output_to_label(file_)
         _menu = menu.add_menu(_label, icon=_icon)
         _add_path_menu_items(menu=_menu, obj=file_)
 
@@ -680,7 +697,7 @@ def _get_work_label(work):
     if work.shot:
         _label = '{}/{}/{}'.format(work.shot, work.step, work.task)
     else:
-        _label = 'assets/{}/{}'.format(work.step, work.task)
+        _label = '{}/{}/{}'.format(work.asset, work.step, work.task)
     return _label
 
 
@@ -723,19 +740,6 @@ def _get_work_text(work, data):
     return _text
 
 
-def _output_to_label(output):
-    """Get menu label for the given output.
-
-    Args:
-        output (TTOutput): output to read
-
-    Returns:
-        (str): label
-    """
-    return '{} ({}/{})'.format(
-        output.output_name, output.output_type, output.format)
-
-
 @store_result
 def _output_to_icon(output):
     """Get icon for the given output.
@@ -746,32 +750,24 @@ def _output_to_icon(output):
     Returns:
         (str): path to icon
     """
-    return icons.EMOJI.find({
-        'fxcache': 'Collision',
-        'capture': 'Play Button',
-        'render': 'Play Button',
-        'animcache': 'Money Bag',
-        'camcache': 'Money Bag',
-    }.get(output.output_type, 'Blue Circle'))
+    _name = None
+    if hasattr(output, 'extn'):
+        if output.extn == 'abc':
+            _name = 'Input Latin Letters'
+        elif output.extn in ['ma', 'mb']:
+            _name = 'Moai'
 
+    if not _name:
+        _name = {
+            'fxcache': 'Collision',
+            'capture': 'Play Button',
+            'render': 'Play Button',
+            'animcache': 'Money Bag',
+            'camcache': 'Movie Camera',
+            'shadegeo': 'Bust in Silhouette',
+        }.get(output.output_type, 'Blue Circle')
 
-# def _read_asset_work_files(path):
-#     """Read asset work files in the given path.
-
-#     Args:
-#         path (str): dir to read
-
-#     Returns:
-#         (TTWork list): work files
-#     """
-#     _works = []
-#     for _file in find(path, type_='f', depth=3):
-#         try:
-#             _work = tk2.TTMayaAssetWork(_file)
-#         except ValueError:
-#             continue
-#         _works.append(_work)
-#     return _works
+    return icons.EMOJI.find(_name)
 
 
 def _set_work_comment(ver, parent):
@@ -788,8 +784,11 @@ def _set_work_comment(ver, parent):
     ver.set_comment(_comment)
 
 
-def get_recent_work():
+def get_recent_work(verbose=0):
     """Read list of recent work file from tank.
+
+    Args:
+        verbose (int): print process data
 
     Returns:
         (TTWork list): list of work files
@@ -798,7 +797,9 @@ def get_recent_work():
     _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
     _works = []
     for _file in _settings.value(_setting_name, []):
-        _work = tk2.obtain_work(_file['file_path'])
+        _path = abs_path(_file['file_path'])
+        lprint('TESTING', _path, verbose=verbose)
+        _work = tk2.obtain_work(_path)
         if not _work:
             continue
         if not _work.dcc == _cur_dcc():

@@ -59,10 +59,10 @@ class PixmapUi(QtWidgets.QDialog):
     def redraw(self):
         """Redraw interface."""
         _size = self.size()
-        _pix = HPixmap(_size)
-        _pix.fill(self.base_col)
-        self.update_pixmap(_pix)
-        self._label.setPixmap(_pix)
+        self._pixmap = HPixmap(_size)
+        self._pixmap.fill(self.base_col)
+        self.update_pixmap(self._pixmap)
+        self._label.setPixmap(self._pixmap)
 
     def update_pixmap(self, pix):
         """Update interface pixmap.

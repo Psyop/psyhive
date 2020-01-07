@@ -1,6 +1,8 @@
 """Tools for managing tank."""
 
-from psyhive.tk2.tk_utils import reference_publish, get_current_engine
+from psyhive.tk2.tk_utils import (
+    reference_publish, get_current_engine, find_tank_app,
+    find_tank_mod, restart_tank)
 from psyhive.tk2.tk_sg import get_project_sg_data, get_shot_sg_data
 
 from psyhive.tk2.tk_templates import (

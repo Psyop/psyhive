@@ -7,7 +7,6 @@ import shutil
 import tempfile
 import time
 
-import sgtk
 import tank
 
 from psyhive import host, qt
@@ -428,7 +427,7 @@ class TTWorkFileBase(TTBase, File):
 
         # Make sure outputpaths app is loaded
         _engine = tank.platform.current_engine()
-        _tk = sgtk.Sgtk(self.path)
+        _tk = tank.Sgtk(self.path)
         _ctx = _tk.context_from_path(self.path)
         try:
             _engine.change_context(_ctx)

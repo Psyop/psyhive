@@ -4,11 +4,11 @@ import functools
 import os
 import traceback
 
-from maya import cmds
+from maya import cmds, mel
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint, test_path
+from psyhive.utils import get_single, lprint, File, abs_path
 
 COLS = (
     "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
@@ -527,6 +527,20 @@ def load_plugin(plugin, verbose=0):
         lprint('ALREADY LOADED:', plugin, verbose=verbose)
 
 
+def mel_(cmd, verbose=1):
+    """Execute mel and print the code being executed.
+
+    Args:
+        cmd (str): mel command to execute
+        verbose (int): print process data
+
+    Returns:
+        (str): mel result
+    """
+    lprint(cmd, verbose=verbose)
+    return mel.eval(cmd)
+
+
 def multiply_node(input1, input2, output, force=False, name='multiply'):
     """Create a multiply node and use it to perform attr maths.
 
@@ -568,19 +582,32 @@ def restore_sel(func):
     return _restore_sel_fn
 
 
-def save_as(file_, revert_filename=True):
+def save_as(file_, revert_filename=True, export_selection=False, force=False):
     """Save the current scene at the given path without changing cur filename.
 
     Args:
         file_ (str): path to save file to
         revert_filename (bool): disable revert filename
+        export_selection (bool): export selected nodes
+        force (bool): overwrite with no confirmation
     """
-    test_path(os.path.dirname(file_))
-    _filename = cmds.file(query=True, location=True)
-    cmds.file(rename=file_)
-    cmds.file(save=True)
+    _cur_filename = cmds.file(query=True, location=True)
+
+    # Test file paths
+    _file = File(abs_path(file_))
+    _file.parent().test_path()
+    _file.delete(wording='replace existing', force=force)
+
+    # Execute save
+    cmds.file(rename=_file.path)
+    _kwargs = {
+        'save' if not export_selection else 'exportSelected': True,
+        'type': {'ma': 'mayaAscii', 'mb': 'mayaBinary'}[_file.extn]}
+    print 'KWARGS', _kwargs
+    cmds.file(**_kwargs)
+
     if revert_filename:
-        cmds.file(rename=_filename)
+        cmds.file(rename=_cur_filename)
 
 
 def set_col(node, col):

@@ -195,6 +195,7 @@ class TTOutput(TTDirBase):
 
     hint_fmt = '{area}_output'
 
+    format = None
     output_name = None
     version = None
 
