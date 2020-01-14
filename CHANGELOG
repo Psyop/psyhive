@@ -1,3 +1,13 @@
+#### v0.56.1 ####
+
+    Released: Tue 14th Jan 2020
+
+    Shot Builder [TOOLS-154]: bugfix error on no update applied,
+    
+    maya_psyhive:
+        tools.m_shot_builder bugfix error on no update applied,
+
+
 #### v0.56.0 ####
 
     Released: Tue 14th Jan 2020

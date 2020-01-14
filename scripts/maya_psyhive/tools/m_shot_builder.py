@@ -69,7 +69,7 @@ def _update_assets(verbose=0):
             _status = 'updated'
         else:
             _status = 'no update needed'
-        print ' - {:25} {:20} {}'.format(_ref.namespace, _status, _latest.path)
+        print ' - {:25} {:20} {}'.format(_ref.namespace, _status, _ref.path)
     print
 
 
