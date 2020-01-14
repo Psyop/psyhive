@@ -2,10 +2,12 @@
 
 from maya import cmds
 
-from psyhive import host, py_gui
+from psyhive import host, py_gui, tk2, pipe
 from psyhive.utils import File, get_single
+
 from maya_psyhive import ui
 from maya_psyhive import open_maya as hom
+from maya_psyhive.tools import m_shot_builder
 
 LABEL = "Clash Short"
 
@@ -112,6 +114,51 @@ def fix_vdb_shaders():
         print _vdb, _sg
         _sg.plug('surfaceShader').break_connections()
         assert not _sg.plug('surfaceShader').list_connections()
+
+
+py_gui.set_section('Shot Builder', collapse=False)
+
+
+def _get_shot_names():
+    """Get list of shot names in the current show.
+
+    Returns:
+        (str list): list of shot names
+    """
+    return [_shot.name for _shot in tk2.find_shots()]
+
+
+def _get_default_browser_dir():
+    """Get default directory for work file browser.
+
+    Returns:
+        (str): path to default browser dir
+    """
+    _cur_work = tk2.cur_work()
+    if _cur_work:
+        return _cur_work.dir
+
+    return pipe.cur_project().path
+
+
+@py_gui.install_gui(
+    browser={'template': py_gui.BrowserLauncher(
+        get_default_dir=_get_default_browser_dir, title='Select template')},
+    update={'shot': _get_shot_names})
+def build_shot(template='', shot=''):
+    """Build shot scene file from template scene.
+
+    The template scene file is opened, all asset references are updated to
+    the latest version, then all abcs are updated to the new shot - or
+    removed if there is no publish in the new shot.
+
+    Args:
+        template (str): path to template scene
+        shot (str): name of shot to update template to
+    """
+    host.new_scene()
+    m_shot_builder.build_shot_from_template(
+        template=template, shot=shot, force=True)
 
 
 py_gui.set_section('Dev')

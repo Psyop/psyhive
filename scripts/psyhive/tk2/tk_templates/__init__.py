@@ -1,6 +1,7 @@
 """Tools for managing tank template representations."""
 
-from psyhive.tk2.tk_templates.tt_base import TTSequenceRoot, TTRoot, TTStepRoot
+from psyhive.tk2.tk_templates.tt_base import (
+    TTSequenceRoot, TTRoot, TTStepRoot, TTShot)
 from psyhive.tk2.tk_templates.tt_work import TTWorkArea, TTWork, TTIncrement
 from psyhive.tk2.tk_templates.tt_output import (
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,

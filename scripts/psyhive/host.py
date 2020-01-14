@@ -33,6 +33,7 @@ else:
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
     _force_open_scene = lambda file_: cmds.file(file_, open=True, force=True)
+    _force_new_scene = wrap_fn(cmds.file, new=True, force=True)
     refresh = cmds.refresh
     reference_scene = ref.create_ref
     save_scene = wrap_fn(cmds.file, save=True)
@@ -64,6 +65,32 @@ def cur_scene():
     return _cur_scene
 
 
+def _handle_unsaved_changes():
+    """Handle unsaved changes in the current scene.
+
+    If there are unsaved changes, offer to save or ignore them.
+    """
+    from psyhive import qt, icons
+
+    _msg = 'Save changes to current scene?'
+
+    _cur_scene = cur_scene()
+    if _cur_scene:
+        _msg += '\n\n{}'.format(_cur_scene)
+
+    _result = qt.raise_dialog(
+        _msg,
+        title='Save changes',
+        buttons=["Save", "Don't Save", "Cancel"],
+        icon=icons.EMOJI.find('Octopus'))
+    if _result == "Save":
+        save_scene()
+    elif _result == "Don't Save":
+        pass
+    else:
+        raise ValueError(_result)
+
+
 def open_scene(file_, force=False):
     """Open the given scene file.
 
@@ -73,22 +100,22 @@ def open_scene(file_, force=False):
         file_ (str): file to open
         force (bool): lose current scene with no warning
     """
-    from psyhive import qt, icons
-
     if not force and _scene_modified():
-        _result = qt.raise_dialog(
-            'Save changes to current scene?\n\n{}'.format(file_),
-            title='Save changes',
-            buttons=["Save", "Don't Save", "Cancel"],
-            icon=icons.EMOJI.find('Octopus'))
-        if _result == "Save":
-            save_scene()
-        elif _result == "Don't Save":
-            pass
-        else:
-            raise ValueError(_result)
-
+        _handle_unsaved_changes()
     _force_open_scene(file_)
+
+
+def new_scene(force=False):
+    """Create a new scene.
+
+    A warning is raised if the current scene has been modified.
+
+    Args:
+        force (bool): lose current scene with no warning
+    """
+    if not force and _scene_modified():
+        _handle_unsaved_changes()
+    _force_new_scene()
 
 
 def set_range(start, end):

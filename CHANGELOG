@@ -1,3 +1,32 @@
+#### v0.56.0 ####
+
+    Released: Tue 14th Jan 2020
+
+    Shot Builder [TOOLS-154]: 
+        added to clash short shows menu,
+        added 3D/<project> as qube cluster requirement,
+    
+    maya_psyhive:
+        open_maya.base_node.find_connected type_ as first arg,
+        ref.swap_to better error message on maya command error,
+        shows.clashshortfilm.build_shot added,
+        tools.m_shot_builder updated to use tk2,
+        tools.m_shot_builder catch error on sg range is None,
+    psyhive:
+        farm.MayaPyJob added cluster as 3D/<project>,
+        host.new_scene added,
+        qt.get_size allow single int arg for square,
+        qt.PixmapUi added parent arg,
+        qt.HPixmap.add_text bugfix error on non-string passed,
+        qt.HPixmap.whiten maintains alpha,
+        qt.HPixmap._get_rect added R/TR anchor handling,
+        tk2 added get_asset_sg_data/get_root_sg_data,
+        tk2.TTShot added with get_frame_range,
+        tk2._TTOutputFileBase added with find_latest/is_latest,
+        tk2.reference_publish updates tank reference list,
+        chain_fns added handling for builtin method,
+
+
 #### v0.55.0 ####
 
     Released: Tue 7th Jan 2020

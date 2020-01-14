@@ -11,7 +11,7 @@ class PixmapUi(QtWidgets.QDialog):
     """Base class for an interface with just an updating pixmap."""
 
     def __init__(self, size=(640, 640), base_col='red', fps=None, title=None,
-                 mouse_tracking=False):
+                 mouse_tracking=False, parent=None):
         """Constructor.
 
         Args:
@@ -20,7 +20,9 @@ class PixmapUi(QtWidgets.QDialog):
             fps (float): frame rate (if declared timer is started)
             title (str): interface title
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
+            parent (QDialog): parent dialog
         """
+        self.base_col = base_col
 
         # Remove any existing intefaces
         _dialog_stack_key = type(self).__name__
@@ -28,8 +30,11 @@ class PixmapUi(QtWidgets.QDialog):
             sys.QT_DIALOG_STACK[_dialog_stack_key].deleteLater()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
-        super(PixmapUi, self).__init__()
-        self.base_col = base_col
+        # Init base class
+        _kwargs = {}
+        if parent:
+            _kwargs['parent'] = parent
+        super(PixmapUi, self).__init__(**_kwargs)
 
         # Set up interface/label
         self.setWindowTitle(title or type(self).__name__.strip('_'))

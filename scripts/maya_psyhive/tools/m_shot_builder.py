@@ -2,7 +2,7 @@
 
 from maya import cmds
 
-from psyhive import tk, host, qt
+from psyhive import tk2, host, qt
 from psyhive.utils import dprint, lprint
 from maya_psyhive import open_maya as hom
 from maya_psyhive import ref
@@ -16,10 +16,10 @@ def build_shot_from_template(shot, template, force=False):
         template (str): path to template work file
         force (bool): force save new scene with no confirmation
     """
-    _shot = tk.find_shot(shot)
-    _tmpl_work = tk.get_work(template)
-    if not host.cur_scene() == _tmpl_work.path:
-        _tmpl_work.load()
+    _shot = tk2.find_shot(shot)
+    _tmpl_work = tk2.get_work(template)
+    if host.cur_scene() != _tmpl_work.path:
+        _tmpl_work.load(force=force)
 
     # Make sure we're on default render layer
     cmds.editRenderLayerGlobals(currentRenderLayer='defaultRenderLayer')
@@ -30,7 +30,10 @@ def build_shot_from_template(shot, template, force=False):
     # Update frame range
     _rng = _shot.get_frame_range()
     print 'RANGE', _rng
-    host.set_range(*_rng)
+    if _rng and _rng != (None, None):
+        host.set_range(*_rng)
+    else:
+        print 'FAILED TO UPDATE TIMELINE'
 
     # Save scene
     _shot_work = _tmpl_work.map_to(
@@ -51,12 +54,14 @@ def _update_assets(verbose=0):
     for _ref in qt.progress_bar(ref.find_refs(), 'Updating {:d} asset{}'):
 
         # Find asset
-        _asset = tk.get_output(_ref.path)
+        _asset = tk2.TTOutputFile(_ref.path)
         if not _asset:
             continue
 
         # Make sure asset is latest
         if not _asset.is_latest():
+            lprint(' - CURRENT FILE: {}'.format(_asset.path),
+                   verbose=verbose)
             _latest = _asset.find_latest()
             lprint(' - UPDATING TO LATEST: {}'.format(_latest.path),
                    verbose=verbose)
@@ -64,7 +69,7 @@ def _update_assets(verbose=0):
             _status = 'updated'
         else:
             _status = 'no update needed'
-        print ' - {:25} {:20} {}'.format(_ref.namespace, _status, _asset.path)
+        print ' - {:25} {:20} {}'.format(_ref.namespace, _status, _latest.path)
     print
 
 
@@ -75,8 +80,8 @@ def _update_abcs(shot='rnd0080', verbose=0):
         shot (str): name of shot to update to (eg. rnd0080)
         verbose (int): print process data
     """
-
     dprint('CHECKING ABCS')
+
     _refs_to_remove = set()
     for _exo in qt.progress_bar(
             hom.CMDS.ls(type='ExocortexAlembicFile'), 'Updating {:d} abc{}'):
@@ -111,18 +116,17 @@ def _update_abc(exo, shot, verbose=0):
         if exo.namespace else None)
     lprint(' - REF', _ref, verbose=verbose)
     _tmpl_abc = exo.plug('fileName').get_val()
-    _tmpl_output = tk.get_output(_tmpl_abc)
+    _tmpl_output = tk2.TTOutputFile(_tmpl_abc)
     if not _tmpl_output or not _tmpl_output.shot:
         lprint(' - NO OUTPUT FOUND', exo, _tmpl_abc, verbose=verbose)
         return 'off pipeline', None
-    if _tmpl_output.shot.name == shot:
+    if tk2.TTRoot(_tmpl_output.path).name == shot:
         lprint(' - NO UPDATE NEEDED', _tmpl_abc, verbose=verbose)
         return 'no update needed', None
 
     # Map to this shot
     lprint(' - TMPL ABC', _tmpl_abc, verbose=verbose)
-    _shot_output = _tmpl_output.map_to(
-        type(_tmpl_output), Shot=shot)
+    _shot_output = _tmpl_output.map_to(Shot=shot)
     try:
         _shot_output = _shot_output.find_latest()
     except OSError:

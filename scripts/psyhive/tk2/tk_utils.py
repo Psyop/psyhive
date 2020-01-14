@@ -98,15 +98,14 @@ def reference_publish(file_, verbose=0):
         file_ (str): path to reference
         verbose (int): print process data
     """
-    from psyhive import tk2
 
     # Find ref util module
-    _mgr = tk2.find_tank_app('assetmanager')
-    _ref_util = tk2.find_tank_mod(
+    _mgr = find_tank_app('assetmanager')
+    _ref_util = find_tank_mod(
         'tk_multi_assetmanager.reference_util', catch=True)
     if not _ref_util:
         _mgr.init_app()
-        _ref_util = tk2.find_tank_mod(
+        _ref_util = find_tank_mod(
             'tk_multi_assetmanager.reference_util')
     lprint('REF UTIL', _ref_util, verbose=verbose)
 
@@ -117,6 +116,7 @@ def reference_publish(file_, verbose=0):
 
     _ref = _ref_util.reference_publish(_publish)
     lprint('REF', _ref, verbose=verbose)
+    _ref_list.update()
 
     return _ref[0]
 

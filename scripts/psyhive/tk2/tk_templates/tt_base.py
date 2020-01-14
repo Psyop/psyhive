@@ -18,6 +18,7 @@ from psyhive.tk2.tk_utils import get_current_engine
 class TTBase(Path):
     """Base class for any tank template object."""
 
+    asset = None
     shot = None
     step = None
     hint = None
@@ -141,8 +142,7 @@ class TTSequenceRoot(TTDirBase):
             (TTRoot list): list of shots
         """
         _shots = []
-        _class = class_ or TTRoot
-        for _shot in self._read_shots():
+        for _shot in self._read_shots(class_=class_):
             if filter_ and not passes_filter(_shot.name, filter_):
                 continue
             _shots.append(_shot)
@@ -162,7 +162,7 @@ class TTSequenceRoot(TTDirBase):
         Returns:
             (TTRoot list): list of shots
         """
-        _class = class_ or TTRoot
+        _class = class_ or TTShot
         return self.find(depth=1, class_=_class)
 
 
@@ -237,6 +237,27 @@ class TTRoot(TTDirBase):
         """
         _class = class_ or TTStepRoot
         return self.find(depth=1, type_='d', class_=_class)
+
+
+class TTShot(TTRoot):
+    """Represents a shot folder."""
+
+    def get_frame_range(self):
+        """Read shot frame range from shotgun.
+
+        Returns:
+            (tuple): start/end frames
+        """
+        from psyhive import tk2
+        _shotgun = tank.platform.current_engine().shotgun
+        _fields = ["sg_head_in", "sg_tail_out"]
+        _sg_data = _shotgun.find_one(
+            "Shot", filters=[
+                ["project", "is", [tk2.get_project_sg_data(self.project)]],
+                ["code", "is", self.name],
+            ],
+            fields=_fields)
+        return tuple([_sg_data[_field] for _field in _fields])
 
 
 class TTStepRoot(TTDirBase):

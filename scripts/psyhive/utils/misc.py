@@ -50,8 +50,10 @@ def chain_fns(*args):
     def _get_chained_fn(args):
 
         # Catch args not funcs
+        _fn_types = (types.FunctionType, types.MethodType,
+                     types.BuiltinMethodType)
         for _arg in args:
-            if not isinstance(_arg, (types.FunctionType, types.MethodType)):
+            if not isinstance(_arg, _fn_types):
                 raise TypeError('Arg is not function - {}'.format(_arg))
 
         def _chained_fn(*xargs):

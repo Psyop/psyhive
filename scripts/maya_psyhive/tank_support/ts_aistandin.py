@@ -369,13 +369,14 @@ def _revert_scene(func):
 
     @functools.wraps(func)
     def _revert_scene_fn(*args, **kwargs):
-        _cur_file = cmds.file(query=True, location=True)
+        _cur_file = host.cur_scene()
         _tmp_file = abs_path('{}/_psyhive_tmp.mb'.format(
             tempfile.gettempdir()))
         host.save_as(_tmp_file, force=True)
         _result = func(*args, **kwargs)
         host.open_scene(_tmp_file, force=True)
-        cmds.file(rename=_cur_file)
+        if _cur_file:
+            cmds.file(rename=_cur_file)
         return _result
 
     return _revert_scene_fn

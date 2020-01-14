@@ -30,6 +30,24 @@ def _get_shot_sg_name(name):
 
 
 @store_result
+def get_asset_sg_data(asset):
+    """Get shotgun data for the given asset.
+
+    Args:
+        asset (TTRoot): asset to retrieve data for
+
+    Returns:
+        (dict): asset shotgun data
+    """
+    _data = get_single(tank.platform.current_engine().shotgun.find(
+        'Asset', filters=[
+            ["project", "is", [get_project_sg_data(asset.project)]],
+            ["code", "is", asset.asset],
+        ]))
+    return _data
+
+
+@store_result
 def get_project_sg_data(project=None):
     """Get tank request data for the given project.
 
@@ -44,6 +62,22 @@ def get_project_sg_data(project=None):
         "Project", filters=[["name", "is", _project.name]])
     _id = get_single(_data)['id']
     return {'type': 'Project', 'id': _id, 'name': _project.name}
+
+
+def get_root_sg_data(root):
+    """Get shotgun data for the given tank template root object.
+
+    Args:
+        root (TTRoot): root object to read
+
+    Returns:
+        (dict): shotgun data
+    """
+    if root.shot:
+        return get_shot_sg_data(root)
+    elif root.asset:
+        return get_asset_sg_data(root)
+    raise ValueError(root)
 
 
 @store_result

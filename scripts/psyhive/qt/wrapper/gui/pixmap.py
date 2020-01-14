@@ -370,7 +370,7 @@ class HPixmap(QtGui.QPixmap):
 
         if not isinstance(text, six.string_types):
             raise TypeError("Bad text type {} ({})".format(
-                text, type(text).__name___))
+                text, type(text).__name__))
 
         _pnt = HPainter()
         _pnt.begin(self)
@@ -533,6 +533,7 @@ class HPixmap(QtGui.QPixmap):
         _tmp = HPixmap(self.size())
         _fill = qt.HColor(255, 255, 255, 255*factor)
         _tmp.fill(_fill)
+        _tmp.setMask(self.mask())
         self.add_overlay(_tmp, operation='over')
         return self
 
@@ -551,13 +552,18 @@ def _get_rect(anchor, pos, size):
     from psyhive import qt
 
     _size = qt.get_size(size)
+    _pos = qt.get_p(pos)
     if anchor == 'C':
-        _pos = pos - qt.get_p(_size)/2
+        _root = _pos - qt.get_p(_size)/2
     elif anchor == 'L':
-        _pos = pos - qt.get_p(0, _size.height()/2)
+        _root = _pos - qt.get_p(0, _size.height()/2)
+    elif anchor == 'R':
+        _root = _pos - qt.get_p(_size.width(), _size.height()/2)
     elif anchor == 'TL':
-        _pos = qt.get_p(pos)
+        _root = _pos
+    elif anchor == 'TR':
+        _root = _pos - qt.get_p(_size.width(), 0)
     else:
         raise ValueError(anchor)
 
-    return QtCore.QRect(_pos, _size)
+    return QtCore.QRect(_root, _size)

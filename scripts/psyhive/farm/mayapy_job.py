@@ -79,6 +79,7 @@ class MayaPyJob(object):
         _job.payload = {
             'app_version': _get_app_version(),
             'py_dir': _tmp_dir}
+        _job.extra['qube.cluster'] = "/3D/{}".format(pipe.cur_project().name)
 
         # Setup job for local execute
         if _local:

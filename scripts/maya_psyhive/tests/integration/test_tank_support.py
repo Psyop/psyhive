@@ -4,7 +4,7 @@ import unittest
 from maya import cmds
 from pymel.core import nodetypes as nt
 
-from psyhive import tk
+from psyhive import tk2
 from psyhive.utils import File
 
 from maya_psyhive import ref
@@ -92,9 +92,11 @@ class TestTankSupport(unittest.TestCase):
         _dialog.close()
 
     def test_restore_image_plane(self):
+
+        # Test restore via psyhive
         _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
                  'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
-        _work = tk.get_work(_path)
+        _work = tk2.TTWork(_path)
         _ref = ref.obtain_ref(file_=_work.path, namespace='restoreTest')
         assert not cmds.ls(type='imagePlane')
         for _path, _time_ctrl in [
@@ -114,6 +116,12 @@ class TestTankSupport(unittest.TestCase):
             tank_support.restore_img_plane(
                 time_control=str(_time_ctrl), abc=_path)
         assert cmds.ls(type='imagePlane')
+
+        # Test restore via asset manager
+        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                 'animation/output/camcache/fishTest_renderCam/v001/'
+                 'alembic/dev0000_fishTest_renderCam_v001.abc')
+        tk2.reference_publish(_path)
 
     def test_shade_geo_from_rig(self):
 
@@ -140,7 +148,7 @@ class TestTankSupport(unittest.TestCase):
             'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
             'dev0000_imagePlaneTest_renderCam_v047.abc')
-        _abc = tk.get_output(_abc_path).find_latest()
+        _abc = tk2.TTOutputFile(_abc_path).find_latest()
         _presets = [
             '{}/{}'.format(_abc.parent().path, _filename)
             for _filename in ['camera.preset', 'imagePlane.preset']]

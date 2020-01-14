@@ -105,6 +105,8 @@ def get_size(*args):
             return QtCore.QSize(_size[0], _size[1])
         elif isinstance(_size, six.string_types):
             return QtCore.QSize(*[int(_token) for _token in _size.split('x')])
+        elif isinstance(_size, int):
+            return QtCore.QSize(_size, _size)
     elif len(args) == 2:
         return QtCore.QSize(*args)
     raise ValueError(args)

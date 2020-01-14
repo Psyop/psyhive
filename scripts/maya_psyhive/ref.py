@@ -178,9 +178,14 @@ class FileRef(object):
         """
         if not os.path.exists(file_):
             raise OSError("Missing file: {}".format(file_))
-        cmds.file(
-            file_, loadReference=self.ref_node, ignoreVersion=True,
-            options="v=0", force=True)
+        try:
+            cmds.file(
+                file_, loadReference=self.ref_node, ignoreVersion=True,
+                options="v=0", force=True)
+        except RuntimeError as _exc:
+            if _exc.message == 'Maya command error':
+                raise RuntimeError('Maya errored on opening file '+file_)
+            raise _exc
 
     def __cmp__(self, other):
         return cmp(self.ref_node, other.ref_node)

@@ -139,13 +139,13 @@ class BaseNode(object):
             _children = [class_(_child) for _child in _children]
         return _children
 
-    def find_connected(self, depth=1, type_=None, filter_=None,
+    def find_connected(self, type_=None, depth=1, filter_=None,
                        source=True, destination=True, verbose=0):
         """Recursively traverse connected nodes in graph.
 
         Args:
-            depth (int): traversal depth
             type_ (str): filter by node type
+            depth (int): traversal depth
             filter_ (str): filter by node name
             source (bool): traverse upstream nodes
             destination (bool): traverse downstream nodes
