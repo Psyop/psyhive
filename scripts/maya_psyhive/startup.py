@@ -69,7 +69,7 @@ def _add_show_toolkits(parent):
         _mod = _file.get_module()
         _rand = str_to_seed(_file.basename)
         _icon = getattr(_mod, 'ICON', _rand.choice(icons.ANIMALS))
-        _label = getattr(_mod, 'LABEL', _file.basename)
+        _label = getattr(_mod, 'LABEL', to_nice(_file.basename))
         _title = '{} tools'.format(_label)
         _cmd = '\n'.join([
             'import {py_gui} as py_gui',

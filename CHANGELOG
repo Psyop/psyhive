@@ -1,3 +1,17 @@
+#### v0.57.0 ####
+
+    Released: Tue 14th Jan 2020
+
+    Frasier: added tool to install Hardsuit-Labs tools,
+    
+    maya_psyhive:
+        shows.frasier added with hsl tools setup,
+        startup._add_show_toolkits better default menu item label,
+    psyhive:
+        host.get_main_window_ptr added,
+        tk2.reference_publish catch assetmanager has missing modules,
+
+
 #### v0.56.1 ####
 
     Released: Tue 14th Jan 2020

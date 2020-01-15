@@ -3,5 +3,6 @@ ignore:
     hv_test/diary/y19/d0405/nelio_fk_ik.py
     hv_test/diary/y19/d1105/_quest_tools
     hv_test/diary/y19/d1105/_quest_clean
+    hv_test/diary/y20/d0109/qtreeview_tests.py
     maya_psyhive/tools/oculus_quest
     maya_psyhive/toolkits/_doCreateNclothCache.mel

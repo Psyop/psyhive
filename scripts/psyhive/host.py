@@ -18,6 +18,10 @@ def _get_cur_scene():
     """None if no dcc."""
 
 
+def get_main_window_ptr():
+    """None if no dcc."""
+
+
 def refresh():
     """Refresh current dcc interface."""
 
@@ -27,7 +31,7 @@ try:
 except ImportError:
     pass
 else:
-    from maya_psyhive import ref
+    from maya_psyhive import ref, ui
     from maya_psyhive.utils import get_fps, save_as
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
@@ -42,6 +46,7 @@ else:
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
     set_start = wrap_fn(cmds.playbackOptions, arg_to_kwarg='minTime')
     set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
+    get_main_window_ptr = ui.get_main_window_ptr
 
 
 try:

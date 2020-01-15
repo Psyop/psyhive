@@ -104,9 +104,8 @@ def reference_publish(file_, verbose=0):
     _ref_util = find_tank_mod(
         'tk_multi_assetmanager.reference_util', catch=True)
     if not _ref_util:
-        _mgr.init_app()
-        _ref_util = find_tank_mod(
-            'tk_multi_assetmanager.reference_util')
+        _init_tank()
+        _ref_util = find_tank_mod('tk_multi_assetmanager.reference_util')
     lprint('REF UTIL', _ref_util, verbose=verbose)
 
     _ref_list = _mgr.reference_list
@@ -121,6 +120,16 @@ def reference_publish(file_, verbose=0):
     return _ref[0]
 
 
+def _init_tank():
+    """Initiate tank for psyhive.
+
+    This makes sure any modules used by psyhive are imported.
+    """
+    _ass_mgr = find_tank_app('assetmanager')
+    _ass_mgr.init_app()
+    _ass_mgr.publish_directory.publish_from_path('asdadasd')
+
+
 def restart_tank(force=True, verbose=0):
     """Restart shotgun toolkit (and remove unused modules).
 
@@ -131,12 +140,7 @@ def restart_tank(force=True, verbose=0):
     _start = time.time()
 
     tank.platform.restart()
-
-    # Make sure asset manager mods loaded
-    _ass_mgr = find_tank_app('assetmanager')
-    _ass_mgr.init_app()
-    _ass_mgr.publish_directory.publish_from_path('asdadasd')
-
+    _init_tank()
     _clean_leftover_modules(force=force, verbose=verbose)
 
     dprint("RESTARTED TANK ({:.02f}s)".format(time.time() - _start))

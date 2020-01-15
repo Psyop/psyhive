@@ -39,6 +39,7 @@ ignore:
     import-error:
         hv_test/diary/
         hv-test/python/hv_test/startup.py
+        psyhive/scripts/maya_psyhive/shows/frasier.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
