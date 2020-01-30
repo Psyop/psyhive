@@ -57,7 +57,8 @@ class BasePyGui(object):
         self.ui_name = self.mod_name.replace(".", "_")+"_ui"
         self.settings_file = abs_path(
             '{}/Psyop/settings/py_gui/{}.yml'.format(
-                os.environ['HOME'], self.mod_name.replace('.', '_')))
+                os.environ.get('HOME') or os.environ.get('HOMEDRIVE'),
+                self.mod_name.replace('.', '_')))
 
         # Read attrs from module
         self.icon_set = getattr(_mod, 'PYGUI_ICON_SET', icons.FRUIT)
@@ -274,7 +275,7 @@ class BasePyGui(object):
         _settings = read_yaml(self.settings_file)
         lprint('LOADING', _settings, verbose=verbose)
         for _attr, _attr_settings in _settings.items():
-            print 'APPLING', _attr
+            lprint('APPLING', _attr, verbose=verbose)
             for _name, _settings in _attr_settings.items():
                 lprint(' - NAME', _name, verbose=verbose)
                 for _arg_name, _val in _settings.items():

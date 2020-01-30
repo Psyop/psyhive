@@ -23,7 +23,10 @@ class Project(Dir):
         Raises:
             (ValueError): if path was not in projects root
         """
-        _tokens = Dir(PROJECTS_ROOT).rel_path(path).split('/')
+        try:
+            _tokens = Dir(PROJECTS_ROOT).rel_path(path).split('/')
+        except ValueError:
+            raise ValueError('Not in projects root '+path)
         _path = '/'.join([PROJECTS_ROOT, _tokens[0]])
 
         super(Project, self).__init__(_path)

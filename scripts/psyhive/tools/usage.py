@@ -9,7 +9,7 @@ import platform
 import time
 
 from psyhive import host
-from psyhive.utils import dprint
+from psyhive.utils import dprint, dev_mode
 
 _ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
 _ES_DATA_TYPE = 'data'
@@ -76,8 +76,8 @@ def _write_usage_to_kibana(name=None, catch=True, args=None, verbose=0):
         verbose (int): print process data
     """
 
-    # Don't track farm usage
-    if os.environ.get('USER') == 'render':
+    # Don't track farm/dev usage
+    if os.environ.get('USER') == 'render' or dev_mode():
         return
 
     try:

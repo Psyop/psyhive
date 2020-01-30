@@ -49,13 +49,22 @@ else:
     get_main_window_ptr = ui.get_main_window_ptr
 
 
-try:
-    import hou
-except ImportError:
-    pass
-else:
-    NAME = 'hou'
-    _get_cur_scene = hou.hipFile.name
+if not NAME:
+    try:
+        import hou
+    except ImportError:
+        pass
+    else:
+        NAME = 'hou'
+        _get_cur_scene = hou.hipFile.name
+
+if not NAME:
+    try:
+        import unreal
+    except ImportError:
+        pass
+    else:
+        NAME = 'unreal'
 
 
 def cur_scene():

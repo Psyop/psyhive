@@ -17,7 +17,7 @@ from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode,
     read_file)
 
-from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore
+from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore, Qt
 from psyhive.qt.wrapper.widgets import HMenu
 from psyhive.qt.misc import get_pixmap, get_icon, get_p
 
@@ -33,7 +33,8 @@ class HUiDialog(QtWidgets.QDialog):
     def __init__(
             self, ui_file, catch_error_=True, track_usage_=True,
             dialog_stack_key=None, connect_widgets=True, show=True,
-            parent=None, save_settings=True, localise_imgs=False, verbose=0):
+            parent=None, save_settings=True, localise_imgs=False,
+            disable_btns_on_exec=True, verbose=0):
         """Constructor.
 
         Args:
@@ -46,6 +47,9 @@ class HUiDialog(QtWidgets.QDialog):
             parent (QDialog): parent dialog
             save_settings (bool): read/write settings on open/close
             localise_imgs (bool): map images to match current pipeline
+            disable_btns_on_exec (bool): disable push buttons while
+                they are being executed - can interfere with
+                enabling/disabling buttons on the fly
             verbose (int): print process data
         """
         from psyhive import host
@@ -61,6 +65,8 @@ class HUiDialog(QtWidgets.QDialog):
 
         _args = [parent] if parent else []
         super(HUiDialog, self).__init__(*_args)
+        # _parent = parent or host.get_main_window_ptr()
+        # super(HUiDialog, self).__init__(_parent)
 
         # Load ui file
         _loader = get_ui_loader()
@@ -89,7 +95,7 @@ class HUiDialog(QtWidgets.QDialog):
         if connect_widgets:
             self.connect_widgets(
                 catch_error_=catch_error_, track_usage_=track_usage_,
-                verbose=verbose)
+                disable_btns_on_exec=disable_btns_on_exec, verbose=verbose)
 
         # Handle settings
         if save_settings:
@@ -121,8 +127,9 @@ class HUiDialog(QtWidgets.QDialog):
             _result = QtWidgets.QDialog.closeEvent(self, event)
 
         if hasattr(self, 'write_settings'):
+            lprint(' - WRITING SETTINGS', verbose=verbose)
             try:
-                self.write_settings()
+                self.write_settings(verbose=verbose-1)
             except RuntimeError:
                 pass
 
@@ -177,7 +184,8 @@ class HUiDialog(QtWidgets.QDialog):
         self.show()
 
     def connect_widgets(
-            self, catch_error_=False, track_usage_=True, verbose=0):
+            self, catch_error_=False, track_usage_=True,
+            disable_btns_on_exec=True, verbose=0):
         """Connect widgets with redraw/callback methods.
 
         Only widgets with override types are linked.
@@ -185,6 +193,9 @@ class HUiDialog(QtWidgets.QDialog):
         Args:
             catch_error_ (bool): apply catch error decorator to callbacks
             track_usage_ (bool): apply track usage decorator to callbacks
+            disable_btns_on_exec (bool): disable push buttons while
+                they are being executed - can interfere with
+                enabling/disabling buttons on the fly
             verbose (int): print process data
         """
         for _widget in self.widgets:
@@ -203,8 +214,9 @@ class HUiDialog(QtWidgets.QDialog):
                         from psyhive.tools import get_error_catcher
                         _catcher = get_error_catcher(exit_on_error=False)
                         _callback = _catcher(_callback)
-                    _callback = _disable_while_executing(
-                        func=_callback, btn=_widget)
+                    if disable_btns_on_exec:
+                        _callback = _disable_while_executing(
+                            func=_callback, btn=_widget)
                 _callback = wrap_fn(_callback)  # To lose args from hook
                 lprint(' - CONNECTING', _widget, verbose=verbose)
                 for _hook_name in [
@@ -221,7 +233,7 @@ class HUiDialog(QtWidgets.QDialog):
             if _context:
                 _widget.customContextMenuRequested.connect(
                     _build_context_fn(_context, widget=_widget))
-                _widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+                _widget.setContextMenuPolicy(Qt.CustomContextMenu)
 
             # Connect redraw callback
             _redraw = getattr(self, '_redraw__'+_name, None)
@@ -276,11 +288,11 @@ class HUiDialog(QtWidgets.QDialog):
         _pos = self.settings.value('window/pos')
         if _pos:
             lprint(' - APPLYING POS', _pos, verbose=verbose)
-            self.ui.move(_pos)
+            self.move(_pos)
         _size = self.settings.value('window/size')
         if _size:
             lprint(' - APPLYING SIZE', _size, verbose=verbose)
-            self.ui.resize(_size)
+            self.resize(_size)
 
         # Apply widget settings
         for _widget in self.widgets:
@@ -312,10 +324,12 @@ class HUiDialog(QtWidgets.QDialog):
                     print ' - FAILED TO APPLY TAB', _val
             elif isinstance(_widget, QtWidgets.QSplitter):
                 _val = [int(_item) for _item in _val]
-                print 'SET SIZE', _val
+                lprint('SET SPLITTER SIZE', _val, verbose=verbose)
                 _widget.setSizes(_val)
             else:
-                raise ValueError(_widget)
+                print 'WIDGET', _widget
+                raise ValueError(
+                    'Error reading settings '+self.settings.fileName())
 
     def read_widgets(self):
         """Read widgets with overidden types from ui object."""

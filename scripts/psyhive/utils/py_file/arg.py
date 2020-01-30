@@ -5,11 +5,13 @@ import ast
 from psyhive.utils.misc import safe_zip, get_single
 
 
-def _read_ast_default(default):
+def _read_ast_default(default, safe=True):
     """Read default value of the given ast.Default object.
 
     Args:
         default (ast.Default): ast default object
+        safe (bool): if safe is disabled, None will be returned
+            if the default cannot be determined
     """
     if isinstance(default, ast.Num):
         _default = default.n
@@ -25,7 +27,11 @@ def _read_ast_default(default):
         elif default.id == 'str':
             _default = str
         else:
-            raise ValueError(default.id)
+            if not safe:
+                _default = None
+            else:
+                print 'UNABLE TO DETERMINE DEFAULT', default
+                raise ValueError(default.id)
     elif default is None:
         _default = None
     elif isinstance(default, ast.Tuple):
@@ -64,7 +70,7 @@ class PyArg(object):
         self._ast = ast_
         self._ast_default = default
         self.name = self._ast.id
-        self.default = _read_ast_default(self._ast_default)
+        self.default = _read_ast_default(self._ast_default, safe=False)
         self.type_ = None if self.default is None else type(self.default)
         self.def_ = def_
 

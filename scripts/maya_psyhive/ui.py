@@ -5,6 +5,7 @@ import tempfile
 from maya import cmds, mel, OpenMayaUI
 
 from psyhive import qt, icons
+from psyhive.qt import QtWidgets
 from psyhive.utils import lprint, store_result
 
 
@@ -161,8 +162,9 @@ def get_main_window_ptr():
         (QWidget): wrapped instance
     """
     import shiboken2
+    qt.get_application()  # Make sure there is QApplication
     _maya_win = OpenMayaUI.MQtUtil.mainWindow()
-    return shiboken2.wrapInstance(long(_maya_win), qt.QtWidgets.QWidget)
+    return shiboken2.wrapInstance(long(_maya_win), QtWidgets.QWidget)
 
 
 def obtain_menu(name, replace=False, verbose=0):

@@ -21,7 +21,7 @@ class PyClass(PyBase):
         _docs = ast.get_docstring(self._ast)
         if not _docs:
             raise MissingDocs('No class docs')
-        if not _docs.endswith('.'):
+        if not _docs.split('\n')[0].endswith('.'):
             raise MissingDocs('No trailing period')
 
     def get_docs_suggestion(self, verbose=0):

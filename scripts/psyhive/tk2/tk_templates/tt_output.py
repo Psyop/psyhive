@@ -333,17 +333,18 @@ class TTOutputFile(_TTOutputFileBase, File):
 
     hint_fmt = '{area}_output_file'
 
-    def __init__(self, file_):
+    def __init__(self, file_, verbose=0):
         """Constructor.
 
         Args:
             file_ (str): path to output file
+            verbose (int): print process data
         """
         File.__init__(self, file_)
         _path = abs_path(file_)
         _area = get_area(_path)
         _hint = self.hint_fmt.format(area=_area)
-        super(TTOutputFile, self).__init__(file_, hint=_hint)
+        super(TTOutputFile, self).__init__(file_, hint=_hint, verbose=verbose)
 
 
 class TTOutputFileSeq(_TTOutputFileBase, Seq):

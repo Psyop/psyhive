@@ -1517,12 +1517,6 @@ def _maya_main_window():
     raise RuntimeError('Could not find MayaWindow instance')
 
 
-# def get_main_window():
-#     ptr = OpenMayaUI.MQtUtil.mainWindow()
-#     main_win = QtCompat.wrapInstance(long(ptr))
-#     return main_win
-
-
 def launch():
     preset_name = "default"
     image_format = "png"

@@ -19,6 +19,8 @@ class TTBase(Path):
     """Base class for any tank template object."""
 
     asset = None
+    sg_asset_type = None
+    sequence = None
     shot = None
     step = None
     hint = None

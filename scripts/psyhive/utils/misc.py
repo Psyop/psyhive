@@ -342,7 +342,8 @@ def str_to_seed(string, offset=0):
         (random.Random): seeded random object
     """
     _random = random.Random()
-    assert isinstance(string, six.string_types)
+    if not isinstance(string, six.string_types):
+        raise ValueError('Not string {} ({})'.format(string, type(string)))
     _total = offset
     for _idx, _chr in enumerate(string):
         _random.seed(ord(_chr)*(_idx+1))

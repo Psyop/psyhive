@@ -1,5 +1,7 @@
 """Qt widget overrides."""
 
+import six
+
 from psyhive.utils import lprint
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, Qt
@@ -349,6 +351,37 @@ class HTreeWidget(QtWidgets.QTreeWidget):
         self.itemCollapsed.connect(self._collapse_callback)
         self.itemExpanded.connect(self._expand_callback)
 
+    def all_items(self):
+        """Get all items in the tree.
+
+        Returns:
+            (QTreeListWidget list): all items
+        """
+
+        def _get_child_items(parent):
+            _items = []
+            for _idx in range(parent.childCount()):
+                _item = parent.child(_idx)
+                _items.append(_item)
+                _items += _get_child_items(_item)
+            return _items
+
+        _items = []
+        for _idx in range(self.topLevelItemCount()):
+            _item = self.topLevelItem(_idx)
+            _items.append(_item)
+            _items += _get_child_items(_item)
+
+        return _items
+
+    def selected_items(self):
+        """Get a list of all selected items in the tree.
+
+        Returns:
+            (QTreeListWidget list): selected items
+        """
+        return [_item for _item in self.all_items() if _item.isSelected()]
+
     def _collapse_callback(self, item):
         """Callback to apply recursive collapse.
 
@@ -379,7 +412,7 @@ class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
     _col = None
 
-    def __init__(self, text, col=None, data=None):
+    def __init__(self, text=None, col=None, data=None):
         """Constructor.
 
         Args:
@@ -389,7 +422,10 @@ class HTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self._col = col or self._col
         super(HTreeWidgetItem, self).__init__()
-        self.setText(0, text)
+
+        if text and isinstance(text, six.string_types):
+            self.setText(0, text)
+
         if self._col:
             _brush = QtGui.QBrush(get_col(self._col))
             self.setForeground(0, _brush)

@@ -220,16 +220,21 @@ class File(Path):
         """
         return File('{}/{}.{}'.format(self.dir, self.basename, extn))
 
-    def copy_to(self, file_):
+    def copy_to(self, file_, diff_=False):
         """Copy this file to another location.
 
         Args:
             file_ (str): target path
+            diff_ (bool): show diffs before copying files
         """
         from psyhive import qt
         test_path(os.path.dirname(file_))
         if os.path.exists(file_):
-            qt.ok_cancel("Replace existing file?\n\n"+file_)
+            if diff_:
+                self.diff(file_)
+            _result = qt.yes_no_cancel("Replace existing file?\n\n"+file_)
+            if _result == 'No':
+                return
         shutil.copy(self.path, file_)
 
     def delete(self, force=False, wording='delete'):
@@ -367,7 +372,9 @@ def abs_path(path, win=False, root=None, verbose=0):
 
     # Handle relative paths
     if _path.startswith('~/'):
-        _path = '{}/{}'.format(os.environ['HOME'], _path[2:])
+        _path = '{}/{}'.format(
+            os.environ.get('HOME') or os.environ['HOMEDRIVE'],
+            _path[2:])
     elif not (
             _path.startswith('/') or
             (len(_path) >= 2 and _path[1] == ':')):
@@ -729,6 +736,9 @@ def read_yaml(file_):
 
     Args:
         file_ (str): path to read
+
+    Returns:
+        (any): yaml data
     """
     import yaml
     if not os.path.exists(file_):
