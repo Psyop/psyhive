@@ -1,7 +1,5 @@
 """Tools for building a py_gui using maya.cmds interface tools."""
 
-import os
-
 from maya import cmds
 
 from psyhive import icons, qt, refresh
@@ -305,18 +303,7 @@ class MayaPyGui(pyg_base.BasePyGui):
         Args:
             verbose (int): print process data
         """
-
-        # Save settings if required
-        _save_on_close = cmds.menuItem(
-            self._save_on_close, query=True, checkBox=True)
-        lprint(
-            'CLOSING {} save_on_close={:d}'.format(self, _save_on_close),
-            verbose=verbose)
-        if _save_on_close:
-            self.save_settings()
-        elif os.path.exists(self.settings_file):
-            print 'REMOVING SETTINGS FILE', self.settings_file
-            os.remove(self.settings_file)
+        self.save_settings()
 
     def finalise_ui(self):
         """Finalise interface."""
@@ -407,7 +394,7 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
             label (str): override interface label
             command (str): override button command
         """
-        self._file = File(abs_path(mod.__file__))
+        self._file = File(abs_path(mod.__file__.replace('.pyc', '.py')))
         self.label = label or getattr(
             mod, 'PYGUI_TITLE', to_nice(self._file.basename))
         self.image = image

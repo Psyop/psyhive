@@ -28,4 +28,4 @@ from psyhive.qt.progress import ProgressBar, progress_bar
 from psyhive.qt.input_ import read_input
 from psyhive.qt.multi_select_ import multi_select
 
-from psyhive.qt.pixmap_ui import PixmapUi
+from psyhive.qt.pixmap_ui import HPixmapUi

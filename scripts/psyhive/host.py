@@ -32,7 +32,7 @@ except ImportError:
     pass
 else:
     from maya_psyhive import ref, ui
-    from maya_psyhive.utils import get_fps, save_as
+    from maya_psyhive.utils import get_fps, save_as, save_scene
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
@@ -40,7 +40,6 @@ else:
     _force_new_scene = wrap_fn(cmds.file, new=True, force=True)
     refresh = cmds.refresh
     reference_scene = ref.create_ref
-    save_scene = wrap_fn(cmds.file, save=True)
     _scene_modified = wrap_fn(cmds.file, query=True, modified=True)
     t_start = wrap_fn(cmds.playbackOptions, query=True, minTime=True)
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
@@ -105,18 +104,20 @@ def _handle_unsaved_changes():
         raise ValueError(_result)
 
 
-def open_scene(file_, force=False):
+def open_scene(file_, func=None, force=False):
     """Open the given scene file.
 
     A warning is raised if the current scene has been modified.
 
     Args:
         file_ (str): file to open
+        func (fn): override save function
         force (bool): lose current scene with no warning
     """
     if not force and _scene_modified():
         _handle_unsaved_changes()
-    _force_open_scene(file_)
+    _func = func or wrap_fn(_force_open_scene, file_)
+    _func()
 
 
 def new_scene(force=False):

@@ -7,7 +7,7 @@ from psyhive.qt.interface import safe_timer_event
 from psyhive.qt.misc import get_size
 
 
-class PixmapUi(QtWidgets.QDialog):
+class HPixmapUi(QtWidgets.QDialog):
     """Base class for an interface with just an updating pixmap."""
 
     def __init__(self, size=(640, 640), base_col='red', fps=None, title=None,
@@ -34,7 +34,7 @@ class PixmapUi(QtWidgets.QDialog):
         _kwargs = {}
         if parent:
             _kwargs['parent'] = parent
-        super(PixmapUi, self).__init__(**_kwargs)
+        super(HPixmapUi, self).__init__(**_kwargs)
 
         # Set up interface/label
         self.setWindowTitle(title or type(self).__name__.strip('_'))
@@ -82,7 +82,7 @@ class PixmapUi(QtWidgets.QDialog):
         Args:
             event (QEvent): resize event
         """
-        super(PixmapUi, self).resizeEvent(event)
+        super(HPixmapUi, self).resizeEvent(event)
         self._label.resize(self.size())
         self.redraw()
 
@@ -93,5 +93,5 @@ class PixmapUi(QtWidgets.QDialog):
         Args:
             event (QEvent): timer event
         """
-        super(PixmapUi, self).timerEvent(event)
+        super(HPixmapUi, self).timerEvent(event)
         self.redraw()

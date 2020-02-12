@@ -20,6 +20,4 @@ ignore:
     E722:  # Bare except
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     W605:  # Redundant escape char
-        hv_test/diary/y19/d0528/bro_tools_tests.py
-        hv_test/diary/y19/d0717/make_littlezoo_zip.py
-        hv_test/diary/y19/d1111/bro_tools_tests.py
+        hv_test/diary

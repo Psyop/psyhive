@@ -330,6 +330,7 @@ class BasePyGui(object):
 
     def rebuild(self):
         """Rebuild this interface."""
+        self.save_settings()
         _class_name = self.__class__.__name__
         _mod_name = self.__class__.__module__
         _class = getattr(sys.modules[_mod_name], _class_name)

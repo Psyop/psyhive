@@ -86,7 +86,7 @@ def _write_usage_to_kibana(name=None, catch=True, args=None, verbose=0):
         return
 
     _start = time.time()
-    _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m.%d')
+    _index_name = 'psyhive-'+datetime.datetime.utcnow().strftime('%Y.%m')
     _usage = _build_usage_dict(name=name, args=args)
 
     if verbose > 1:

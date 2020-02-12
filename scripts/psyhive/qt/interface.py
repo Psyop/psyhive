@@ -65,8 +65,6 @@ class HUiDialog(QtWidgets.QDialog):
 
         _args = [parent] if parent else []
         super(HUiDialog, self).__init__(*_args)
-        # _parent = parent or host.get_main_window_ptr()
-        # super(HUiDialog, self).__init__(_parent)
 
         # Load ui file
         _loader = get_ui_loader()
@@ -129,7 +127,7 @@ class HUiDialog(QtWidgets.QDialog):
         if hasattr(self, 'write_settings'):
             lprint(' - WRITING SETTINGS', verbose=verbose)
             try:
-                self.write_settings(verbose=verbose-1)
+                self.write_settings(verbose=max(verbose-1, 0))
             except RuntimeError:
                 pass
 

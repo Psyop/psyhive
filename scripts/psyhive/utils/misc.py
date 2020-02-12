@@ -97,9 +97,18 @@ def copy_text(text, verbose=1):
         lprint("[copied]", text, verbose=verbose)
 
 
-def dev_mode():
-    """Test whether dev mode env var is set."""
-    return bool(os.environ.get('PSYOP_DEV'))
+def dev_mode(verbose=0):
+    """Test whether dev mode env var is set.
+
+    Args:
+        verbose (int): print process data
+
+    Returns:
+        (bool): whether we are in dev mode
+    """
+    _dev = os.environ.get('PSYOP_DEV')
+    lprint('PSYOP_DEV', _dev, bool(_dev), verbose=verbose)
+    return bool(_dev)
 
 
 def dprint(*args, **kwargs):
@@ -272,6 +281,44 @@ def lprint(*args, **kwargs):
     if not kwargs.get('verbose', True):
         return
     print(' '.join([str(_arg) for _arg in args]))
+
+
+def nice_age(age):
+    """Convert an age in seconds to a readable string.
+
+    eg. 61 -> 1m1s
+
+    Args:
+        age (int|float): age in seconds
+
+    Returns:
+        (str): age as string
+    """
+    _str = ''
+    _secs = int(age)
+
+    if _secs > 7*24*60*60:
+        _wks = _secs/(7*24*60*60)
+        _secs = _secs - _wks*7*24*60*60
+        _str += '{:d}d'.format(_wks)
+
+    if _secs > 24*60*60:
+        _days = _secs/(24*60*60)
+        _secs = _secs - _days*24*60*60
+        _str += '{:d}d'.format(_days)
+
+    if _secs > 60*60:
+        _hours = _secs/(60*60)
+        _str += '{:d}h'.format(_hours)
+        _secs = _secs - _hours*60*60
+
+    if _secs > 60:
+        _mins = _secs/60
+        _str += '{:d}m'.format(_mins)
+        _secs = _secs - _mins*60
+
+    _str += '{:d}s'.format(_secs)
+    return _str
 
 
 def read_url(url, edit=False, attempts=5):

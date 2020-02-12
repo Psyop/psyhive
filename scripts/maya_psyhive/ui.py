@@ -155,16 +155,28 @@ def get_main_window():
     return mel.eval('$s=$gMainWindow', verbose=0)
 
 
-def get_main_window_ptr():
+def get_main_window_ptr(style='oculus'):
     """Get pointer for main maya window.
+
+    Args:
+        style (str): how to read pointer
 
     Returns:
         (QWidget): wrapped instance
     """
-    import shiboken2
-    qt.get_application()  # Make sure there is QApplication
-    _maya_win = OpenMayaUI.MQtUtil.mainWindow()
-    return shiboken2.wrapInstance(long(_maya_win), QtWidgets.QWidget)
+    if style == 'generic':
+        import shiboken2
+        qt.get_application()  # Make sure there is QApplication
+        _maya_win = OpenMayaUI.MQtUtil.mainWindow()
+        return shiboken2.wrapInstance(long(_maya_win), QtWidgets.QWidget)
+    elif style == 'oculus':
+        app = QtWidgets.QApplication.instance()
+        widgets = app.topLevelWidgets()
+        for obj in widgets:
+            if obj.objectName() == 'MayaWindow':
+                return obj
+        raise RuntimeError('Could not find MayaWindow instance')
+    raise ValueError(style)
 
 
 def obtain_menu(name, replace=False, verbose=0):

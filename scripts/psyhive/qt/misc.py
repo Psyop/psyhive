@@ -82,7 +82,7 @@ def get_p(*args):
             return QtCore.QPoint(*_arg)
         elif isinstance(_arg, (QtCore.QPoint, QtCore.QPointF)):
             return _arg
-        elif isinstance(_arg, QtCore.QSize):
+        elif isinstance(_arg, (QtCore.QSize, QtCore.QSizeF)):
             return QtCore.QPoint(_arg.width(), _arg.height())
     elif len(args) == 2:
         return QtCore.QPoint(args[0], args[1])
@@ -98,18 +98,25 @@ def get_size(*args):
     if len(args) == 1:
         _size = args[0]
         if isinstance(_size, QtCore.QSize):
-            return _size
+            _result = _size
         elif isinstance(_size, QtCore.QPoint):
-            return QtCore.QSize(_size.x(), _size.y())
+            _result = QtCore.QSize(_size.x(), _size.y())
         elif isinstance(_size, (tuple, list)):
-            return QtCore.QSize(_size[0], _size[1])
+            _result = QtCore.QSize(_size[0], _size[1])
         elif isinstance(_size, six.string_types):
-            return QtCore.QSize(*[int(_token) for _token in _size.split('x')])
+            _result = QtCore.QSize(*[
+                int(_token) for _token in _size.split('x')])
         elif isinstance(_size, int):
-            return QtCore.QSize(_size, _size)
+            _result = QtCore.QSize(_size, _size)
+        elif isinstance(_size, float):
+            _result = QtCore.QSizeF(_size, _size)
+        else:
+            raise ValueError(args)
     elif len(args) == 2:
-        return QtCore.QSize(*args)
-    raise ValueError(args)
+        _result = QtCore.QSize(*args)
+    else:
+        raise ValueError(args)
+    return _result
 
 
 def get_pixmap(pix):

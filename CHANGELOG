@@ -1,3 +1,42 @@
+#### v0.58.0 ####
+
+    Released: Wed 12th Feb 2020
+
+    Usage Tracking: don't use day in index name,
+    
+    maya_psyhive:
+        ref.get_selected catch error on ns node w/o ref selected,
+        startup split into submodules,
+        ui.get_main_window_ptr added style,
+        utils.save_scene added,
+    psyhive:
+        host.open_scene added func override,
+        pipe.Project better error on path outside projects root,
+        py_gui settings handles HOME/HOMEDRIVE,
+        py_gui save settings on rebuild,
+        py_gui.MayaPyShelfButton added handling for pyc init,
+        qt renamed PixmapUi -> HPixmapUi,
+        qt.HUiDialog added disabled_btns_on_exec arg,
+        qt.HUiDialog.read_settings apply pos/size to dialog not ui,
+        qt.get_size added QSizeF handling,
+        qt.HTreeWidget added all_items/selected_items,
+        qt.HTreeWidgetItem allow text as None,
+        tk2.TTShot added,
+        tk2.TTBase added sg_asset_type/sequence attrs,
+        tools.hive_bro.DIALOG added,
+        tools.usage don't track in dev mode,
+        tools.usage no day in index name,
+        utils.nice_age added,
+        utils.str_to_seed better error on non-string,
+        utils.Path get_age/nice_age added,
+        utils.File.copy_to added diff_ arg,
+        utils.File.write_text bugfix overwrite warning if file doesn't exist,
+        utils.abs_path uses os.path.abspath + added la1nas006 handling,
+        utils.PyFile added option to ignore arg defaults that can't be determined,
+        utils.PyClass.check_docs only require full stop on first line,
+        utils.seq_from_frame bugfix catch on frame padding mismatch,
+
+
 #### v0.57.0 ####
 
     Released: Tue 14th Jan 2020

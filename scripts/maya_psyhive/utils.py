@@ -610,6 +610,17 @@ def save_as(file_, revert_filename=True, export_selection=False, force=False):
         cmds.file(rename=_cur_filename)
 
 
+def save_scene(file_=None, force=False):
+    """Save current scene.
+
+    Args:
+        file_ (str): path to save as
+        force (bool): force overwrite existing
+    """
+    _file = file_ or cmds.file(query=True, location=True)
+    save_as(_file, revert_filename=False, force=force)
+
+
 def set_col(node, col):
     """Set viewport colour of the given node.
 

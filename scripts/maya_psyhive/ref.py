@@ -314,7 +314,8 @@ def get_selected(catch=False, multi=False, class_=None, verbose=0):
         _node.split(":")[0] for _node in cmds.ls(selection=True)
         if ":" in _node]))
     lprint('SEL NAMESPACES', _nss, verbose=verbose)
-    _refs = [find_ref(_ns, class_=class_) for _ns in _nss]
+    _refs = [find_ref(_ns, class_=class_, catch=True) for _ns in _nss]
+    _refs = [_ref for _ref in _refs if _ref]
     _class = class_ or FileRef
     _sel_ref_nodes = [
         _class(_ref_node) for _ref_node in cmds.ls(
@@ -341,7 +342,10 @@ def obtain_ref(file_, namespace, class_=None):
     """
     _ref = find_ref(namespace, catch=True, class_=class_)
     if _ref:
-        assert _ref.path == file_
+        if abs_path(_ref.path) != abs_path(file_):
+            print 'A', abs_path(_ref.path)
+            print 'B', abs_path(file_)
+            raise ValueError('Path mismatch')
         return _ref
 
     return create_ref(file_=file_, namespace=namespace, class_=class_)

@@ -277,5 +277,9 @@ def seq_from_frame(file_, catch=False):
             return False
         raise ValueError(file_)
     _base = '.'.join(_tokens[:-1])
-    return Seq('{}/{}.%0{:d}d.{}'.format(
-        _file.dir, _base, len(_frame), _file.extn))
+    _path = '{}/{}.%0{:d}d.{}'.format(
+        _file.dir, _base, len(_frame), _file.extn)
+    try:
+        return Seq(_path)
+    except ValueError:
+        return None

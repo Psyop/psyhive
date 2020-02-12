@@ -5,6 +5,7 @@ ignore:
         hv_test/diary/y19/d0528/bro_tools_tests.py
         hv_test/diary/y19/d0717/make_littlezoo_zip.py
         hv_test/diary/y19/d1111/bro_tools_tests.py
+        hv_test/diary/y20/d0131/obfuscate_tests.py
     anomalous-unicode-escape-in-string:
         pinterest_rip
     arguments-differ:
@@ -22,6 +23,8 @@ ignore:
         sanity_check/checks/maya/general/scene.py
     c-extension-no-member:
         maya_psyhive/ui.py
+    consider-iterating-dictionary:
+        hv-test/python/hv_test/tools/cod_bro.py
     eval-used:
         hv_test/diary/
         maya_psyhive/shows/clashroyaleholi.py
@@ -38,7 +41,8 @@ ignore:
         hv_test/diary/
     import-error:
         hv_test/diary/
-        hv-test/python/hv_test/startup.py
+        hv-test/python/hv_test/startup/hsu_tools.py
+        hv_test/toolkits/home_tools.py
         psyhive/scripts/maya_psyhive/shows/frasier.py
     invalid-name:
         sanity_check/checks/
@@ -157,6 +161,7 @@ ignore:
     too-many-return-statements:
         _machi/card.py
     unbalanced-tuple-unpacking:
+        hv_test/diary/y20/d0122/_ham_qt.py
         maya_psyhive/open_maya/camera.py
     undefined-loop-variable:
         diary/y19/d0814/boid_test.py
@@ -170,9 +175,11 @@ ignore:
     unsubscriptable-object:
         _machi/game.py
         maya_psyhive/tools/yeti/cache.py
+    unsupported-assignment-operation:
+        hv_test/diary/y20/d0206/google_images_tests.py
     unused-argument:
         hv_test/diary/
-        hv_test/startup.py
+        hv_test/startup/hsu_henry_shelf.py
         hv_test/toolkits/check_code.py
         hv_test/tools/colour_bro/cb_ui.py
         maya_psyhive/open_maya/base_node.py

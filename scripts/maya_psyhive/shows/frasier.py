@@ -30,7 +30,5 @@ def install_hsl_tools():
 def launch_anim_exporter():
     """Launch hsl anim exporter."""
     install_hsl_tools()
-    import art_tools
-    reload(art_tools)
     from art_tools.gui.qt.dialog import animation_exporter_2
     animation_exporter_2.open_tool()

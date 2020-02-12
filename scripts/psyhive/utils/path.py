@@ -13,7 +13,8 @@ from ctypes import wintypes
 import six
 
 from psyhive.utils.misc import (
-    lprint, system, dprint, bytes_to_str, copy_text, get_ord)
+    lprint, system, dprint, bytes_to_str, copy_text, get_ord,
+    nice_age)
 from psyhive.utils.heart import check_heart
 from psyhive.utils.filter_ import passes_filter
 
@@ -94,6 +95,14 @@ class Path(object):
         """
         return os.path.exists(self.path)
 
+    def get_age(self):
+        """Get age of this file (based on mtime).
+
+        Returns:
+            (float): age in seconds
+        """
+        return time.time() - self.get_mtime()
+
     def get_mtime(self):
         """Get mtime of this path.
 
@@ -109,6 +118,14 @@ class Path(object):
             (int): size of path in bytes
         """
         return os.path.getsize(self.path)
+
+    def nice_age(self):
+        """Get this file's age as a readable string.
+
+        Returns:
+            (str): age as string
+        """
+        return nice_age(self.get_age())
 
     def nice_mtime(self, fmt=None):
         """Get mtime of this file in a readable format.
@@ -333,7 +350,7 @@ class File(Path):
             force (bool): overwrite existing file with no warning
         """
         _force = force
-        if not force:
+        if not force and self.exists():
             from psyhive import qt, icons
             _result = qt.raise_dialog(
                 'Overwrite file?\n\n{}'.format(self.path),
@@ -370,25 +387,32 @@ def abs_path(path, win=False, root=None, verbose=0):
     if _path.startswith('file:///'):
         _path = _path[8:]
 
-    # Handle relative paths
+    # Handle home dir paths
     if _path.startswith('~/'):
         _path = '{}/{}'.format(
             os.environ.get('HOME') or os.environ['HOMEDRIVE'],
             _path[2:])
-    elif not (
+
+    # Handle relative paths
+    if not (
             _path.startswith('/') or
             (len(_path) >= 2 and _path[1] == ':')):
         _root = root or os.getcwd()
-        lprint('ADDING ROOT', _root, verbose=verbose)
+        lprint(' - ADDING ROOT', _root, verbose=verbose)
         _path = '{}/{}'.format(_root, _path)
 
+    _path = os.path.abspath(_path)
+    lprint(' - FIXED PATH', _path, verbose=verbose)
+
     # Unify different dir separators
-    _path = _path.\
-        replace('\\\\', '/').\
-        replace('\\', '/').\
-        replace('//', '/').\
-        replace('/./', '/').\
-        replace('c:/users/hvande~1', 'C:/users/hvanderbeek')
+    for _find, _replace in [
+            ('\\', '/'),
+            ('//', '/'),
+            ('/./', '/'),
+            ('c:/users/hvande~1', 'C:/users/hvanderbeek'),
+            ('/la1nas006/homedir/hvanderbeek', 'Z:'),
+    ]:
+        _path = _path.replace(_find, _replace)
     lprint('CLEANED', _path, verbose=verbose)
 
     # Fix MINGW64 style single drive letters with leading /
