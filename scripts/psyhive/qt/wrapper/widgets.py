@@ -202,6 +202,19 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
 class HListWidgetItem(QtWidgets.QListWidgetItem):
     """Wrapper for QListWidgetItem object."""
 
+    def __init__(self, text=None, data=None):
+        """Constructor.
+
+        Args:
+            text (str): widget text
+            data (any): widget data
+        """
+        super(HListWidgetItem, self).__init__()
+        if text:
+            self.setText(text)
+        if data:
+            self.set_data(data)
+
     def get_data(self):
         """Get stored data from this item.
 
@@ -235,6 +248,9 @@ class HListWidgetItem(QtWidgets.QListWidgetItem):
         """
         _icon = QtGui.QIcon(get_pixmap(image))
         self.setIcon(_icon)
+
+    def __repr__(self):
+        return '<{}:{}>'.format(type(self).__name__, self.text())
 
 
 class HMenu(QtWidgets.QMenu, HWidgetBase):

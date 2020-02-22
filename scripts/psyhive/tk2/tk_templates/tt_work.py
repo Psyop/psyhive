@@ -61,8 +61,8 @@ class TTWorkArea(TTDirBase):
         _hint = '{}_{}_work'.format(self.dcc, self.area)
         _tmpl = get_template(_hint)
         _test_work = self.map_to(
-            hint=_hint, class_=_class, Task=self.step,
-            extension=get_extn(self.dcc), version=1)
+            hint=_hint, Task=self.step, extension=get_extn(self.dcc),
+            version=1, class_=TTWork)
         _works = find(_test_work.dir, depth=1, type_='f', class_=_class)
         return _works
 
@@ -217,17 +217,23 @@ class TTWork(TTBase, File):
             task=self.task, version=self.version, filter_=filter_,
             output_type=output_type)
 
-    def find_output_files(self, verbose=0):
+    def find_output_files(self, output_type=None, extension=None, verbose=0):
         """Find output files associated with this work file.
 
         Args:
+            output_type (str): filter by output type
+            extension (str): filter by extension
             verbose (int): print process data
 
         Returns:
             (TTOutput list): list of outputs
         """
-        return sum([_out.find_files(verbose=verbose)
-                    for _out in self.find_outputs()], [])
+        _outs = self.find_outputs(output_type=output_type)
+        _files = sum([_out.find_files(verbose=verbose)
+                      for _out in _outs], [])
+        if extension is not None:
+            _files = [_file for _file in _files if _file.extn == extension]
+        return _files
 
     def find_publishes(self):
         """Find publishes associated with this work file.
@@ -361,6 +367,14 @@ class TTWork(TTBase, File):
             (TTWorkArea): work area
         """
         return TTWorkArea(self.path)
+
+    def get_root(self):
+        """Get shot/asset root for this work file.
+
+        Returns:
+            (TTRoot): shot/asset root
+        """
+        return TTRoot(self.path)
 
     def load(self, force=True):
         """Load this work file.

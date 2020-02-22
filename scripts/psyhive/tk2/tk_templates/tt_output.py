@@ -352,6 +352,8 @@ class TTOutputFileSeq(_TTOutputFileBase, Seq):
 
     hint_fmt = '{area}_output_file_seq'
 
+    exists = Seq.exists
+
     def __init__(self, path, verbose=0):
         """Constructor.
 

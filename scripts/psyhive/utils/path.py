@@ -245,14 +245,17 @@ class File(Path):
             diff_ (bool): show diffs before copying files
         """
         from psyhive import qt
-        test_path(os.path.dirname(file_))
-        if os.path.exists(file_):
+        _file = file_
+        if isinstance(_file, File):
+            _file = file_.path
+        test_path(os.path.dirname(_file))
+        if os.path.exists(_file):
             if diff_:
-                self.diff(file_)
-            _result = qt.yes_no_cancel("Replace existing file?\n\n"+file_)
+                self.diff(_file)
+            _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
             if _result == 'No':
                 return
-        shutil.copy(self.path, file_)
+        shutil.copy(self.path, _file)
 
     def delete(self, force=False, wording='delete'):
         """Delete this file.
@@ -267,7 +270,12 @@ class File(Path):
             from psyhive import qt
             qt.ok_cancel("{} file?\n\n{}".format(
                 wording.capitalize(), self.path))
-        os.remove(self.path)
+
+        try:
+            os.remove(self.path)
+        except WindowsError as _exc:
+            print 'FAILED TO DELETE', self.path
+            raise _exc
 
     def diff(self, other, label=None, check_extn=True):
         """Show diffs between this and another text file.
@@ -278,7 +286,10 @@ class File(Path):
             check_extn (bool): check extension is approved (to avoid
                 binary compares)
        """
-        diff(self.path, other, label=label, check_extn=check_extn)
+        _other = other
+        if isinstance(_other, File):
+            _other = _other.path
+        diff(self.path, _other, label=label, check_extn=check_extn)
 
     def edit(self, line_n=None, verbose=0):
         """Edit this file in a text editor.
@@ -313,6 +324,17 @@ class File(Path):
         """
         return os.access(self.path, os.W_OK)
 
+    def matches(self, other):
+        """Test if the contents of this file matches another.
+
+        Args:
+            other (str): path to file to compare with
+
+        Returns:
+            (bool): whether files match
+        """
+        return filecmp.cmp(self.path, other.path)
+
     def read(self):
         """Read the text contents of this file."""
         return read_file(self.path)
@@ -323,7 +345,7 @@ class File(Path):
         Returns:
             (str list): list of lines
         """
-        return self.read().split('\n')
+        return [_line.strip('\n') for _line in self.read().split('\n')]
 
     def set_writable(self, writable=True):
         """Set writable state of this path.
@@ -378,9 +400,12 @@ def abs_path(path, win=False, root=None, verbose=0):
         root (str): override root dir (otherwise cwd is used)
         verbose (int): print process data
     """
-    if not isinstance(path, six.string_types):
-        raise ValueError(path)
-    _path = str(path)
+    _path = path
+    if isinstance(_path, Path):
+        _path = _path.path
+    if not isinstance(_path, six.string_types):
+        raise ValueError(_path)
+    _path = str(_path)
     lprint('USING PATH', _path, verbose=verbose)
 
     # Handle file:/// prefix
@@ -453,7 +478,7 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
     if check_extn and not File(left).extn in [
-            None, 'py', 'yml', 'ui', 'nk', 'json', 'mel']:
+            None, 'py', 'yml', 'ui', 'nk', 'json', 'mel', 'gizmo']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':
@@ -749,6 +774,8 @@ def read_file(file_):
     Args:
         file_ (str): path to check
     """
+    if not os.path.exists(file_):
+        raise OSError('File does not exist '+file_)
     _file = open(file_, 'r')
     _text = _file.read()
     _file.close()
@@ -832,7 +859,7 @@ def search_files_for_text(
     from psyhive import qt
 
     _found_instance = False
-    for _file in qt.ProgressBar(
+    for _file in qt.progress_bar(
             files, 'Searching {:d} file{}', col='Aquamarine', show=not edit):
 
         dprint('CHECKING FILE', _file, verbose=verbose)

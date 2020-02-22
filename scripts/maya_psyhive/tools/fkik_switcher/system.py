@@ -17,6 +17,7 @@ import math
 
 from maya import cmds, mel
 
+from psyhive import host
 from psyhive.utils import get_single, store_result, lprint, wrap_fn
 
 from maya_psyhive import ref
@@ -211,7 +212,7 @@ class FkIkSystem(object):
         if key_mode in ['none']:
             pass
         elif key_mode == 'timeline':
-            self._exec_switch_and_key_over_timeline(
+            self.exec_switch_and_key_over_timeline(
                 switch_mode=switch_mode, switch_key=switch_key)
             return
         elif key_mode == 'frame':
@@ -235,7 +236,7 @@ class FkIkSystem(object):
         else:
             raise ValueError(key_mode)
 
-    def _exec_switch_and_key_over_timeline(self, switch_mode, switch_key):
+    def exec_switch_and_key_over_timeline(self, switch_mode, switch_key=False, selection=True):
         """Exec switch and key over timeline selection.
 
         Args:
@@ -244,10 +245,13 @@ class FkIkSystem(object):
         """
 
         # Read timeline range
-        _timeline = mel.eval('$tmpVar=$gPlayBackSlider')
-        _start, _end = [
-            int(_val) for _val in cmds.timeControl(
-                _timeline, query=True, rangeArray=True)]
+        if selection:
+            _timeline = mel.eval('$tmpVar=$gPlayBackSlider')
+            _start, _end = [
+                int(_val) for _val in cmds.timeControl(
+                    _timeline, query=True, rangeArray=True)]
+        else:
+            _start, _end = host.t_range()
         print 'TIMELINE RANGE', _start, _end
 
         # Get list of keyed frames

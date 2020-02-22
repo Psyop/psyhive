@@ -6,7 +6,7 @@ import time
 from psyhive import qt, icons, host, pipe, tk2
 from psyhive.qt import QtCore, QtGui
 from psyhive.utils import (
-    get_single, wrap_fn, abs_path, store_result,
+    get_single, wrap_fn, abs_path, store_result, system,
     get_time_t, get_owner, chain_fns, passes_filter, lprint,
     safe_zip, val_map, copy_text, str_to_seed,
     launch_browser, Seq, store_result_on_obj)
@@ -227,14 +227,7 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
         # Add items
         _work_data = _work_files[0].get_work_area().get_metadata()
         for _idx, _work_file in enumerate(reversed(_work_files)):
-            _icon = _get_work_icon(_work_file)
-            _text = _get_work_text(_work_file, data=_work_data)
-            _col = _get_work_col(_work_file)
-            _item = qt.HListWidgetItem(_text)
-            if _col:
-                _item.set_col(_col)
-            _item.set_data(_work_file)
-            _item.set_icon(_icon)
+            _item = create_work_item(_work_file, data=_work_data)
             widget.addItem(_item)
 
     def _redraw__work_open(self, widget):
@@ -512,15 +505,17 @@ class _HiveBro(_HiveBroAssets, _HiveBroShots):
             file_ (TTOutputFile): output file to add options for
         """
         if file_.channel:
-            _label = '{} ({})'.format(file_.channel, file_.format)
+            _label = '{} {} ({})'.format(
+                file_.output_type, file_.channel, file_.format)
         else:
-            _label = '{}/{}'.format(file_.format, file_.extn)
+            _label = '{} {}/{}'.format(
+                file_.output_type, file_.format, file_.extn)
         _icon = _output_to_icon(file_)
         _menu = menu.add_menu(_label, icon=_icon)
         _add_path_menu_items(menu=_menu, obj=file_)
 
 
-class _HiveBroStandalone(qt.HUiDialog, _HiveBro):
+class _HiveBroStandalone(qt.HUiDialog2, _HiveBro):
     """HiveBro interface as a standalone dialog (rather than docked)."""
 
     def __init__(self):
@@ -585,8 +580,33 @@ def _add_path_menu_items(menu, obj):
 
     if isinstance(obj, Seq):
         _icon = icons.EMOJI.find('Play button')
-        menu.add_action(
-            'View images', obj.view, icon=_icon)
+        menu.add_action('View images', obj.view, icon=_icon)
+    elif obj.extn == 'mov':
+        _icon = icons.EMOJI.find('Play button')
+        _view = wrap_fn(system, 'djv_view '+obj.path)
+        menu.add_action('View images', _view, icon=_icon)
+
+
+def create_work_item(work, data=None):
+    """Create work list widget item.
+
+    Args:
+        work (TTWork): work to build item from
+        data (dict): work metadata
+
+    Returns:
+        (HListWidgetItem): list widget item for this work file
+    """
+    _icon = _get_work_icon(work)
+    _text = _get_work_text(work, data=data)
+    _col = _get_work_col(work)
+    _item = qt.HListWidgetItem(_text)
+    if _col:
+        _item.set_col(_col)
+    _item.set_data(work)
+    _item.set_icon(_icon)
+
+    return _item
 
 
 def _cur_dcc():
@@ -596,6 +616,30 @@ def _cur_dcc():
         (str): dcc name
     """
     return {'hou': 'houdini'}.get(host.NAME, host.NAME)
+
+
+def get_recent_work(verbose=0):
+    """Read list of recent work file from tank.
+
+    Args:
+        verbose (int): print process data
+
+    Returns:
+        (TTWork list): list of work files
+    """
+    _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
+    _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
+    _works = []
+    for _file in _settings.value(_setting_name, []):
+        _path = abs_path(_file['file_path'])
+        lprint('TESTING', _path, verbose=verbose)
+        _work = tk2.obtain_work(_path)
+        if not _work:
+            continue
+        if not _work.dcc == _cur_dcc():
+            continue
+        _works.append(_work)
+    return _works
 
 
 def _get_work_col(work):
@@ -701,7 +745,7 @@ def _get_work_label(work):
     return _label
 
 
-def _get_work_text(work, data):
+def _get_work_text(work, data=None):
     """Get display text for the given work file.
 
     Args:
@@ -782,30 +826,6 @@ def _set_work_comment(ver, parent):
             ver.task, ver.version),
         title='Enter comment', parent=parent, default=ver.get_comment())
     ver.set_comment(_comment)
-
-
-def get_recent_work(verbose=0):
-    """Read list of recent work file from tank.
-
-    Args:
-        verbose (int): print process data
-
-    Returns:
-        (TTWork list): list of work files
-    """
-    _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
-    _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
-    _works = []
-    for _file in _settings.value(_setting_name, []):
-        _path = abs_path(_file['file_path'])
-        lprint('TESTING', _path, verbose=verbose)
-        _work = tk2.obtain_work(_path)
-        if not _work:
-            continue
-        if not _work.dcc == _cur_dcc():
-            continue
-        _works.append(_work)
-    return _works
 
 
 def launch(path=None):

@@ -118,6 +118,7 @@ ignore:
         maya_psyhive/open_maya/base_node.py
         maya_psyhive/open_maya/plug.py
         psyhive/scripts/psyhive/qt/wrapper/gui/pixmap.py
+        psyhive/scripts/psyhive/tk2/tk_templates/tt_work.py
     too-many-ancestors:
         hv_test/diary/y19/d0516/batch_cache_test.py
         hv_test/diary/y19/d1122/arnold_update_sss_type.py
@@ -161,7 +162,7 @@ ignore:
     too-many-return-statements:
         _machi/card.py
     unbalanced-tuple-unpacking:
-        hv_test/diary/y20/d0122/_ham_qt.py
+        _ham_qt.py
         maya_psyhive/open_maya/camera.py
     undefined-loop-variable:
         diary/y19/d0814/boid_test.py
@@ -173,6 +174,7 @@ ignore:
     unreachable:
         hv_test/diary/
     unsubscriptable-object:
+        hv_test/diary/y20/d0213/_fr_core.py
         _machi/game.py
         maya_psyhive/tools/yeti/cache.py
     unsupported-assignment-operation:

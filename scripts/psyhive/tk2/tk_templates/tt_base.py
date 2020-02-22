@@ -6,7 +6,7 @@ import pprint
 
 import tank
 
-from psyhive import pipe
+from psyhive import pipe, host
 from psyhive.utils import (
     Path, abs_path, lprint, Dir, find, apply_filter, get_single,
     passes_filter)
@@ -81,16 +81,32 @@ class TTBase(Path):
         """
         _class = class_ or self.__class__
         lprint('CLASS', _class, class_, verbose=verbose)
-        _hint = hint or _class.hint_fmt.format(area=self.area, dcc=self.dcc)
+
+        # Get hint
+        _hint = hint
+        if not _hint:
+            _dcc = None
+            if '{dcc}' in _class.hint_fmt:
+                _dcc = kwargs.get('dcc', self.dcc)
+                if not _dcc:  # Try to determine dcc from extn
+                    _extn = kwargs.get('extension')
+                    _dcc = {'mb': 'maya'}.get(_extn)
+                if '{dcc}' in _class.hint_fmt and not _dcc:
+                    raise ValueError('No value for dcc')
+            _hint = _class.hint_fmt.format(area=self.area, dcc=_dcc)
+
+        # Apply data to hint
         _data = copy.copy(self.data)
         for _key, _val in kwargs.items():
             _data[_key] = _val
         _tmpl = get_template(_hint)
+
         try:
             _path = _tmpl.apply_fields(_data)
         except tank.TankError as _exc:
             _tags = '['+_exc.message.split('[')[-1]
             raise ValueError('Missing tags: '+_tags)
+
         return _class(_path)
 
     def __repr__(self):
@@ -361,16 +377,17 @@ class TTStepRoot(TTDirBase):
         return [_name for _name in self.find_output_names()
                 if _name.output_type == 'render']
 
-    def find_work(self, dcc=None):
+    def find_work(self, dcc=None, class_=None):
         """Find work files inside this step root.
 
         Args:
             dcc (str): dcc to find work for
+            class_ (class): override work class
 
         Returns:
             (TTWork list): list of work files
         """
-        return self.get_work_area(dcc=dcc).find_work()
+        return self.get_work_area(dcc=dcc).find_work(class_=class_)
 
     def get_work_area(self, dcc):
         """Get work area in this step for the given dcc.
@@ -382,7 +399,8 @@ class TTStepRoot(TTDirBase):
             (TTWorkArea): work area
         """
         from psyhive.tk2.tk_templates.tt_work import TTWorkArea
-        _hint = '{}_work_area_{}'.format(self.area, dcc)
+        _dcc = dcc or host.NAME
+        _hint = '{}_work_area_{}'.format(self.area, _dcc)
         _tmpl = get_template(_hint)
         _path = _tmpl.apply_fields(self.data)
         return TTWorkArea(_path)

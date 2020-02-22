@@ -19,6 +19,10 @@ class Cacheable(object):
     cache_fmt = None
 
 
+class CacheMissing(OSError):
+    """Raise when a cache doesn't exist."""
+
+
 class ReadError(RuntimeError):
     """Raised on failed to read cached object."""
 

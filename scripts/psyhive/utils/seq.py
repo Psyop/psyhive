@@ -4,7 +4,7 @@ import os
 
 from psyhive.utils.cache import store_result_on_obj
 from psyhive.utils.path import File, abs_path, find, test_path, Dir
-from psyhive.utils.misc import system, dprint
+from psyhive.utils.misc import system, dprint, lprint
 
 
 class Seq(object):
@@ -80,24 +80,30 @@ class Seq(object):
             os.remove(self[_frame])
         self.get_frames(force=True)
 
-    def exists(self, force=False):
+    def exists(self, force=False, verbose=0):
         """Test if this image sequence exists.
 
         Args:
             force (bool): force reread frames from disk
+            verbose (int): print process data
 
         Returns:
             (bool): whether sequence exists
         """
-        return bool(self.get_frames(force=force))
+        return bool(self.get_frames(force=force, verbose=verbose))
 
-    def find_range(self):
+    def find_range(self, force=False):
         """Find range of this sequence's frames.
+
+        Args:
+            force (bool): force reread range from disk
 
         Returns:
             (tuple): start/end frames
         """
-        _frames = self.get_frames()
+        _frames = self.get_frames(force=force)
+        if not _frames:
+            return None
         return _frames[0], _frames[-1]
 
     def get_frame(self, file_):
@@ -127,21 +133,34 @@ class Seq(object):
         return _frame
 
     @store_result_on_obj
-    def get_frames(self, frames=None, force=False):
+    def get_frames(self, frames=None, force=False, verbose=0):
         """Get a list of frame indices from disk.
 
         Args:
             frames (int list): force frames (ie. don't read from disk)
             force (bool): force reread list from disk
+            verbose (int): print process data
+
+        Returns:
+            (int list): frame numbers
         """
         if frames:
             return frames
         _frames = set()
         _head, _tail = self.path.split(self.frame_expr)
-        for _file in find(self.dir, depth=1, extn=self.extn):
-            if (
-                    not _file.startswith(_head) or
-                    not _file.endswith(_tail)):
+
+        _files = find(self.dir, depth=1, extn=self.extn)
+        if verbose:
+            print 'CHECKING {:d} FILES IN DIR {}'.format(len(_files), self.dir)
+            print ' - HEAD', _head
+            print ' - TAIL', _tail
+
+        for _file in _files:
+            if not _file.startswith(_head):
+                lprint(' - REJECTED HEAD', _file, verbose=verbose)
+                continue
+            if not _file.endswith(_tail):
+                lprint(' - REJECTED TAIL', _file, verbose=verbose)
                 continue
             _frame_str = _file[len(_head): -len(_tail)]
             if not _frame_str.isdigit():

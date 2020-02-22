@@ -153,7 +153,7 @@ class FileRef(object):
         """Get path to this ref's scene file (without copy number)."""
         if not self._file:
             return None
-        return self._file.split('{')[0]
+        return abs_path(self._file.split('{')[0])
 
     def remove(self, force=False):
         """Remove this reference from the scene.

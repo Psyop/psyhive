@@ -5,6 +5,8 @@ import os
 import traceback
 
 from maya import cmds, mel
+from maya.app.general import createImageFormats
+
 import six
 
 from psyhive import qt
@@ -213,6 +215,53 @@ def add_to_set(obj, set_, verbose=0):
         cmds.namespace(set=':')
         cmds.sets(name=set_, empty=True)
     cmds.sets(obj, addElement=set_)
+
+
+def blast(seq, range_=None, res=None, force=False, verbose=0):
+    """Execute a playblast.
+
+    Args:
+        seq (Seq): output sequence
+        range_ (tuple): start/end frame
+        res (tuple): override image resolution
+        force (bool): overwrite existing images without confirmation
+        verbose (int): print process data
+    """
+    from psyhive import host
+
+    # Get res
+    if res:
+        _width, _height = res
+        cmds.setAttr('defaultResolution.width', _width)
+        cmds.setAttr('defaultResolution.height', _height)
+    else:
+        _width = cmds.getAttr('defaultResolution.width')
+        _height = cmds.getAttr('defaultResolution.height')
+    lprint('RES', _width, _height, verbose=verbose)
+
+    # Get range
+    _rng = range_ or host.t_range()
+    _start, _end = _rng
+
+    seq.delete(wording='Replace')
+    seq.test_dir()
+
+    # Set image format
+    _fmt_mgr = createImageFormats.ImageFormats()
+    _fmt_mgr.pushRenderGlobalsForDesc({
+        'jpg': "JPEG",
+        'exr': "EXR",
+    }[seq.extn])
+
+    _filename = '{}/{}'.format(seq.dir, seq.basename)
+    lprint('BLAST FILENAME', _filename, verbose=verbose)
+    cmds.playblast(
+        startTime=_start, endTime=_end, format='image', filename=_filename,
+        viewer=False, width=_width, height=_height, offScreen=True,
+        percent=100)
+    assert seq.get_frames(force=True)
+
+    _fmt_mgr.popRenderGlobals()
 
 
 def break_conns(attr):
@@ -653,6 +702,18 @@ def set_namespace(namespace, clean=False):
     if not cmds.namespace(exists=_namespace):
         cmds.namespace(addNamespace=_namespace)
     cmds.namespace(setNamespace=_namespace)
+
+
+def set_res(res):
+    """Set render resolution.
+
+    Args:
+        res (tuple): width/height
+    """
+    _width, _height = res
+    cmds.setAttr("defaultResolution.aspectLock", False)
+    cmds.setAttr('defaultResolution.width', _width)
+    cmds.setAttr('defaultResolution.height', _height)
 
 
 def set_val(attr, val, verbose=0):

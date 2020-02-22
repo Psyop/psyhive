@@ -217,7 +217,7 @@ def launch_err_catcher(traceback_, message):
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
 
 
-def get_error_catcher(exit_on_error=True, verbose=1):
+def get_error_catcher(exit_on_error=False, verbose=1):
     """Build an error catcher decorator.
 
     Args:
@@ -248,7 +248,7 @@ def get_error_catcher(exit_on_error=True, verbose=1):
                 _handle_exception(_exc)
                 if exit_on_error:
                     sys.exit()
-                return None
+                raise _exc
             lprint(
                 ' - EXECUTED FUNCTION', func.__name__,
                 verbose=verbose > 1)
@@ -295,17 +295,20 @@ def _pass_exception_to_sentry(exc):
     _logger.exception(str(exc))
 
 
-def toggle_err_catcher(value=None):
+def toggle_err_catcher(value=None, verbose=0):
     """Toggle error catcher decorator.
 
     Args:
         value (bool): apply error catch enabled state
+        verbose (int): print process data
     """
     if value is not None:
         _value = value
     else:
-        _cur_value = bool(os.environ.get('EXC_DISABLE_ERR_CATCHER'))
+        _cur_value = not bool(os.environ.get('EXC_DISABLE_ERR_CATCHER'))
+        lprint(' - USING CUR VALUE', _cur_value, verbose=verbose)
         _value = not _cur_value
+        lprint(' - APPLYING VALUE', _value, verbose=verbose)
 
     if _value:
         if 'EXC_DISABLE_ERR_CATCHER' in os.environ:
@@ -314,6 +317,8 @@ def toggle_err_catcher(value=None):
     else:
         os.environ['EXC_DISABLE_ERR_CATCHER'] = '1'
         dprint("Disabled error catcher")
+    lprint(' - EXC_DISABLE_ERR_CATCHER',
+           bool(os.environ.get('EXC_DISABLE_ERR_CATCHER')), verbose=verbose)
 
 
 def toggle_file_errors():

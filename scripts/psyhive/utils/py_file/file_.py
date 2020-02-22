@@ -91,8 +91,9 @@ class PyFile(File, PyBase):
             print 'INDENTATION ERROR', self.path
             raise _exc
         except SyntaxError as _exc:
-            raise FileError('Syntax error in file '+self.path,
-                            file_=self.path, line_n=_exc.lineno)
+            _msg = 'Syntax error at line {:d} in file {}'.format(
+                _exc.lineno, self.path)
+            raise FileError(_msg, file_=self.path, line_n=_exc.lineno)
 
     def get_module(self, catch=False, reload_=False, verbose=0):
         """Get the python module associated with this py file.

@@ -5,7 +5,7 @@ import copy
 import time
 
 from psyhive.utils import (
-    get_plural, check_heart, lprint, dprint, get_time_t)
+    get_plural, check_heart, lprint, dprint, get_time_t, str_to_seed)
 
 from psyhive.qt.misc import get_application, get_p
 from psyhive.qt.wrapper import QtWidgets, Y_AXIS, HProgressBar
@@ -13,7 +13,7 @@ from psyhive.qt.wrapper import QtWidgets, Y_AXIS, HProgressBar
 _PROGRESS_BARS = []
 
 
-def _get_next_pos(title, stack_key):
+def _get_next_pos(stack_key, verbose=0):
     """Get position for next progress bar.
 
     This checks the existing progress bars, removing any ones which have
@@ -21,30 +21,41 @@ def _get_next_pos(title, stack_key):
     below the last bar.
 
     Args:
-        title (str): title of progress bar being positioned
         stack_key (str): identifier for this progress bar
+        verbose (int): print process data
+
+    Returns:
+        (QPoint): next progress bar position
     """
+    global _PROGRESS_BARS
 
     # Flush out unused bars
     for _bar in copy.copy(_PROGRESS_BARS):
         if (
                 not _bar.isVisible() or
-                _bar.windowTitle() == title or
-                _bar.stack_key == stack_key):
+                # _bar.windowTitle() == title or
+                _bar.stack_key == stack_key
+        ):
+            lprint('REPLACING EXISTING BAR', _bar, verbose=verbose)
             _PROGRESS_BARS.remove(_bar)
+            _bar.close()
+            _bar.deleteLater()
 
     if not _PROGRESS_BARS:
+        lprint('NO EXISTING BARS FOUND', verbose=verbose)
         return None
 
-    return _PROGRESS_BARS[-1].pos() + Y_AXIS*100
+    _pos = _PROGRESS_BARS[-1].pos() + Y_AXIS*88
+    lprint('USING EXISTING BAR POS', verbose=verbose)
+    return _pos
 
 
 class ProgressBar(QtWidgets.QDialog):
     """Simple dialog for showing progress of an interation."""
 
     def __init__(
-            self, items, title=None, col=None, show=True, pos=None,
-            parent=None, stack_key='progress'):
+            self, items, title='Processing {:d} item{}', col=None, show=True,
+            pos=None, parent=None, stack_key='progress'):
         """Constructor.
 
         Args:
@@ -58,9 +69,11 @@ class ProgressBar(QtWidgets.QDialog):
                 existing progress bar has the same stack key then this
                 will replace it
         """
+        global _PROGRESS_BARS
+
+        from psyhive import host, qt
 
         # Avoid batch mode seg fault
-        from psyhive import host
         if host.batch_mode():
             raise RuntimeError("Cannot create progress bar in batch mode")
 
@@ -75,10 +88,11 @@ class ProgressBar(QtWidgets.QDialog):
         self.durs = []
         self.info = ''
 
-        _args = [parent] if parent else []
+        _parent = parent or host.get_main_window_ptr()
+        _args = [_parent] if _parent else []
         super(ProgressBar, self).__init__(*_args)
 
-        _title = (title or 'Processing {:d} item{}').format(
+        _title = title.format(
             len(self.items), get_plural(self.items))
         self.setWindowTitle(_title)
         self.resize(408, 54)
@@ -86,9 +100,14 @@ class ProgressBar(QtWidgets.QDialog):
         if pos:
             _pos = pos - get_p(self.size())/2
         else:
-            _pos = _get_next_pos(title=_title, stack_key=stack_key)
+            _pos = _get_next_pos(stack_key=stack_key)
         if _pos:
             self.move(_pos)
+
+        _col = col
+        if not _col:
+            _random = str_to_seed(title)
+            _col = _random.choice(qt.NICE_COLS)
 
         # Build ui
         self.grid_lyt = QtWidgets.QGridLayout(self)
@@ -102,12 +121,12 @@ class ProgressBar(QtWidgets.QDialog):
         self.progress_bar.setSizePolicy(_size_policy)
         self.progress_bar.setProperty("value", 0)
         self.grid_lyt.addWidget(self.progress_bar, 0, 0, 1, 1)
-        if col:
-            self.progress_bar.set_col(col)
+        self.progress_bar.set_col(_col)
 
         self._hidden = not show
         if show:
             self.show()
+
         _PROGRESS_BARS.append(self)
 
     def print_eta(self):

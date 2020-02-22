@@ -228,6 +228,22 @@ def get_ord(idx):
     return 'th'
 
 
+def get_time_f(val):
+    """Get time tuple based on the given value.
+
+    Args:
+        val (float|stuct_time): value to convert
+
+    Returns:
+        (stuct_time): time tuple
+    """
+    if isinstance(val, float):
+        return val
+    elif isinstance(val, time.struct_time):
+        return time.mktime(val)
+    raise ValueError(val)
+
+
 def get_time_t(val):
     """Get time tuple based on the given value.
 

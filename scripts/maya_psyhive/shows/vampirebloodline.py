@@ -52,7 +52,7 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
         self.set_to_fk = wrap_fn(self.ik_fk_attr.set_val, 0)
 
     def apply_fk_to_ik(self, pole_vect_depth=30.0, apply_=True,
-                       build_tmp_geo=False, verbose=1):
+                       build_tmp_geo=False, verbose=0):
         """Apply fk to ik.
 
         First the pole vector is calculated by extending a line from the
@@ -85,7 +85,7 @@ class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
             raise ValueError(self.limb)
         _pole_dir = -(_limb_v ^ _limb_bend).normalized()
         _pole_p = hom.get_p(self.fk_ctrls[1]) + _pole_dir*pole_vect_depth
-        print 'APPLYING POLE', self.ik_pole
+        lprint(' - APPLYING POLE', self.ik_pole, verbose=verbose)
 
         # Read fk3 mtx
         _ik_mtx = hom.get_m(self.fk_ctrls[2])

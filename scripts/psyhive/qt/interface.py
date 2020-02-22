@@ -81,7 +81,8 @@ class HUiDialog(QtWidgets.QDialog):
             self.ui.closeEvent = self.closeEvent
             self.setWindowTitle(self.ui.windowTitle())
         else:
-            self.ui.rejected.connect(self.closeEvent)
+            if hasattr(self.ui, 'rejected'):  # Main window has no rejected
+                self.ui.rejected.connect(self.closeEvent)
             if (
                     dev_mode() and
                     isinstance(self.ui, QtWidgets.QDialog) and
@@ -324,8 +325,10 @@ class HUiDialog(QtWidgets.QDialog):
                 _val = [int(_item) for _item in _val]
                 lprint('SET SPLITTER SIZE', _val, verbose=verbose)
                 _widget.setSizes(_val)
+            elif isinstance(_widget, QtWidgets.QLabel):
+                pass
             else:
-                print 'WIDGET', _widget
+                print 'WIDGET', _name, _widget
                 raise ValueError(
                     'Error reading settings '+self.settings.fileName())
 

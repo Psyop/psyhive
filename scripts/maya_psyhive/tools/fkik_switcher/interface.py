@@ -27,7 +27,7 @@ class _NoSystemSelected(HandledError):
         super(_NoSystemSelected, self).__init__(msg=msg)
 
 
-class _FkIkSwitcherUi(qt.HUiDialog):
+class _FkIkSwitcherUi(qt.HUiDialog2):
     """Interface for FK/IK switcher."""
 
     def __init__(self, system_=None):
