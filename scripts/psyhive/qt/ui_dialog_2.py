@@ -26,7 +26,7 @@ class HUiDialog2(QtWidgets.QDialog):
     _redraw_sorting = None
 
     def __init__(self, ui_file, dialog_stack_key=None, save_settings=True,
-                 catch_error_=False):
+                 catch_error_=False, redraw=True):
         """Constructor.
 
         Args:
@@ -34,6 +34,7 @@ class HUiDialog2(QtWidgets.QDialog):
             dialog_stack_key (str): override dialog stack identifier
             save_settings (bool): load/save settings
             catch_error_ (bool): apply error catcher decorator
+            redraw (bool): redraw elements
         """
         from psyhive import host
 
@@ -43,11 +44,14 @@ class HUiDialog2(QtWidgets.QDialog):
 
         self._close_existing_uis(dialog_stack_key=dialog_stack_key)
 
-        super(HUiDialog2, self).__init__(parent=host.get_main_window_ptr())
+        _parent = host.get_main_window_ptr()
+        _kwargs = {'parent': _parent} if _parent else {}
+        super(HUiDialog2, self).__init__(**_kwargs)
 
         self._load_ui()
         self._connect_widgets(catch_error_=catch_error_)
-        self.redraw_ui()  # Populate before load settings
+        if redraw:
+            self.redraw_ui()  # Populate before load settings
 
         self._init_settings(save_settings=save_settings)
 
@@ -184,7 +188,11 @@ class HUiDialog2(QtWidgets.QDialog):
         self.setWindowIcon(_pix)
 
     def set_redraw_sorting(self, sort):
+        """Set sorting function for redrawing elements.
 
+        Args:
+            sort (fn): sorting function
+        """
         self._redraw_sorting = sort
 
     def delete(self):
@@ -192,7 +200,7 @@ class HUiDialog2(QtWidgets.QDialog):
         self.closeEvent(event=None)
         self.deleteLater()
 
-    def read_settings(self, verbose=1):
+    def read_settings(self, verbose=0):
         """Read settings from disk.
 
         Args:
@@ -267,7 +275,7 @@ class HUiDialog2(QtWidgets.QDialog):
             raise ValueError(
                 'Error reading settings '+self.settings.fileName())
 
-    def write_settings(self, verbose=1):
+    def write_settings(self, verbose=0):
         """Write settings to disk.
 
         Args:
@@ -305,12 +313,16 @@ class HUiDialog2(QtWidgets.QDialog):
         self.settings.setValue('window/size', self.ui.size())
         lprint(' - SAVING SIZE', self.ui.size(), verbose=verbose)
 
-    def redraw_ui(self, verbose=1):
-        """Redraw widgets that need updating."""
+    def redraw_ui(self, verbose=0):
+        """Redraw widgets that need updating.
+
+        Args:
+            verbose (int): print process data
+        """
         lprint("REDRAW UI", self, verbose=verbose)
         _widgets = self.findChildren(QtWidgets.QWidget)
         if self._redraw_sorting:
-            _widgets.sort(key=_self._redraw_sorting)
+            _widgets.sort(key=self._redraw_sorting)
         for _widget in _widgets:
             _redraw = getattr(_widget, 'redraw', None)
             if _redraw:
@@ -329,6 +341,15 @@ class HUiDialog2(QtWidgets.QDialog):
 
 
 def get_widget_sort(first=(), last=()):
+    """Build widget sorting function.
+
+    Args:
+        first (tuple): list of widgets to start with
+        last (tuple): list of widgets to end with
+
+    Returns:
+        (fn): sorting function
+    """
 
     def _widget_sort(widget):
 
@@ -343,5 +364,4 @@ def get_widget_sort(first=(), last=()):
 
         return _prefix + widget.objectName()
 
-    return _widget_sort 
-
+    return _widget_sort

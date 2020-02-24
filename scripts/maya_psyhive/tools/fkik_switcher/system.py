@@ -212,7 +212,7 @@ class FkIkSystem(object):
         if key_mode in ['none']:
             pass
         elif key_mode == 'timeline':
-            self.exec_switch_and_key_over_timeline(
+            self.exec_switch_and_key_over_range(
                 switch_mode=switch_mode, switch_key=switch_key)
             return
         elif key_mode == 'frame':
@@ -236,15 +236,18 @@ class FkIkSystem(object):
         else:
             raise ValueError(key_mode)
 
-    def exec_switch_and_key_over_timeline(self, switch_mode, switch_key=False, selection=True):
-        """Exec switch and key over timeline selection.
+    def exec_switch_and_key_over_range(
+            self, switch_mode, switch_key=False, selection=True):
+        """Exec switch and key over range.
 
         Args:
             switch_mode (str): fk/ik switch mode
             switch_key (bool): add keys on switch
+            selection (bool): use timeline selection
+                (otherwise use whole timeline)
         """
 
-        # Read timeline range
+        # Read range
         if selection:
             _timeline = mel.eval('$tmpVar=$gPlayBackSlider')
             _start, _end = [

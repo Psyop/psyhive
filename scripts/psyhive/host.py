@@ -78,7 +78,7 @@ def cur_scene():
     return _cur_scene
 
 
-def _handle_unsaved_changes():
+def handle_unsaved_changes():
     """Handle unsaved changes in the current scene.
 
     If there are unsaved changes, offer to save or ignore them.
@@ -115,7 +115,7 @@ def open_scene(file_, func=None, force=False):
         force (bool): lose current scene with no warning
     """
     if not force and _scene_modified():
-        _handle_unsaved_changes()
+        handle_unsaved_changes()
     _func = func or wrap_fn(_force_open_scene, file_)
     _func()
 
@@ -129,7 +129,7 @@ def new_scene(force=False):
         force (bool): lose current scene with no warning
     """
     if not force and _scene_modified():
-        _handle_unsaved_changes()
+        handle_unsaved_changes()
     _force_new_scene()
 
 

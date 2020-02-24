@@ -45,16 +45,22 @@ class ArgUpdater(object):
 
 
 class BrowserLauncher(object):
-    """Hook to facilitate adding a browser button to an arg field."""
+    """Hook to facilitate adding a browser button to an arg field.
 
-    def __init__(self, title=None, get_default_dir=None):
+    This object should be passed to the install_gui decorator as a value
+    in the browser arg dictionary.
+    """
+
+    def __init__(self, title=None, default_dir=None, get_default_dir=None):
         """Constructor.
 
         Args:
             title (str): title for browser
+            default_dir (str): path to default browser dir
             get_default_dir (fn): function to get default dir for browser
         """
         self.title = title
+        self._default_dir = default_dir
         self._get_default_dir = get_default_dir
 
     def get_default_dir(self):
@@ -63,6 +69,8 @@ class BrowserLauncher(object):
         Returns:
             (str): path to start browser in
         """
+        if self._default_dir:
+            return self._default_dir
         return self._get_default_dir()
 
 

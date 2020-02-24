@@ -81,8 +81,7 @@ class HUiDialog(QtWidgets.QDialog):
             self.ui.closeEvent = self.closeEvent
             self.setWindowTitle(self.ui.windowTitle())
         else:
-            if hasattr(self.ui, 'rejected'):  # Main window has no rejected
-                self.ui.rejected.connect(self.closeEvent)
+            self.ui.rejected.connect(self.closeEvent)
             if (
                     dev_mode() and
                     isinstance(self.ui, QtWidgets.QDialog) and

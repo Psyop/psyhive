@@ -17,7 +17,7 @@ ICON = icons.EMOJI.find("Vampire: Medium-Light Skin Tone")
 LABEL = "Vampire Bloodline"
 
 
-class _VampireFkIkSystem(fkik_switcher.FkIkSystem):
+class VampireFkIkSystem(fkik_switcher.FkIkSystem):
     """Represents vapire rig FK/IK system."""
 
     def setup_ctrls(self):
@@ -144,4 +144,4 @@ def launch_vampire_ikfk_switcher():
     Returns:
         (FkIkSwitcherUi): dialog instance
     """
-    return fkik_switcher.launch_interface(system_=_VampireFkIkSystem)
+    return fkik_switcher.launch_interface(system_=VampireFkIkSystem)

@@ -43,7 +43,7 @@ class TestTools(unittest.TestCase):
     def test_fkik_switcher(self):
 
         _dialog = fkik_switcher.launch_interface()
-        _dialog.ui.close()
+        _dialog.close()
 
         _ref = ref.obtain_ref(namespace='archer', file_=_RIG_PATH)
         _ctrl = _ref.get_node('Lf_armIk_Ctrl')

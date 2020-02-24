@@ -217,7 +217,7 @@ def launch_err_catcher(traceback_, message):
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
 
 
-def get_error_catcher(exit_on_error=False, verbose=1):
+def get_error_catcher(exit_on_error=True, verbose=1):
     """Build an error catcher decorator.
 
     Args:
@@ -248,7 +248,7 @@ def get_error_catcher(exit_on_error=False, verbose=1):
                 _handle_exception(_exc)
                 if exit_on_error:
                     sys.exit()
-                raise _exc
+                return None
             lprint(
                 ' - EXECUTED FUNCTION', func.__name__,
                 verbose=verbose > 1)

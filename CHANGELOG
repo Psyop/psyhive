@@ -1,3 +1,47 @@
+#### v0.59.0 ####
+
+    Released: Mon 24th Feb 2020
+
+    Frasier Tools: 
+        added tools to ingest ma file + export fbx,
+        added FK/IK switcher,
+    FK/IK switcher:
+        bugfix interface dissappears behind main maya window,
+    
+    maya_psyhive:
+        ref.FileRef.path apply abs_path,
+        shows.frasier added prepare ma file + export fbx tools,
+        shows.vampirebloodline fk/ik system made public + more quiet,
+        tools.fkik_switcher uses HUiDialog2,
+        tools.fkik_switcher renamed exec_switch_and_key_over_timeline -> exec_switch_and_key_over_range + added selection option,
+        utils blast/set_res added,
+    psyhive:
+        host.handle_unsaved_changes made public,
+        py_gui.BrowserLauncher added default_dir arg,
+        qt added HUiDialog2/get_widget_sort,
+        qt.HUiDialog.read_settings ignore QLabel,
+        qt.progress bugfix replace by stack_key + fix stacking multiple bars,
+        qt.progress assign rand colour based on title,
+        qt.HListWidgetItem allow data/text on init + added __repr__,
+        tk2.TTBase.map_to use current dcc if not declared + catch no dcc if required,
+        tk2.TTStepRoot.find_work added class_ arg,
+        tk2.TTOutputFileSeq.exists bugfix using File.exists,
+        tk2.TTWorkArea.find_work bugfix casting class_ causing fail to build test work,
+        tk2.TTWork.find_output_files added output_type/extension filters,
+        tk2.TTWork.get_root added,
+        tools.err_catcher.toggle_err_catcher bugfix toggle,
+        tools.hive_bro.create_work_item added,
+        tools.hive_bro fixed seq labelling in work ctx + added mov handling,
+        utils CacheMissing/get_time_f added,
+        utils.File.copy_to allow file_ as File,
+        utils.File.delete print path fail to delete,
+        utils.File.matches added,
+        utils.abs_path allow path as Path,
+        utils.read_file better error on missing file,
+        utils.PyFile.get_ast print syntax error lineno in FileError,
+        utils.Seq.find_range added force arg,
+
+
 #### v0.58.0 ####
 
     Released: Wed 12th Feb 2020
