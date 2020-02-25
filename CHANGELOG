@@ -1,3 +1,19 @@
+#### v0.60.0 ####
+
+    Released: Tue 25th Feb 2020
+
+    Frasier Tools: added action browser,
+    
+    maya_psyhive:
+        shows.frasier added FrasierWork/FrasierVendorMa,
+        shows.frasier.launch_action_browser added,
+    psyhive:
+        qt.dialog use host.get_main_window_ptr as default parent,
+        refresh.get_mod_sort match prefix in list,
+        tk2 CTTWorkArea/CTTWork get_metadata added force,
+        tk2.CTTWork.save reread metadata on save,
+
+
 #### v0.59.0 ####
 
     Released: Mon 24th Feb 2020

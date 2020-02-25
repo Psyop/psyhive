@@ -29,7 +29,9 @@ class _HMessageBox(QtWidgets.QMessageBox):
             icon_size (int): icon size in pixels
             parent (QDialog): parent dialog
         """
-        _args = [parent] if parent else []
+        from psyhive import host
+        _parent = parent or host.get_main_window_ptr()
+        _args = [_parent] if _parent else []
         super(_HMessageBox, self).__init__(*_args)
         self.setWindowTitle(title)
         self.setText(text)

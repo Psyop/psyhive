@@ -12,6 +12,7 @@ ignore:
         hv_test/diary/entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
         _machi/deck.py
+        psyhive/scripts/psyhive/tk2/tk_cache.py
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
@@ -44,6 +45,7 @@ ignore:
         hv-test/python/hv_test/startup/hsu_tools.py
         hv_test/toolkits/home_tools.py
         psyhive/scripts/maya_psyhive/shows/frasier.py
+        psyhive/scripts/maya_psyhive/shows/_fr_tools.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
@@ -55,6 +57,7 @@ ignore:
     missing-docstring: '*'
     no-member:
         hv_test/diary/
+        psyhive/scripts/maya_psyhive/shows/_fr_browser.py
         psyhive/qt/wrapper/widgets.py
         psyhive/tk/cache.py
         sanity_check/checks/maya/general/shotgun.py
@@ -74,6 +77,7 @@ ignore:
         maya_psyhive/tools/yeti/yeti_ui.py
         psyhive/py_gui/pyg_qt.py
         psyhive/qt/wrapper/widgets.py
+        psyhive/scripts/maya_psyhive/shows/_fr_work.py
         psyhive/tk/templates/tt_base_work.py
         psyhive/tools/batch_rerender/interface.py
         psyhive/tools/err_catcher.py
@@ -149,6 +153,7 @@ ignore:
         psyhive/pipe/work_file.py
         psyhive/py_gui/pyg_base.py
         psyhive/qt/progress.py
+        psyhive/scripts/maya_psyhive/shows/_fr_work.py
         psyhive/utils/py_file/base.py
         psyhive/utils/py_file/docs.py
     too-many-lines:
@@ -174,9 +179,9 @@ ignore:
     unreachable:
         hv_test/diary/
     unsubscriptable-object:
-        hv_test/diary/y20/d0213/_fr_core.py
         _machi/game.py
         maya_psyhive/tools/yeti/cache.py
+        psyhive/scripts/maya_psyhive/shows/_fr_work.py
     unsupported-assignment-operation:
         hv_test/diary/y20/d0206/google_images_tests.py
     unused-argument:

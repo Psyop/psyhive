@@ -65,6 +65,9 @@ _RELOAD_ORDER = [
     'maya_psyhive.tools.batch_cache.sg_handler',
     'maya_psyhive.tools.batch_cache',
     'maya_psyhive.tools',
+    'maya_psyhive.shows._fr_',
+    'maya_psyhive.shows.frasier',
+    'maya_psyhive.shows',
     'maya_psyhive.startup',
     'maya_psyhive',
 
@@ -162,6 +165,9 @@ def get_mod_sort(order):
                 break
             if name.startswith(_name+'.') and name not in order:
                 _val += 0.01
+                break
+            if name.startswith(_name) and name not in order:
+                _val += 0.02
                 break
         _val += _idx*10
 

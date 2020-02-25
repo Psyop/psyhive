@@ -1,17 +1,19 @@
 """Tools for frasier_38732V project."""
 
 import os
-import shutil
 import sys
 
 from maya import cmds
 
-from psyhive import icons, py_gui, host, refresh
-from psyhive.utils import store_result, File, nice_size
+from psyhive import icons, py_gui, host
 
 from maya_psyhive import ref, ui
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
+
+from . import _fr_browser, _fr_tools
+from ._fr_vendor_ma import FrasierVendorMa
+from ._fr_work import FrasierWork, find_action_works, ASSETS
 
 ICON = icons.EMOJI.find('Brain')
 _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
@@ -20,7 +22,8 @@ _PY_ROOT = _ROOT+'/release/maya/v2018/hsl/python'
 _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 _MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
                      'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
-_KEALEYE_TOOLS_ROOT = 'P:/projects/frasier_38732V/production/kealeye_tools'
+
+_DUMMY = [FrasierWork, FrasierVendorMa, find_action_works, ASSETS]  # For lint
 
 
 py_gui.set_section("Ingestion tools")
@@ -41,7 +44,7 @@ def _ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
     if ma_ and load_ma:
         print 'INGEST', ma_
         _load_vendor_ma(ma_.path, force=force)
-        ma_.get_range(force=True)  # Cache range
+        ma_.get_range(force=True)  # Update caches
 
     if apply_mapping:
         _apply_kealeye_rig_mapping()
@@ -53,7 +56,8 @@ def _ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
         _work = ma_.get_work()
         print ' - WORK', _work
         print ' - RANGE', ma_.get_range()
-        _work.save(comment='Copied from '+ma_.path)
+        host.save_scene(_work.path)
+        _work.set_comment('Copied from '+ma_.path)
         _work.set_vendor_file(ma_.path)
         _work.has_ik_legs()  # Store cache
         if legs_to_ik:
@@ -97,16 +101,6 @@ def _load_vendor_ma(path, force=False, lazy=False):
         _ref.swap_to(_MOTIONBURNER_RIG)
 
 
-@store_result
-def _install_mocap_tools():
-    """Install Sean Kealeye MocapTools module."""
-    refresh.add_sys_path(_KEALEYE_TOOLS_ROOT)
-    assert os.path.exists(_KEALEYE_TOOLS_ROOT)
-    assert os.path.exists(_KEALEYE_TOOLS_ROOT+'/MocapTools')
-    import MocapTools
-    print 'INSTALLED MocapTools MODULE', MocapTools
-
-
 def _apply_kealeye_rig_mapping():
     """Apply rig mapping from Sean Kealeye MocapTools.
 
@@ -114,7 +108,7 @@ def _apply_kealeye_rig_mapping():
     then bakes the anim. The MotionBurner rig is left in the scene
     for comparison but it is placed in a group and hidden.
     """
-    _install_mocap_tools()
+    _fr_tools.install_mocap_tools()
     from MocapTools.Scripts import PsyopMocapTools
 
     # Apply kealeye bake
@@ -161,35 +155,6 @@ def prepare_motionburner_ma_file(ma_, use_hsl_rig=True, legs_to_ik=False):
                save=False)
 
 
-def _export_hsl_fbx_from_cur_scene(fbx):
-    """Export HSL format fbx from the current scene.
-
-    This uses the MocapTools library.
-
-    Args:
-        fbx (str): path to export to
-    """
-    cmds.loadPlugin('fbxmaya', quiet=True)
-    _install_mocap_tools()
-    from MocapTools.Scripts import PsyopMocapTools
-
-    _tmp_fbx = File('{}/MocapTools/Anim/Export/{}_SK_Tier1_Male.fbx'.format(
-        _KEALEYE_TOOLS_ROOT, File(host.cur_scene()).basename))
-    print ' - TMP FBX', _tmp_fbx.path
-
-    _setup = PsyopMocapTools.mocapSetupTools()
-    _tmp_fbx.delete(force=True)
-    assert not _tmp_fbx.exists()
-    _setup.exportAnim(PsyopMocapTools.config.animFBX)
-    assert _tmp_fbx.exists()
-
-    # Move from tmp dir
-    _fbx = File(fbx)
-    _fbx.test_dir()
-    shutil.move(_tmp_fbx.path, _fbx.path)
-    print ' - SAVED FBX', nice_size(_fbx.path), _fbx.path
-
-
 @py_gui.install_gui(
     browser={'fbx': py_gui.BrowserLauncher(
         default_dir='P:/projects/frasier_38732V')},
@@ -200,7 +165,7 @@ def export_hsl_fbx(fbx=''):
     Args:
         fbx (str): path to export to
     """
-    _export_hsl_fbx_from_cur_scene(fbx)
+    _fr_tools.export_hsl_fbx_from_cur_scene(fbx)
 
 
 py_gui.set_section("Animation")
@@ -211,6 +176,12 @@ def launch_fkik_switcher():
     """Launch FK/IK switcher interface for HSL rig."""
     return fkik_switcher.launch_interface(
         system_=vampirebloodline.VampireFkIkSystem)
+
+
+@py_gui.install_gui(label='Launch Action Browser')
+def launch_action_browser():
+    """Launch Action Browser interface."""
+    _fr_browser.launch()
 
 
 py_gui.set_section("HSL Tools")

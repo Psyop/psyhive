@@ -103,10 +103,11 @@ class _CTTWorkArea(TTWorkArea):
         return [obtain_cacheable(_work) for _work in _works]
 
     @store_result_on_obj
-    def get_metadata(self, verbose=0):
+    def get_metadata(self, force=False, verbose=0):
         """Read this work area's metadata yaml file.
 
         Args:
+            force (bool): force reread yaml
             verbose (int): print process data
 
         Returns:
@@ -119,18 +120,18 @@ class _CTTWork(TTWork):
     """Represents a work file with caching."""
 
     @store_result_on_obj
-    def get_metadata(self, data=None, catch=True, verbose=0):
+    def get_metadata(self, data=None, catch=True, force=False, verbose=0):
         """Read this work area's metadata yaml file.
 
         Args:
             data (dict): override read data
             catch (bool): no error on work file missing from metadata
+            force (bool): force reread yaml
             verbose (int): print process data
 
         Returns:
             (dict): work area metadata
         """
-        _work_area = self.get_work_area()
         return super(_CTTWork, self).get_metadata(
             data=data, catch=catch, verbose=verbose)
 
@@ -153,6 +154,14 @@ class _CTTWork(TTWork):
         """
         _root = super(_CTTWork, self).get_step_root()
         return obtain_cacheable(_root)
+
+    def save(self, *args, **kwargs):
+        """Save this work file."""
+        print 'SAVE CACHEABLE WORK'
+        super(_CTTWork, self).save(*args, **kwargs)
+        self.get_work_area().get_metadata(force=True)
+        self.get_metadata(force=True)
+        print ' - COMMENT', self.get_comment()
 
 
 class _CTTIncrement(TTIncrement):
