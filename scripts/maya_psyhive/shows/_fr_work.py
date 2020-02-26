@@ -15,9 +15,9 @@ import six
 
 from psyhive import host, tk2, qt
 from psyhive.utils import (
-    File, abs_path, Dir, CacheMissing, store_result_to_file, store_result,
+    File, abs_path, Dir, CacheMissing, store_result,
     apply_filter, get_time_f, get_time_t, store_result_on_obj,
-    lprint, passes_filter, store_result_content_dependent)
+    lprint, passes_filter, store_result_to_file)
 
 from . import _fr_tools, _fr_vendor_ma
 
@@ -271,17 +271,19 @@ class FrasierWork(tk2.TTWork):
         return _fr_vendor_ma.FrasierVendorMa(
             self.get_vendor_file()).get_range()
 
-    def get_export_fbx(self, dated=False):
+    def get_export_fbx(self, dated=False, anim=False):
         """Get path to export fbx for this work file.
 
         Args:
             dated (bool): get path to dated fbx (in date folder)
+            anim (bool): get path to anim fbx (in dated anim folder)
 
         Returns:
             (str): path to export fbx
         """
         _char_name = self.get_char_name()
         _char = {'M': 'Male', 'F': 'Female'}.get(_char_name, _char_name)
+        _fbx_root = Dir(EXPORT_FBX_ROOT)
 
         if self.type_ == 'Disposition':
             _fmt = (
@@ -297,23 +299,24 @@ class FrasierWork(tk2.TTWork):
         _fbx_path = _fmt.format(root=EXPORT_FBX_ROOT, work=self, char=_char)
 
         if dated:
-            _fbx_root = Dir(EXPORT_FBX_ROOT)
             _vendor_root = Dir(_fr_vendor_ma.MOBURN_ROOT)
-            # print self.get_vendor_file()
-            # print _fbx_path
-
             _vendor_file = self.get_vendor_file()
             _delivery_dir = _vendor_root.rel_path(_vendor_file).split('/')[0]
             assert self.get_mtime_fmt('%Y-%m-%d') in _delivery_dir
             _date_fbx = File('{}/{}/{}'.format(
                 _fbx_root.path, _delivery_dir,
                 _fbx_root.rel_path(_fbx_path)))
-            # print _date_fbx.path
             return _date_fbx
+
+        if anim:
+            _anim_fbx = File('{}/Anim-{}/{}'.format(
+                _fbx_root.path, time.strftime('%Y-%m-%d'),
+                _fbx_root.rel_path(_fbx_path)))
+            return _anim_fbx
 
         return File(_fbx_path)
 
-    @store_result_content_dependent
+    @store_result_to_file
     def has_ik_legs(self, force=False, verbose=0):
         """Test if this work file ik legs.
 
@@ -333,15 +336,30 @@ class FrasierWork(tk2.TTWork):
                 return False
         return True
 
-    def export_fbx(self):
-        """Export fbx from this work file."""
+    def export_fbx(self, anim=False):
+        """Export fbx from this work file.
+
+        Args:
+            anim (bool): export to anim folder
+        """
+
+        # Save top level fbx
         _fbx = self.get_export_fbx()
         print 'EXPORT FBX', _fbx.path
+        _fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path)
+
+        # Save to dated folder
         _dated_fbx = self.get_export_fbx(dated=True)
         print 'DATED FBX', _dated_fbx.path
-        _fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path)
         _dated_fbx.test_dir()
         shutil.copy(_fbx.path, _dated_fbx.path)
+
+        # Save to anim folder
+        if anim:
+            _anim_fbx = self.get_export_fbx(anim=True)
+            print 'ANIM FBX', _anim_fbx.path
+            _anim_fbx.test_dir()
+            shutil.copy(_fbx.path, _anim_fbx.path)
 
 
 def find_action_works(

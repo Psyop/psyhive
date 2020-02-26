@@ -281,7 +281,7 @@ class _ActionBrowser(QtWidgets.QDialog):
     def _callback__ExportFbx(self):
         _work = get_single(self.ui.Work.selected_data(), catch=True)
         _work_orig = _work.map_to(version=1)
-        _work_orig.export_fbx()
+        _work_orig.export_fbx(anim=True)
 
     def _callback__Magnet(self):
         _cur_scene = host.cur_scene()
