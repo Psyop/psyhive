@@ -208,7 +208,8 @@ class BasePyGui(object):
         _col = opts.get('col') or self.base_col
         _exec_fn = get_exec_fn(
             def_=def_, read_arg_fns=self.read_settings_fns['def'][def_.name],
-            disable_reload=_disable_reload, catch_error_=True)
+            disable_reload=_disable_reload, catch_error_=True,
+            interface=self)
         _help_fn = get_help_fn(def_)
         _code_fn = get_code_fn(def_)
         self.add_execute(

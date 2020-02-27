@@ -6,6 +6,7 @@ import sys
 from maya import cmds
 
 from psyhive import icons, py_gui, host
+from psyhive.utils import CacheMissing
 
 from maya_psyhive import ref, ui
 from maya_psyhive.tools import fkik_switcher
@@ -166,6 +167,60 @@ def export_hsl_fbx(fbx=''):
         fbx (str): path to export to
     """
     _fr_tools.export_hsl_fbx_from_cur_scene(fbx)
+
+
+py_gui.set_section('Search')
+
+
+@py_gui.install_gui(choices={
+    'type_': ['Any', 'Vignette', 'Encounter', 'Disposition', 'Transition'],
+    'format_': ['FBX (dated)', 'FBX', 'Full']})
+def search_ingested_files(
+        type_='Any', day='', fbx_filter='', ma_filter='',
+        format_='FBX (dated)'):
+    """Search ingested files and print matches in given format.
+
+    Args:
+        type_ (str): only match fbxs of the given type
+        day (str): match by delivery day (in %y%m%d format, eg. 200226)
+        fbx_filter (str): filter by fbx path
+        ma_filter (str): filter by vendor ma file path
+        format_ (str): what data to print out
+    """
+    _works = []
+    for _work in find_action_works(
+            type_=None if type_ == 'Any' else type_, day_filter=day,
+            fbx_filter=fbx_filter, ma_filter=ma_filter, version=1, force=True):
+
+        try:
+            _work.get_vendor_file()
+        except CacheMissing:
+            print '- MISSING VENDOR FILE', _work.path
+            continue
+        _works.append(_work)
+
+    print
+
+    for _idx, _work in enumerate(_works):
+
+        if format_ == 'FBX (dated)':
+            print '[{:d}/{:d}] {}'.format(
+                _idx+1, len(_works), _work.get_export_fbx(dated=True).path)
+
+        elif format_ == 'FBX':
+            print '[{:d}/{:d}] {}'.format(
+                _idx+1, len(_works), _work.get_export_fbx().path)
+
+        elif format_ == 'Full':
+            print '[{:d}/{:d}] {}'.format(
+                _idx+1, len(_works), _work.get_export_fbx().basename)
+            print ' - MA', _work.get_vendor_file()
+            print ' - WORK', _work.path
+            print ' - FBX', _work.get_export_fbx().path
+            print
+
+        else:
+            raise ValueError(format_)
 
 
 py_gui.set_section("Animation")

@@ -137,10 +137,42 @@
            </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <item>
               <widget class="QLabel" name="label_8">
                <property name="text">
                 <string>Version</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="PlaySeq">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Jump to current scene</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2381.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2381.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -164,8 +196,8 @@
                </property>
                <property name="iconSize">
                 <size>
-                 <width>14</width>
-                 <height>14</height>
+                 <width>18</width>
+                 <height>18</height>
                 </size>
                </property>
                <property name="flat">
@@ -176,7 +208,14 @@
             </layout>
            </item>
            <item>
-            <widget class="HListWidget" name="Work"/>
+            <widget class="HListWidget" name="Work">
+             <property name="iconSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -329,6 +368,10 @@
    <class>HListWidget</class>
    <extends>QListWidget</extends>
    <header>hlistwidget.h</header>
+   <slots>
+    <slot>blah()</slot>
+    <slot>redraw()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>

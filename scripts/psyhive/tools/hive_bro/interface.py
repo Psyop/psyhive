@@ -11,9 +11,7 @@ from psyhive.utils import (
     safe_zip, val_map, copy_text, str_to_seed,
     launch_browser, Seq, store_result_on_obj)
 
-_UI_FILE = abs_path('hive_bro.ui', root=os.path.dirname(__file__))
-
-# Use fileops to read/set comment
+UI_FILE = abs_path('hive_bro.ui', root=os.path.dirname(__file__))
 
 
 class _HiveBroAssets(object):
@@ -521,7 +519,7 @@ class _HiveBroStandalone(qt.HUiDialog2, _HiveBro):
     def __init__(self):
         """Constructor."""
         _HiveBro.__init__(self)
-        super(_HiveBroStandalone, self).__init__(ui_file=_UI_FILE)
+        super(_HiveBroStandalone, self).__init__(ui_file=UI_FILE)
         self.connect_signals()
         self.set_icon(icons.EMOJI.find('Honeybee'))
         if not host.NAME == 'maya':

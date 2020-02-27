@@ -175,14 +175,14 @@ class _ActionBrowser(QtWidgets.QDialog):
         # Get iterations
         _type = get_single(self.ui.Type.selected_text(), catch=True)
         _char = get_single(self.ui.Character.selected_data(), catch=True)
-        _disp = get_single(self.ui.Name.selected_text(), catch=True)
-        _label = get_single(self.ui.Desc.selected_text(), catch=True)
+        _name = get_single(self.ui.Name.selected_text(), catch=True)
+        _desc = get_single(self.ui.Desc.selected_text(), catch=True)
         _iters = sorted(set([
             _work.iter for _work in self.o_works
             if _work.type_ == _type and
             _work.get_root() == _char and
-            _work.disp == _disp and
-            _work.label == _label]))
+            _work.name == _name and
+            _work.desc == _desc]))
 
         # Populate list
         self.ui.Iteration.blockSignals(True)
@@ -196,7 +196,7 @@ class _ActionBrowser(QtWidgets.QDialog):
 
         self._redraw__Work()
 
-    def _redraw__Work(self, verbose=1):
+    def _redraw__Work(self, verbose=0):
 
         dprint('POPULATE WORK', verbose=verbose)
 
@@ -230,6 +230,7 @@ class _ActionBrowser(QtWidgets.QDialog):
 
     def _update_work(self):
         """Update work elements."""
+
         _work = get_single(self.ui.Work.selected_data(), catch=True)
         _cur_scene = host.cur_scene()
         _cur_work = tk2.cur_work()
@@ -260,10 +261,13 @@ class _ActionBrowser(QtWidgets.QDialog):
             self.ui.ExportFbx.setEnabled(False)
             self.ui.WorkBrowser.setEnabled(False)
 
+        self.ui.PlaySeq.setVisible(False)
+
     def _callback__Load(self):
         _work = get_single(self.ui.Work.selected_data(), catch=True)
-        if _work:
-            host.open_scene(_work.path)
+        if not _work:
+            return
+        _work.load()
         self._update_work()
 
     def _callback__VersionUp(self):

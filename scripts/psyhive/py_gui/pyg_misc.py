@@ -37,13 +37,16 @@ def get_def_icon(name, set_):
 
 
 def get_exec_fn(
-        def_, read_arg_fns, catch_error_=True, track_usage_=True,
+        def_, read_arg_fns, interface, catch_error_=True, track_usage_=True,
         disable_reload=False):
     """Get execute command for the given def and read arg functions.
+
+    Interface settings are saved on execute.
 
     Args:
         def_ (PyDef): def being executed
         read_arg_fns (dict): name/fn dict of functions to read def args
+        interface (PyGui): interface triggering function
         catch_error_ (bool): apply catch_error decorator
         track_usage_ (bool): apply track usage decorator
         disable_reload (bool): no reload on execute
@@ -67,6 +70,7 @@ def get_exec_fn(
         if track_usage_:
             _fn = track_usage(_fn)
         _fn(**_kwargs)
+        interface.save_settings()
         dprint('############ Complete {} ############'.format(def_.name))
 
     return _exec_fn

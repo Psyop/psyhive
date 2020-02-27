@@ -1,3 +1,24 @@
+#### v0.61.0 ####
+
+    Released: Wed 26th Feb 2020
+
+    Frasier Tools: 
+        bugfix action browser not showing vignettes,
+        bugfix action browser not updating shotgun env,
+        added tools to search fbxs,
+    
+    maya_psyhive:
+        shows.frasier action browser fix vignettes not populating,
+        shows.frasier action browser fix shotgun env not updating on load,
+        shows.frasier.find_action_works added name/desc filter,
+        shows.frasier.search_ingested_files added,
+    psyhive:
+        py_gui save settings on execute,
+        tk2.CTTWork.set_comment added to force metadata update on work area,
+        tk2.TTWork find_captures/find_seqs include blasts,
+        tools.hive_bro.UI_FILE made public,
+
+
 #### v0.60.1 ####
 
     Released: Tue 25th Feb 2020

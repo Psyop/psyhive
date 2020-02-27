@@ -158,7 +158,9 @@ class TTWork(TTBase, File):
         Returns:
             (TTOutput list): list of captures
         """
-        return self.find_outputs(output_type='capture')
+        return [_out for _out in self.find_outputs()
+                if _out.output_type == 'capture' or
+                'blast' in _out.output_type.lower()]
 
     def find_increments(self, verbose=0):
         """Find increments of this work file.
@@ -259,7 +261,8 @@ class TTWork(TTBase, File):
             (TTOutput list): list of sequences
         """
         return [_output for _output in self.find_outputs()
-                if _output.output_type in ('render', 'capture')]
+                if _output.output_type in ('render', 'capture') or
+                'blast' in _output.output_type.lower()]
 
     def find_vers(self):
         """Find other versions of this workfile.

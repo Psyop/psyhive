@@ -134,6 +134,7 @@ ignore:
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
         maya_psyhive/open_maya/cmds.py
+        maya_psyhive/shows/_fr_work.py
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/qt/interface.py
         psyhive/tk/templates/base.py

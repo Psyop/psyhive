@@ -155,13 +155,21 @@ class _CTTWork(TTWork):
         _root = super(_CTTWork, self).get_step_root()
         return obtain_cacheable(_root)
 
+    def set_comment(self, *args, **kwargs):
+        """Set comment for this work file."""
+        super(_CTTWork, self).set_comment(*args, **kwargs)
+        self._update_metadata()
+        print 'COMMENT', self.get_comment()
+
     def save(self, *args, **kwargs):
         """Save this work file."""
-        print 'SAVE CACHEABLE WORK'
         super(_CTTWork, self).save(*args, **kwargs)
+        self._update_metadata()
+
+    def _update_metadata(self):
+        """Update cached metadata."""
         self.get_work_area().get_metadata(force=True)
         self.get_metadata(force=True)
-        print ' - COMMENT', self.get_comment()
 
 
 class _CTTIncrement(TTIncrement):

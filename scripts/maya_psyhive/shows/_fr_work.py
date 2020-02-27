@@ -365,7 +365,7 @@ class FrasierWork(tk2.TTWork):
 def find_action_works(
         type_=None, task_filter=None, day_filter=None, max_age=None,
         after=None, task=None, root=None, filter_=None, version=None,
-        fbx_filter=None, ma_filter=None, force=False):
+        fbx_filter=None, ma_filter=None, name=None, desc=None, force=False):
     """Find action work files in frasier project.
 
     Args:
@@ -380,6 +380,8 @@ def find_action_works(
         version (int): filter by version (v001 are always ingested files)
         fbx_filter (str): apply filter export fbx path
         ma_filter (str): filter by vendor ma path
+        name (str): filter by exact name
+        desc (str): filter by exact desc
         force (bool): force reread actions from disk
 
     Returns:
@@ -387,23 +389,36 @@ def find_action_works(
     """
     _works = _read_action_works(force=force)
 
-    # Filter by task
-    if task_filter:
-        _works = apply_filter(
-            _works, task_filter, key=operator.attrgetter('task'))
-    if task:
-        _works = [_work for _work in _works if _work.task == task]
-
-    if type_:
-        _works = [_work for _work in _works if _work.type_ == type_]
-
+    # Filters
     if filter_:
         _works = apply_filter(
             _works, filter_, key=operator.attrgetter('path'))
+    if task_filter:
+        _works = apply_filter(
+            _works, task_filter, key=operator.attrgetter('task'))
+    if fbx_filter:
+        _works = [_work for _work in _works
+                  if passes_filter(_work.get_export_fbx().path, fbx_filter)]
+    if ma_filter:
+        _works = [_work for _work in _works
+                  if _work.get_mtime() and
+                  passes_filter(_work.get_vendor_file(), ma_filter)]
 
+    # Match attr
+    if task:
+        _works = [_work for _work in _works if _work.task == task]
+    if type_:
+        _works = [_work for _work in _works if _work.type_ == type_]
     if root:
         _works = [_work for _work in _works if _work.get_root() == root]
+    if name:
+        _works = [_work for _work in _works if _work.name == name]
+    if desc:
+        _works = [_work for _work in _works if _work.desc == desc]
+    if version:
+        _works = [_work for _work in _works if _work.version == version]
 
+    # Date match
     if max_age is not None:
         _works = [_work for _work in _works if _work.get_age() < max_age]
 
@@ -411,24 +426,11 @@ def find_action_works(
         _works = [_work for _work in _works
                   if _work.get_mtime() and
                   _work.get_mtime_fmt('%y%m%d') == day_filter]
-
     if after:
         _cutoff = get_time_f(time.strptime(after, '%y%m%d'))
         _works = [_work for _work in _works
                   if _work.get_mtime() and
                   _work.get_mtime() >= _cutoff]
-
-    if fbx_filter:
-        _works = [_work for _work in _works
-                  if passes_filter(_work.get_export_fbx().path, fbx_filter)]
-
-    if ma_filter:
-        _works = [_work for _work in _works
-                  if _work.get_mtime() and
-                  passes_filter(_work.get_vendor_file(), ma_filter)]
-
-    if version:
-        _works = [_work for _work in _works if _work.version == version]
 
     return _works
 
