@@ -166,6 +166,11 @@ class _CTTWork(TTWork):
         super(_CTTWork, self).save(*args, **kwargs)
         self._update_metadata()
 
+    def save_inc(self, *args, **kwargs):
+        """Save this work file."""
+        super(_CTTWork, self).save_inc(*args, **kwargs)
+        self._update_metadata()
+
     def _update_metadata(self):
         """Update cached metadata."""
         self.get_work_area().get_metadata(force=True)

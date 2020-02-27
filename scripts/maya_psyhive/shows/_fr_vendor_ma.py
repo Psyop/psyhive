@@ -25,6 +25,8 @@ class FrasierVendorMa(File):
         self.cache_fmt = '{}/data_cache/{}/{}_{{}}.cache'.format(
             MOBURN_ROOT, _rel_path, self.basename)
 
+        self.get_work()  # Check this maps to valid work file
+
     def get_work(self, verbose=0):
         """Get work file object for this vendor file.
 

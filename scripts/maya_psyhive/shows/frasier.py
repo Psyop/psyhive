@@ -14,7 +14,7 @@ from maya_psyhive.shows import vampirebloodline
 
 from . import _fr_browser, _fr_tools
 from ._fr_vendor_ma import FrasierVendorMa
-from ._fr_work import FrasierWork, find_action_works, ASSETS
+from ._fr_work import FrasierWork, find_action_works, ASSETS, cur_work
 
 ICON = icons.EMOJI.find('Brain')
 _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
@@ -24,7 +24,8 @@ _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 _MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
                      'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
 
-_DUMMY = [FrasierWork, FrasierVendorMa, find_action_works, ASSETS]  # For lint
+_DUMMY = [FrasierWork, FrasierVendorMa, find_action_works,
+          ASSETS, cur_work]  # For lint
 
 
 py_gui.set_section("Ingestion tools")
@@ -177,7 +178,7 @@ py_gui.set_section('Search')
     'format_': ['FBX (dated)', 'FBX', 'Full']})
 def search_ingested_files(
         type_='Any', day='', fbx_filter='', ma_filter='',
-        format_='FBX (dated)'):
+        format_='FBX (dated)', refresh=True):
     """Search ingested files and print matches in given format.
 
     Args:
@@ -186,12 +187,13 @@ def search_ingested_files(
         fbx_filter (str): filter by fbx path
         ma_filter (str): filter by vendor ma file path
         format_ (str): what data to print out
+        refresh (bool): reread actions from disk
     """
     _works = []
     for _work in find_action_works(
             type_=None if type_ == 'Any' else type_, day_filter=day,
-            fbx_filter=fbx_filter, ma_filter=ma_filter, version=1, force=True):
-
+            fbx_filter=fbx_filter, ma_filter=ma_filter, version=1,
+            force=refresh):
         try:
             _work.get_vendor_file()
         except CacheMissing:

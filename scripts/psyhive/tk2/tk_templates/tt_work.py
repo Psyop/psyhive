@@ -400,7 +400,7 @@ class TTWork(TTBase, File):
 
         if self.exists():
 
-            self._save_inc(comment=comment)
+            self.save_inc(comment=comment)
 
         else:
 
@@ -427,7 +427,7 @@ class TTWork(TTBase, File):
         self.set_comment(comment)
         self.add_to_recent()
 
-    def _save_inc(self, comment):
+    def save_inc(self, comment):
         """Save increment file.
 
         Args:

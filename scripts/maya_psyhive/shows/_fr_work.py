@@ -198,7 +198,7 @@ class FrasierWork(tk2.TTWork):
         """
         return time.strftime(fmt, get_time_t(self.get_mtime()))
 
-    def get_ref_data(self):
+    def _get_face_ref_data(self):
         """Get reference mov data.
 
         Some files have reference footage associated with them. This is
@@ -210,19 +210,44 @@ class FrasierWork(tk2.TTWork):
             (tuple): mov path, start seconds
         """
         _vendor_file = self.get_vendor_file()
-        _ref_movs_data = _get_ref_movs_data()
+        _ref_movs_data = _get_face_ref_movs_data()
         if _vendor_file not in _ref_movs_data:
             return None
         _mov, _start = _ref_movs_data[_vendor_file]
         return _mov, _start
 
-    def get_ref_mov(self):
-        """Get reference mob path for this wor file.
+    def _get_body_ref_data(self):
+        """Get body reference data.
+
+        Returns:
+            (tuple): mov path, secs offset
+        """
+        _all_data = _get_body_ref_movs_data()
+        return _all_data.get(self.blast_comp.path)
+
+    def get_ref_data(self, which='face'):
+        """Get reference mob path for this work file.
+
+        Args:
+            which (str): which data to retrieve (face/body)
 
         Returns:
             (str|None): path to ref mov (if any)
         """
-        _data = self.get_ref_data()
+        _fn = {'face': self._get_face_ref_data,
+               'body': self._get_body_ref_data}[which]
+        return _fn()
+
+    def get_ref_mov(self, which='face'):
+        """Get reference mob path for this work file.
+
+        Args:
+            which (str): which data to retrieve (face/body)
+
+        Returns:
+            (str|None): path to ref mov (if any)
+        """
+        _data = self.get_ref_data(which=which)
         if not _data:
             return None
         _mov, _ = _data
@@ -454,7 +479,7 @@ def _read_action_works(force=False):
 
 
 @store_result
-def _get_ref_movs_data(force=False):
+def _get_face_ref_movs_data(force=False):
     """Read reference movs spreadsheet data.
 
     Args:
@@ -463,9 +488,9 @@ def _get_ref_movs_data(force=False):
     Returns:
         (dict): vendor in mov, reference mov and start frame data
     """
-    _data = {}
-    _data_file = _DIR+'/_fr_ref_movs.data'
+    _data_file = '{}/_fr_ref_movs_face.data'.format(_DIR)
 
+    _data = {}
     for _line in File(_data_file).read_lines()[1:]:
         _line = _line.strip()
         if not _line.strip():
@@ -489,6 +514,44 @@ def _get_ref_movs_data(force=False):
         _start = float(_start)
 
         _data[_ma] = _mov, _start
+
+    return _data
+
+
+@store_result
+def _get_body_ref_movs_data(force=False):
+    """Read reference movs spreadsheet data.
+
+    Args:
+        force (bool): force reread from disk
+
+    Returns:
+        (dict): vendor in mov, reference mov and start frame data
+    """
+    _data_file = '{}/_fr_ref_movs_body.data'.format(_DIR)
+
+    _data = {}
+    for _line in File(_data_file).read_lines():
+        _line = _line.strip()
+        if not _line.strip():
+            continue
+
+        # Extract blast comp
+        _blast_comp = _line.split('.mov')[0]+'.mov'
+        assert _line.count(_blast_comp) == 1
+        _line = _line.replace(_blast_comp, '').strip()
+        _blast_comp = abs_path(_blast_comp)
+
+        # Extract ref mov
+        _body_ref = _line.split('.mov')[0]+'.mov'
+        assert _line.count(_body_ref) == 1
+        _line = _line.replace(_body_ref, '').strip()
+        _body_ref = abs_path(_body_ref)
+
+        # Extract start
+        _start = float(_line.strip())
+
+        _data[_blast_comp] = _body_ref, _start
 
     return _data
 

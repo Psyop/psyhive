@@ -472,6 +472,13 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
             verbose (int): print process data
         """
 
+    def save_settings(self, verbose=0):
+        """Not applicable.
+
+        Args:
+            verbose (int): print process data
+        """
+
     def set_section(self, section, verbose=0):
         """Set section.
 
