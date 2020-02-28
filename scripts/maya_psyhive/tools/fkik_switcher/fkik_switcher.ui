@@ -32,14 +32,14 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QRadioButton" name="key_none">
+        <widget class="QRadioButton" name="KeyNone">
          <property name="text">
           <string>None</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="key_frame">
+        <widget class="QRadioButton" name="KeyFrame">
          <property name="text">
           <string>Current frame</string>
          </property>
@@ -49,7 +49,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="key_timeline">
+        <widget class="QRadioButton" name="KeyTimeline">
          <property name="text">
           <string>Timeline selection</string>
          </property>
@@ -65,7 +65,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="switch_key">
+      <widget class="QCheckBox" name="SwitchKey">
        <property name="text">
         <string>Add switch key</string>
        </property>
@@ -85,7 +85,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="keyframe">
+      <widget class="QPushButton" name="Keyframe">
        <property name="maximumSize">
         <size>
          <width>70</width>
@@ -106,7 +106,7 @@ color: rgb(0, 0, 0);</string>
    <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QPushButton" name="fk_to_ik">
+      <widget class="QPushButton" name="FkToIk">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -129,7 +129,7 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ik_to_fk">
+      <widget class="QPushButton" name="IkToFk">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -158,9 +158,9 @@ color: rgb(0, 0, 0);</string>
  <resources/>
  <connections>
   <connection>
-   <sender>key_none</sender>
+   <sender>KeyNone</sender>
    <signal>toggled(bool)</signal>
-   <receiver>switch_key</receiver>
+   <receiver>SwitchKey</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -174,9 +174,9 @@ color: rgb(0, 0, 0);</string>
    </hints>
   </connection>
   <connection>
-   <sender>key_frame</sender>
+   <sender>KeyFrame</sender>
    <signal>toggled(bool)</signal>
-   <receiver>switch_key</receiver>
+   <receiver>SwitchKey</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -190,9 +190,9 @@ color: rgb(0, 0, 0);</string>
    </hints>
   </connection>
   <connection>
-   <sender>key_timeline</sender>
+   <sender>KeyTimeline</sender>
    <signal>toggled(bool)</signal>
-   <receiver>switch_key</receiver>
+   <receiver>SwitchKey</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

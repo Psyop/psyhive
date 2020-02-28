@@ -2,15 +2,15 @@
 
 import functools
 import os
-import sys
 import traceback
 import urllib
+import sys
 import webbrowser
 
 from psyhive import qt, icons, host, pipe
 from psyhive.utils import (
     abs_path, check_heart, File, FileError, lprint, dprint, dev_mode,
-    copy_text)
+    copy_text, get_single)
 
 _UI_FILE = abs_path('err_dialog.ui', root=os.path.dirname(__file__))
 
@@ -35,7 +35,7 @@ class HandledError(Exception):
         self.title = title or 'Error'
 
 
-class _ErrDialog(qt.HUiDialog):
+class _ErrDialog(qt.HUiDialog3):
     """Dialog for managing code errors."""
 
     def __init__(self, traceback_, message, type_=None):
@@ -51,29 +51,34 @@ class _ErrDialog(qt.HUiDialog):
         self.type_ = type_
 
         super(_ErrDialog, self).__init__(
-            ui_file=_UI_FILE, catch_error_=False)
+            ui_file=_UI_FILE, catch_errors_=False)
+
         self.setWindowTitle('Error')
 
-    def _redraw__er_message(self, widget):
+    def init_ui(self):
+        """Init ui elements."""
+        self._redraw__Traceback()
+        self._redraw__Message()
+
+    def _redraw__Message(self):
         _text = 'There has been an error ({})'.format(self.type_)
         if not self.message:
             _text += '.'
         else:
             _text += ':\n\n{}'.format(self.message)
-        widget.setText(_text)
+        self.ui.Message.setText(_text)
 
-    def _redraw__er_traceback(self, widget):
-        widget.clear()
+    def _redraw__Traceback(self):
+        self.ui.Traceback.clear()
         for _line in reversed(self.traceback.lines):
-            _item = qt.QtWidgets.QListWidgetItem(_line.text)
-            _item.setData(qt.QtCore.Qt.UserRole, _line)
-            widget.addItem(_item)
-        widget.setCurrentRow(0)
+            _item = qt.HListWidgetItem(_line.text, data=_line)
+            self.ui.Traceback.addItem(_item)
+        self.ui.Traceback.setCurrentRow(0)
 
-    def _callback__er_copy_text(self):
+    def _callback__CopyText(self):
         copy_text('```\n{}\n```'.format(self.traceback.clean_text))
 
-    def _callback__er_make_ticket(self):
+    def _callback__MakeTicket(self):
 
         _desc = '\n'.join([
             'HOST: {}'.format(host.NAME),
@@ -88,8 +93,8 @@ class _ErrDialog(qt.HUiDialog):
             summary='[PSYHIVE] Error: {}'.format(self.message),
             description=_desc)
 
-    def _callback__er_view_code(self):
-        _line = self.ui.er_traceback.currentItem().data(qt.QtCore.Qt.UserRole)
+    def _callback__ViewCode(self):
+        _line = get_single(self.ui.Traceback.selected_data())
         _line.edit()
 
 
@@ -217,7 +222,7 @@ def launch_err_catcher(traceback_, message):
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
 
 
-def get_error_catcher(exit_on_error=True, verbose=1):
+def get_error_catcher(exit_on_error=False, verbose=1):
     """Build an error catcher decorator.
 
     Args:
@@ -230,7 +235,7 @@ def get_error_catcher(exit_on_error=True, verbose=1):
     def _error_catcher(func):
 
         @functools.wraps(func)
-        def _catch_error_fn(*args, **kwargs):
+        def _catch_errors_fn(*args, **kwargs):
 
             # Handle catcher disabled
             if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
@@ -247,7 +252,7 @@ def get_error_catcher(exit_on_error=True, verbose=1):
                 lprint('EXCEPTION', func, args, kwargs, verbose=verbose)
                 _handle_exception(_exc)
                 if exit_on_error:
-                    sys.exit()
+                    raise sys.exit()
                 return None
             lprint(
                 ' - EXECUTED FUNCTION', func.__name__,
@@ -255,7 +260,7 @@ def get_error_catcher(exit_on_error=True, verbose=1):
 
             return _result
 
-        return _catch_error_fn
+        return _catch_errors_fn
 
     return _error_catcher
 

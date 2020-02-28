@@ -17,14 +17,14 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="er_message">
+      <widget class="QLabel" name="Message">
        <property name="text">
         <string>TextLabel</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="er_traceback">
+      <widget class="HListWidget" name="Traceback">
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
@@ -60,21 +60,21 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="er_make_ticket">
+        <widget class="QPushButton" name="MakeTicket">
          <property name="text">
           <string>Make ticket</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="er_copy_text">
+        <widget class="QPushButton" name="CopyText">
          <property name="text">
           <string>Copy text</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="er_view_code">
+        <widget class="QPushButton" name="ViewCode">
          <property name="text">
           <string>View code</string>
          </property>
@@ -86,6 +86,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HListWidget</class>
+   <extends>QListWidget</extends>
+   <header>hlistwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

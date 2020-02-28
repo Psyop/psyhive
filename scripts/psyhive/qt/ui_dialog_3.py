@@ -8,6 +8,8 @@ create issues.
 import operator
 import sys
 
+import six
+
 from psyhive.qt import QtCore, QtWidgets, Qt
 from psyhive.utils import abs_path, lprint, File, touch, dprint, dev_mode
 
@@ -32,11 +34,12 @@ def _get_widget_label(widget):
 class HUiDialog3(QtWidgets.QDialog):
     """Dialog based on a ui file."""
 
-    def __init__(self, ui_file):
+    def __init__(self, ui_file, catch_errors_=False):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
+            catch_errors_ (bool): apply error catcher to callbacks
         """
         from psyhive import host
         self.ui_file = ui_file
@@ -45,7 +48,7 @@ class HUiDialog3(QtWidgets.QDialog):
         super(HUiDialog3, self).__init__(parent=host.get_main_window_ptr())
 
         self._load_ui()
-        self._connect_elements()
+        self._connect_elements(catch_errors_=catch_errors_)
 
         self.init_ui()
         self.load_settings()
@@ -78,12 +81,15 @@ class HUiDialog3(QtWidgets.QDialog):
         self.setLayout(self.ui.layout())
         self.setWindowTitle(self.ui.windowTitle())
 
-    def _connect_elements(self, verbose=0):
+    def _connect_elements(self, catch_errors_=False, verbose=0):
         """Connect qt elements to callback/context methods.
 
         Args:
+            catch_errors_ (bool): apply error catcher to callbacks
             verbose (int): print process data
         """
+        if catch_errors_:
+            print 'CATCH ERRORS: NOT IMPLEMENTED'
 
         # Get list of widgets
         _widgets = self.findChildren(QtWidgets.QWidget)
@@ -176,11 +182,80 @@ class HUiDialog3(QtWidgets.QDialog):
         return QtCore.QSettings(
             _settings_file, QtCore.QSettings.IniFormat)
 
-    def load_settings(self):
-        """Load dialog settings."""
-        print 'LOAD SETTINGS (not implemented)', self.settings
+    def load_settings(self, verbose=0):
+        """Read settings from disk.
 
-    def save_settings(self, verbose=1):
+        Args:
+            verbose (int): print process data
+        """
+        dprint('LOAD SETTINGS', self.settings.fileName(), verbose=verbose)
+
+        # Apply window settings
+        _pos = self.settings.value('window/pos')
+        if _pos:
+            lprint(' - APPLYING POS', _pos, verbose=verbose)
+            self.move(_pos)
+        _size = self.settings.value('window/size')
+        if _size:
+            lprint(' - APPLYING SIZE', _size, verbose=verbose)
+            self.resize(_size)
+
+        # Apply widget settings
+        for _widget in self.findChildren(QtWidgets.QWidget):
+            _name = _widget.objectName()
+            _val = self.settings.value(_name)
+            if _val is None:
+                continue
+            lprint(' - APPLY', _name, _val, verbose=verbose)
+            self._load_setting(widget=_widget, value=_val)
+
+    def _load_setting(self, widget, value, verbose=0):
+        """Apply a value from settings to a widget.
+
+        Args:
+            widget (QWidget): widget to apply setting to
+            value (any): value to apply
+            verbose (int): print process data
+        """
+        _value = value
+
+        if isinstance(widget, QtWidgets.QLineEdit):
+            widget.setText(_value)
+
+        elif isinstance(widget, (
+                QtWidgets.QRadioButton,
+                QtWidgets.QCheckBox,
+                QtWidgets.QPushButton)):
+            if isinstance(_value, six.string_types):
+                _value = {'true': True, 'false': False}[_value]
+            if isinstance(_value, bool):
+                widget.setChecked(_value)
+            else:
+                print ' - FAILED TO APPLY:', widget, _value, type(_value)
+
+        elif isinstance(widget, QtWidgets.QListWidget):
+            _load_setting_list_widget(value=_value, widget=widget)
+
+        elif isinstance(widget, QtWidgets.QTabWidget):
+            try:
+                widget.setCurrentIndex(_value)
+            except TypeError:
+                print ' - FAILED TO APPLY TAB', _value
+
+        elif isinstance(widget, QtWidgets.QSplitter):
+            _value = [int(_item) for _item in _value]
+            lprint('SET SPLITTER SIZE', _value, verbose=verbose)
+            widget.setSizes(_value)
+
+        elif isinstance(widget, QtWidgets.QLabel):
+            pass
+
+        else:
+            print 'WIDGET', widget.objectName(), widget
+            raise ValueError(
+                'Error reading settings '+self.settings.fileName())
+
+    def save_settings(self, verbose=0):
         """Save dialog settings.
 
         Args:
@@ -217,6 +292,18 @@ class HUiDialog3(QtWidgets.QDialog):
         lprint(' - SAVING POS', self.pos(), verbose=verbose)
         self.settings.setValue('window/size', self.size())
         lprint(' - SAVING SIZE', self.size(), verbose=verbose)
+
+    def set_icon(self, icon):
+        """Set icon for this interface.
+
+        Args:
+            icon (str|QPixmap): icon to apply
+        """
+        from psyhive import qt
+        _pix = qt.get_pixmap(icon)
+        _icon = qt.get_icon(_pix)
+        self.setWindowIcon(_pix)
+        self.ui.setWindowIcon(_pix)
 
     def get_c(self):
         """Get interface centre.
@@ -275,3 +362,20 @@ def _is_pascal(string):
         if _chr in string:
             return False
     return True
+
+
+def _load_setting_list_widget(widget, value):
+    """Load a QListWidget setting.
+
+    If the stored value does not match any items in the list then
+    the widget is left unchanged.
+
+    Args:
+        widget (QListWidget): widget to apply setting to
+        value (str list): stored setting to apply
+    """
+    _items = [widget.item(_idx) for _idx in range(widget.count())]
+    if not [_item for _item in _items if _item.text() in value]:
+        return
+    for _item in _items:
+        _item.setSelected(_item.text() in value)

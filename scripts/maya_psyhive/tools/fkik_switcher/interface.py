@@ -27,7 +27,7 @@ class _NoSystemSelected(HandledError):
         super(_NoSystemSelected, self).__init__(msg=msg)
 
 
-class _FkIkSwitcherUi(qt.HUiDialog2):
+class _FkIkSwitcherUi(qt.HUiDialog3):
     """Interface for FK/IK switcher."""
 
     def __init__(self, system_=None):
@@ -40,20 +40,20 @@ class _FkIkSwitcherUi(qt.HUiDialog2):
         super(_FkIkSwitcherUi, self).__init__(ui_file=UI_FILE)
         self.set_icon(ICON)
 
-    def _callback__fk_to_ik(self):
+    def _callback__FkToIk(self):
         print 'FK -> IK'
         self._execute_switch(mode='fk_to_ik')
 
-    def _callback__ik_to_fk(self):
+    def _callback__IkToFk(self):
         print 'IK -> FK'
         self._execute_switch(mode='ik_to_fk')
 
-    def _callback__keyframe(self):
+    def _callback__Keyframe(self):
         _system = system.get_selected_system(
             class_=self.system, error=HandledError)
         cmds.setKeyframe(_system.get_key_attrs())
 
-    def _context__keyframe(self, menu):
+    def _context__Keyframe(self, menu):
         menu.setStyleSheet('background-color:DimGrey; color:white')
         try:
             _system = system.get_selected_system(class_=self.system)
@@ -73,13 +73,13 @@ class _FkIkSwitcherUi(qt.HUiDialog2):
             class_=self.system, error=HandledError)
         _system.exec_switch_and_key(
             switch_mode=mode,
-            switch_key=self.ui.switch_key.isChecked(),
+            switch_key=self.ui.SwitchKey.isChecked(),
             key_mode=self._read_key_mode())
 
     def _read_key_mode(self):
         """Read current key mode from radio buttons."""
-        for _name in ['none', 'frame', 'timeline']:
-            _elem = getattr(self.ui, 'key_'+_name)
+        for _name in ['None', 'Frame', 'Timeline']:
+            _elem = getattr(self.ui, 'Key'+_name)
             if _elem.isChecked():
                 return _name
         raise ValueError("Failed to read key mode")

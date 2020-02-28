@@ -44,8 +44,42 @@ def _find_shelf_buttons():
     return _btns
 
 
+def add_shelf(name, verbose=0):
+    """Make sure the shelf of the given name exists.
+
+    Args:
+        name (str): name of shelf
+        verbose (int): print process data
+
+    Returns:
+        (str): shelf name
+    """
+
+    _layout_name = name.replace(' ', '_')
+
+    # Check if shelf exists
+    _shelves = cmds.lsUI(type='shelfLayout')
+    _exists = _layout_name in _shelves
+    lprint('SHELF "{}" EXISTS: {}'.format(name, _exists), sorted(_shelves),
+           verbose=verbose)
+
+    if not _exists:
+
+        # Get shelves parent
+        _test_shelf = cmds.lsUI(type='shelfLayout')[0]
+        lprint('TEST SHELF', _test_shelf, verbose=verbose)
+        _parent = cmds.shelfLayout(_test_shelf, query=True, parent=True)
+        lprint('PARENT', _parent, verbose=verbose)
+
+        # Create the shelf
+        lprint('BUILDING "{}" SHELF'.format(name), verbose=verbose)
+        _layout_name = cmds.shelfLayout(name, parent=_parent)
+
+    return _layout_name
+
+
 def add_shelf_button(name, image, command, annotation=None, parent='Henry',
-                     width=None, force=True):
+                     width=None, force=True, enabled=True):
     """Add a shelf button.
 
     Args:
@@ -56,6 +90,7 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
         parent (str): parent shelf
         width (int): button width
         force (bool): force replace any existing buttons
+        enabled (bool): enabled state for button
     """
 
     # Replace existing buttons with matching name or command/image
@@ -71,10 +106,12 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
     # Create new button
     _kwargs = {}
     for _name, _val in [
+            ('label', annotation),
             ('annotation', annotation),
             ('image', image),
             ('command', command),
             ('width', width),
+            ('enable', enabled),
     ]:
         if _val:
             _kwargs[_name] = _val
@@ -103,16 +140,25 @@ def _get_separator_icon(icon='Fleur-de-lis'):
     return _file
 
 
-def add_separator(name, parent):
+def add_separator(name, parent, style='Fleur-de-lis'):
     """Add a shelf button separator.
 
     Args:
         name (str): ui element name
         parent (str): parent shelf
+        style (str): separator style
     """
-    _icon = _get_separator_icon()
-    add_shelf_button(name, image=_icon, command='# '+name, width=10,
-                     parent=parent)
+    if style == 'maya':
+        if cmds.separator(name, exists=True):
+            cmds.deleteUI(name)
+        cmds.separator(name, style='shelf', parent=parent)
+    elif style == 'Fleur-de-lis':
+        _icon = _get_separator_icon()
+        add_shelf_button(name, image=_icon, command='# {}\npass'.format(name),
+                         width=10, parent=parent, annotation='** Separator **',
+                         enabled=False)
+    else:
+        raise ValueError(style)
 
 
 def clear_script_editor():

@@ -1,3 +1,21 @@
+#### v0.64.0 ####
+
+    Released: Fri 28th Feb 2020
+
+    FK/IK Switcher + Error Dialog: updated to use more stable base class,
+    
+    maya_psyhive:
+        startup build PsyHive shelf,
+        tools.fkik_switcher updated to HUiDialog3,
+        ui.add_shelf added,
+        ui.add_shelf_button use annotation for label,
+    psyhive:
+        qt.HUiDialog3.load_settings implemented,
+        qt.HUiDialog3.set_icon added,
+        tools.err_catcher updated to HUiDialog3,
+        tools.err_catcher no exit on error,
+
+
 #### v0.63.0 ####
 
     Released: Fri 28th Feb 2020
