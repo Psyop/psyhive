@@ -93,7 +93,7 @@ def _load_vendor_ma(path, force=False, lazy=False):
                 print '######################'
                 print _exc.message
                 print '######################'
-                raise RuntimeError('Error on loading scene')
+                raise RuntimeError('Error on loading scene '+path)
 
         assert host.get_fps() == 30
 

@@ -17,10 +17,11 @@ from psyhive.qt.misc import (
     get_application, get_col, get_p, get_size, get_pixmap, get_icon)
 from psyhive.qt.constants import COLS, NICE_COLS, BLANK
 
-from psyhive.qt.interface import (
+from psyhive.qt.ui_dialog import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
     reset_interface_settings, get_ui_loader, safe_timer_event)
 from psyhive.qt.ui_dialog_2 import HUiDialog2, get_widget_sort
+from psyhive.qt.ui_dialog_3 import HUiDialog3
 
 from psyhive.qt.dialog import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,

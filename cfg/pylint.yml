@@ -19,7 +19,7 @@ ignore:
         hv_test/dev.py
         hv_test/diary/
         maya_psyhive/utils.py
-        psyhive/qt/interface.py
+        psyhive/qt/ui_dialog.py
         psyhive/tools/err_catcher.py
         sanity_check/checks/maya/general/scene.py
     c-extension-no-member:
@@ -36,7 +36,7 @@ ignore:
     expression-not-assigned:
         hv_test/diary/y19/d0613/curve_to_image_test.py
         hv_test/diary/y19/d1120/qt_threading_bug.py
-        psyhive/qt/interface.py
+        psyhive/qt/ui_dialog.py
     global-statement: '*'
     inconsistent-return-statements:
         hv_test/diary/
@@ -136,7 +136,7 @@ ignore:
         maya_psyhive/open_maya/cmds.py
         maya_psyhive/shows/_fr_work.py
         maya_psyhive/tools/fkik_switcher/system.py
-        psyhive/qt/interface.py
+        psyhive/qt/ui_dialog.py
         psyhive/tk/templates/base.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
@@ -176,7 +176,7 @@ ignore:
         diary/y19/d0726/machi4.py
     unidiomatic-typecheck:
         hv_test/diary/y19/d1120/qt_threading_bug.py
-        psyhive/qt/interface.py
+        psyhive/qt/ui_dialog.py
     unreachable:
         hv_test/diary/
     unsubscriptable-object:

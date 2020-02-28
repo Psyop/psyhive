@@ -1,10 +1,8 @@
 """Tools for providing an actions browser in frasier."""
 
 import os
-import sys
 
-from psyhive import qt, host, tk2
-from psyhive.qt import QtWidgets
+from psyhive import qt, host, tk2, icons
 from psyhive.tools import hive_bro
 from psyhive.utils import get_single, abs_path, dprint
 
@@ -15,7 +13,7 @@ _DIR = abs_path(os.path.dirname(__file__))
 _UI_FILE = _DIR+'/_fr_action_browser.ui'
 
 
-class _ActionBrowser(QtWidgets.QDialog):
+class _ActionBrowser(qt.HUiDialog3):
     """Browser for frasier actions."""
 
     def __init__(self, path=None):
@@ -24,42 +22,18 @@ class _ActionBrowser(QtWidgets.QDialog):
         Args:
             path (str): jump to path
         """
-
-        # Read works
+        self._trg_path = path
         self._read_works()
+        super(_ActionBrowser, self).__init__(ui_file=_UI_FILE)
 
-        # Clean existing uis
-        if _UI_FILE in sys.QT_DIALOG_STACK:
-            sys.QT_DIALOG_STACK[_UI_FILE].deleteLater()
-        sys.QT_DIALOG_STACK[_UI_FILE] = self
-
-        super(_ActionBrowser, self).__init__(parent=host.get_main_window_ptr())
-
-        self.setWindowTitle('Action Browser')
-        self.ui = qt.get_ui_loader().load(_UI_FILE)
-        self.setLayout(self.ui.layout())
+    def init_ui(self):
+        """Init ui elements."""
         self.ui.splitter.setSizes([314, 453])
-
         self._redraw__Character()
 
-        self.ui.Type.itemSelectionChanged.connect(self._redraw__Character)
-        self.ui.Character.itemSelectionChanged.connect(self._redraw__Name)
-        self.ui.Name.itemSelectionChanged.connect(self._redraw__Desc)
-        self.ui.Desc.itemSelectionChanged.connect(self._redraw__Iteration)
-        self.ui.Iteration.itemSelectionChanged.connect(self._redraw__Work)
-        self.ui.Work.itemSelectionChanged.connect(self._update_work)
-
-        self.ui.Load.clicked.connect(self._callback__Load)
-        self.ui.VersionUp.clicked.connect(self._callback__VersionUp)
-        self.ui.ExportFbx.clicked.connect(self._callback__ExportFbx)
-        self.ui.Magnet.clicked.connect(self._callback__Magnet)
-        self.ui.WorkBrowser.clicked.connect(self._callback__WorkBrowser)
-
-        _path = path or host.cur_scene()
+        _path = self._trg_path or host.cur_scene()
         if _path:
             self.jump_to(_path)
-
-        self.show()
 
     def jump_to(self, path):
         """Jump browser to the given path.
@@ -93,7 +67,7 @@ class _ActionBrowser(QtWidgets.QDialog):
         Args:
             force (bool): force reread from disk
         """
-        self.o_works = _fr_work.find_action_works(force=True)
+        self.o_works = _fr_work.find_action_works(force=force)
         self.c_works = {}
         for _o_work in self.o_works:
             _c_work = tk2.obtain_cacheable(tk2.TTWork(_o_work.path))
@@ -226,12 +200,13 @@ class _ActionBrowser(QtWidgets.QDialog):
             self.ui.Work.setCurrentRow(0)
         self.ui.Work.blockSignals(False)
 
-        self._update_work()
+        self._callback__Work()
 
-    def _update_work(self):
+    def _callback__Work(self):
         """Update work elements."""
 
         _work = get_single(self.ui.Work.selected_data(), catch=True)
+        _c_work = self.c_works.get(_work)
         _cur_scene = host.cur_scene()
         _cur_work = tk2.cur_work()
 
@@ -251,6 +226,7 @@ class _ActionBrowser(QtWidgets.QDialog):
             self.ui.VersionUp.setEnabled(_cur_work_selected)
             self.ui.ExportFbx.setEnabled(_cur_work_selected)
             self.ui.WorkBrowser.setEnabled(True)
+            self.ui.PlaySeq.setEnabled(bool(_c_work.find_outputs()))
 
         else:
             self.ui.WorkPath.setText('')
@@ -260,15 +236,29 @@ class _ActionBrowser(QtWidgets.QDialog):
             self.ui.VersionUp.setEnabled(False)
             self.ui.ExportFbx.setEnabled(False)
             self.ui.WorkBrowser.setEnabled(False)
+            self.ui.PlaySeq.setEnabled(False)
 
-        self.ui.PlaySeq.setVisible(False)
+    def _callback__Type(self):
+        self._redraw__Character()
+
+    def _callback__Character(self):
+        self._redraw__Name()
+
+    def _callback__Name(self):
+        self._redraw__Desc()
+
+    def _callback__Desc(self):
+        self._redraw__Iteration()
+
+    def _callback__Iteration(self):
+        self._redraw__Work()
 
     def _callback__Load(self):
         _work = get_single(self.ui.Work.selected_data(), catch=True)
         if not _work:
             return
         _work.load()
-        self._update_work()
+        self._callback__Work()
 
     def _callback__VersionUp(self):
         self.ui.VersionUp.setEnabled(False)
@@ -296,17 +286,46 @@ class _ActionBrowser(QtWidgets.QDialog):
         _work = get_single(self.ui.Work.selected_data(), catch=True)
         _work.parent().launch_browser()
 
-    def get_c(self):
-        """Get interface centre.
+    def _callback__Refresh(self):
+        self.ui.Refresh.setEnabled(False)
+        host.refresh()
+        _work_path = self.ui.WorkPath.text()
+        self._read_works(force=True)
+        if _work_path:
+            self.jump_to(_work_path)
+        self.ui.Refresh.setEnabled(True)
 
-        Returns:
-            (QPoint): centre
-        """
-        return self.pos()+qt.get_p(self.size()/2)
+    def _callback__PlaySeq(self):
 
-    def delete(self):
-        """Delete this interface."""
-        self.deleteLater()
+        _work = get_single(self.ui.Work.selected_data(), catch=True)
+        if not _work:
+            return
+        _c_work = self.c_works[_work]
+        _viewables = [_out for _out in _c_work.find_outputs()
+                      if _out.format in ['mov', 'jpg']]
+
+        if len(_viewables) == 1:
+            _viewable = get_single(_viewables)
+            _seq = get_single(_viewable.find_files())
+            _seq.view()
+            return
+
+        _menu = qt.HMenu(self.ui.PlaySeq)
+        for _viewable in _viewables:
+            _seq = get_single(_viewable.find_files())
+            _menu.add_action('View '+_viewable.output_type, func=_seq.view,
+                             icon=icons.EMOJI.find('Blue Circle'))
+        _pos = qt.get_p(self.ui.PlaySeq.size()/2)
+        _menu.exec_(self.ui.PlaySeq.mapToGlobal(_pos))
+
+    def _context__Work(self, menu):
+        _work = get_single(self.ui.Work.selected_data(), catch=True)
+        if not _work:
+            return
+        _c_work = self.c_works[_work]
+        hive_bro.get_work_ctx_opts(
+            menu=menu, parent=self, redraw_work=self._redraw__Work,
+            work=_c_work)
 
 
 def launch(path=None):

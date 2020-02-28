@@ -17,9 +17,9 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,3">
      <item>
-      <widget class="HTabWidget" name="main_tabs">
+      <widget class="HTabWidget" name="RootTabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="assets_tab">
         <attribute name="title">
@@ -38,7 +38,7 @@
               </widget>
              </item>
              <item>
-              <widget class="HListWidget" name="asset_type"/>
+              <widget class="HListWidget" name="AssetType"/>
              </item>
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -64,10 +64,10 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="asset_filter"/>
+                  <widget class="QLineEdit" name="AssetFilter"/>
                  </item>
                  <item>
-                  <widget class="HPushButton" name="asset_filter_clear">
+                  <widget class="HPushButton" name="AssetFilterClear">
                    <property name="maximumSize">
                     <size>
                      <width>18</width>
@@ -95,7 +95,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="HListWidget" name="asset"/>
+                <widget class="HListWidget" name="Asset"/>
                </item>
               </layout>
              </item>
@@ -122,7 +122,7 @@
               </widget>
              </item>
              <item>
-              <widget class="HListWidget" name="sequence"/>
+              <widget class="HListWidget" name="Sequence"/>
              </item>
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -148,10 +148,10 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="shot_filter"/>
+                  <widget class="QLineEdit" name="ShotFilter"/>
                  </item>
                  <item>
-                  <widget class="HPushButton" name="shot_filter_clear">
+                  <widget class="HPushButton" name="ShotFilterClear">
                    <property name="maximumSize">
                     <size>
                      <width>20</width>
@@ -176,7 +176,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="HListWidget" name="shot"/>
+                <widget class="HListWidget" name="Shot"/>
                </item>
               </layout>
              </item>
@@ -208,7 +208,7 @@
             </widget>
            </item>
            <item>
-            <widget class="HListWidget" name="step"/>
+            <widget class="HListWidget" name="Step"/>
            </item>
           </layout>
          </item>
@@ -236,7 +236,7 @@
               </widget>
              </item>
              <item>
-              <widget class="HPushButton" name="task_refresh">
+              <widget class="HPushButton" name="TaskRefresh">
                <property name="maximumSize">
                 <size>
                  <width>20</width>
@@ -264,7 +264,7 @@
             </layout>
            </item>
            <item>
-            <widget class="HListWidget" name="task"/>
+            <widget class="HListWidget" name="Task"/>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -272,10 +272,10 @@
               <number>3</number>
              </property>
              <item>
-              <widget class="QLineEdit" name="task_edit"/>
+              <widget class="QLineEdit" name="TaskEdit"/>
              </item>
              <item>
-              <widget class="HPushButton" name="task_edit_clear">
+              <widget class="HPushButton" name="TaskAdd">
                <property name="maximumSize">
                 <size>
                  <width>20</width>
@@ -311,7 +311,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <property name="spacing">
-            <number>3</number>
+            <number>2</number>
            </property>
            <item>
             <widget class="QLabel" name="label_9">
@@ -321,7 +321,7 @@
             </widget>
            </item>
            <item>
-            <widget class="HPushButton" name="work_jump_to">
+            <widget class="HPushButton" name="WorkJumpTo">
              <property name="maximumSize">
               <size>
                <width>20</width>
@@ -352,7 +352,7 @@
             </widget>
            </item>
            <item>
-            <widget class="HPushButton" name="work_view_capture">
+            <widget class="HPushButton" name="WorkView">
              <property name="maximumSize">
               <size>
                <width>20</width>
@@ -378,7 +378,7 @@
             </widget>
            </item>
            <item>
-            <widget class="HPushButton" name="work_refresh">
+            <widget class="HPushButton" name="WorkRefresh">
              <property name="maximumSize">
               <size>
                <width>20</width>
@@ -406,7 +406,7 @@
           </layout>
          </item>
          <item>
-          <widget class="HListWidget" name="work">
+          <widget class="HListWidget" name="Work">
            <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
@@ -454,17 +454,27 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="spacing">
+          <number>4</number>
+         </property>
          <item>
-          <widget class="HPushButton" name="work_open">
+          <widget class="HPushButton" name="WorkLoad">
            <property name="text">
-            <string>Open</string>
+            <string>Load</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="HPushButton" name="work_save">
+          <widget class="HPushButton" name="WorkSave">
            <property name="text">
             <string>Save</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="HPushButton" name="WorkSaveAs">
+           <property name="text">
+            <string>Save As</string>
            </property>
           </widget>
          </item>
@@ -493,14 +503,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="work_path">
+      <widget class="QLineEdit" name="WorkPath">
        <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="HPushButton" name="work_copy">
+      <widget class="HPushButton" name="WorkCopy">
        <property name="maximumSize">
         <size>
          <width>20</width>

@@ -1,3 +1,27 @@
+#### v0.62.0 ####
+
+    Released: Fri 28th Feb 2020
+
+    Frasier Tools: 
+        action browser added options to view sequences + refresh,
+    
+    maya_psyhive:
+        shows.frasier action browser as HUiDialog3,
+        shows.frasier action browser added PlaySeq/Refresh,
+        shows.frasier.FraiserVendorMa check maps to work successfully,
+        shows.frasier.FrasierWork get_ref_mov/get_ref_data added which for face/body,
+        shows.frasier.cur_work added,
+        shows.frasier.search_ingested_files added refresh option,
+    psyhive:
+        py_gui.MayaPyShelfButton disabled save_settings,
+        qt.HUiDialog3 added,
+        qt renamed inteface -> ui_dialog
+        tk2.TTWork.save_inc made public,
+        tk2.TTOuputFile.view added,
+        tools.hive_bro updated to use HUiDialog3,
+        utils.Movie added,
+
+
 #### v0.61.0 ####
 
     Released: Wed 26th Feb 2020

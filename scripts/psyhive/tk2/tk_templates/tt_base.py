@@ -330,7 +330,7 @@ class TTStepRoot(TTDirBase):
         return get_single(_names, verbose=1)
 
     def find_output_names(self, output_name=None, output_type=None,
-                          task=None, filter_=None):
+                          task=None, filter_=None, verbose=0):
         """Find output names within this step root.
 
         Args:
@@ -338,18 +338,21 @@ class TTStepRoot(TTDirBase):
             output_type (str): filter by output type
             task (str): filter by task
             filter_ (str): apply filter to paths
+            verbose (int): print process data
 
         Returns:
             (TTOutputName list): output names list
         """
         _names = []
         for _type in self.find_output_types(output_type=output_type):
+            lprint('TESTING TYPE', _type, verbose=verbose)
             _names += _type.find_names(
-                output_name=output_name, filter_=filter_, task=task)
+                output_name=output_name, filter_=filter_, task=task,
+                verbose=verbose)
         return _names
 
     def find_outputs(self, filter_=None, task=None, version=None,
-                     output_type=None):
+                     output_type=None, verbose=0):
         """Find outputs within this step root.
 
         Args:
@@ -357,6 +360,7 @@ class TTStepRoot(TTDirBase):
             task (str): filter by task
             version (str): filter by version
             output_type (str): filter by version type
+            verbose (int): print process data
 
         Returns:
             (TTOutput list): list of outputs
@@ -364,7 +368,9 @@ class TTStepRoot(TTDirBase):
         _outs = []
         for _name in self.find_output_names(
                 task=task, output_type=output_type):
+            lprint('TESTING NAME', _name, verbose=verbose)
             for _ver in _name.find_versions(version=version):
+                lprint('TESTING VER', _ver, verbose=verbose)
                 _outs += _ver.find_outputs(filter_=filter_)
         return _outs
 

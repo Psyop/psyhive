@@ -7,7 +7,7 @@ from psyhive.utils import get_single
 from psyhive.qt.wrapper.mgr import QtWidgets
 from psyhive.qt.wrapper.widgets import HListWidgetItem
 from psyhive.qt.misc import get_application
-from psyhive.qt.interface import HUiDialog, list_redrawer
+from psyhive.qt.ui_dialog import HUiDialog, list_redrawer
 
 _DIALOG = None
 

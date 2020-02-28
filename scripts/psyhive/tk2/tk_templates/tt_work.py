@@ -205,19 +205,20 @@ class TTWork(TTBase, File):
         _path = get_template(self.hint).apply_fields(_data)
         return self.__class__(_path)
 
-    def find_outputs(self, filter_=None, output_type=None):
+    def find_outputs(self, filter_=None, output_type=None, verbose=0):
         """Find outputs from this work file.
 
         Args:
             filter_ (str): path filter
             output_type (str): filter by output type
+            verbose (int): print process data
 
         Returns:
             (TTOutput list): list of outputs
         """
         return self.get_step_root().find_outputs(
             task=self.task, version=self.version, filter_=filter_,
-            output_type=output_type)
+            output_type=output_type, verbose=verbose)
 
     def find_output_files(self, output_type=None, extension=None, verbose=0):
         """Find output files associated with this work file.

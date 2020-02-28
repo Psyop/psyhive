@@ -3,7 +3,7 @@
 import sys
 
 from psyhive.qt.wrapper import QtWidgets, HPixmap
-from psyhive.qt.interface import safe_timer_event
+from psyhive.qt.ui_dialog import safe_timer_event
 from psyhive.qt.misc import get_size
 
 

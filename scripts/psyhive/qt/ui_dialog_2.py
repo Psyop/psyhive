@@ -14,7 +14,7 @@ import six
 from psyhive.utils import lprint, wrap_fn, abs_path, File, dprint
 
 from psyhive.qt.wrapper import QtWidgets, Qt, QtCore
-from psyhive.qt.interface import (
+from psyhive.qt.ui_dialog import (
     _build_redraw_method, _disable_while_executing, _build_context_fn,
     _SETTINGS_DIR, touch, get_ui_loader)
 

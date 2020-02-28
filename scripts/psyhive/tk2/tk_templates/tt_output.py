@@ -6,7 +6,7 @@ import tank
 
 from psyhive.utils import (
     File, abs_path, lprint, apply_filter, Seq, seq_from_frame,
-    get_single)
+    get_single, Movie)
 
 from psyhive.tk2.tk_templates.tt_base import TTDirBase, TTBase
 from psyhive.tk2.tk_templates.tt_utils import get_area, get_template
@@ -29,7 +29,7 @@ class TTOutputType(TTDirBase):
         super(TTOutputType, self).__init__(path, hint=_hint)
 
     def find_names(self, class_=None, filter_=None, output_name=None,
-                   task=None):
+                   task=None, verbose=0):
         """Find output names in this type dir.
 
         Args:
@@ -37,21 +37,37 @@ class TTOutputType(TTDirBase):
             filter_ (str): filter by path
             output_name (str): filter by output name
             task (str): filter by task
+            verbose (int): print process data
 
         Returns:
             (TTOutputName list): list of output names
         """
         _names = self._read_names(class_=class_)
+        lprint(' - FOUND {:d} NAMES'.format(len(_names)), verbose=verbose)
+
         if filter_:
+            lprint(' - APPLYING FILTER', len(_names), verbose=verbose)
             _names = apply_filter(
                 _names, filter_, key=operator.attrgetter('path'))
+
         if output_name is not None:
+            lprint(' - APPLYING NAME FILTER', len(_names), verbose=verbose)
             _names = [_name for _name in _names
                       if _name.output_name == output_name]
-        if task is not None:
-            _names = [_name for _name in _names
-                      if _name.task == task]
 
+        if task is not None:
+            lprint(' - APPLYING TASK FILTER', len(_names), verbose=verbose)
+            _names_copy = _names[:]
+            _names = []
+            for _name in _names_copy:
+                if _name.task != task:
+                    lprint('   - REJECTED', _name, verbose=verbose)
+                    continue
+                lprint('   - ACCEPTED', _name, verbose=verbose)
+                _names.append(_name)
+
+        lprint(' - FOUND {:d} MATCHING NAMES'.format(len(_names)),
+               verbose=verbose)
         return _names
 
     def _read_names(self, class_=None):
@@ -345,6 +361,10 @@ class TTOutputFile(_TTOutputFileBase, File):
         _area = get_area(_path)
         _hint = self.hint_fmt.format(area=_area)
         super(TTOutputFile, self).__init__(file_, hint=_hint, verbose=verbose)
+
+    def view(self):
+        """View this movie file."""
+        Movie(self.path).view()
 
 
 class TTOutputFileSeq(_TTOutputFileBase, Seq):

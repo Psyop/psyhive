@@ -223,16 +223,7 @@ class Seq(object):
         Args:
             viewer (str): viewer to use
         """
-        _viewer = viewer or os.environ.get('VIEWER', 'rv')
-        if _viewer == 'djv_view':
-            _path = self.path.replace("%04d", "#")
-            system('djv_view {}'.format(_path), verbose=1, result=False)
-        elif _viewer == 'rv':
-            import psylaunch
-            dprint('Launching psylaunch rv')
-            psylaunch.launch_app('rv', args=[self.path, '-play'])
-        else:
-            raise ValueError(_viewer)
+        _view_seq(self.path, viewer=viewer)
 
     def __getitem__(self, idx):
         return self.get_path(idx)
@@ -272,6 +263,41 @@ class Collection(object):
 
     def __len__(self):
         return len(self.get_paths())
+
+
+class Movie(File):
+    """Represents a movie file, eg. a mov/mp4."""
+
+    def view(self, viewer=None):
+        """View this movie.
+
+        Args:
+            viewer (str): override movie viewer
+        """
+        _view_seq(self.path, viewer=viewer)
+
+
+def _view_seq(path, viewer=None):
+    """View an image sequence or movie file.
+
+    Args:
+        path (str): path to images/movie to view
+        viewer (str): viewer to use
+    """
+    _viewer = viewer or os.environ.get('VIEWER', 'rv')
+    print 'VIEW SEQ', path, _viewer
+
+    if _viewer == 'djv_view':
+        _path = path.replace("%04d", "#")
+        system('djv_view {}'.format(_path), result=False, verbose=1)
+
+    elif _viewer == 'rv':
+        import psylaunch
+        dprint('Launching psylaunch rv')
+        psylaunch.launch_app('rv', args=[path, '-play'])
+
+    else:
+        raise ValueError(_viewer)
 
 
 def seq_from_frame(file_, catch=False):

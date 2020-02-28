@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ActionBrowserUi</string>
+   <string>Action Browser</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -138,7 +138,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="spacing">
-              <number>0</number>
+              <number>2</number>
              </property>
              <item>
               <widget class="QLabel" name="label_8">
@@ -148,7 +148,36 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="PlaySeq">
+              <widget class="QPushButton" name="Magnet">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Jump to current scene</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="HPushButton" name="PlaySeq">
                <property name="maximumSize">
                 <size>
                  <width>20</width>
@@ -177,7 +206,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="Magnet">
+              <widget class="QPushButton" name="Refresh">
                <property name="maximumSize">
                 <size>
                  <width>20</width>
@@ -192,7 +221,7 @@
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2277.png</iconset>
+                 <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2347.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -372,6 +401,11 @@
     <slot>blah()</slot>
     <slot>redraw()</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>HPushButton</class>
+   <extends>QPushButton</extends>
+   <header>hpushbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
