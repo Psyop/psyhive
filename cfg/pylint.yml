@@ -46,6 +46,7 @@ ignore:
         hv_test/toolkits/home_tools.py
         psyhive/scripts/maya_psyhive/shows/frasier.py
         psyhive/scripts/maya_psyhive/shows/_fr_tools.py
+        psyhive/scripts/maya_psyhive/shows/_fr_ingest.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
@@ -197,6 +198,7 @@ ignore:
         psyhive/qt/wrapper/gui/pixmap.py
         psyhive/py_gui/pyg_base.py
         psyhive/py_gui/pyg_maya.py
+        psyhive/scripts/maya_psyhive/shows/frasier.py
         psyhive/utils/cache.py
         sanity_check/checks/
         /tests/

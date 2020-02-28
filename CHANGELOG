@@ -1,3 +1,16 @@
+#### v0.65.0 ####
+
+    Released: Fri 28th Feb 2020
+
+    Frasier Tools: added batch ingestion tool,
+    
+    maya_psyhive:
+        shows.frasier action browser more quiet,
+        shows.frasier added batch ingestion tool,
+    psyhive:
+        py_gui.BrowserLauncher added mode arg to allow single dir,
+
+
 #### v0.64.0 ####
 
     Released: Fri 28th Feb 2020

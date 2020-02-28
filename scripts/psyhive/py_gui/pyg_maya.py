@@ -44,16 +44,19 @@ def get_selection_reader(type_, verbose=0):
     return pyg_install.ArgUpdater(_get_sel, label='Get selected')
 
 
-def _apply_browser_path(target, default, title="Select file"):
+def _apply_browser_path(target, default, title="Select file",
+                        mode='SingleFileExisting'):
     """Launch a browser dialog and apply the selected path to the given field.
 
     Args:
         target (str): field to apply path to
         default (str): default directory for browser
         title (str): title for browser
+        mode (str): browser mode - SingleFileExisting/SingleDirExisting
     """
+    _file_mode = {'SingleFileExisting': 1, 'SingleDirExisting': 3}[mode]
     _file = get_single(cmds.fileDialog2(
-        fileMode=1,  # Single existing file
+        fileMode=_file_mode,  # Single existing file
         caption=title, okCaption='Select',
         startingDirectory=default))
     cmds.textField(target, edit=True, text=_file)
@@ -194,8 +197,8 @@ class MayaPyGui(pyg_base.BasePyGui):
             _icon = cmds.iconTextButton(
                 image1=icons.OPEN, width=19, height=19,
                 style='iconOnly', command=wrap_fn(
-                    _apply_browser_path, target=_field, title=browser.title,
-                    default=browser.get_default_dir()))
+                    _apply_browser_path, mode=browser.mode, target=_field,
+                    title=browser.title, default=browser.get_default_dir()))
 
         cmds.setParent('..')
 

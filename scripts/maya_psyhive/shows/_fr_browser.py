@@ -118,7 +118,7 @@ class _ActionBrowser(qt.HUiDialog3):
 
         self._redraw__Desc()
 
-    def _redraw__Desc(self, verbose=1):
+    def _redraw__Desc(self, verbose=0):
 
         dprint('REDRAW DESC', verbose=verbose)
 

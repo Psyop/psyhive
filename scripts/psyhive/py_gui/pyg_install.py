@@ -51,15 +51,18 @@ class BrowserLauncher(object):
     in the browser arg dictionary.
     """
 
-    def __init__(self, title=None, default_dir=None, get_default_dir=None):
+    def __init__(self, title=None, default_dir=None, get_default_dir=None,
+                 mode='SingleFileExisting'):
         """Constructor.
 
         Args:
             title (str): title for browser
             default_dir (str): path to default browser dir
             get_default_dir (fn): function to get default dir for browser
+            mode (str): browser mode - SingleFileExisting/SingleDirExisting
         """
         self.title = title
+        self.mode = mode
         self._default_dir = default_dir
         self._get_default_dir = get_default_dir
 
