@@ -4,7 +4,6 @@ import operator
 import os
 
 from psyhive import qt, icons, host, tk2
-from psyhive.tools import hive_bro
 from psyhive.utils import (
     get_single, wrap_fn, abs_path, apply_filter, lprint, safe_zip, val_map,
     copy_text)
@@ -471,7 +470,9 @@ def launch(path=None):
     Returns:
         (HiveBro): hive bro instance
     """
+    from psyhive.tools import hive_bro
     global DIALOG
+
     tk2.clear_caches()
     print 'Launching HiveBro'
     DIALOG = _HiveBro(path=path)

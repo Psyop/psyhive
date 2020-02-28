@@ -8,13 +8,25 @@ create issues.
 import operator
 import sys
 
-from psyhive import qt, host
 from psyhive.qt import QtCore, QtWidgets, Qt
-from psyhive.utils import abs_path, lprint, File, touch, dprint
+from psyhive.utils import abs_path, lprint, File, touch, dprint, dev_mode
 
 from psyhive.qt.ui_dialog import _SETTINGS_DIR
 
 PYGUI_COL = 'Yellow'
+
+
+def _get_widget_label(widget):
+    """Get label for a widget - eg. <QPushButton:MyButton>.
+
+    Args:
+        widget (QWidget): widget to read
+
+    Returns:
+        (str): button label
+    """
+    _name = widget.objectName()
+    return '<{}:{}>'.format(type(widget).__name__, _name)
 
 
 class HUiDialog3(QtWidgets.QDialog):
@@ -26,6 +38,7 @@ class HUiDialog3(QtWidgets.QDialog):
         Args:
             ui_file (str): path to ui file
         """
+        from psyhive import host
         self.ui_file = ui_file
         self._register_in_dialog_stack()
 
@@ -59,6 +72,7 @@ class HUiDialog3(QtWidgets.QDialog):
 
     def _load_ui(self):
         """Load ui file."""
+        from psyhive import qt
         self.ui = qt.get_ui_loader().load(self.ui_file)
         self.resize(self.ui.size())
         self.setLayout(self.ui.layout())
@@ -82,8 +96,7 @@ class HUiDialog3(QtWidgets.QDialog):
             _name = _widget.objectName()
             if not _name or _name.startswith('qt_'):
                 continue
-            _label = '<{}:{}>'.format(type(_widget).__name__, _name)
-            lprint(_label, verbose=verbose)
+            lprint(_get_widget_label(_widget), verbose=verbose)
 
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
@@ -110,7 +123,16 @@ class HUiDialog3(QtWidgets.QDialog):
                 _widget.setContextMenuPolicy(Qt.CustomContextMenu)
                 lprint(' - CONNECTING CONTEXT', _context, verbose=verbose)
 
-        # Catch unconnected elements
+        if dev_mode():
+            self._catch_unconnected_callbacks()
+            self._catch_duplicate_tooltips()
+
+    def _catch_unconnected_callbacks(self):
+        """Error if unconnected callbacks are found.
+
+        These are callack/redraw/context methods without a corresponding
+        element in the dialog's ui object.
+        """
         for _name in dir(self):
             _tokens = _name.split('__')
             if len(_tokens) != 2 or _tokens[0] not in (
@@ -120,6 +142,26 @@ class HUiDialog3(QtWidgets.QDialog):
             _elem = getattr(self.ui, _elem_name, None)
             if not _elem:
                 raise RuntimeError('Unconnected method '+_name)
+
+    def _catch_duplicate_tooltips(self):
+        """Error if duplicate tooltips are found.
+
+        These are often overlooked when duplicating elements in designer
+        and can cause confusion if elements are badly tooltipped.
+        """
+        _tooltips = {}
+        for _widget in self.findChildren(QtWidgets.QWidget):
+            _tooltip = _widget.toolTip()
+            if not _tooltip:
+                continue
+            if _tooltip in _tooltips:
+                print _get_widget_label(_tooltips[_tooltip])
+                print _get_widget_label(_widget)
+                print _tooltip
+                raise RuntimeError('Duplicate tooltip {}/{} - {}'.format(
+                    _tooltips[_tooltip].objectName(),
+                    _widget.objectName(), _tooltip))
+            _tooltips[_tooltip] = _widget
 
     @property
     def settings(self):
@@ -182,6 +224,7 @@ class HUiDialog3(QtWidgets.QDialog):
         Returns:
             (QPoint): centre
         """
+        from psyhive import qt
         return self.pos()+qt.get_p(self.size()/2)
 
     def delete(self):
@@ -207,6 +250,7 @@ def _build_context_fn(callback, widget):
     """
 
     def _context_fn(pos):
+        from psyhive import qt
         _menu = qt.HMenu(widget)
         callback(_menu)
         _menu.exec_(widget.mapToGlobal(pos))

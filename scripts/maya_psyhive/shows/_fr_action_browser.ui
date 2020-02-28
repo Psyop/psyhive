@@ -185,7 +185,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Jump to current scene</string>
+                <string>View image sequence or movie from this version</string>
                </property>
                <property name="text">
                 <string/>
@@ -214,7 +214,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Jump to current scene</string>
+                <string>Reload actions from disk</string>
                </property>
                <property name="text">
                 <string/>

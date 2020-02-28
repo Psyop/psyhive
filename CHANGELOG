@@ -1,3 +1,18 @@
+#### v0.63.0 ####
+
+    Released: Fri 28th Feb 2020
+
+    Qt Wrapper: fixed cyclical import errors,
+    Frasier: action browser fixed bad tooltips,
+    
+    maya_psyhive:
+        shows.frasier fixed bad tooltip,
+    psyhive:
+        qt.HUiDialog3 check for duplicate tooltips,
+        qt.HUiDialog3 fix cyclical import error,
+        tools.hive_bro fix cyclical import error,
+
+
 #### v0.62.0 ####
 
     Released: Fri 28th Feb 2020
