@@ -238,8 +238,8 @@ def _ph_add_show_toolkits(parent):
         label='Shows', parent=parent, subMenu=True,
         image=icons.EMOJI.find('Top Hat'))
 
-    _shows = File(shows.__file__).parent()
-    for _py in _shows.find(extn='py', depth=1, type_='f'):
+    _shows_dir = File(shows.__file__).parent()
+    for _py in _shows_dir.find(extn='py', depth=1, type_='f'):
 
         _file = PyFile(_py)
         if _file.basename.startswith('_'):
@@ -256,7 +256,7 @@ def _ph_add_show_toolkits(parent):
             '_title = "{title}"',
             'py_gui.MayaPyGui(_path, title=_title, all_defs=True)',
         ]).format(py_gui=py_gui.__name__, file=_file.path, title=_title)
-        cmds.menuItem(command=_cmd, image=_icon, label=_label)
+        cmds.menuItem(command=_cmd, image=_icon, label=_label, parent=_shows)
 
         py_gui.MayaPyShelfButton(mod=_mod, parent='PsyHive', image=_icon,
                                  label=_label)
