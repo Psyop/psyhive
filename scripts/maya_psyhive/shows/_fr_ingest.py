@@ -28,7 +28,7 @@ ICON = icons.EMOJI.find('Brain')
 _MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
                      'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
 _DIR = abs_path(os.path.dirname(__file__))
-_CAM_SETTINGS_FMT = abs_path(
+CAM_SETTINGS_FMT = abs_path(
     '_fr_{}_cam_{}.preset', root=os.path.dirname(__file__))
 
 
@@ -102,6 +102,8 @@ def load_vendor_ma(path, force=False, lazy=False):
     _ref = ref.find_ref()
     if not _ref.path == _MOTIONBURNER_RIG:
         _ref.swap_to(_MOTIONBURNER_RIG)
+    if not _ref.namespace == 'SK_Tier1_Male':
+        _ref.rename('SK_Tier1_Male')
 
 
 def _apply_kealeye_rig_mapping():
@@ -413,7 +415,7 @@ def _build_blast_cam():
     """
     _cam = hom.CMDS.camera(name='BLAST_CAM')
     for _node, _name in [(_cam.tfm, 'tfm'), (_cam.shp, 'shp')]:
-        _preset = _CAM_SETTINGS_FMT.format('blast', _name)
+        _preset = CAM_SETTINGS_FMT.format('blast', _name)
         print _preset
         hom.HFnDependencyNode(str(_node)).load_preset(_preset)
 
@@ -560,7 +562,7 @@ def _generate_fbx(work, load_scene=True, lazy=True):
     print 'EXPORT FBX'
 
     if load_scene:
-        if not lazy or host.cur_scene() == work.path:
+        if not lazy or host.cur_scene() != work.path:
             print ' - LOADING SCENE FOR FBX EXPORT'
             host.open_scene(work.path, force=True)
 

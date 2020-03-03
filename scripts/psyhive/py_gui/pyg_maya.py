@@ -313,17 +313,14 @@ class MayaPyGui(pyg_base.BasePyGui):
         cmds.setParent('..')
         cmds.setParent('..')
         cmds.showWindow(self.ui_name)
-        _col_h = cmds.columnLayout(self.master, query=True, height=True)
-        cmds.window(
-            self.ui_name, edit=True,
-            height=min(_col_h+27, self._height),
-            width=self._width)
 
         # Make sure window is not offscreen
         for _attr in ('topEdge', 'leftEdge'):
             _val = cmds.window(self.ui_name, query=True, **{_attr: True})
             if _val < 0:
                 cmds.window(self.ui_name, edit=True, **{_attr: 100})
+
+        self._resize_to_fit_children()
 
     def close(self):
         """Close this window."""
@@ -359,9 +356,14 @@ class MayaPyGui(pyg_base.BasePyGui):
             section (_Section): section to apply
             verbose (int): print process data
         """
+        _resize = wrap_fn(
+            cmds.evalDeferred, self._resize_to_fit_children,
+            lowestPriority=True)
         _frame = cmds.frameLayout(
             collapsable=True, label=section.label, collapse=section.collapse,
             parent=self.master,
+            collapseCommand=_resize,
+            expandCommand=_resize,
             backgroundColor=self.section_col.to_tuple(mode='float'),
         )
         cmds.columnLayout(parent=_frame, adjustableColumn=1)
@@ -378,6 +380,13 @@ class MayaPyGui(pyg_base.BasePyGui):
         lprint(
             '[py_gui.maya] SETTING SECTION', section, section.collapse,
             verbose=verbose)
+
+    def _resize_to_fit_children(self):
+        """Resize interface to fit child elements."""
+        cmds.refresh()
+        _col_h = cmds.columnLayout(self.master, query=True, height=True)
+        _height = min(_col_h+25, self._height)
+        cmds.window(self.ui_name, edit=True, height=_height, width=self._width)
 
 
 class MayaPyShelfButton(pyg_base.BasePyGui):

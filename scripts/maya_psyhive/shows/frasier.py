@@ -1,5 +1,6 @@
 """Tools for frasier_38732V project."""
 
+import operator
 import os
 import sys
 
@@ -11,7 +12,9 @@ from maya_psyhive.shows import vampirebloodline
 
 from . import _fr_browser, _fr_tools, _fr_ingest
 from ._fr_vendor_ma import FrasierVendorMa
-from ._fr_work import FrasierWork, find_action_works, ASSETS, cur_work
+from ._fr_work import (
+    FrasierWork, find_action_works, ASSETS, cur_work, EXPORT_FBX_ROOT)
+from ._fr_ingest import ingest_ma_files_to_pipeline, CAM_SETTINGS_FMT
 
 ICON = icons.EMOJI.find('Brain')
 _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
@@ -20,7 +23,7 @@ _PY_ROOT = _ROOT+'/release/maya/v2018/hsl/python'
 _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 
 __ALL__ = [FrasierWork, FrasierVendorMa, find_action_works,
-           ASSETS, cur_work]  # For lint
+           ASSETS, cur_work, EXPORT_FBX_ROOT, CAM_SETTINGS_FMT]  # For lint
 
 
 py_gui.set_section("Ingestion tools")
@@ -66,7 +69,7 @@ py_gui.set_section('Batch ingestion')
     choices={"verbose": range(2)},
     browser={'src_dir': py_gui.BrowserLauncher(
         default_dir=_INGEST_ROOT, mode='SingleDirExisting')})
-def ingest_ma_files_to_pipeline(
+def ingest_ma_files_to_pipeline_(
         src_dir, ma_filter='', replace=False, blast_=True, legs_to_ik=False,
         verbose=0):
     """Copy ma file from vendors_in to psyop pipeline.
@@ -82,7 +85,7 @@ def ingest_ma_files_to_pipeline(
         legs_to_ik (bool): execute legs ik switch (slow)
         verbose (int): print process data
     """
-    _fr_ingest.ingest_ma_files_to_pipeline(**locals())
+    ingest_ma_files_to_pipeline(**locals())
 
 
 py_gui.set_section('Search')
@@ -90,7 +93,7 @@ py_gui.set_section('Search')
 
 @py_gui.install_gui(choices={
     'type_': ['Any', 'Vignette', 'Encounter', 'Disposition', 'Transition'],
-    'format_': ['FBX (dated)', 'FBX', 'Full']})
+    'format_': ['Vendor MA', 'FBX (dated)', 'FBX', 'Full']})
 def search_ingested_files(
         type_='Any', day='', fbx_filter='', ma_filter='',
         format_='FBX (dated)', refresh=True):
@@ -118,19 +121,24 @@ def search_ingested_files(
 
     print
 
+    if format_ == 'Vendor MA':
+        _works.sort(key=operator.methodcaller('get_vendor_file'))
+
     for _idx, _work in enumerate(_works):
 
+        _prefix = '[{:d}/{:d}]'.format(_idx+1, len(_works))
+
         if format_ == 'FBX (dated)':
-            print '[{:d}/{:d}] {}'.format(
-                _idx+1, len(_works), _work.get_export_fbx(dated=True).path)
+            print _prefix, _work.get_export_fbx(dated=True).path
 
         elif format_ == 'FBX':
-            print '[{:d}/{:d}] {}'.format(
-                _idx+1, len(_works), _work.get_export_fbx().path)
+            print _prefix, _work.get_export_fbx().path
+
+        elif format_ == 'Vendor MA':
+            print _prefix, _work.get_vendor_file()
 
         elif format_ == 'Full':
-            print '[{:d}/{:d}] {}'.format(
-                _idx+1, len(_works), _work.get_export_fbx().basename)
+            print _prefix, _work.get_export_fbx().basename
             print ' - MA', _work.get_vendor_file()
             print ' - WORK', _work.path
             print ' - FBX', _work.get_export_fbx().path

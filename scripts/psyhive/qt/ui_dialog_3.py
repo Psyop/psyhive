@@ -34,7 +34,7 @@ def _get_widget_label(widget):
 class HUiDialog3(QtWidgets.QDialog):
     """Dialog based on a ui file."""
 
-    def __init__(self, ui_file, catch_errors_=False):
+    def __init__(self, ui_file, catch_errors_=True):
         """Constructor.
 
         Args:
@@ -88,8 +88,7 @@ class HUiDialog3(QtWidgets.QDialog):
             catch_errors_ (bool): apply error catcher to callbacks
             verbose (int): print process data
         """
-        if catch_errors_:
-            print 'CATCH ERRORS: NOT IMPLEMENTED'
+        from psyhive.tools import catch_error
 
         # Get list of widgets
         _widgets = self.findChildren(QtWidgets.QWidget)
@@ -107,6 +106,8 @@ class HUiDialog3(QtWidgets.QDialog):
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
+                if catch_errors_:
+                    _callback = catch_error(_callback)
                 _signal = None
                 if isinstance(_widget, QtWidgets.QListWidget):
                     _signal = _widget.itemSelectionChanged

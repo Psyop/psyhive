@@ -15,6 +15,10 @@ class TestShows(unittest.TestCase):
                 'animation/output/animcache')
         assert clashroyaleholi._get_default_browser_dir(work=_work) == _dir
 
+    def test_frasier(self):
+
+        from maya_psyhive.shows import frasier
+
 
 if __name__ == '__main__':
     unittest.main()

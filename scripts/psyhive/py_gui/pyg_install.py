@@ -180,7 +180,7 @@ class _Section(object):
     be hidden if required.
     """
 
-    def __init__(self, label, collapse=False):
+    def __init__(self, label, collapse=True):
         """Constructor.
 
         Args:
@@ -202,7 +202,7 @@ class _Section(object):
             type(self).__name__.strip('_'), self.label)
 
 
-def set_section(label, collapse=False):
+def set_section(label, collapse=True):
     """Set current section.
 
     Args:
