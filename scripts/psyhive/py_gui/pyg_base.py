@@ -98,8 +98,12 @@ class BasePyGui(object):
         # Add menu bar
         _interface = self.add_menu('Interface')
         self.add_menu_item(
+            _interface, label='Collapse all', image=icons.EMOJI.find('Sponge'),
+            command=self.collapse_all)
+        self.add_menu_item(
             _interface, label='Rebuild', image=icons.EMOJI.find('Hammer'),
             command=rebuild_fn or self.rebuild)
+
         _settings = self.add_menu('Settings')
         self.add_menu_item(
             _settings, label='Save', image=icons.EMOJI.find('Floppy disk'),
@@ -329,6 +333,12 @@ class BasePyGui(object):
                     _settings[_attr][_name][_arg] = _val
         return _settings
 
+    def collapse_all(self, *xargs):
+        """Collapse all sections."""
+        del xargs
+        for _section in self.set_settings_fns['section'].values():
+            _section['collapse'](True)
+
     def rebuild(self):
         """Rebuild this interface."""
         self.save_settings()
@@ -346,6 +356,7 @@ class BasePyGui(object):
         print 'RESETTING SETTINGS'
         _sections = set()
         for _fn, _data in self._get_defs_data():
+
             _py_def = self.py_file.find_def(_fn.__name__)
             if def_ and not def_ == _py_def:
                 continue
@@ -355,6 +366,7 @@ class BasePyGui(object):
                 _set_fn = self.set_settings_fns[
                     'def'][_py_def.name][_py_arg.name]
                 _set_fn(_py_arg.default)
+
             _section = _data.get('section')
             if _section:
                 print ' - SECTION', _section

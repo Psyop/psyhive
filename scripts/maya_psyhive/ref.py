@@ -6,7 +6,8 @@ import os
 from maya import cmds
 
 from psyhive.utils import File, get_single, lprint, apply_filter, abs_path
-from maya_psyhive.utils import restore_ns, get_parent
+from maya_psyhive.utils import (
+    restore_ns, get_parent, set_namespace, del_namespace)
 
 
 class FileRef(object):
@@ -169,6 +170,16 @@ class FileRef(object):
             if not qt.yes_no_cancel(_msg) == 'Yes':
                 return
         cmds.file(self._file, removeReference=True)
+
+    def rename(self, namespace):
+        """Rename this reference's namespace.
+
+        Args:
+            namespace (str): namespace to update to
+        """
+        set_namespace(":")
+        del_namespace(':'+namespace)
+        cmds.file(self._file, edit=True, namespace=namespace)
 
     def swap_to(self, file_):
         """Swap this reference file path.

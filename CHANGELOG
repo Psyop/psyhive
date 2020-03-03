@@ -1,3 +1,23 @@
+#### v0.66.0 ####
+
+    Released: Tue 3rd Mar 2020
+
+    FK/IK Switcher: bugfix failing to switch through ui,
+    
+    maya_psyhive:
+        ref.FileRef.rename added,
+        shows.frasier.CAM_SETTINGS_FMT made public,
+        shows.frasier.load_vendor_ma unify rig ns,
+        shows.frasier._generate_fbx bugfix lazy load work,
+        shows.frasier.search_ingested_files added vendor ma option,
+        tools.fkik_switcher bugfix frame range options not updated to pascal,
+    psyhive:
+        py_gui added collapse all option,
+        py_gui (maya) resize on expand/collapse to fit children,
+        py_gui._Section collapsed by default,
+        qt.UiDialog3 catch errors,
+
+
 #### v0.65.1 ####
 
     Released: Fri 28th Feb 2020

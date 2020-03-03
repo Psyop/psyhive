@@ -209,13 +209,13 @@ class FkIkSystem(object):
             raise ValueError(switch_mode)
 
         # Apply pre frame option
-        if key_mode in ['none']:
+        if key_mode in ['None']:
             pass
-        elif key_mode == 'timeline':
+        elif key_mode == 'Timeline':
             self.exec_switch_and_key_over_range(
                 switch_mode=switch_mode, switch_key=switch_key)
             return
-        elif key_mode == 'frame':
+        elif key_mode == 'Frame':
             if switch_key:
                 _frame = cmds.currentTime(query=True)
                 cmds.setKeyframe(self.get_key_attrs())
@@ -229,9 +229,9 @@ class FkIkSystem(object):
         _fn(build_tmp_geo=build_tmp_geo, apply_=apply_, verbose=verbose)
 
         # Apply post frame option
-        if key_mode == 'none':
+        if key_mode == 'None':
             pass
-        elif key_mode == 'frame':
+        elif key_mode == 'Frame':
             cmds.setKeyframe(self.get_key_attrs())
         else:
             raise ValueError(key_mode)
@@ -286,7 +286,7 @@ class FkIkSystem(object):
             cmds.currentTime(_frame)
             cmds.refresh()
             self.exec_switch_and_key(
-                switch_mode=switch_mode, key_mode='frame',
+                switch_mode=switch_mode, key_mode='Frame',
                 switch_key=False, verbose=0)
 
     def get_ctrls(self):
