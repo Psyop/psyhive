@@ -311,6 +311,22 @@ class BaseNode(object):
         """
         return cmds.listConnections(self, **kwargs)
 
+    def list_incoming(self, **kwargs):
+        """List incoming connections.
+
+        Returns:
+            (str list): connections
+        """
+        return self.list_connections(destination=False, **kwargs)
+
+    def list_outgoing(self, **kwargs):
+        """List outgoing connections.
+
+        Returns:
+            (str list): connections
+        """
+        return self.list_connections(source=False, **kwargs)
+
     def list_relatives(self, **kwargs):
         """Wrapper for cmds.listRelatives command.
 

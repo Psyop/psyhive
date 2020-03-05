@@ -16,6 +16,7 @@ ignore:
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
+        /plug-ins/
         hv_test/dev.py
         hv_test/diary/
         maya_psyhive/utils.py
@@ -44,6 +45,7 @@ ignore:
         hv_test/diary/
         hv-test/python/hv_test/startup/hsu_tools.py
         hv_test/toolkits/home_tools.py
+        psyhive/psyaddon.py
         psyhive/scripts/maya_psyhive/shows/frasier.py
         psyhive/scripts/maya_psyhive/shows/_fr_tools.py
         psyhive/scripts/maya_psyhive/shows/_fr_ingest.py
@@ -65,6 +67,8 @@ ignore:
     no-name-in-module:
         hv_test/tools/qube/__init__.py
     no-self-use:
+        /plug-ins/
+        /tests/
         hv_test/diary/
         hv_test/release/rel_misc.py
         hv_test/toolkits/release_tools.py
@@ -84,7 +88,6 @@ ignore:
         psyhive/tools/err_catcher.py
         psyhive/tools/hive_bro/interface.py
         sanity_check/checks/maya/
-        /tests/
         tk_multi_publish/publish_types/scene/export_engines/maya_export/ui/fbx_ui.py
     no-value-for-parameter:
         hv_test/diary/y19/d0425/tk_tools.py
@@ -159,7 +162,7 @@ ignore:
         psyhive/utils/py_file/base.py
         psyhive/utils/py_file/docs.py
     too-many-lines:
-        /tests
+        /tests/
         hv_test/diary/y19/d0911/machi5.py
     too-many-locals: '*'
     too-many-statements:
@@ -187,6 +190,7 @@ ignore:
     unsupported-assignment-operation:
         hv_test/diary/y20/d0206/google_images_tests.py
     unused-argument:
+        /plug-ins/
         hv_test/diary/
         hv_test/startup/hsu_henry_shelf.py
         hv_test/toolkits/check_code.py
@@ -212,9 +216,14 @@ ignore:
     wrong-import-position:
         psyhive/bin/batch_rerender
         psyhive/bin/shot_builder
+
 allowed_names:
-    closeEvent
+
     cv
+    userSetup
+
+    // Qt
+    closeEvent
     eventFilter
     keyPressEvent
     mouseMoveEvent
@@ -224,30 +233,44 @@ allowed_names:
     resizeEvent
     timerEvent
     ui
-    userSetup
     wheelEvent
+
+    // OpenMaya
+    maya_useNewAPI
+    supportedDrawAPIs
+    prepareForDraw
+    hasUIDrawables
+    addUIDrawables
+    initializePlugin
+    uninitializePlugin
+    postConstructor
+
 no_member_libs:
+
     cv2
     email
+    sgtk
+
+    // Maya
     maya.cmds
     maya.mel
     maya.api.OpenMaya
     maya.api.OpenMayaAnim
+    maya.api.OpenMayaRender
+    maya.api.OpenMayaUI
     maya.standalone
     maya.utils
     OpenEXR
     psyop.env
     pymel.core
 
+    // Qt
     PySide.QtCore
     PySide.QtGui
     PySide.QtWidgets
     PySide.QtUiTools
-
     PySide2.QtCore
     PySide2.QtGui
     PySide2.QtWidgets
     PySide2.QtUiTools
-
-    sgtk
     shiboken2

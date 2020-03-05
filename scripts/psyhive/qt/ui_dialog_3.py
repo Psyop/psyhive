@@ -88,7 +88,8 @@ class HUiDialog3(QtWidgets.QDialog):
             catch_errors_ (bool): apply error catcher to callbacks
             verbose (int): print process data
         """
-        from psyhive.tools import catch_error
+        from psyhive.tools import err_catcher
+        _err_catcher = err_catcher.get_error_catcher(remove_args=True)
 
         # Get list of widgets
         _widgets = self.findChildren(QtWidgets.QWidget)
@@ -107,7 +108,7 @@ class HUiDialog3(QtWidgets.QDialog):
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
                 if catch_errors_:
-                    _callback = catch_error(_callback)
+                    _callback = _err_catcher(_callback)
                 _signal = None
                 if isinstance(_widget, QtWidgets.QListWidget):
                     _signal = _widget.itemSelectionChanged

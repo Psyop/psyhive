@@ -1,3 +1,40 @@
+#### v0.67.1 ####
+
+    Released: Thu 5th Mar 2020
+
+    Maya Plugins: updated to accomodate psylaunch,
+    
+    maya_psyhive:
+        renamed plugins -> plug-ins to accomodate psylaunch,
+        shows.brawlstarsbaked better button labels + bugfix not loading plugin,
+
+
+#### v0.67.0 ####
+
+    Released: Thu 5th Mar 2020
+
+    Brawlstars Baked: added tool to render meshes in xray in viewport,
+    
+    maya_psyhive:
+        plugins/mesh_xrayer added,
+        open_maya.get_col added,
+        open_maya BaseNode/HPlug list_incoming/list_outgoing added,
+        open_maya.HPlug.multiply_node added force,
+        shows.frasier.search_ingested_files dated fbx sorts by path,
+        shows.brawlstarsbaked 
+        utils.get_val added doubleAngle handling,
+        utils.render added with mesh xray tools,
+        utils.multiple_node bugfix force,
+    psyhive:
+        py_gui.save_settings more quiet,
+        qt added PINKS/GREENS/BLUES,
+        qt.HPixmapUi parent to host main window,
+        qt.HPixmapUi added default key press s/q/x,
+        qt.HUiDialog.connect_elements bugfix error on signal with args,
+        tools.get_error_catcher added remove_args opt, 
+    psyaddon.py added for plugin config,
+
+
 #### v0.66.0 ####
 
     Released: Tue 3rd Mar 2020

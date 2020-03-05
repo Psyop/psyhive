@@ -486,7 +486,7 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
     elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double',
-                   'double3', 'time', 'byte', 'bool', 'int']:
+                   'double3', 'time', 'byte', 'bool', 'int', 'doubleAngle']:
         pass
     else:
         raise ValueError('Unhandled type {} on attr {}'.format(_type, attr))
@@ -605,11 +605,45 @@ def multiply_node(input1, input2, output, force=False, name='multiply'):
         (str): output attr
     """
     _out = divide_node(
-        input1=input1, input2=input2, output=output, force=False,
+        input1=input1, input2=input2, output=output, force=force,
         name=name)
     _out_node = _out.split('.')[0]
     cmds.setAttr(_out_node+'.operation', 1)
     return _out
+
+
+def render(file_, camera=None, layer='defaultRenderLayer'):
+    """Render the current scene.
+
+    Args:
+        file_ (str): path to save rendered image
+        camera (str): camera to render through
+        layer (str): layer to render
+    """
+    cmds.loadPlugin('mtoa', quiet=True)
+    from mtoa.cmds import arnoldRender
+
+    _cam = camera
+    if not _cam:
+        raise NotImplementedError
+
+    _file = File(file_)
+    _file.test_dir()
+
+    _editor = 'renderView'
+
+    _fmt_mgr = createImageFormats.ImageFormats()
+    _fmt_mgr.pushRenderGlobalsForDesc({
+        'jpg': "JPEG",
+        'exr': "EXR",
+    }[_file.extn])
+
+    arnoldRender.arnoldRender(
+        640, 640, True, True, _cam, ' -layer '+layer)
+    cmds.renderWindowEditor(_editor, edit=True, writeImage=file_,
+                            colorManage=True)
+
+    _fmt_mgr.popRenderGlobals()
 
 
 def restore_sel(func):

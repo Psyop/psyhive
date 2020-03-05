@@ -6,6 +6,7 @@ import random
 from maya import cmds
 from maya.api import OpenMaya as om
 
+from psyhive import qt
 from psyhive.utils import lprint, get_single
 from maya_psyhive.utils import get_unique
 
@@ -108,6 +109,22 @@ def cast_result(func, verbose=0):
         raise ValueError(_result)
 
     return _casted_result_fn
+
+
+def get_col(col):
+    """Get an OpenMaya colour object.
+
+    This can be used to get a colour from a name (eg. Cyna, IndianRed)
+    or a QColor.
+
+    Args:
+        col (str|QColor): colour to create
+
+    Returns:
+        (MColor): OpenMaya colour
+    """
+    _q_col = qt.get_col(col)
+    return om.MColor(_q_col.to_tuple('float'))
 
 
 def get_selected(type_=None, class_=None, multi=False, verbose=1):

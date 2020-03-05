@@ -102,8 +102,8 @@ def load_vendor_ma(path, force=False, lazy=False):
     _ref = ref.find_ref()
     if not _ref.path == _MOTIONBURNER_RIG:
         _ref.swap_to(_MOTIONBURNER_RIG)
-    if not _ref.namespace == 'SK_Tier1_Male':
-        _ref.rename('SK_Tier1_Male')
+    if not _ref.namespace == 'SK_Tier1_Male_CR':
+        _ref.rename('SK_Tier1_Male_CR')
 
 
 def _apply_kealeye_rig_mapping():

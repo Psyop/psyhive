@@ -123,6 +123,9 @@ def search_ingested_files(
 
     if format_ == 'Vendor MA':
         _works.sort(key=operator.methodcaller('get_vendor_file'))
+    elif format_ == 'FBX (dated)':
+        _sort = lambda work: work.get_export_fbx(dated=True)
+        _works.sort(key=_sort)
 
     for _idx, _work in enumerate(_works):
 

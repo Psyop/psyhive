@@ -170,4 +170,24 @@ NICE_COLS = [
     'violet', 'orchid', 'mediumvioletred', 'deeppink', 'hotpink',
     'palevioletred', 'crimson', 'pink', 'lightpink']
 
+PINKS = [
+    'LightPink', 'Pink', 'Crimson', 'PaleVioletRed', 'HotPink',
+    'DeepPink', 'MediumVioletRed', 'Orchid', 'Thistle', 'Plum',
+    'Violet', 'Magenta', 'Fuchsia']
+
+GREENS = [
+    'MediumSpringGreen', 'SpringGreen', 'MediumSeaGreen', 'SeaGreen',
+    'LightGreen', 'PaleGreen', 'DarkSeaGreen', 'LimeGreen', 'Lime',
+    'ForestGreen', 'Green', 'DarkGreen', 'Chartreuse', 'LawnGreen',
+    'GreenYellow', 'DarkOliveGreen', 'YellowGreen', 'OliveDrab']
+
+BLUES = [
+    'Blue', 'MediumBlue', 'MidnightBlue', 'DarkBlue', 'Navy', 'RoyalBlue',
+    'CornflowerBlue', 'LightSteelBlue', 'LightSlateGray', 'SlateGray',
+    'DodgerBlue', 'SteelBlue', 'LightSkyBlue', 'SkyBlue', 'DeepSkyBlue',
+    'LightBlue', 'PowderBlue', 'CadetBlue', 'LightCyan', 'PaleTurquoise',
+    'Cyan', 'Aqua', 'DarkTurquoise', 'DarkSlateGray', 'DarkCyan', 'Teal',
+    'MediumTurquoise', 'LightSeaGreen', 'Turquoise', 'Aquamarine',
+    'MediumAquamarine']
+
 BLANK = QtGui.QColor(0, 0, 0, 0)
