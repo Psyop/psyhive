@@ -12,6 +12,7 @@ import time
 from maya.api import OpenMaya as om, OpenMayaUI as omui, OpenMayaRender as omr
 
 from psyhive.utils import lprint
+from maya_psyhive.utils import get_unique
 
 _NODE_NAME = 'MeshXRayer'
 _NODE_ID = 0x80005
@@ -70,7 +71,7 @@ class MeshXRayer(omui.MPxLocatorNode):
 
         # Fix name
         _node = om.MFnDependencyNode(self.thisMObject())
-        _node.setName('meshXRayerShape')
+        _node.setName(get_unique('meshXRayerShape'))
 
 
 class MeshXRayerData(om.MUserData):

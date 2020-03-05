@@ -1,3 +1,14 @@
+#### v0.67.1 ####
+
+    Released: Thu 5th Mar 2020
+
+    Maya Plugins: updated to accomodate psylaunch,
+    
+    maya_psyhive:
+        renamed plugins -> plug-ins to accomodate psylaunch,
+        shows.brawlstarsbaked better button labels + bugfix not loading plugin,
+
+
 #### v0.67.0 ####
 
     Released: Thu 5th Mar 2020

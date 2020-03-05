@@ -13,8 +13,10 @@ LABEL = "Brawlstars Baked"
 py_gui.set_section('Mesh XRay Plugin')
 
 
+@py_gui.install_gui(label='Apply MeshXRayer to selected mesh')
 def apply_mesh_xrayer_to_sel():
     """Apply mesh xrayer to selected mesh."""
+
     _mesh = hom.get_selected(class_=hom.HFnMesh)
     print 'SELECTION', _mesh
 
@@ -29,6 +31,7 @@ def apply_mesh_xrayer_to_sel():
         cmds.polyTriangulate()
 
     # Create mesh xrayer
+    cmds.loadPlugin('mesh_xrayer', quiet=True)
     _loc_s = hom.CMDS.createNode('MeshXRayer')
     _loc = _loc_s.get_parent()
     cmds.parent(_loc, _mesh, relative=True)
@@ -36,6 +39,7 @@ def apply_mesh_xrayer_to_sel():
     cmds.select(_loc_s)
 
 
+@py_gui.install_gui(label='Remove MeshXRayer from selected mesh')
 def remove_mesh_xrayer_from_sel():
     """Remove mesh xrayer to selected mesh."""
     _mesh = hom.get_selected(class_=hom.HFnMesh)

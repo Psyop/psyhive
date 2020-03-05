@@ -16,7 +16,7 @@ ignore:
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
-        /plugins/
+        /plug-ins/
         hv_test/dev.py
         hv_test/diary/
         maya_psyhive/utils.py
@@ -67,7 +67,7 @@ ignore:
     no-name-in-module:
         hv_test/tools/qube/__init__.py
     no-self-use:
-        /plugins/
+        /plug-ins/
         /tests/
         hv_test/diary/
         hv_test/release/rel_misc.py
@@ -190,7 +190,7 @@ ignore:
     unsupported-assignment-operation:
         hv_test/diary/y20/d0206/google_images_tests.py
     unused-argument:
-        /plugins/
+        /plug-ins/
         hv_test/diary/
         hv_test/startup/hsu_henry_shelf.py
         hv_test/toolkits/check_code.py
