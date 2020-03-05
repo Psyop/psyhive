@@ -222,13 +222,14 @@ def launch_err_catcher(traceback_, message):
     _dialog = _ErrDialog(traceback_=_traceback, message=message)
 
 
-def get_error_catcher(exit_on_error=False, verbose=1):
+def get_error_catcher(exit_on_error=False, remove_args=False, verbose=1):
     """Build an error catcher decorator.
 
     Args:
         exit_on_error (bool): raise sys.exit on error (this should be
             avoided for an error raised in a maya qt thread as it can
             cause a seg fault)
+        remove_args (bool): strip args from callback (for maya compatibilty)
         verbose (int): print process data
     """
 
@@ -237,26 +238,26 @@ def get_error_catcher(exit_on_error=False, verbose=1):
         @functools.wraps(func)
         def _catch_errors_fn(*args, **kwargs):
 
+            _args, _kwargs = ([], {}) if remove_args else (args, kwargs)
+
             # Handle catcher disabled
             if os.environ.get('EXC_DISABLE_ERR_CATCHER'):
                 lprint(' - ERROR CATCHER DISABLED', verbose=verbose)
-                return func(*args, **kwargs)
+                return func(*_args, **_kwargs)
 
             # Catch function fails
-            lprint(
-                ' - EXECUTING FUNCTION', func.__name__,
-                verbose=verbose > 1)
+            lprint(' - EXECUTING FUNCTION', func.__name__,
+                   verbose=verbose > 1)
             try:
-                _result = func(*args, **kwargs)
+                _result = func(*_args, **_kwargs)
             except Exception as _exc:
-                lprint('EXCEPTION', func, args, kwargs, verbose=verbose)
+                lprint('EXCEPTION', func, _args, _kwargs, verbose=verbose)
                 _handle_exception(_exc)
                 if exit_on_error:
                     raise sys.exit()
                 return None
-            lprint(
-                ' - EXECUTED FUNCTION', func.__name__,
-                verbose=verbose > 1)
+            lprint(' - EXECUTED FUNCTION', func.__name__,
+                   verbose=verbose > 1)
 
             return _result
 

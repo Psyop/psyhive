@@ -235,21 +235,39 @@ class HPlug(om.MPlug):
         """
         return cmds.listConnections(self, **kwargs)
 
+    def list_incoming(self):
+        """List incoming connections.
+
+        Returns:
+            (str list): connections
+        """
+        return self.list_connections(destination=False)
+
+    def list_outgoing(self):
+        """List outgoing connections.
+
+        Returns:
+            (str list): connections
+        """
+        return self.list_connections(source=False)
+
     def loop_anim(self, **kwargs):
         """Loop animation on this plug."""
         self.find_anim().loop(**kwargs)
 
-    def multiply_node(self, input_, output=None):
+    def multiply_node(self, input_, output=None, force=False):
         """Connect this plug as the first input to a multiply node.
 
         Args:
             input_ (HPlug): second input
             output (HPlug): plug to connect output to
+            force (bool): replace existing connections
 
         Returns:
             (HPlug): output plug
         """
-        return HPlug(multiply_node(self, input_, output))
+        _result = multiply_node(self, input_, output, force=force)
+        return HPlug(_result)
 
     def reset(self, break_connections=False):
         """Reset this plug - set value to default.
@@ -291,6 +309,20 @@ class HPlug(om.MPlug):
             verbose (int): print process data
         """
         set_val(self, val, verbose=verbose)
+
+    def subtract_node(self, input_, output=None):
+        """Connect this plug as the first input in an subtract node.
+
+        Args:
+            input_ (HPlug): second input
+            output (HPlug): plug to connect output to
+
+        Returns:
+            (HPlug): ouptut channel
+        """
+        _result = HPlug(add_node(self, input_, output))
+        print _result.node()
+        raise NotImplementedError
 
     def __str__(self):
         return self.name

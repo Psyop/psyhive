@@ -380,7 +380,7 @@ class BasePyGui(object):
                     'section'][_section.label]['collapse']
                 _set_fn(_section.collapse)
 
-    def save_settings(self, verbose=1):
+    def save_settings(self, verbose=0):
         """Save current settings to disk.
 
         Args:

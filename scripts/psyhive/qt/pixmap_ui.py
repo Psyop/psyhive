@@ -22,6 +22,8 @@ class HPixmapUi(QtWidgets.QDialog):
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
             parent (QDialog): parent dialog
         """
+        from psyhive import host
+
         self.base_col = base_col
 
         # Remove any existing intefaces
@@ -32,8 +34,9 @@ class HPixmapUi(QtWidgets.QDialog):
 
         # Init base class
         _kwargs = {}
-        if parent:
-            _kwargs['parent'] = parent
+        _parent = parent or host.get_main_window_ptr()
+        if _parent:
+            _kwargs['parent'] = _parent
         super(HPixmapUi, self).__init__(**_kwargs)
 
         # Set up interface/label
@@ -75,6 +78,17 @@ class HPixmapUi(QtWidgets.QDialog):
         Args:
             pix (QPixmap): pixmap to update
         """
+
+    def keyPressEvent(self, event):
+        """Executed on key press.
+
+        Args:
+            event (QEvent): key press event
+        """
+        if event.text() == 's':
+            self._pixmap.save_test()
+        elif event.text() in 'qx':
+            self.delete()
 
     def resizeEvent(self, event):
         """Executed on resize.

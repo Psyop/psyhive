@@ -17,7 +17,7 @@ from maya_psyhive.open_maya.point import HPoint, get_p, ORIGIN
 from maya_psyhive.open_maya.transform import HFnTransform
 from maya_psyhive.open_maya.ray import HVRay
 from maya_psyhive.open_maya.utils import (
-    build_loc, build_arrow, get_selected, lerp, sph_rand)
+    build_loc, build_arrow, get_selected, lerp, sph_rand, get_col)
 from maya_psyhive.open_maya.vector import HVector, X_AXIS, Y_AXIS, Z_AXIS
 from maya_psyhive.open_maya.cmds import CMDS
 
