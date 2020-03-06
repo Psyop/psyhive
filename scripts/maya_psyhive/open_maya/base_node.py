@@ -344,14 +344,16 @@ class BaseNode(object):
         """
         _tmp_path = self._get_tmp_preset_path(use_mel=use_mel)
         test_path(os.path.dirname(_tmp_path))
-        shutil.copy(file_, _tmp_path)
+        if file_ != _tmp_path:
+            shutil.copy(file_, _tmp_path)
         if use_mel:
             _cmd = '{} "{}" "" "" "tmp" 1'.format(
                 _get_load_preset_mel(), self)
             mel.eval(_cmd)
         else:
             cmds.nodePreset(load=(self, "tmp"))
-        os.remove(_tmp_path)
+        if file_ != _tmp_path:
+            os.remove(_tmp_path)
 
     def object_type(self):
         """Wrapper for cmds.objectType command.

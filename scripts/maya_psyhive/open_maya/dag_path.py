@@ -22,3 +22,15 @@ class HDagPath(om.MDagPath):
         _tmp_list.add(node)
         self._obj = _tmp_list.getDependNode(0)
         super(HDagPath, self).__init__(_tmp_list.getDagPath(0))
+
+    def inclusive_matrix(self):
+        """Get world space matrix for this dag object.
+
+        Returns:
+            (HMatrix): matrix
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HMatrix(self.inclusiveMatrix())
+
+    def __repr__(self):
+        return "<{}|{}>".format(type(self).__name__, self.partialPathName())

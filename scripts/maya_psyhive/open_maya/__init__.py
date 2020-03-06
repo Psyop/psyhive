@@ -4,6 +4,7 @@ from maya_psyhive.open_maya.anim_curve import HFnAnimCurve
 from maya_psyhive.open_maya.base_array3 import BaseArray3
 from maya_psyhive.open_maya.bounding_box import get_bbox, HBoundingBox
 from maya_psyhive.open_maya.camera import HFnCamera, get_active_cam
+from maya_psyhive.open_maya.dag_path import HDagPath
 from maya_psyhive.open_maya.dependency_node import HFnDependencyNode
 from maya_psyhive.open_maya.euler_rotation import HEulerRotation, get_r
 from maya_psyhive.open_maya.matrix import HMatrix, get_m, axes_to_m
