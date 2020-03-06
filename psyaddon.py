@@ -32,9 +32,9 @@ class PsyHive(MayaModule):
 
         self.env.append_to_env('PYTHONPATH', _py_root)
 
-        # assert os.path.exists(_PLUGIN_DIR)
-        if _plugin_path not in os.environ['MAYA_PLUG_IN_PATH'].split(';'):
-            os.environ['MAYA_PLUG_IN_PATH'] += ';'+_plugin_path
+        # # assert os.path.exists(_PLUGIN_DIR)
+        # if _plugin_path not in os.environ['MAYA_PLUG_IN_PATH'].split(';'):
+        #     os.environ['MAYA_PLUG_IN_PATH'] += ';'+_plugin_path
 
         # ART_TOOLS_FRASIER_DEV = 'p4 sync //art_tools/frasier_dev/... #head'
         # FRASIER_ART_TOOLS = 'p4 sync //frasier/sourceart/Tools... #head'

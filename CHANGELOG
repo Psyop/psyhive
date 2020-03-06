@@ -1,3 +1,18 @@
+#### v0.68.0 ####
+
+    Released: Thu 5th Mar 2020
+
+    Brawlstars Viewport Plugin: added hide angle,
+    
+    plug-ins:
+        mesh_xrayer added hide_angle/draw_mesh/draw_control,
+    maya_psyhive:
+        open_maya.HDagPath made public,
+        open_maya.HDagPath.inclusive_matrix added,
+        open_maya.BaseNode.load_preset bugfix error on load preset using default path,
+    psyaddon.py: disable MAYA_PLUG_IN_PATH update,
+
+
 #### v0.67.1 ####
 
     Released: Thu 5th Mar 2020
