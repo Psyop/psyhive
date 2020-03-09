@@ -9,6 +9,7 @@ from maya_psyhive import ref, tank_support
 
 LABEL = "Clash Royale Holidays"
 ICON = icons.EMOJI.find('Christmas Tree')
+BUTTON_LABEL = 'clash\nholi'
 
 
 py_gui.install_gui('Crowd standins')

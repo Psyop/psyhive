@@ -1525,7 +1525,7 @@ def launch():
     if not tk.cur_work():
         qt.notify_warning(
             'No current work file.\n\nPlease save your scene so '
-            'the toolkit know where to export data to.',
+            'the toolkit knows where to export data to.',
             title='No work file')
         return
 

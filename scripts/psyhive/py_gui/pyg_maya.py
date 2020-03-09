@@ -141,6 +141,10 @@ class MayaPyGui(pyg_base.BasePyGui):
         lprint('ADDING', arg, verbose=verbose)
         _label_width = label_width or self.label_width
 
+        # Some args don't appear in interface
+        if arg.type_ in [tuple]:
+            return None, None
+
         if update:
             cmds.rowLayout(
                 numberOfColumns=3,
@@ -381,6 +385,11 @@ class MayaPyGui(pyg_base.BasePyGui):
             '[py_gui.maya] SETTING SECTION', section, section.collapse,
             verbose=verbose)
 
+    def rebuild(self):
+        """Rebuild this interface."""
+        super(MayaPyGui, self).rebuild()
+        self._resize_to_fit_children()
+
     def _resize_to_fit_children(self):
         """Resize interface to fit child elements."""
         cmds.refresh()
@@ -396,7 +405,8 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
     are also avaliable as right-click options.
     """
 
-    def __init__(self, mod, parent, image, label=None, command=None):
+    def __init__(self, mod, parent, image, label=None, command=None,
+                 button=None):
         """Constructor.
 
         Args:
@@ -405,6 +415,8 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
             image (str): path to icon
             label (str): override interface label
             command (str): override button command
+            button (str): add menuItem elements to this existing button
+                rather than creating a new one
         """
         self._file = File(abs_path(mod.__file__.replace('.pyc', '.py')))
         self.label = label or getattr(
@@ -412,15 +424,20 @@ class MayaPyShelfButton(pyg_base.BasePyGui):
         self.image = image
 
         # Create shelf button
-        self.button = '{}_{}_PyShelfButton'.format(parent, self._file.basename)
         _cmd = command or '\n'.join([
             'from {} import MayaPyGui'.format(__name__),
             '_path = "{}"'.format(self._file.path),
             '_title = "{}"'.format(self.label),
             'MayaPyGui(_path, all_defs=True, title=_title)'])
-        ui.add_shelf_button(
-            self.button, image=image, parent=parent, command=_cmd,
-            annotation=self.label, force=True)
+        if button:
+            self.button = button
+            cmds.shelfButton(self.button, edit=True, command=_cmd)
+        else:
+            self.button = '{}_{}_PyShelfButton'.format(
+                parent, self._file.basename)
+            ui.add_shelf_button(
+                self.button, image=image, parent=parent, command=_cmd,
+                annotation=self.label, force=True)
 
         super(MayaPyShelfButton, self).__init__(
             self._file.path, all_defs=True, mod=mod)

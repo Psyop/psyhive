@@ -4,11 +4,13 @@ import operator
 import os
 import sys
 
-from psyhive import icons, py_gui
-from psyhive.utils import CacheMissing
+from psyhive import icons, py_gui, qt
+from psyhive.utils import CacheMissing, find, store_result, File, get_single
 
+from maya_psyhive import ref
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
+from maya_psyhive.utils import restore_sel
 
 from . import _fr_browser, _fr_tools, _fr_ingest
 from ._fr_vendor_ma import FrasierVendorMa
@@ -17,6 +19,8 @@ from ._fr_work import (
 from ._fr_ingest import ingest_ma_files_to_pipeline, CAM_SETTINGS_FMT
 
 ICON = icons.EMOJI.find('Brain')
+BUTTON_LABEL = 'frasier\ntools'
+
 _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
          'frasier/_ToolsPsy')
 _PY_ROOT = _ROOT+'/release/maya/v2018/hsl/python'
@@ -32,7 +36,8 @@ py_gui.set_section("Ingestion tools")
 @py_gui.install_gui(
     browser={'ma_': py_gui.BrowserLauncher(default_dir=_INGEST_ROOT)},
     label='Prepare MotionBurner ma file')
-def prepare_motionburner_ma_file(ma_, use_hsl_rig=True, legs_to_ik=False):
+def prepare_motionburner_ma_file(
+        ma_, fix_hik_issues=True, use_hsl_rig=True, legs_to_ik=False):
     """Prepare MotionBurner ma file from vendor in.
 
     This opens the scene and updates the broken rig reference to the one on
@@ -40,11 +45,12 @@ def prepare_motionburner_ma_file(ma_, use_hsl_rig=True, legs_to_ik=False):
 
     Args:
         ma_ (str): path to ma file to load
+        fix_hik_issues (bool): check and fix any human ik issues
         use_hsl_rig (bool): update the rig to HSL rig
         legs_to_ik (bool): update legs from fk to ik for animation (slow)
     """
     if ma_:
-        _fr_ingest.load_vendor_ma(ma_)
+        _fr_ingest.load_vendor_ma(ma_, fix_hik_issues=fix_hik_issues)
     _fr_ingest.ingest_ma(ma_=None, legs_to_ik=legs_to_ik, save=False,
                          apply_mapping=use_hsl_rig)
 
@@ -165,6 +171,39 @@ def launch_fkik_switcher():
 def launch_action_browser():
     """Launch Action Browser interface."""
     _fr_browser.launch()
+
+
+@store_result
+def _find_rigs():
+    """Find HSL rigs to switch between.
+
+    Returns:
+        (File list): list of rig files
+    """
+    _path = 'P:/projects/frasier_38732V/production/character_rigs'
+    _files = find(_path, depth=1, type_='f', extn='ma', class_=File)
+    for _file in _files:
+        _file.name = _file.basename.replace('SK_', '').replace('_', ' ')
+    return _files
+
+
+@restore_sel
+@py_gui.install_gui(choices={'rig': [_rig.name for _rig in _find_rigs()]})
+def switch_selected_rig(rig):
+    """Switch selected rig reference.
+
+    Args:
+        rig (str): rig name to switch to
+    """
+    _sel = ref.get_selected(catch=True)
+    if not _sel:
+        qt.notify_warning('No rig selected')
+        return
+    print 'SELECTED', _sel
+    _trg = get_single([_rig for _rig in _find_rigs() if _rig.name == rig])
+    print 'TARGET', _trg.path
+    qt.ok_cancel('Update "{}" rig to "{}"?'.format(_sel.namespace, _trg.name))
+    _sel.swap_to(_trg.path)
 
 
 py_gui.set_section("HSL Tools")

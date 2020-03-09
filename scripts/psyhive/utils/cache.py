@@ -424,7 +424,7 @@ def store_result_content_dependent(method):
 
 
 def store_result_to_file(method):
-    """Decorator to the result of a function to a file.
+    """Decorator to the result of a method to a file.
 
     This must be applied to an object which inherits from Cachable. The
     path to the cache file is reads from the obj.cache_fmt attribute.
@@ -435,6 +435,6 @@ def store_result_to_file(method):
         method (fn): method to decorate
 
     Returns:
-        (fn): decorated function
+        (fn): decorated method
     """
     return get_result_to_file_storer()(method)

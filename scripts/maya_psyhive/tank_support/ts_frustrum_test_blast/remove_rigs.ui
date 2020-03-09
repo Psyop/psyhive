@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="Label">
        <property name="text">
         <string>Some of the rigs seem to be outside the camera frustrum for the duration of the animation.
 
@@ -31,7 +31,7 @@ Would you like to remove them from the scene?</string>
       </widget>
      </item>
      <item>
-      <widget class="HListWidget" name="list">
+      <widget class="HListWidget" name="List">
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
@@ -55,21 +55,21 @@ Would you like to remove them from the scene?</string>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="select">
+        <widget class="QPushButton" name="Select">
          <property name="text">
           <string>Select in scene</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="remove">
+        <widget class="QPushButton" name="Remove">
          <property name="text">
           <string>Remove 5 rigs</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="continue_">
+        <widget class="QPushButton" name="Continue">
          <property name="text">
           <string>Ignore</string>
          </property>

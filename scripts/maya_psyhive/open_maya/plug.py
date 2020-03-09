@@ -235,21 +235,21 @@ class HPlug(om.MPlug):
         """
         return cmds.listConnections(self, **kwargs)
 
-    def list_incoming(self):
+    def list_incoming(self, **kwargs):
         """List incoming connections.
 
         Returns:
             (str list): connections
         """
-        return self.list_connections(destination=False)
+        return self.list_connections(destination=False, **kwargs)
 
-    def list_outgoing(self):
+    def list_outgoing(self, **kwargs):
         """List outgoing connections.
 
         Returns:
             (str list): connections
         """
-        return self.list_connections(source=False)
+        return self.list_connections(source=False, **kwargs)
 
     def loop_anim(self, **kwargs):
         """Loop animation on this plug."""

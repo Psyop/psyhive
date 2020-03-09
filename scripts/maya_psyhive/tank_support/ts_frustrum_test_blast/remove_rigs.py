@@ -10,7 +10,7 @@ from psyhive.utils import abs_path, get_plural
 _DIALOG = None
 
 
-class _RemoveRigsUi(qt.HUiDialog):
+class _RemoveRigsUi(qt.HUiDialog3):
     """Interface for user to choose rigs to remove."""
 
     def __init__(self, rigs):
@@ -21,32 +21,32 @@ class _RemoveRigsUi(qt.HUiDialog):
         """
         self.rigs = rigs
         _ui_file = abs_path('remove_rigs.ui', root=os.path.dirname(__file__))
+
         super(_RemoveRigsUi, self).__init__(_ui_file, save_settings=False)
 
-        self.ui.list.itemSelectionChanged.connect(self.ui.remove.redraw)
+    def _redraw__List(self):
 
-    @qt.get_list_redrawer(default_selection='all')
-    def _redraw__list(self, widget):
+        self.ui.List.clear()
         for _rig in self.rigs:
             _item = qt.HListWidgetItem(_rig.namespace)
             _item.set_data(_rig)
-            widget.addItem(_item)
+            self.ui.List.addItem(_item)
 
-    def _redraw__remove(self, widget):
-        _to_remove = self.ui.list.selected_data()
-        widget.setText('Remove {:d} rig{}'.format(
+    def _redraw__Remove(self):
+        _to_remove = self.ui.List.selected_data()
+        self.ui.Remove.setText('Remove {:d} rig{}'.format(
             len(_to_remove), get_plural(_to_remove)))
-        widget.setEnabled(bool(_to_remove))
+        self.ui.Remove.setEnabled(bool(_to_remove))
 
-    def _callback__select(self):
-        _to_remove = self.ui.list.selected_data()
+    def _callback__Select(self):
+        _to_remove = self.ui.List.selected_data()
         cmds.select([_rig.get_node('cRoot') for _rig in _to_remove])
 
-    def _callback__continue_(self):
+    def _callback__Continue(self):
         self.close()
 
-    def _callback__remove(self):
-        _to_remove = self.ui.list.selected_data()
+    def _callback__Remove(self):
+        _to_remove = self.ui.List.selected_data()
         for _rig in qt.ProgressBar(
                 _to_remove, "Removing {:d} rig{}", col='IndianRed'):
             _rig.remove(force=True)

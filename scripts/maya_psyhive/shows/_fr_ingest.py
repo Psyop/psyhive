@@ -8,7 +8,7 @@ file sequences as blasts, and the exported to fbx in the processed_fbx folder.
 import os
 import tempfile
 
-from maya import cmds
+from maya import cmds, mel
 from pymel import core as pm
 
 import psylaunch
@@ -67,13 +67,15 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
             assert _work.has_ik_legs()
 
 
-def load_vendor_ma(path, force=False, lazy=False):
+def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
     """Load vendor ma file.
 
     The file is loaded and then the bad rig reference is updated.
 
     Args:
         path (str): vendor ma file
+        fix_hik_issues (bool): check if hik is still driving the motion
+            burner skeleton and disable it if it is
         force (bool): lose unsaved changes with no warning
         lazy (bool): don't open scene if it's already open
     """
@@ -104,6 +106,46 @@ def load_vendor_ma(path, force=False, lazy=False):
         _ref.swap_to(_MOTIONBURNER_RIG)
     if not _ref.namespace == 'SK_Tier1_Male_CR':
         _ref.rename('SK_Tier1_Male_CR')
+
+    # Test for hik issues
+    if fix_hik_issues:
+        _test_for_hik_issues(_ref)
+
+
+def _test_for_hik_issues(ref_):
+    """Fix any human ik issues.
+
+    Some MotionBurner files have been delivered with human ik left driving
+    the MotionBurner skeleton. This will check for any human ik driver and
+    disable it if it is found.
+
+    Args:
+        ref_ (FileRef): reference to update
+    """
+    _hip_rx = ref_.get_plug('Hip_L.rx')
+    if _hip_rx.list_incoming(type='animCurve'):
+        print 'NO HIK ISSUES'
+        return
+
+    print 'HIK ISSUES DETECTED'
+
+    # Find source option menu
+    mel.eval('HIKCharacterControlsTool')
+    _hik_src_opt = None
+    for _grp in cmds.lsUI(long=True, type='optionMenuGrp'):
+        if _grp.endswith('|hikSourceList'):
+            _hik_src_opt = _grp.split('|')[-1]
+            break
+    assert _hik_src_opt
+    print 'HIK SOURCE OPTION', _hik_src_opt
+
+    # Apply None
+    cmds.optionMenuGrp(_hik_src_opt, edit=True, value=" None")
+    mel.eval("hikUpdateCurrentSourceFromUI()")
+    mel.eval("hikUpdateContextualUI()")
+
+    # assert _hip_rx.list_incoming(type='animCurve')
+    print 'DISABLED HUMAN IK'
 
 
 def _apply_kealeye_rig_mapping():

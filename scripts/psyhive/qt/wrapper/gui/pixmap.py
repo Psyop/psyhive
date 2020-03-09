@@ -162,6 +162,8 @@ class HPixmap(QtGui.QPixmap):
             pass
         elif anchor == 'TR':
             _pos = _pos - qt.get_p([_pix.width(), 0])
+        elif anchor == 'T':
+            _pos = _pos - qt.get_p([_pix.width()/2, 0])
         else:
             raise ValueError(anchor)
 

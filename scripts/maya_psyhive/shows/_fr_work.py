@@ -390,7 +390,8 @@ class FrasierWork(tk2.TTWork):
 def find_action_works(
         type_=None, task_filter=None, day_filter=None, max_age=None,
         after=None, task=None, root=None, filter_=None, version=None,
-        fbx_filter=None, ma_filter=None, name=None, desc=None, force=False):
+        fbx_filter=None, ma_filter=None, name=None, desc=None, force=False,
+        progress=True):
     """Find action work files in frasier project.
 
     Args:
@@ -408,11 +409,12 @@ def find_action_works(
         name (str): filter by exact name
         desc (str): filter by exact desc
         force (bool): force reread actions from disk
+        progress (bool): show progress bar on read
 
     Returns:
         (FrasierWork list): list of work files
     """
-    _works = _read_action_works(force=force)
+    _works = _read_action_works(force=force, progress=progress)
 
     # Filters
     if filter_:
@@ -461,17 +463,19 @@ def find_action_works(
 
 
 @store_result
-def _read_action_works(force=False):
+def _read_action_works(force=False, progress=True):
     """Read action work files from disk.
 
     Args:
         force (bool): force reread from disk
+        progress (bool): show progress bar on read
 
     Returns:
         (FrasierWork list): list of all frasier work files
     """
     _works = []
-    for _asset in ASSETS.values():
+    for _asset in qt.progress_bar(
+            ASSETS.values(), 'Checking {:d} asset{}', show=progress):
         _anim = _asset.find_step_root('animation')
         for _work in _anim.find_work(class_=FrasierWork, dcc='maya'):
             _works.append(_work)

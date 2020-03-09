@@ -34,12 +34,13 @@ def _get_widget_label(widget):
 class HUiDialog3(QtWidgets.QDialog):
     """Dialog based on a ui file."""
 
-    def __init__(self, ui_file, catch_errors_=True):
+    def __init__(self, ui_file, catch_errors_=True, save_settings=True):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
             catch_errors_ (bool): apply error catcher to callbacks
+            save_settings (bool): load/save settings on open/close
         """
         from psyhive import host
         self.ui_file = ui_file
@@ -51,6 +52,7 @@ class HUiDialog3(QtWidgets.QDialog):
         self._connect_elements(catch_errors_=catch_errors_)
 
         self.init_ui()
+        self.disable_save_settings = not save_settings
         self.load_settings()
 
         self.show()
@@ -190,6 +192,8 @@ class HUiDialog3(QtWidgets.QDialog):
         Args:
             verbose (int): print process data
         """
+        if self.disable_save_settings:
+            return
         dprint('LOAD SETTINGS', self.settings.fileName(), verbose=verbose)
 
         # Apply window settings
@@ -263,6 +267,8 @@ class HUiDialog3(QtWidgets.QDialog):
         Args:
             verbose (int): print process data
         """
+        if self.disable_save_settings:
+            return
         dprint('SAVE SETTINGS', self.settings, verbose=verbose)
 
         for _widget in self.findChildren(QtWidgets.QWidget):
