@@ -44,11 +44,12 @@ def _find_shelf_buttons():
     return _btns
 
 
-def add_shelf(name, verbose=0):
+def add_shelf(name, flush=False, verbose=0):
     """Make sure the shelf of the given name exists.
 
     Args:
         name (str): name of shelf
+        flush (bool): empty all buttons from the shelf
         verbose (int): print process data
 
     Returns:
@@ -74,6 +75,13 @@ def add_shelf(name, verbose=0):
         # Create the shelf
         lprint('BUILDING "{}" SHELF'.format(name), verbose=verbose)
         _layout_name = cmds.shelfLayout(name, parent=_parent)
+
+    if flush:
+        for _btn in cmds.lsUI(type='shelfButton'):
+            _parent = cmds.shelfButton(_btn, query=True, parent=True)
+            if not _parent.endswith('|'+name):
+                continue
+            cmds.deleteUI(_btn)
 
     return _layout_name
 
@@ -115,7 +123,7 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
     ]:
         if _val:
             _kwargs[_name] = _val
-    cmds.shelfButton(name, parent=parent, **_kwargs)
+    return cmds.shelfButton(name, parent=parent, **_kwargs)
 
 
 @store_result

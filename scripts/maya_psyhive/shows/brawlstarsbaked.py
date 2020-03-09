@@ -8,6 +8,7 @@ from maya_psyhive import open_maya as hom
 
 ICON = icons.EMOJI.find("Star")
 LABEL = "Brawlstars Baked"
+BUTTON_LABEL = 'brawl\nstars'
 
 
 py_gui.set_section('Mesh XRay Plugin')

@@ -15,6 +15,7 @@ from maya_psyhive.tools.fkik_switcher import Side, Limb
 
 ICON = icons.EMOJI.find("Vampire: Medium-Light Skin Tone")
 LABEL = "Vampire Bloodline"
+BUTTON_LABEL = 'vamp\nblood'
 
 
 class VampireFkIkSystem(fkik_switcher.FkIkSystem):

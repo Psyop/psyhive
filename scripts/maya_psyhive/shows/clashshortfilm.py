@@ -10,6 +10,7 @@ from maya_psyhive import open_maya as hom
 from maya_psyhive.tools import m_shot_builder
 
 LABEL = "Clash Short"
+BUTTON_LABEL = 'clash\nshort'
 
 
 def _get_scene_name():

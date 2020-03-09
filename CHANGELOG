@@ -1,3 +1,30 @@
+#### v0.69.0 ####
+
+    Released: Mon 9th Mar 2020
+
+    Frasier:
+        added tool to swap rigs,
+    Tank Support:
+        catch error on frustrum test blast for rig with empty bake set [WHD-15782],
+    
+    maya_psyhive:
+        open_maya.MPlug list_incoming/list_outgoing pass kwargs,
+        shows.frasier added option to disable hik on ingest,
+        shows.frasier.find_action_works added progress bar,
+        shows.frasier.switch_selected_rig added,
+        startup added styling/labels to PsyHive shelf buttons,
+        tank_support.blast_with_frustrum_check bugfix error on empty bakeSet,
+        tank_support.blast_with_frustrum_check RemoveRigsUi updated to HUiDialog3,
+        tools.oculus_quest fix typo in warning dialog,
+        ui.add_shelf added flush option,
+        ui.add_shelf_button returns button name,
+    psyhive:
+        py_gui maya resize interface to fit children on rebuild,
+        py_gui.MayaPyShelfButton allow button override,
+        qt.HUiDialog3 added save_settings option,
+        qt.HPixmap.add_overlay added T anchor handling,
+
+
 #### v0.68.0 ####
 
     Released: Thu 5th Mar 2020
