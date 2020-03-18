@@ -108,7 +108,7 @@ class _CmdsMapper(object):
         if name in ['createNode', 'pathAnimation', 'shadingNode']:
             _result = _get_result_mapper(
                 _fn, class_=hom.HFnDependencyNode)
-        elif name in ['ls']:
+        elif name in ['ls', 'sets']:
             _result = _get_result_mapper(
                 _fn, as_list=True, class_=hom.HFnDependencyNode)
         elif name in ['referenceQuery']:

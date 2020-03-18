@@ -11,7 +11,7 @@ from maya import cmds
 import six
 import tank
 
-from psyhive import qt, py_gui, tk2, pipe, host, deprecate
+from psyhive import qt, py_gui, tk2, pipe, host
 from psyhive.utils import get_single, lprint, wrap_fn, abs_path, dprint
 
 from maya_psyhive import tex
@@ -417,7 +417,6 @@ class _ShadeScene(object):
         return _meshes
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
 def build_aistandin_from_shade(
         archive, shade=None, animated=True, name=None, deferred=True,
         verbose=0):
@@ -475,10 +474,15 @@ def build_aistandin_from_shade(
     return _parent
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
 @_revert_scene
-def build_aistandin_output(output):
-    """Build aiStandIn ma file output.
+def build_shader_outputs(output, verbose=0):
+    """Build shader outputs for the given shade asset.
+
+    This conisist of:
+    
+        - mb file containing just shaders for this asset
+        - yml file containing list of shaders
+        - standin file containing shaders attached to aiStandIn node
 
     Args:
         output (str): path to aiStandIn output
@@ -486,38 +490,44 @@ def build_aistandin_output(output):
     Returns:
         (str): path to output file
     """
-    print 'BUILD aiStandIn MA', output
+    lprint('BUILD aiStandIn MA', output, verbose=verbose)
 
     # Get paths for standin + rest cache + shade
     _out = tk2.TTOutput(output)
-    assert _out.format == 'aistandin'
+    _shaders = _out.map_to(tk2.TTOutputFile, format='shaders', extension='mb')
+    _yml = _out.map_to(tk2.TTOutputFile, format='shaders', extension='mb')
     _standin = _out.map_to(tk2.TTOutputFile, extension='ma')
-    print ' - STANDIN', _standin
-    assert _standin.extn == 'ma'
     _ver = tk2.TTOutputVersion(output)
-    print ' - VER', _ver
     _rest_cache = get_single(_ver.find(extn='abc', filter_='restCache'))
-    print ' - REST CACHE', _rest_cache
     _shade = _ver.find_file(extn='mb', format_='maya')
-    print ' - SHADE', _shade
+    lprint(' - STANDIN', _standin, verbose=verbose)
+    lprint(' - VER', _ver, verbose=verbose)
+    lprint(' - REST CACHE', _rest_cache, verbose=verbose)
+    lprint(' - SHADE', _shade, verbose=verbose)
     assert not _shade == _out.path
 
     # Build aiStandIn node
-    dprint('OPENING SHADE SCENE')
+    lprint(' - OPENING SHADE SCENE', verbose=verbose)
     host.open_scene(_shade.path, force=True)
     build_aistandin_from_shade(
         archive=_rest_cache, shade=_ShadeScene(), animated=False, name='AIS',
         deferred=False)
 
-    # Strip out scene
+    # Remove + save aistandin
     cmds.delete('GEO')
-
     host.save_as(file_=_standin.path, force=True)
+
+    # Remove standin + save shaders
+    cmds.delete('AIS')
+    _ses = [_se for _se in cmds.ls(type='shadingEngine')
+            if _se not in _IGNORE]
+    lprint(" - SHADING ENGINES", _ses, verbose=verbose)
+    host.save_as(_shaders.path, force=force)
+    write_yaml(file_=_yml.path, data=_ses)    
 
     return _standin.path
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
 def apply_abc_to_shade_aistandin(namespace, abc):
     """Update shade aiStandIn to match given abc.
 

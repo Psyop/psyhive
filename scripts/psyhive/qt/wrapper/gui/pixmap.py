@@ -535,7 +535,8 @@ class HPixmap(QtGui.QPixmap):
         _tmp = HPixmap(self.size())
         _fill = qt.HColor(255, 255, 255, 255*factor)
         _tmp.fill(_fill)
-        _tmp.setMask(self.mask())
+        if self.hasAlpha():
+            _tmp.setMask(self.mask())
         self.add_overlay(_tmp, operation='over')
         return self
 

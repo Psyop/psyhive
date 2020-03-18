@@ -328,4 +328,5 @@ class HPlug(om.MPlug):
         return self.name
 
     def __repr__(self):
-        return '<{}:"{}">'.format(type(self).__name__, self.name)
+        return '<{}:"{}">'.format(
+            type(self).__name__.strip('_'), self.name)

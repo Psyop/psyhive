@@ -36,7 +36,7 @@ def export_hsl_fbx_from_cur_scene(fbx, force=False):
 
     _fbx = File(fbx)
     if _fbx.exists():
-        _fbx.delete(wording='Overwrite')
+        _fbx.delete(wording='Overwrite', force=force)
 
     _tmp_fbx = File('{}/MocapTools/Anim/Export/{}_SK_Tier1_Male.fbx'.format(
         _KEALEYE_TOOLS_ROOT, File(host.cur_scene()).basename))

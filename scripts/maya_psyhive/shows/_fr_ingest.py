@@ -62,9 +62,12 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
         host.save_scene(_work.path)
         _work.set_comment('Copied from '+ma_.path)
         _work.set_vendor_file(ma_.path)
+        assert _work.get_vendor_file() == ma_.path
         _work.has_ik_legs()  # Store cache
         if legs_to_ik:
             assert _work.has_ik_legs()
+
+    return _work
 
 
 def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
@@ -227,7 +230,10 @@ def ingest_ma_files_to_pipeline(
         limit (int): limit the number of files to be processed
         verbose (int): print process data
     """
-    _mas = _find_ma_files_to_check(src_dir, ma_filter, work_filter, limit)
+    _src_dir = abs_path(src_dir)
+    print 'SRC DIR', _src_dir
+    assert os.path.exists(_src_dir)
+    _mas = _find_ma_files_to_check(_src_dir, ma_filter, work_filter, limit)
 
     # Check which mas need processing
     _to_process = []
@@ -251,7 +257,8 @@ def ingest_ma_files_to_pipeline(
                     _replacing.append((_ma, _work))
             elif (
                     _work.blast_comp.exists() and
-                    _work.get_export_fbx().exists()):
+                    _work.get_export_fbx().exists() and
+                    _work.get_export_fbx(dated=True).exists()):
                 print ' - COMP BLAST', _work.blast_comp.path
                 print ' - FBX', _work.get_export_fbx().path
                 print ' - NO PROCESSING NEEDED'
@@ -318,8 +325,9 @@ def _ingest_vendor_ma(ma_, work, blast_, legs_to_ik):
     print 'VENDOR FILE', ma_.path
 
     # Ingest work
+    _work = work
     if not work.exists():
-        ingest_ma(ma_=ma_, force=True, legs_to_ik=legs_to_ik)
+        _work = ingest_ma(ma_=ma_, force=True, legs_to_ik=legs_to_ik)
     else:
         print ' - WORK', work.path
 
@@ -345,8 +353,9 @@ def _ingest_vendor_ma(ma_, work, blast_, legs_to_ik):
             print ' - FACE BLAST {}'.format(work.blast_comp.path)
 
     # Generate export fbx
-    if not work.get_export_fbx().exists():
-        _generate_fbx(work)
+    if not (_work.get_export_fbx().exists() and
+            _work.get_export_fbx(dated=True).exists()):
+        _generate_fbx(_work, force=True)
     else:
         print ' - FBX {}'.format(work.get_export_fbx().path)
 
@@ -593,13 +602,14 @@ def _generate_blast_comp_mov(
     print ' - WROTE MOV', work.blast_comp.path
 
 
-def _generate_fbx(work, load_scene=True, lazy=True):
+def _generate_fbx(work, load_scene=True, lazy=True, force=False):
     """Generate fbx for a work file.
 
     Args:
         work (FrasierWork): work file to generate for
         load_scene (bool): load scene before export (for debugging)
         lazy (bool): don't load file if it's already open
+        force (bool): overwrite existing files without confirmation
     """
     print 'EXPORT FBX'
 
@@ -608,4 +618,4 @@ def _generate_fbx(work, load_scene=True, lazy=True):
             print ' - LOADING SCENE FOR FBX EXPORT'
             host.open_scene(work.path, force=True)
 
-    work.export_fbx()
+    work.export_fbx(force=force)

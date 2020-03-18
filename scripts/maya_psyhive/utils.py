@@ -10,7 +10,7 @@ from maya.app.general import createImageFormats
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint, File, abs_path
+from psyhive.utils import get_single, lprint, File, abs_path, dprint
 
 COLS = (
     "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
@@ -456,12 +456,24 @@ def get_shp(node, verbose=0):
     Returns:
         (str): shape node
     """
-    _shps = cmds.listRelatives(node, shapes=True, noIntermediate=True)
+    _shps = get_shps(node)
     lprint('SHAPES', _shps, verbose=verbose)
     if not len(_shps) == 1:
         raise ValueError("Multiple shapes found on {} - {}".format(
             node, ', '.join(_shps)))
     return get_single(_shps)
+
+
+def get_shps(node):
+    """Get the shapes on the given node.
+
+    Args:
+        node (str): node to read
+
+    Returns:
+        (str list): shape nodes
+    """
+    return cmds.listRelatives(node, shapes=True, noIntermediate=True)
 
 
 def get_val(attr, type_=None, class_=None, verbose=0):
@@ -665,7 +677,8 @@ def restore_sel(func):
     return _restore_sel_fn
 
 
-def save_as(file_, revert_filename=True, export_selection=False, force=False):
+def save_as(file_, revert_filename=True, export_selection=False, force=False,
+            verbose=0):
     """Save the current scene at the given path without changing cur filename.
 
     Args:
@@ -673,6 +686,7 @@ def save_as(file_, revert_filename=True, export_selection=False, force=False):
         revert_filename (bool): disable revert filename
         export_selection (bool): export selected nodes
         force (bool): overwrite with no confirmation
+        verbose (int): print process data
     """
     _cur_filename = cmds.file(query=True, location=True)
 
@@ -686,8 +700,8 @@ def save_as(file_, revert_filename=True, export_selection=False, force=False):
     _kwargs = {
         'save' if not export_selection else 'exportSelected': True,
         'type': {'ma': 'mayaAscii', 'mb': 'mayaBinary'}[_file.extn]}
-    print 'KWARGS', _kwargs
     cmds.file(**_kwargs)
+    dprint('SAVED SCENE', _file.nice_size(), _file.path, verbose=verbose)
 
     if revert_filename:
         cmds.file(rename=_cur_filename)

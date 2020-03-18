@@ -9,7 +9,7 @@ ignore:
     anomalous-unicode-escape-in-string:
         pinterest_rip
     arguments-differ:
-        hv_test/diary/entry.py
+        hv_test/diary/di_entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
         _machi/deck.py
         psyhive/scripts/psyhive/tk2/tk_cache.py
@@ -49,6 +49,8 @@ ignore:
         psyhive/scripts/maya_psyhive/shows/frasier.py
         psyhive/scripts/maya_psyhive/shows/_fr_tools.py
         psyhive/scripts/maya_psyhive/shows/_fr_ingest.py
+    import-self:
+        psyhive/__init__.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
@@ -164,6 +166,7 @@ ignore:
     too-many-lines:
         /tests/
         hv_test/diary/y19/d0911/machi5.py
+        hv_test/diary/y20/d0109/_ham_ui.py
     too-many-locals: '*'
     too-many-statements:
         hv_test/diary/
@@ -214,6 +217,7 @@ ignore:
         hv_test/diary/
         /tests/
     wrong-import-position:
+        psyhive/__init__.py
         psyhive/bin/batch_rerender
         psyhive/bin/shot_builder
 
