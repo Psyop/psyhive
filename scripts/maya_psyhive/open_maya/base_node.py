@@ -309,7 +309,7 @@ class BaseNode(object):
         Returns:
             (list): connections
         """
-        return cmds.listConnections(self, **kwargs)
+        return cmds.listConnections(self, **kwargs) or []
 
     def list_incoming(self, **kwargs):
         """List incoming connections.

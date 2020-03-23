@@ -9,7 +9,7 @@ import os
 from maya import cmds
 from pymel.core import nodetypes as nt
 
-from psyhive import qt
+from psyhive import qt, deprecate
 from psyhive.tools import track_usage
 from psyhive.utils import get_single, lprint, safe_zip
 
@@ -74,6 +74,7 @@ def _connect_visibility(src, trg, verbose=0):
     _tail.connect(trg.visibility)
 
 
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @reset_ns
 @track_usage
 def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
@@ -151,6 +152,7 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     return _bake_geo, _cleanup
 
 
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @track_usage
 def export_img_plane(camera, abc):
     """Export image plane preset data for the given camera/abc.
@@ -178,6 +180,7 @@ def export_img_plane(camera, abc):
         _shp.save_preset(_preset)
 
 
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @track_usage
 def restore_img_plane(time_control, abc):
     """Restore image plane from preset data.

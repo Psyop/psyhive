@@ -11,12 +11,13 @@ from maya import cmds
 import six
 import tank
 
-from psyhive import qt, py_gui, tk2, pipe, host, deprecate
-from psyhive.utils import get_single, lprint, wrap_fn, abs_path, dprint
+from psyhive import qt, py_gui, tk2, pipe, host
+from psyhive.utils import (
+    get_single, lprint, wrap_fn, abs_path, dprint, write_yaml)
 
 from maya_psyhive import tex
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_unique, get_parent
+from maya_psyhive.utils import get_unique, get_parent, DEFAULT_NODES
 
 _AI_ATTRS = {
     'aiSubdivType': 'subdiv_type',
@@ -100,9 +101,9 @@ def _build_aip_node(shd, merge, meshes, ai_attrs=None, name=None, verbose=0):
         name (str): override name
         verbose (int): print process data
     """
-    print 'BULID AIP', shd, meshes
+    dprint('BUILD AIP', shd, meshes, verbose=verbose)
     _ai_attrs = ai_attrs if ai_attrs is not None else _AI_ATTRS
-    print ' - AI ATTRS', _ai_attrs
+    lprint(' - AI ATTRS', _ai_attrs, verbose=verbose)
 
     # Create standin node
     _aip = hom.CMDS.createNode(
@@ -128,7 +129,7 @@ def _build_aip_node(shd, merge, meshes, ai_attrs=None, name=None, verbose=0):
                     continue
             _ai_attr_vals[_ai_attr].add(_val)
 
-        print _mesh, _mesh.namespace
+        lprint(' - MESH', _mesh, _mesh.namespace, verbose=verbose)
         _prefix = '*:' if _mesh.namespace else '*/'
         _tfm = hom.HFnTransform(get_parent(_mesh))
         _sels.append('{}{}/*'.format(_prefix, _tfm.clean_name))
@@ -154,28 +155,29 @@ def _build_aip_node(shd, merge, meshes, ai_attrs=None, name=None, verbose=0):
     return _aip
 
 
-def _add_displacement_override(shd, aip):
+def _add_displacement_override(shd, aip, verbose=0):
     """Add displacement override if applicable.
 
     Args:
         shd (HFnDepedencyNode): shader node
         aip (HFnDepedencyNode): aiSetParameter node
+        verbose (int): print process data
     """
     _shd = tex.find_shd(str(shd), catch=True)
     if not _shd:
         return
-    print ' - SHD', _shd
+    lprint(' - SHD', _shd, verbose=verbose)
     if not _shd.get_se():
         return
 
-    print ' - SE', _shd.get_se()
+    lprint(' - SE', _shd.get_se(), verbose=verbose)
     _displ = get_single(
         _shd.get_se().plug('displacementShader').list_connections(),
         catch=True)
     if not _displ:
         return
 
-    print ' - DISPL', _displ
+    lprint(' - DISPL', _displ, verbose=verbose)
     _val = "disp_map = '{}'".format(_displ)
     _get_next_idx(aip.plug('assignment')).set_val(_val)
 
@@ -325,14 +327,14 @@ def _finalise_standin(node, name, range_, verbose=0):
         range_ (tuple|None): range to loop (if any)
         verbose (int): print process data
     """
-    print 'FINALISE STANDIN', node
-    print ' - RANGE', range_
+    dprint('FINALISE STANDIN', node, verbose=verbose)
+    lprint(' - RANGE', range_, verbose=verbose)
 
     # Fix names
     _parent = node.get_parent()
-    print ' - RENAMING', name, _parent
+    lprint(' - RENAMING', name, _parent, verbose=verbose)
     _parent = cmds.rename(_parent, name)
-    print ' - PARENT', _parent
+    lprint(' - PARENT', _parent, verbose=verbose)
     _node = node.rename(name+"Shape")
     _plug = _node.plug('frameNumber')
 
@@ -340,19 +342,19 @@ def _finalise_standin(node, name, range_, verbose=0):
     if range_:
 
         # Clean frame expression
-        print ' - PLUG', _plug, _plug.find_driver()
-        print ' - BREAKING CONNECTIONS'
+        lprint(' - PLUG', _plug, _plug.find_driver(), verbose=verbose)
+        lprint(' - BREAKING CONNECTIONS', verbose=verbose)
         _plug.break_connections()
 
         # Build expression
         if range_:
-            print ' - BUILDING EXPRESSION'
+            lprint(' - BUILDING EXPRESSION', verbose=verbose)
             _str = (
                 '{plug} = ((frame - {start}) % ({end} - {start} + 1)) + '
                 '{start};').format(start=range_[0], end=range_[1], plug=_plug)
             lprint(_str, verbose=verbose)
             _expr = cmds.expression(string=_str, timeDependent=True)
-            print ' - CREATED EXPRESSION', _expr
+            lprint(' - CREATED EXPRESSION', _expr, verbose=verbose)
 
     return hom.HFnTransform(_parent)
 
@@ -417,7 +419,6 @@ class _ShadeScene(object):
         return _meshes
 
 
-@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 def build_aistandin_from_shade(
         archive, shade=None, animated=True, name=None, deferred=True,
         verbose=0):
@@ -475,49 +476,69 @@ def build_aistandin_from_shade(
     return _parent
 
 
-@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 @_revert_scene
-def build_aistandin_output(output):
-    """Build aiStandIn ma file output.
+def build_shader_outputs(output, force=True, verbose=1):
+    """Build shader outputs for the given shade asset.
+
+    This consists of:
+
+        - mb file containing just shaders for this asset
+        - yml file containing list of shaders
+        - standin file containing shaders attached to aiStandIn node
 
     Args:
         output (str): path to aiStandIn output
+        force (bool): overrwrite existing files without confirmation
+        verbose (int): print process data
 
     Returns:
         (str): path to output file
     """
-    print 'BUILD aiStandIn MA', output
+    lprint('BUILD aiStandIn MA', output, verbose=verbose)
 
     # Get paths for standin + rest cache + shade
     _out = tk2.TTOutput(output)
-    assert _out.format == 'aistandin'
-    _standin = _out.map_to(tk2.TTOutputFile, extension='ma')
-    print ' - STANDIN', _standin
-    assert _standin.extn == 'ma'
+    _shaders = _out.map_to(
+        tk2.TTOutputFile, format='shaders', extension='mb')
+    _yml = _out.map_to(
+        tk2.TTOutputFile, format='shaders', extension='yml')
+    _standin = _out.map_to(
+        tk2.TTOutputFile, format='aistandin', extension='ma')
     _ver = tk2.TTOutputVersion(output)
-    print ' - VER', _ver
-    _rest_cache = get_single(_ver.find(extn='abc', filter_='restCache'))
-    print ' - REST CACHE', _rest_cache
+    _rest_cache = get_single(_ver.find(
+        extn='abc', filter_='restCache'), catch=True)
+    if not _rest_cache:
+        raise RuntimeError('Missing rest cache '+_ver.path)
     _shade = _ver.find_file(extn='mb', format_='maya')
-    print ' - SHADE', _shade
+    lprint(' - VER       ', _ver.path, verbose=verbose)
+    lprint(' - SHADE     ', _shade.path, verbose=verbose)
+    lprint(' - REST CACHE', _rest_cache, verbose=verbose)
+    lprint(' - STANDIN   ', _standin.path, verbose=verbose)
+    lprint(' - SHADERS   ', _shaders.path, verbose=verbose)
     assert not _shade == _out.path
 
     # Build aiStandIn node
-    dprint('OPENING SHADE SCENE')
+    lprint(' - OPENING SHADE SCENE', verbose=verbose)
     host.open_scene(_shade.path, force=True)
     build_aistandin_from_shade(
         archive=_rest_cache, shade=_ShadeScene(), animated=False, name='AIS',
         deferred=False)
 
-    # Strip out scene
+    # Remove + save aistandin
     cmds.delete('GEO')
+    host.save_as(file_=_standin.path, force=force)
 
-    host.save_as(file_=_standin.path, force=True)
+    # Remove standin + save shaders
+    cmds.delete('AIS')
+    _ses = [str(_se) for _se in cmds.ls(type='shadingEngine')
+            if _se not in DEFAULT_NODES]
+    lprint(" - SHADING ENGINES", _ses, verbose=verbose)
+    host.save_as(_shaders.path, force=force)
+    write_yaml(file_=_yml.path, data=_ses)
 
     return _standin.path
 
 
-@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 def apply_abc_to_shade_aistandin(namespace, abc):
     """Update shade aiStandIn to match given abc.
 

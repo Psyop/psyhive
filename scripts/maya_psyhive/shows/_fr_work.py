@@ -361,23 +361,23 @@ class FrasierWork(tk2.TTWork):
                 return False
         return True
 
-    def export_fbx(self, anim=False):
+    def export_fbx(self, anim=False, force=False):
         """Export fbx from this work file.
 
         Args:
             anim (bool): export to anim folder
+            force (bool): overwrite existing without confirmation
         """
 
         # Save top level fbx
         _fbx = self.get_export_fbx()
         print 'EXPORT FBX', _fbx.path
-        _fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path)
+        _fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path, force=force)
 
         # Save to dated folder
         _dated_fbx = self.get_export_fbx(dated=True)
         print 'DATED FBX', _dated_fbx.path
-        _dated_fbx.test_dir()
-        shutil.copy(_fbx.path, _dated_fbx.path)
+        _fbx.copy_to(_dated_fbx.path)
 
         # Save to anim folder
         if anim:

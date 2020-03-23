@@ -8,7 +8,7 @@ from maya import cmds
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint
+from psyhive.utils import get_single, lprint, abs_path
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import get_shp, load_plugin
 
@@ -260,11 +260,11 @@ def build_texture_path(namespace, timestamp=True, extn='jpg'):
     Returns:
         (str): texture path
     """
-    _tex_ws = cmds.workspace(fileRuleEntry='textures')
+    _tex_ws = cmds.workspace(fileRuleEntry='textures') or 'textures'
     _tex_dir = cmds.workspace(expandName=_tex_ws)
-    return '{dir}/{base}{timestamp}.{extn}'.format(
+    return abs_path('{dir}/{base}{timestamp}.{extn}'.format(
         dir=_tex_dir, base=namespace, extn=extn,
-        timestamp=time.strftime('_%H%M%S') if timestamp else '')
+        timestamp=time.strftime('_%H%M%S') if timestamp else ''))
 
 
 def connect_place_2d(node_, place=None):

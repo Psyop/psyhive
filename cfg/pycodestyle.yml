@@ -2,6 +2,7 @@ ignore:
     E261:  # At least two spaces before inline comment
         hv_test/diary/y19/d1114/foliage.py
     E402:  # Module level import not at top of file
+        psyhive/__init__.py
         psyhive/bin/batch_rerender
         psyhive/bin/shot_builder
     E501:  # Line too long

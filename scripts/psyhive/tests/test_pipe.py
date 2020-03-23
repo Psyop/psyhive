@@ -44,11 +44,6 @@ class TestPipe(unittest.TestCase):
             'ocean_02.abc')
         with self.assertRaises(ValueError):
             _asset = pipe.AssetFile(_path)
-        _path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/shade/'
-            'output/shadegeo/shade_main/v068/maya/archer_shade_main_v068.mb')
-        with self.assertRaises(ValueError):
-            _asset = pipe.AssetFile(_path)
 
 
 if __name__ == '__main__':

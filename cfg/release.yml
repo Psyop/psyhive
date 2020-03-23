@@ -6,5 +6,8 @@ ignore:
     hv_test/diary/y20/d0109/qtreeview_tests.py
     hv_test/diary/y20/d0114/_anim_exporter.py
     hv_test/diary/y20/d0129/_delete_unused_assets.py
+    hv_test/diary/y20/d0302/_plugin/custom_locator.py
+    hv_test/diary/y20/d0302/_plugin/custom_locator_2.py
+    hv_test/diary/y20/d0302/_plugin/footprint.py
     maya_psyhive/tools/oculus_quest
     maya_psyhive/toolkits/_doCreateNclothCache.mel

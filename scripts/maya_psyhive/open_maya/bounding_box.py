@@ -174,7 +174,7 @@ def get_bbox(obj, ignore_points=False, verbose=0):
         _pt = hom.HPoint(obj)
         return HBoundingBox(_pt, _pt)
     elif isinstance(obj, (
-            six.string_types, hom.HFnDependencyNode)):
+            six.string_types, hom.HFnDependencyNode, hom.HFnTransform)):
         _result = cmds.exactWorldBoundingBox(
             obj, calculateExactly=True, ignoreInvisible=True)
         lprint('BBOX RESULT', _result, verbose=verbose)
@@ -182,5 +182,5 @@ def get_bbox(obj, ignore_points=False, verbose=0):
         _max = hom.HPoint(_result[-3:])
         return HBoundingBox(_min, _max)
     else:
-        raise ValueError('Failed to create bounding box {} ({})'.format(
+        raise NotImplementedError('Unhandled get bbox {} ({})'.format(
             obj, type(obj).__name__))

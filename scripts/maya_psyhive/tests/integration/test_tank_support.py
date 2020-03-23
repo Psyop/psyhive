@@ -5,11 +5,10 @@ from maya import cmds
 from pymel.core import nodetypes as nt
 
 from psyhive import tk2
-from psyhive.utils import File
+from psyhive.utils import File, revert_dev_mode, set_dev_mode
 
-from maya_psyhive import ref
-from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import use_tmp_ns, del_namespace
+from maya_psyhive import ref, open_maya as hom
+from maya_psyhive.utils import use_tmp_ns, del_namespace, set_namespace
 
 from maya_psyhive import tank_support
 
@@ -22,9 +21,11 @@ _SHADE_PATH = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
 
 class TestTankSupport(unittest.TestCase):
 
+    @revert_dev_mode
     def test_aistandin(self):
 
         from maya_psyhive.tank_support import ts_aistandin
+        set_dev_mode(False)
 
         _abc = (
             'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
@@ -91,6 +92,7 @@ class TestTankSupport(unittest.TestCase):
         _dialog = remove_rigs.launch([_ref], exec_=False)
         _dialog.close()
 
+    @use_tmp_ns
     def test_restore_image_plane(self):
 
         # Test restore via psyhive
@@ -118,6 +120,7 @@ class TestTankSupport(unittest.TestCase):
         assert cmds.ls(type='imagePlane')
 
         # Test restore via asset manager
+        set_namespace(":")
         _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
                  'animation/output/camcache/fishTest_renderCam/v001/'
                  'alembic/dev0000_fishTest_renderCam_v001.abc')
@@ -138,6 +141,60 @@ class TestTankSupport(unittest.TestCase):
         _geo = hom.HFnMesh('tmp_archer_test:hairStrand_04_Geo')
         assert _geo.bbox().min == _bbox.min
         assert _geo.bbox().max == _bbox.max
+
+    def test_shader_outputs(self):
+
+        from maya_psyhive.tank_support import ts_shaders
+
+        _abc = (
+            'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+            'animation/output/animcache/test_archer/v004/alembic/'
+            'dev9999_test_archer_v004.abc')
+        _standin = tk2.TTOutputFile(
+            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+            'shade/output/shadegeo/shade_main/v092/aistandin/'
+            'archer_shade_main_v092.ma')
+        _shaders = _standin.map_to(extension='mb', format='shaders')
+        _yml = _standin.map_to(extension='yml', format='shaders')
+
+        # Test build standin output (for Publish Tool)
+        for _out in [_shaders, _standin, _yml]:
+            _out.delete(force=True)
+        assert not _standin.exists()
+        tank_support.build_shader_outputs(output=_standin.path)
+        for _out in [_shaders, _standin, _yml]:
+            assert _out.exists()
+
+        # Test apply abc to standin output (for Asset Manager)
+        _shade = ref.obtain_ref(_standin.path, namespace='ais_test')
+        tank_support.apply_abc_to_shade_aistandin(
+            namespace=_shade.namespace, abc=_abc)
+        assert _shade.get_node('AISShape').plug('dso').get_val() == _abc
+
+        # Test build standin from shade (for clash holiday)
+        _shade_path = (
+            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/shade/'
+            'output/shadegeo/shade_main/v092/maya/archer_shade_main_v092.mb')
+        _shade = ref.obtain_ref(namespace='archer_SHD', file_=_shade_path)
+        _standin = tank_support.build_aistandin_from_shade(
+            archive=_abc, shade=_shade, deferred=False)
+        assert _standin.shp.plug('dso').get_val() == _abc
+
+        # Test read sg range
+        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                'animation/output/animcache/aadvark_archer1/v039/alembic/'
+                'dev0000_aadvark_archer1_v039.abc')
+        assert ts_shaders._get_abc_range_from_sg(_abc) == (1005, 1015)
+        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                'animation/output/animcache/test_archer/v005/alembic/'
+                'dev9999_test_archer_v005.abc')
+        assert ts_shaders._get_abc_range_from_sg(_abc) is None
+
+    def test_build_shader_outputs(self):
+        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/test/'
+                 'shade/output/shadegeo/sphere_main/v036/shaders/'
+                 'test_sphere_main_v036.mb')
+        tank_support.build_shader_outputs(_path, force=True)
 
     @use_tmp_ns
     def test_write_image_plane(self):

@@ -374,6 +374,32 @@ def read_url(url, edit=False, attempts=5):
     return _data
 
 
+def revert_dev_mode(func):
+    """Decorator which reverts any changes to dev mode.
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (dec): decorator
+    """
+
+    @functools.wraps(func)
+    def _dev_mode_revert_func(*args, **kwargs):
+
+        _dev_mode = dev_mode()
+        _result = func(*args, **kwargs)
+        if not _dev_mode:
+            if 'PSYOP_DEV' in os.environ:
+                del os.environ['PSYOP_DEV']
+        else:
+            os.environ['PSYOP_DEV'] = '1'
+        assert dev_mode() == _dev_mode
+        return _result
+
+    return _dev_mode_revert_func
+
+
 def safe_zip(list_a, list_b):
     """Zip two lists together, erroring if they don't have the same length.
 
@@ -392,6 +418,20 @@ def safe_zip(list_a, list_b):
             '({:d})'.format(len(list_a), len(list_b)))
 
     return [(_itema, _itemb) for _itema, _itemb in zip(list_a, list_b)]
+
+
+def set_dev_mode(value, verbose=0):
+    """Set dev mode.
+
+    Args:
+        value (bool): dev mode setting
+        verbose (int): print process data
+    """
+    if value:
+        os.environ['PSYOP_DEV'] = '1'
+    elif 'PSYOP_DEV' in os.environ:
+        del os.environ['PSYOP_DEV']
+    lprint('PSYOP_DEV', dev_mode(), verbose=verbose)
 
 
 def str_to_seed(string, offset=0):

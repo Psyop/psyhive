@@ -186,16 +186,17 @@ def notify(
         pos=pos, parent=parent)
 
 
-def notify_warning(msg, title='Warning', icon=None):
+def notify_warning(msg, title='Warning', icon=None, parent=None):
     """Raise a warning notification dialog.
 
     Args:
         msg (str): notification message
         title (str): dialog title
         icon (str): path to dialog icon
+        parent (QDialog): parent dialog
     """
     notify(
-        msg=msg, title=title,
+        msg=msg, title=title, parent=parent,
         icon=icon or icons.EMOJI.find('Cold Face'))
 
 

@@ -1,3 +1,42 @@
+#### v0.70.0 ####
+
+    Released: Mon 23rd Mar 2020
+
+    tank support: added publish shader outputs tools,
+    shader bro: added,
+    
+    ROOT/__init__.py:
+        applied linting,
+    maya_psyhive:
+        open_maya use relative import in __init__.py,
+        open_maya.HFnAnimCurve.get_plugs added,
+        open_maya.BaseNode.list_connections bugfix None on no results,
+        open_maya.get_bbox added HFnTransform handling,
+        open_maya.CMDS sets/joint added,
+        open_maya.cpnt_mesh use relative import in __init__.py,
+        open_maya.CpntFace.extrude added,
+        shows.frasier.ingest_ma bugfix dated fbx wrong date folder,
+        startup added shader_bro install,
+        tank_support.build_aistandin_output applied deprecation,
+        tank_support build_aistandin_from_shade/apply_abc_to_shade_aistandin moved to ts_shaders,
+        tank_support.build_shader_outputs added,
+        tex.build_texture_path catch no fileEntryRule for textures,
+        tools added shader bro,
+        tools use relative import in __init__.py,
+        tools blast_with_frustrum_check/remove_rigs/drive_shade_geo_from_rig/export_img_plane/restore_img_plane applied deprecation,
+        utils DEFAULT_NODES/get_shps added,
+        utils.save_as added verbose flag,
+    psyhive:
+        qt.notify_warning added parent flag,
+        qt.HPixmapUi added show arg,
+        qt.HUiDialog3 added QComboBox handling + catch no layout in ui, 
+        qt.HPixmap.whiten catch bad result on no alpha,
+        qt HComboBox/HListWidget added set_items,
+        qt.HListWidget selected_data/selected_text added single flag,
+        utils use relative import in __init__.py,
+        utils set_dev_mode/revert_dev_mode added,
+
+
 #### v0.69.0 ####
 
     Released: Mon 9th Mar 2020

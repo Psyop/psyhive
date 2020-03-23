@@ -166,7 +166,8 @@ def _install_psyhive_elements():
             [_ph_add_batch_cache,
              _ph_add_batch_rerender,
              _ph_add_yeti_tools,
-             _ph_add_oculus_quest_toolkit],
+             _ph_add_oculus_quest_toolkit,
+             _ph_add_shader_bro],
             [_ph_add_anim_toolkit,
              _ph_add_tech_anim_toolkit])):
         for _func in _grp:
@@ -358,6 +359,23 @@ def _ph_add_show_toolkits(parent):
             label=_btn_label, cmd=None, icon=_icon, tooltip=_title)
         py_gui.MayaPyShelfButton(mod=_mod, parent='PsyHive', image=_icon,
                                  label=_label, button=_btn)
+
+
+def _ph_add_shader_bro(menu):
+    """Add PsyHive shader bro tool.
+
+    Args:
+        menu (str): menu to add to
+    """
+    from maya_psyhive.tools import shader_bro
+    _cmd = '\n'.join([
+        'import {} as shader_bro',
+        'shader_bro.launch()']).format(shader_bro.__name__)
+    cmds.menuItem(
+        parent=menu, command=_cmd, image=shader_bro.ICON,
+        label='Shader Bro')
+    _add_psyhive_btn(label='shader\nbro', cmd=_cmd, icon=shader_bro.ICON,
+                     tooltip='Launch shader browser interface')
 
 
 @track_usage

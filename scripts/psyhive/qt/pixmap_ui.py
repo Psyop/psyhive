@@ -11,7 +11,7 @@ class HPixmapUi(QtWidgets.QDialog):
     """Base class for an interface with just an updating pixmap."""
 
     def __init__(self, size=(640, 640), base_col='red', fps=None, title=None,
-                 mouse_tracking=False, parent=None):
+                 mouse_tracking=False, parent=None, show=True):
         """Constructor.
 
         Args:
@@ -21,6 +21,7 @@ class HPixmapUi(QtWidgets.QDialog):
             title (str): interface title
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
             parent (QDialog): parent dialog
+            show (bool): show interface on launch
         """
         from psyhive import host
 
@@ -58,7 +59,8 @@ class HPixmapUi(QtWidgets.QDialog):
             self.timer = self.startTimer(1000.0/fps)
 
         self.redraw()
-        self.show()
+        if show:
+            self.show()
 
     def delete(self):
         """Delete this interface."""

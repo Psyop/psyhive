@@ -1,13 +1,22 @@
+"""Forces scripts/ directory into sys.path.
+
+This allows access to psyhive and maya_psyhive modules.
+"""
+
 import os
 import sys
 
-RELATIVE_VALUE = -1  # Directories to step up:  -1 = . (packages only), -2 = .. , -3 = ... , etc.
-PATH_APPEND = ['scripts']  # After step up, append this sub path, example: ['foo', 'bar'] -> /foo/bar is appended
+# Directories to step up:  -1 = . (packages only), -2 = .. , -3 = ... , etc.
+_RELATIVE_VALUE = -1
 
-pth = os.path.sep.join(__file__.split(os.path.sep)[0:RELATIVE_VALUE] + PATH_APPEND)
-if pth not in sys.path:
-    sys.path.insert(0, pth)
+# After step up, append this sub path
+# example: ['foo', 'bar'] -> /foo/bar is appended
+_PATH_APPEND = ['scripts']
 
-del sys.modules[__name__] 
+_PATH = os.path.sep.join(
+    __file__.split(os.path.sep)[0:_RELATIVE_VALUE] + _PATH_APPEND)
+if _PATH not in sys.path:
+    sys.path.insert(0, _PATH)
+
+del sys.modules[__name__]
 import psyhive
-

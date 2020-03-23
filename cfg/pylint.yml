@@ -9,7 +9,7 @@ ignore:
     anomalous-unicode-escape-in-string:
         pinterest_rip
     arguments-differ:
-        hv_test/diary/entry.py
+        hv_test/diary/di_entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
         _machi/deck.py
         psyhive/scripts/psyhive/tk2/tk_cache.py
@@ -31,6 +31,7 @@ ignore:
         hv_test/diary/
         maya_psyhive/shows/clashroyaleholi.py
         maya_psyhive/tank_support/ts_aistandin.py
+        maya_psyhive/tank_support/ts_shaders.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
     exec-used:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
@@ -49,6 +50,8 @@ ignore:
         psyhive/scripts/maya_psyhive/shows/frasier.py
         psyhive/scripts/maya_psyhive/shows/_fr_tools.py
         psyhive/scripts/maya_psyhive/shows/_fr_ingest.py
+    import-self:
+        psyhive/__init__.py
     invalid-name:
         sanity_check/checks/
         psyhive/host.py
@@ -76,6 +79,7 @@ ignore:
         hv_test/tools/colour_bro/cb_ui.py
         hv_test/tools/qube/hive_qube.py
         maya_psyhive/tank_support/ts_aistandin.py
+        maya_psyhive/tank_support/ts_shaders.py
         maya_psyhive/tools/fkik_switcher/interface.py
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/
@@ -164,6 +168,7 @@ ignore:
     too-many-lines:
         /tests/
         hv_test/diary/y19/d0911/machi5.py
+        hv_test/diary/y20/d0109/_ham_ui.py
     too-many-locals: '*'
     too-many-statements:
         hv_test/diary/
@@ -214,6 +219,7 @@ ignore:
         hv_test/diary/
         /tests/
     wrong-import-position:
+        psyhive/__init__.py
         psyhive/bin/batch_rerender
         psyhive/bin/shot_builder
 

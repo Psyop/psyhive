@@ -4,7 +4,7 @@ import copy
 
 from maya import cmds
 
-from psyhive import py_gui, qt
+from psyhive import qt, deprecate
 from psyhive.tools import track_usage
 from psyhive.utils import lprint, passes_filter, ints_to_str
 
@@ -141,7 +141,7 @@ def _rig_in_cam(cam, rig, create_geo=False, verbose=0):
     return False
 
 
-@py_gui.hide_from_gui
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @track_usage
 def blast_with_frustrum_check(kwargs, sample_freq=5):
     """Blast and check rigs in frustrum.

@@ -1,9 +1,12 @@
 """Tools for managing face components."""
 
-from maya_psyhive.open_maya.bounding_box import get_bbox
-from maya_psyhive.open_maya.plane import HPlane
-from maya_psyhive.open_maya.point import HPoint
-from maya_psyhive.open_maya.cpnt_mesh import cm_base
+from maya import cmds
+
+from ..bounding_box import get_bbox
+from ..plane import HPlane
+from ..point import HPoint
+
+from . import cm_base
 
 
 class CpntFace(cm_base.CpntBase):
@@ -18,6 +21,16 @@ class CpntFace(cm_base.CpntBase):
         _vtxs = self.to_vtxs()
         _pts = [_vtx.to_p() for _vtx in _vtxs]
         return get_bbox(_pts)
+
+    def extrude(self, translate):
+        """Extrude this face.
+
+        Args:
+            translate (float): extrusion depth
+        """
+        _nml = self.to_n()
+        cmds.polyExtrudeFacet(self, translate=translate*_nml,
+                              constructionHistory=False)
 
     def to_c(self):
         """Get face centre.

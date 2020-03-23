@@ -71,7 +71,7 @@ class HUiDialog3(QtWidgets.QDialog):
 
         # Clean existing uis
         if self.ui_file in sys.QT_DIALOG_STACK:
-            sys.QT_DIALOG_STACK[self.ui_file].deleteLater()
+            sys.QT_DIALOG_STACK[self.ui_file].delete()
 
         sys.QT_DIALOG_STACK[self.ui_file] = self
 
@@ -80,6 +80,8 @@ class HUiDialog3(QtWidgets.QDialog):
         from psyhive import qt
         self.ui = qt.get_ui_loader().load(self.ui_file)
         self.resize(self.ui.size())
+        if not self.ui.layout():
+            raise RuntimeError('HUiDialog3 requires root level layout in ui')
         self.setLayout(self.ui.layout())
         self.setWindowTitle(self.ui.windowTitle())
 
@@ -114,6 +116,8 @@ class HUiDialog3(QtWidgets.QDialog):
                 _signal = None
                 if isinstance(_widget, QtWidgets.QListWidget):
                     _signal = _widget.itemSelectionChanged
+                elif isinstance(_widget, QtWidgets.QComboBox):
+                    _signal = _widget.currentIndexChanged
                 elif isinstance(_widget, QtWidgets.QLineEdit):
                     _signal = _widget.textChanged
                 elif isinstance(_widget, QtWidgets.QPushButton):

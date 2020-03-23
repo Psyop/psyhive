@@ -2,7 +2,7 @@
 
 import six
 
-from psyhive.utils import lprint
+from psyhive.utils import lprint, get_single, dprint
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, Qt
 from psyhive.qt.misc import get_col, get_pixmap, get_p, get_icon
@@ -122,6 +122,28 @@ class HComboBox(QtWidgets.QComboBox, HWidgetBase):
         """
         self.setItemData(index, data, Qt.UserRole)
 
+    def set_items(self, items, select=None):
+        """Populate this combo box with the given items.
+
+        This allows the list to be populated and changed with a single
+        itemSelectionChanged signal emission.
+
+        Args:
+            items (str list): items to add
+            select (str): item to select (if any)
+        """
+        self.blockSignals(True)
+        self.clear()
+        _select = None
+        for _idx, _item in enumerate(items):
+            self.addItem(_item)
+            if _item == select:
+                _select = _idx
+        if items:
+            self.setCurrentRow(_select if _select is not None else 0)
+        self.blockSignals(False)
+        self.itemSelectionChanged.emit()
+
 
 class HLabel(QtWidgets.QLabel, HWidgetBase):
     """Override for QLabel widget."""
@@ -181,22 +203,64 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             lprint(' -', _text, _text in items, verbose=verbose)
             _item.setSelected(_text in items)
 
-    def selected_data(self):
+    def selected_data(self, single=False):
         """Get data stored in selected items.
+
+        Args:
+            single (bool): return a single item
 
         Returns:
             (any list): list of data
+            (any): data (if single flag used)
         """
-        return [
-            _item.data(Qt.UserRole) for _item in self.selectedItems()]
+        _datas = [_item.data(Qt.UserRole) for _item in self.selectedItems()]
+        if single:
+            return get_single(_datas, catch=True)
+        return _datas
 
-    def selected_text(self):
+    def selected_text(self, single=False):
         """Get selected item as text.
+
+        Args:
+            single (bool): return a single item
 
         Returns:
             (str list): text of selected items
+            (str): selected item (if single flag used)
         """
-        return [_item.text() for _item in self.selectedItems()]
+        _texts = [_item.text() for _item in self.selectedItems()]
+        if single:
+            return get_single(_texts, catch=True)
+        return _texts
+
+    def set_items(self, items, select=None, verbose=0):
+        """Populate this list with the given items.
+
+        This allows the list to be populated and changed with a single
+        itemSelectionChanged signal emission.
+
+        Args:
+            items (str|QListWidgetItem list): items to add
+            select (str|QListWidgetItem): item to select (if any)
+            verbose (int): print process data
+        """
+        dprint('SET ITEMS', self, items, select, verbose=verbose)
+        self.blockSignals(True)
+        self.clear()
+        _select = None
+        for _idx, _item in enumerate(items):
+            if isinstance(_item, six.string_types):
+                _item = HListWidgetItem(_item)
+            self.addItem(_item)
+            if _item is select or _item.text() == select:
+                lprint(' - MATCHED SELECT', select, _idx, verbose=verbose)
+                _select = _idx
+        if items:
+            _index = _select if _select is not None else 0
+            lprint(' - SELECT ITEM', _index, verbose=verbose)
+            self.setCurrentRow(_index)
+        self.blockSignals(False)
+        self.itemSelectionChanged.emit()
 
 
 class HListWidgetItem(QtWidgets.QListWidgetItem):

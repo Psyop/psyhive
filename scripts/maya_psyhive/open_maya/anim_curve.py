@@ -57,10 +57,16 @@ class HFnAnimCurve(BaseNode, oma.MFnAnimCurve):
             (HPlug): plug being driven
         """
         from maya_psyhive import open_maya as hom
-        return get_single([
-            hom.HPlug(_attr)
-            for _attr in self.output.list_connections(
-                source=False, plugs=True)])
+        return hom.HPlug(self.get_plugs())
+
+    def get_plugs(self):
+        """Get name of plug which this curve is driving.
+
+        Returns:
+            (str): plug being driven
+        """
+        return get_single(
+            self.output.list_connections(source=False, plugs=True))
 
     def is_static(self):
         """Test whether this is a static anim.
