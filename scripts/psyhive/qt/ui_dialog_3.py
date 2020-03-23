@@ -81,7 +81,7 @@ class HUiDialog3(QtWidgets.QDialog):
         self.ui = qt.get_ui_loader().load(self.ui_file)
         self.resize(self.ui.size())
         if not self.ui.layout():
-        	raise RuntimeError('HUiDialog3 requires root level layout in ui') 
+            raise RuntimeError('HUiDialog3 requires root level layout in ui')
         self.setLayout(self.ui.layout())
         self.setWindowTitle(self.ui.windowTitle())
 

@@ -161,8 +161,8 @@ class TestPath(unittest.TestCase):
         assert abs_path('./test.txt') == 'W:/Temp/test.txt'
         assert abs_path('./test.txt', root='K:/Temp') == 'K:/Temp/test.txt'
         assert abs_path('~/test.txt') == 'Z:/test.txt'
-        assert abs_path('./test.txt', root='/a/b/c') == '/a/b/c/test.txt'
-        assert abs_path('../test.txt', root='/a/b/c') == '/a/b/test.txt'
+        assert abs_path('./test.txt', root='/a/b/c') == 'A:/b/c/test.txt'
+        assert abs_path('../test.txt', root='/a/b/c') == 'A:/b/test.txt'
 
         _root = r'Z:/dev/global/code/pipeline/bootstrap/hv-test/python'
         _path = (

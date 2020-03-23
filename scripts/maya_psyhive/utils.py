@@ -19,6 +19,10 @@ COLS = (
     "pink", "orange", "lightyellow", "fadedgreen", "darktan", "tanyellow",
     "olivegreen", "woodgreen", "cyan", "greyblue", "purple", "crimson")
 
+DEFAULT_NODES = [
+    'initialParticleSE', 'initialShadingGroup', 'persp', 'top',
+    'front', 'side', 'lambert1']
+
 _FPS_LOOKUP = {
     23.97: "film",
     23.98: "film",
@@ -692,16 +696,17 @@ def save_as(file_, revert_filename=True, export_selection=False, force=False,
 
     # Test file paths
     _file = File(abs_path(file_))
-    _file.parent().test_path()
     _file.delete(wording='replace existing', force=force)
 
     # Execute save
+    _file.test_dir()
     cmds.file(rename=_file.path)
     _kwargs = {
         'save' if not export_selection else 'exportSelected': True,
         'type': {'ma': 'mayaAscii', 'mb': 'mayaBinary'}[_file.extn]}
-    cmds.file(**_kwargs)
+    cmds.file(options="v=0;", **_kwargs)
     dprint('SAVED SCENE', _file.nice_size(), _file.path, verbose=verbose)
+    lprint(' - KWARGS', _kwargs, verbose=verbose > 1)
 
     if revert_filename:
         cmds.file(rename=_cur_filename)

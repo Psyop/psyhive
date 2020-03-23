@@ -417,7 +417,7 @@ class _ShadeScene(object):
         return _meshes
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
+@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 def build_aistandin_from_shade(
         archive, shade=None, animated=True, name=None, deferred=True,
         verbose=0):
@@ -475,7 +475,7 @@ def build_aistandin_from_shade(
     return _parent
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
+@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 @_revert_scene
 def build_aistandin_output(output):
     """Build aiStandIn ma file output.
@@ -517,7 +517,7 @@ def build_aistandin_output(output):
     return _standin.path
 
 
-@deprecate.deprecate_func('03/18/20 Use .ts_shaders module')
+@deprecate.deprecate_func('18/03/20 Use .ts_shaders module')
 def apply_abc_to_shade_aistandin(namespace, abc):
     """Update shade aiStandIn to match given abc.
 

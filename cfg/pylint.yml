@@ -31,6 +31,7 @@ ignore:
         hv_test/diary/
         maya_psyhive/shows/clashroyaleholi.py
         maya_psyhive/tank_support/ts_aistandin.py
+        maya_psyhive/tank_support/ts_shaders.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
     exec-used:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
@@ -78,6 +79,7 @@ ignore:
         hv_test/tools/colour_bro/cb_ui.py
         hv_test/tools/qube/hive_qube.py
         maya_psyhive/tank_support/ts_aistandin.py
+        maya_psyhive/tank_support/ts_shaders.py
         maya_psyhive/tools/fkik_switcher/interface.py
         maya_psyhive/tools/batch_cache/
         maya_psyhive/tools/batch_rerender/

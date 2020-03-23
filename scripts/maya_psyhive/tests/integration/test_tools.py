@@ -5,16 +5,13 @@ from maya import cmds
 from pymel.core import nodetypes as nt
 
 from psyhive import tk
-from maya_psyhive import ref
-from maya_psyhive import open_maya as hom
+from psyhive.utils import set_dev_mode, revert_dev_mode
+from maya_psyhive import ref, tex, open_maya as hom
 from maya_psyhive.utils import use_tmp_ns, del_namespace
 
 from maya_psyhive.tools import (
-    fkik_switcher, batch_cache, export_img_plane, restore_img_plane,
-    drive_shade_geo_from_rig)
-from maya_psyhive.tools.frustrum_test_blast.blast import _rig_in_cam, _Rig
+    fkik_switcher, batch_cache, restore_img_plane, shader_bro)
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
-from maya_psyhive.tools.frustrum_test_blast import remove_rigs
 from maya_psyhive.tools.m_batch_rerender import rerender
 
 _RIG_PATH = (
@@ -53,29 +50,37 @@ class TestTools(unittest.TestCase):
         _system.apply_ik_to_fk()
         _system.apply_fk_to_ik()
 
+    @revert_dev_mode
     def test_frustrum_test_blast(self):
+        from maya_psyhive.tools.frustrum_test_blast import blast, remove_rigs
+
+        set_dev_mode(False)
 
         # Test frustrum test
         _ref = ref.obtain_ref(namespace='archer_TMP', file_=_RIG_PATH,
-                              class_=_Rig)
-        assert isinstance(_ref, _Rig)
+                              class_=blast._Rig)
+        assert isinstance(_ref, blast._Rig)
         _cam = hom.HFnCamera('persp')
         _pos = hom.HMatrix([
             0.95, 0.00, 0.31, 0.00, 0.08, 0.96, -0.26, 0.00, -0.29, 0.27,
             0.92, 0.00, -19.37, 25.40, 54.23, 1.00])
         _pos.apply_to(_cam)
-        assert _rig_in_cam(rig=_ref, cam=_cam)
+        assert blast._rig_in_cam(rig=_ref, cam=_cam)
         _pos = hom.HMatrix([
             0.80, -0.00, -0.60, 0.00, -0.10, 0.98, -0.13, 0.00, 0.60, 0.16,
             0.79, 0.00, -16.33, 37.34, 109.80, 1.00])
         _pos.apply_to(_cam)
-        assert not _rig_in_cam(rig=_ref, cam=_cam)
+        assert not blast._rig_in_cam(rig=_ref, cam=_cam)
 
         # Test remove rigs ui
         _dialog = remove_rigs.launch([_ref], exec_=False)
         _dialog.close()
 
+    @revert_dev_mode
+    @use_tmp_ns
     def test_restore_image_plane(self):
+        set_dev_mode(False)
+        print 'TEST RESTORE IMAGE PLANE'
         _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
                  'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
         _work = tk.get_work(_path)
@@ -95,10 +100,38 @@ class TestTools(unittest.TestCase):
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
             _time_ctrl = _ref.get_node(_time_ctrl, strip_ns=False)
+            print ' - TIME CTRL', _time_ctrl
             restore_img_plane(time_control=str(_time_ctrl), abc=_path)
         assert cmds.ls(type='imagePlane')
 
+    @use_tmp_ns
+    def test_shader_bro(self):
+
+        _shader_bro = shader_bro.launch()
+
+        # Test apply to selection
+        _sphere = hom.CMDS.polySphere()
+        assert tex.read_shd(_sphere) == 'lambert1'
+        _shader_bro.ui.Asset.select_text('test')
+        _shader_bro.ui.Task.select_text('sphere')
+        _shader_bro.ui.Shader.select_text('blue_SG')
+        _shader_bro.ui.ApplyToSelection.click()
+        assert tex.read_shd(_sphere) == 'tmp:blue_SHD'
+        _shader_bro.ui.Shader.select_text('blue_SG')
+
+        # Test import shader
+        _shader_bro.ui.Shader.select_text('pink_SG')
+        assert not cmds.objExists('tmp:pink_SHD')
+        _shader_bro.ui.ImportShader.click()
+        assert cmds.objExists('tmp:pink_SHD')
+        _shader_bro.close()
+
+    @revert_dev_mode
     def test_shade_geo_for_rig(self):
+
+        from maya_psyhive.tools import drive_shade_geo_from_rig
+
+        set_dev_mode(False)
 
         _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
                  'rig/output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
@@ -114,9 +147,12 @@ class TestTools(unittest.TestCase):
         assert _geo.bbox().min == _bbox.min
         assert _geo.bbox().max == _bbox.max
 
+    @revert_dev_mode
     @use_tmp_ns
     def test_write_image_plane(self):
         """Write image plane settings to output abc dir."""
+        from maya_psyhive.tools import export_img_plane
+        set_dev_mode(False)
         _img = (r"\\la1nas006\homedir\hvanderbeek\Desktop"
                 r"\tumblr_p3gzfbykSP1rv4b7io1_1280.png")
         _abc_path = (

@@ -4,7 +4,7 @@ import os
 
 from maya import cmds
 
-from psyhive import qt
+from psyhive import qt, deprecate
 from psyhive.utils import abs_path, get_plural
 
 _DIALOG = None
@@ -54,6 +54,7 @@ class _RemoveRigsUi(qt.HUiDialog):
         self.close()
 
 
+@deprecate.deprecate_func('19/03/20 Use maya_psyhive.tank_support module')
 def launch(rigs, exec_=True):
     """Launch interface for removing rigs.
 

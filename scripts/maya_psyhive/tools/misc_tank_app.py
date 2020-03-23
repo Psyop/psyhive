@@ -18,7 +18,6 @@ from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import get_parent, reset_ns, set_namespace
 
 
-@deprecate.deprecate_func('03/18/20 Use maya_psyhive.tank_support module')
 def _clean_unused_uv_sets(mesh, verbose=0):
     """Clean unused uv sets from the given mesh.
 
@@ -47,7 +46,6 @@ def _clean_unused_uv_sets(mesh, verbose=0):
             cmds.polyUVSet(mesh, delete=True, uvSet=_set)
 
 
-@deprecate.deprecate_func('03/18/20 Use maya_psyhive.tank_support module')
 def _connect_visibility(src, trg, verbose=0):
     """Connect visibility of source to target node.
 
@@ -76,7 +74,7 @@ def _connect_visibility(src, trg, verbose=0):
     _tail.connect(trg.visibility)
 
 
-@deprecate.deprecate_func('03/18/20 Use maya_psyhive.tank_support module')
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @reset_ns
 @track_usage
 def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
@@ -154,7 +152,7 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     return _bake_geo, _cleanup
 
 
-@deprecate.deprecate_func('03/18/20 Use maya_psyhive.tank_support module')
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @track_usage
 def export_img_plane(camera, abc):
     """Export image plane preset data for the given camera/abc.
@@ -182,7 +180,7 @@ def export_img_plane(camera, abc):
         _shp.save_preset(_preset)
 
 
-@deprecate.deprecate_func('03/18/20 Use maya_psyhive.tank_support module')
+@deprecate.deprecate_func('18/03/20 Use maya_psyhive.tank_support module')
 @track_usage
 def restore_img_plane(time_control, abc):
     """Restore image plane from preset data.

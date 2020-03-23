@@ -6,6 +6,7 @@ import unittest
 from maya import cmds
 
 from maya_psyhive import open_maya as hom
+from maya_psyhive.utils import use_tmp_ns
 
 
 def _rand_m():
@@ -19,6 +20,7 @@ def _rand_m():
 
 class TestOpenMaya(unittest.TestCase):
 
+    @use_tmp_ns
     def test(self):
 
         _sphere1 = hom.CMDS.polySphere()
@@ -28,31 +30,33 @@ class TestOpenMaya(unittest.TestCase):
         # Test apply euler rotation to sphere
         _rot = hom.HEulerRotation(0, 0, math.pi)
         _rot.apply_to(_sphere1)
-        assert cmds.getAttr(_sphere1.rotate) == [0, 0, 180]
+        assert cmds.getAttr(_sphere1.rotate) == [(0, 0, 180)]
 
         # Test apply euler rot as mtx to sphere
         hom.HMatrix().apply_to(_sphere1)
         _rot = hom.HEulerRotation(0, math.pi, 0)
         _mtx = _rot.as_mtx()
         cmds.xform(_sphere1, matrix=_mtx)
-        assert cmds.getAttr(_sphere1.rotate) == [0, 180, 0]
+        assert cmds.getAttr(_sphere1.rotate) == [(0, 180, 0)]
         hom.HMatrix().apply_to(_sphere1)
-        _mtx.apply_to("pSphere2")
-        assert cmds.getAttr(_sphere1.rotate) == [0, 180, 0]
+        _mtx.apply_to(_sphere2)
+        assert cmds.getAttr(_sphere2.rotate) == [(0, 180, 0)]
 
         # Test apply vector + rot as mtxs to sphere
         hom.HMatrix().apply_to(_sphere1)
         _mtx1 = hom.HVector(5, 10, 20).as_mtx()
         _mtx2 = hom.HEulerRotation(0, math.pi, 0).as_mtx()
         (_mtx2*_mtx1).apply_to(_sphere1)
-        assert cmds.getAttr(_sphere1.rotate) == [0, 180, 0]
-        assert cmds.getAttr(_sphere1.translate) == [5, 10, 20]
+        print cmds.getAttr(_sphere1.rotate)
+        assert cmds.getAttr(_sphere1.rotate) == [(0, 180, 0)]
+        assert cmds.getAttr(_sphere1.translate) == [(5, 10, 20)]
         (_mtx1*_mtx2).apply_to(_sphere1)
-        assert cmds.getAttr(_sphere1.rotate) == [0, 180, 0]
-        assert cmds.getAttr(_sphere1.translate) == [-5, 10, -20]
+        assert cmds.getAttr(_sphere1.rotate) == [(0, 180, 0)]
+        assert cmds.getAttr(_sphere1.translate) == [(
+            -4.999999999999997, 10.0, -20.0)]
         (_mtx1*_mtx1).apply_to(_sphere1)
-        assert cmds.getAttr(_sphere1.rotate) == [0, 0, 0]
-        assert cmds.getAttr(_sphere1.translate) == [10, 20, 40]
+        assert cmds.getAttr(_sphere1.rotate) == [(0, 0, 0)]
+        assert cmds.getAttr(_sphere1.translate) == [(10, 20, 40)]
 
         # Offset matrix cookbook
         _mtx_b = _rand_m()
@@ -71,7 +75,8 @@ class TestOpenMaya(unittest.TestCase):
         _sphere1.save_preset(_tmp_preset)
         print _tmp_preset
         _sphere2.load_preset(_tmp_preset)
-        assert not (_sphere1.get_p() - _sphere2.get_p()).length()
+        print (_sphere1.get_p() - _sphere2.get_p()).length()
+        assert not round((_sphere1.get_p() - _sphere2.get_p()).length(), 5)
 
     def test_get_selected(self):
         cmds.select('persp')

@@ -21,6 +21,7 @@ class HPixmapUi(QtWidgets.QDialog):
             title (str): interface title
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
             parent (QDialog): parent dialog
+            show (bool): show interface on launch
         """
         from psyhive import host
 
