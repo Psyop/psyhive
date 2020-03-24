@@ -217,10 +217,15 @@ class _ActionBrowser(qt.HUiDialog3):
 
             self.ui.WorkPath.setText(_work.path)
             self.ui.VendorMa.setText(_work_orig.get_vendor_file())
-            _start, _end = [int(round(_val))
-                            for _val in _work_orig.get_range()]
-            self.ui.WorkLabel.setText(
-                'Range: {:d} - {:d}'.format(_start, _end))
+
+            # Set label
+            _rng = _work_orig.get_range()
+            if _rng:
+                _start, _end = [int(round(_val)) for _val in _rng]
+                _label = 'Range: {:d} - {:d}'.format(_start, _end)
+            else:
+                _label = 'Cache missing'
+            self.ui.WorkLabel.setText(_label)
 
             self.ui.Load.setEnabled(True)
             self.ui.VersionUp.setEnabled(_cur_work_selected)

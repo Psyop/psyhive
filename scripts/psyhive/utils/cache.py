@@ -222,7 +222,7 @@ def get_result_storer(
 
 def get_result_to_file_storer(
         get_depend_path=None, min_mtime=None, create_dir=True,
-        max_age=None, verbose=0):
+        max_age=None, allow_fail=True, verbose=0):
     """Build a decorator that stores the result of a function to a file.
 
     Args:
@@ -235,6 +235,7 @@ def get_result_to_file_storer(
             doesn't exist
         max_age (float): if the age of the cache (in secs) is more than
             this value then it should be ignored (ie. regenerated)
+        allow_fail (bool): error if cache fails to write to disk
         verbose (int): print process data
     """
 
@@ -268,8 +269,9 @@ def get_result_to_file_storer(
                 obj_write(
                     _result, file_=cache_file, create_dir=create_dir,
                     verbose=max(verbose-1, 0))
-            except (OSError, IOError):
-                pass
+            except (OSError, IOError) as _exc:
+                if not allow_fail:
+                    raise _exc
 
             return _result
 

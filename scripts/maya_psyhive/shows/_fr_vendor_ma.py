@@ -1,9 +1,8 @@
 """Tools for managing ma files in vendor_in dir on frasier."""
 
-from maya import cmds
-
 from psyhive import host
-from psyhive.utils import File, Dir, store_result_to_file, lprint
+from psyhive.utils import (
+    File, Dir, lprint, CacheMissing, get_result_to_file_storer)
 
 MOBURN_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 
@@ -81,7 +80,7 @@ class FrasierVendorMa(File):
 
         return _work
 
-    @store_result_to_file
+    @get_result_to_file_storer(allow_fail=False)
     def get_range(self, force=False):
         """Get frame range of this ma file.
 
@@ -91,6 +90,12 @@ class FrasierVendorMa(File):
         Returns:
             (tuple): start/end frames
         """
+        if not force:
+            raise CacheMissing(self.path)
         if not host.cur_scene() == self.path:
-            cmds.file(self.path, open=True, prompt=False, force=force)
+            try:
+                host.open_scene(self.path, force=force)
+            except RuntimeError:
+                pass
+        assert host.cur_scene() == self.path
         return host.t_range()

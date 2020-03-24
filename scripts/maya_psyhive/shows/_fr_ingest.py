@@ -55,10 +55,11 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
     if legs_to_ik:
         _update_legs_to_ik()
 
+    _work = ma_.get_work()
+    print ' - WORK', _work
+    print ' - RANGE', ma_.get_range()
+
     if save:
-        _work = ma_.get_work()
-        print ' - WORK', _work
-        print ' - RANGE', ma_.get_range()
         host.save_scene(_work.path)
         _work.set_comment('Copied from '+ma_.path)
         _work.set_vendor_file(ma_.path)
@@ -328,8 +329,8 @@ def _ingest_vendor_ma(ma_, work, blast_, legs_to_ik):
     _work = work
     if not work.exists():
         _work = ingest_ma(ma_=ma_, force=True, legs_to_ik=legs_to_ik)
-    else:
-        print ' - WORK', work.path
+    print ' - WORK', work.path
+    print ' - RANGE', work.get_range()
 
     if blast_:
 

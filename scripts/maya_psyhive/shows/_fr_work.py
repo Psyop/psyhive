@@ -145,7 +145,6 @@ class FrasierWork(tk2.TTWork):
 
         for _file in [
                 self.get_export_fbx(),
-                self.get_export_fbx(dated=True),
                 File(self.processed_mov),
                 self]:
             _file.delete(force=True)
@@ -287,14 +286,17 @@ class FrasierWork(tk2.TTWork):
         """
         self.get_vendor_file(force=True, file_=file_)
 
-    def get_range(self):
+    def get_range(self, force=False):
         """Get frame range of this work.
+
+        Args:
+            force (bool): force reread from vendor ma
 
         Returns:
             (float tuple): start/end frames
         """
         return _fr_vendor_ma.FrasierVendorMa(
-            self.get_vendor_file()).get_range()
+            self.get_vendor_file()).get_range(force=force)
 
     def get_export_fbx(self, dated=False, anim=False):
         """Get path to export fbx for this work file.
