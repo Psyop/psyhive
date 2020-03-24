@@ -75,8 +75,7 @@ def multi_select(
         items (list): list of objects to display
         msg (str): message for dialog
         title (str): dialog title
-        multi (bool): allow multiple selection (otherwise single
-            is applied)
+        multi (bool): allow multiple selection (default is True)
         default (any): default value
         select (str): label for select button
         width (int): override dialog width

@@ -1,3 +1,15 @@
+#### v0.72.0 ####
+
+    Released: Tue 24th Mar 2020
+
+    Brawl Stars: added tool for rendering tbm nodes into pipeline,
+    
+    maya_psyhive:
+        shows.brawlstarsbaked addded render tbm nodes tool,
+    psyhive:
+        utils.Seq.move added,
+
+
 #### v0.71.0 ####
 
     Released: Tue 24th Mar 2020
