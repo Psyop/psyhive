@@ -1,6 +1,7 @@
 """Tools for managing sequences of files."""
 
 import os
+import shutil
 
 from psyhive.utils.cache import store_result_on_obj
 from psyhive.utils.path import File, abs_path, find, test_path, Dir
@@ -196,6 +197,17 @@ class Seq(object):
         """
         _start, _end = self.find_range()
         return self.get_frames() != range(_start, _end+1)
+
+    def move(self, target):
+        """Move this image sequence.
+
+        Args:
+            target (Seq): where to move to
+        """
+        assert not target.exists(force=True)
+        target.test_dir()
+        for _frame in self.get_frames(force=True):
+            shutil.move(self[_frame], target[_frame])
 
     def parent(self):
         """Get parent dir of this seq.
