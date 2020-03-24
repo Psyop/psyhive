@@ -49,10 +49,12 @@ def prepare_motionburner_ma_file(
         use_hsl_rig (bool): update the rig to HSL rig
         legs_to_ik (bool): update legs from fk to ik for animation (slow)
     """
+    _ma = None
     if ma_:
         _fr_ingest.load_vendor_ma(ma_, fix_hik_issues=fix_hik_issues)
-    _fr_ingest.ingest_ma(ma_=None, legs_to_ik=legs_to_ik, save=False,
-                         apply_mapping=use_hsl_rig)
+        _ma = FrasierVendorMa(ma_)
+    _fr_ingest.ingest_ma(ma_=_ma, legs_to_ik=legs_to_ik, save=False,
+                         apply_mapping=use_hsl_rig, load_ma=False)
 
 
 @py_gui.install_gui(

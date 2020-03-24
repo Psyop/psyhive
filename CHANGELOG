@@ -1,3 +1,18 @@
+#### v0.71.0 ####
+
+    Released: Tue 24th Mar 2020
+
+    frasier ingestion: bugfix replace removes timestamped fbx,
+    
+    maya_psyhive:
+        shows.frasier action browser added handling for no cached range,
+        shows.frasier.ingest_ma force range cache + error if range cache write fails,
+        shows.fraiser.FrasierWork.delete_all_data no delete of timestamp fbx,
+        shows.fraiser.FrasierWork.get_range added force flag,
+    psyhive:
+        utils.get_result_to_file_storer added allow_fail flag,
+
+
 #### v0.70.0 ####
 
     Released: Mon 23rd Mar 2020
