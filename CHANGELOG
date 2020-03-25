@@ -1,3 +1,13 @@
+#### v0.72.1 ####
+
+    Released: Wed 25th Mar 2020
+
+    Tank Support: bugfix error on generate shaders for asset with no rest cache (csage),
+    
+    maya_psyhive:
+        tank_support.build_shader_outputs bugfix error on no rest cache,
+
+
 #### v0.72.0 ####
 
     Released: Tue 24th Mar 2020

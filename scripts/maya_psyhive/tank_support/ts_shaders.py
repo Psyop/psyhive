@@ -447,7 +447,8 @@ def build_aistandin_from_shade(
 
     # Create standin
     _standin = hom.CMDS.createNode('aiStandIn')
-    _standin.plug('dso').set_val(archive)
+    if archive:
+        _standin.plug('dso').set_val(archive)
     _standin.plug('useFrameExtension').set_val(animated)
 
     _merge = hom.CMDS.createNode(
@@ -460,7 +461,10 @@ def build_aistandin_from_shade(
 
     # Init updates to happen after abc load
     _standin.select()
-    _rng = _get_abc_range_from_sg(archive) if animated else None
+    if archive and animated:
+        _rng = _get_abc_range_from_sg(archive)
+    else:
+        _rng = None
     _ais_name = get_unique(name or '{}_AIS'.format(shade.namespace))
     _finalise_fn = wrap_fn(
         _finalise_standin, node=_standin, range_=_rng, name=_ais_name)
@@ -507,8 +511,6 @@ def build_shader_outputs(output, force=True, verbose=1):
     _ver = tk2.TTOutputVersion(output)
     _rest_cache = get_single(_ver.find(
         extn='abc', filter_='restCache'), catch=True)
-    if not _rest_cache:
-        raise RuntimeError('Missing rest cache '+_ver.path)
     _shade = _ver.find_file(extn='mb', format_='maya')
     lprint(' - VER       ', _ver.path, verbose=verbose)
     lprint(' - SHADE     ', _shade.path, verbose=verbose)
