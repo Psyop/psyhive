@@ -1,3 +1,17 @@
+#### v0.72.2 ####
+
+    Released: Thu 26th Mar 2020
+
+    Frasier Ingest: fix nested namespace issues (hmeinertrita),
+    Startup: fix issues with missing script editor file menu (ccessaro),
+    
+    maya_psyhive:
+        shows.frasier ingest added fix for nested namespaces,
+        startup fix error on missing script editor file menu,
+    psyhive:
+        utils dev mode env updated PSYOP_DEV -> PSYHIVE_DEV,
+
+
 #### v0.72.1 ####
 
     Released: Wed 25th Mar 2020

@@ -108,12 +108,34 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
     _ref = ref.find_ref()
     if not _ref.path == _MOTIONBURNER_RIG:
         _ref.swap_to(_MOTIONBURNER_RIG)
+    _ref = _fix_nested_namespace(_ref)
     if not _ref.namespace == 'SK_Tier1_Male_CR':
         _ref.rename('SK_Tier1_Male_CR')
 
     # Test for hik issues
     if fix_hik_issues:
         _test_for_hik_issues(_ref)
+
+
+def _fix_nested_namespace(ref_):
+    """Fix nested namespace issues.
+
+    If the rig is in a nested namespace, move it into the root namespace.
+
+    Args:
+        ref_ (FileRef): reference to check
+
+    Returns:
+        (FileRef): fixed reference
+    """
+    _ref_node = hom.HFnDependencyNode(ref_.ref_node)
+    if not _ref_node.namespace:
+        print 'NO NAMESPACE ISSUE TO FIX'
+        return ref_
+
+    print 'FIXING NESTED NAMESPACE', _ref_node.namespace
+    cmds.namespace(moveNamespace=(_ref_node.namespace, ":"), force=True)
+    return ref.find_ref()
 
 
 def _test_for_hik_issues(ref_):
