@@ -106,8 +106,8 @@ def dev_mode(verbose=0):
     Returns:
         (bool): whether we are in dev mode
     """
-    _dev = os.environ.get('PSYOP_DEV')
-    lprint('PSYOP_DEV', _dev, bool(_dev), verbose=verbose)
+    _dev = os.environ.get('PSYHIVE_DEV')
+    lprint('PSYHIVE_DEV', _dev, bool(_dev), verbose=verbose)
     return bool(_dev)
 
 
@@ -390,10 +390,10 @@ def revert_dev_mode(func):
         _dev_mode = dev_mode()
         _result = func(*args, **kwargs)
         if not _dev_mode:
-            if 'PSYOP_DEV' in os.environ:
-                del os.environ['PSYOP_DEV']
+            if 'PSYHIVE_DEV' in os.environ:
+                del os.environ['PSYHIVE_DEV']
         else:
-            os.environ['PSYOP_DEV'] = '1'
+            os.environ['PSYHIVE_DEV'] = '1'
         assert dev_mode() == _dev_mode
         return _result
 
@@ -428,10 +428,10 @@ def set_dev_mode(value, verbose=0):
         verbose (int): print process data
     """
     if value:
-        os.environ['PSYOP_DEV'] = '1'
-    elif 'PSYOP_DEV' in os.environ:
-        del os.environ['PSYOP_DEV']
-    lprint('PSYOP_DEV', dev_mode(), verbose=verbose)
+        os.environ['PSYHIVE_DEV'] = '1'
+    elif 'PSYHIVE_DEV' in os.environ:
+        del os.environ['PSYHIVE_DEV']
+    lprint('PSYHIVE_DEV', dev_mode(), verbose=verbose)
 
 
 def str_to_seed(string, offset=0):

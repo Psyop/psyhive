@@ -12,6 +12,8 @@ from psyhive.utils import get_single, lprint, write_file
 def script_editor_add_project_opts():
     """Add script editor project load/save option."""
     _menu = _script_editor_find_file_menu()
+    if not _menu:
+        return
 
     # Add divider
     _div = 'psyProjectScriptDivider'
@@ -98,7 +100,10 @@ def _script_editor_find_file_menu(verbose=0):
         lprint(' - MATCHED', verbose=verbose)
         _menus.append(_menu)
 
-    _menu = get_single(_menus)
+    _menu = get_single(_menus, catch=True)
+    if not _menu:
+        print ' - PSYHIVE FAILED TO FIND SCRIPT EDITOR MENU'
+        return None
 
     # Init menu if it has no children
     if not cmds.menu(_menu, query=True, itemArray=True):

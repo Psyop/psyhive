@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from psyhive import deprecate
@@ -13,8 +12,7 @@ class TestDeprecate(unittest.TestCase):
         with self.assertRaises(ValueError):
             deprecate.apply_deprecation('kash')
 
-        if dev_mode():
-            del os.environ['PSYOP_DEV']
+        set_dev_mode(False)
         assert not dev_mode()
         deprecate.apply_deprecation("18/03/20 don't use this")
 
