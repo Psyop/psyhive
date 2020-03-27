@@ -1,3 +1,24 @@
+#### v0.73.0 ####
+
+    Released: Fri 27th Mar 2020
+
+    Brawl Stars: added previs cleanup tools (kcassidy),
+    Error Catcher: copy text button replaced with send email,
+    
+    maya_psyhive:
+        ref.FileRef.rename added update ref node feature,
+        shows.brawlstarsbaked added previs cleanup tools,
+    psyhive:
+        qt.multi_select updated to HUiDialog3 + added labels arg,
+        qt.HUiDialog3 added parent override arg,
+        tk2.TTOutput added find_latest/is_latest,
+        tk2.find_shots added sequence arg,
+        tools.err_catcher copy text -> send email,
+        tools.hive_bro steps maintain cur selection,
+        utils dev tools moved to submodule,
+        utils send_email/Path.is_file/get_path added,
+
+
 #### v0.72.2 ####
 
     Released: Thu 26th Mar 2020

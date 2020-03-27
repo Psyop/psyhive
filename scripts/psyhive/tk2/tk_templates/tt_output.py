@@ -313,11 +313,36 @@ class TTOutput(TTDirBase):
 
         return _outputs
 
+    def find_latest(self):
+        """Find latest version of this output.
+
+        Returns:
+            (TTOutputFileBase): latest version
+        """
+        _ver = TTOutputVersion(self.path)
+        _name = TTOutputName(self.path)
+        for _o_ver in reversed(_name.find_versions()):
+            if _o_ver == _ver:
+                return self
+            _out = self.map_to(version=_o_ver.version)
+            if _out.exists():
+                return _out
+        raise OSError('Failed to find latest version '+self.path)
+
+    def is_latest(self):
+        """Check if this is the latest version.
+
+        Returns:
+            (bool): latest status
+        """
+        return self.find_latest() == self
+
 
 class _TTOutputFileBase(TTBase):
     """Base class for any output file/seq."""
 
     channel = None
+    extension = None
 
     def find_latest(self):
         """Find latest version of this output.

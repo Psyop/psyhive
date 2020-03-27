@@ -1,13 +1,16 @@
 """Toolkit for brawl stars baked project."""
 
 from maya import cmds, mel
+
 from psyhive import icons, qt, py_gui, tk2
-from psyhive.utils import get_plural, Seq, get_single, lprint
+from psyhive.utils import get_plural, Seq, get_single, lprint, check_heart
+
 from maya_psyhive import open_maya as hom, ref
 
 ICON = icons.EMOJI.find("Star")
 LABEL = "Brawlstars Baked"
 BUTTON_LABEL = 'brawl\nstars'
+_SEQS = [_seq.name for _seq in tk2.obtain_sequences()]
 
 
 py_gui.set_section('Beast Makers Plugin')
@@ -152,3 +155,160 @@ def remove_mesh_xrayer_from_sel():
                       catch=True)
     print 'TRI', _tri
     cmds.delete([_node for _node in (_mxray, _tri) if _node])
+
+
+py_gui.set_section('Previs Cleanup')
+
+
+def _get_correct_namespace(ref_, used=()):
+    """Get target namespace for the given reference.
+
+    If it is the first instance, just use the asset name - for subsequent
+    instances add _ index (eg. archer, archer_2).
+
+    Args:
+        ref_ (FileRef): reference to check
+        used (tuple): list of namespaces to avoid
+
+    Returns:
+        (str): target namespace
+    """
+    _asset = tk2.TTOutputName(ref_.path)
+
+    _ns = _asset.asset
+    _count = 1
+    while (
+            _ns in used or
+            _ns in [_ref.namespace for _ref in ref.find_refs()] or
+            cmds.namespace(exists=_ns)):
+        if _ns == ref_.namespace:
+            break
+        check_heart()
+        _count += 1
+        _ns = '{}_{:d}'.format(_asset.asset, _count)
+        print 'TESTING', _ns
+
+    return _ns
+
+
+def cleanup_previz_namespaces(force=False):
+    """Clean up previz namespaces in the current scene.
+
+    This updates namespaces to match asset manager style naming and updates
+    the reference node names to match the new namespace.
+
+    Args:
+        force (bool): update without confirmation
+    """
+    _used = set()
+    _rename = []
+    for _ref in ref.find_refs():
+        if not _ref.is_loaded():
+            continue
+        _namespace = _get_correct_namespace(_ref, used=_used)
+        if _namespace == _ref.namespace:
+            continue
+        # _root
+        print '{:30} {}'.format(_ref.namespace, _namespace)
+        _used.add(_namespace)
+        _rename.append((_ref, _namespace))
+
+    if not force:
+        qt.ok_cancel('Rename {:d} asset{}?'.format(
+            len(_rename), get_plural(_rename)))
+    for _ref, _namespace in qt.progress_bar(_rename):
+        _ref.rename(_namespace)
+
+
+def _load_and_cleanup_workfile(work):
+    """Load the given workfile, clean it and version up.
+
+    Args:
+        work (TTWork): work file to update
+    """
+    print
+
+    print 'WORK', work.path
+    cmds.file(work.path, open=True, prompt=False, force=True)
+
+    _errs = cmds.file(query=True, errorStatus=True)
+    print ' - LOADED', _errs
+
+    # Update refs
+    _to_update = []
+    for _ref in ref.find_refs():
+
+        print _ref, _ref.path
+
+        if not _errs and not _ref.is_loaded():
+            continue
+
+        try:
+            _asset = tk2.TTOutputFile(_ref.path)
+        except ValueError:
+            print 'IGNORING OFF PIPELINE:', _ref
+            continue
+            # _asset = tk2.TTOutput(_ref.path)
+        if _ref.is_loaded() and _asset.is_latest():
+            continue
+
+        print _asset
+        _latest = _asset.find_latest()
+        assert _latest.is_file()
+        assert _latest.extension in ['ma', 'mb']
+        print _latest
+        _to_update.append((_ref, _latest))
+
+    for _ref, _latest in qt.progress_bar(
+            _to_update, 'Updating {:d} ref{}', stack_key='Update assets'):
+        _ref.swap_to(_latest)
+        print
+
+    cleanup_previz_namespaces(force=True)
+
+    work.find_next().save('Cleaned up namespaces')
+
+
+@py_gui.install_gui(choices={'sequence': _SEQS})
+def batch_cleanup_preview_assets(sequence='barleyBarPreviz'):
+    """Batch cleanup preview asset namespaces.
+
+    This will launch a popup asking you select a list of shots. Then
+    for each shot it will:
+
+        - open the latest previz work file
+        - update assets to latest version
+        - update asset namespaces
+        - version up
+
+    Args:
+        sequence (str): sequence to get shots from
+    """
+
+    # Request shots to check
+    _shots = tk2.find_shots(sequence=sequence)
+    _shots = qt.multi_select(
+        items=_shots, labels=[_shot.name for _shot in _shots],
+        title='Select shots', msg='Select shots to clean up:')
+
+    # Get works to update
+    _works = []
+    for _shot in _shots:
+        print _shot
+        _work = None
+        for _task in ['previs', 'previz']:
+            _task_work = _shot.map_to(
+                tk2.TTWork, Step='previz', Task=_task, dcc='maya',
+                extension='ma', version=1).find_latest()
+            if _task_work:
+                _work = _task_work
+                break
+        if not _work:
+            print 'NO WORK', _shot
+            continue
+        assert _work.exists()
+        _works.append(_work)
+
+    for _work in qt.progress_bar(
+            _works, 'Cleaning {:d} shot{}', stack_key='CleanupShots'):
+        _load_and_cleanup_workfile(_work)

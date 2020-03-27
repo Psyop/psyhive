@@ -32,6 +32,8 @@ _RELOAD_ORDER = [
     'psyhive.qt.wrapper',
     'psyhive.qt.misc',
     'psyhive.qt.interface',
+    'psyhive.qt.ui_dialog_3',
+    'psyhive.qt.multi_select_',
     'psyhive.qt',
     'psyhive.py_gui',
     'psyhive.pipe.project',

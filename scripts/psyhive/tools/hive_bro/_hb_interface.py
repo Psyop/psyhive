@@ -113,9 +113,10 @@ class _HiveBro(qt.HUiDialog3):
         _steps = _root.find_step_roots() if _root else []
 
         # Populate list
+        _cur = self.ui.Step.selected_text(single=True)
         self.ui.Step.blockSignals(True)
         self.ui.Step.clear()
-        _sel = None
+        _sel = _cur if _cur in _steps else None
         for _step in _steps:
             _work_area = _step.get_work_area(dcc=_hb_utils.cur_dcc())
             _col = 'grey'

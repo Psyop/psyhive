@@ -10,7 +10,7 @@ import webbrowser
 from psyhive import qt, icons, host, pipe
 from psyhive.utils import (
     abs_path, check_heart, File, FileError, lprint, dprint, dev_mode,
-    copy_text, get_single)
+    get_single, send_email)
 
 _UI_FILE = abs_path('err_dialog.ui', root=os.path.dirname(__file__))
 
@@ -75,12 +75,27 @@ class _ErrDialog(qt.HUiDialog3):
             self.ui.Traceback.addItem(_item)
         self.ui.Traceback.setCurrentRow(0)
 
-    def _callback__CopyText(self):
-        copy_text('```\n{}\n```'.format(self.traceback.clean_text))
+    def _callback__SendEmail(self):
+        send_email('hvanderbeek@psyop.tv',
+                   subject='[ERR] {}'.format(self.message),
+                   body=self._get_summary())
 
     def _callback__MakeTicket(self):
+        _make_ticket(
+            summary='[PSYHIVE] Error: {}'.format(self.message),
+            description=self._get_summary())
 
-        _desc = '\n'.join([
+    def _callback__ViewCode(self):
+        _line = get_single(self.ui.Traceback.selected_data())
+        _line.edit()
+
+    def _get_summary(self):
+        """Get error summary for email/ticket.
+
+        Returns:
+            (str): error summary
+        """
+        return '\n'.join([
             'HOST: {}'.format(host.NAME),
             'PROJECT: {}'.format(pipe.cur_project().name),
             'SCENE: {}'.format(host.cur_scene()),
@@ -89,13 +104,6 @@ class _ErrDialog(qt.HUiDialog3):
             '```',
             self.traceback.clean_text,
             '```'])
-        _make_ticket(
-            summary='[PSYHIVE] Error: {}'.format(self.message),
-            description=_desc)
-
-    def _callback__ViewCode(self):
-        _line = get_single(self.ui.Traceback.selected_data())
-        _line.edit()
 
 
 class _TraceStep(object):

@@ -5,7 +5,8 @@ import os
 
 from maya import cmds
 
-from psyhive.utils import File, get_single, lprint, apply_filter, abs_path
+from psyhive.utils import (
+    File, get_single, lprint, apply_filter, abs_path, get_path)
 from maya_psyhive.utils import (
     restore_ns, get_parent, set_namespace, del_namespace)
 
@@ -171,15 +172,22 @@ class FileRef(object):
                 return
         cmds.file(self._file, removeReference=True)
 
-    def rename(self, namespace):
+    def rename(self, namespace, update_ref_node=True):
         """Rename this reference's namespace.
 
         Args:
             namespace (str): namespace to update to
+            update_ref_node (bool): update reference node name
         """
         set_namespace(":")
         del_namespace(':'+namespace)
         cmds.file(self._file, edit=True, namespace=namespace)
+
+        if update_ref_node:
+            cmds.lockNode(self.ref_node, lock=False)
+            _ref_node = cmds.rename(self.ref_node, namespace+"RN")
+            cmds.lockNode(_ref_node, lock=True)
+            self.__init__(_ref_node)
 
     def swap_to(self, file_):
         """Swap this reference file path.
@@ -187,15 +195,16 @@ class FileRef(object):
         Args:
             file_ (str): new file path
         """
-        if not os.path.exists(file_):
-            raise OSError("Missing file: {}".format(file_))
+        _file = get_path(file_)
+        if not os.path.exists(_file):
+            raise OSError("Missing file: {}".format(_file))
         try:
             cmds.file(
-                file_, loadReference=self.ref_node, ignoreVersion=True,
+                _file, loadReference=self.ref_node, ignoreVersion=True,
                 options="v=0", force=True)
         except RuntimeError as _exc:
             if _exc.message == 'Maya command error':
-                raise RuntimeError('Maya errored on opening file '+file_)
+                raise RuntimeError('Maya errored on opening file '+_file)
             raise _exc
 
     def __cmp__(self, other):
