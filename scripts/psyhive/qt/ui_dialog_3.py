@@ -34,19 +34,22 @@ def _get_widget_label(widget):
 class HUiDialog3(QtWidgets.QDialog):
     """Dialog based on a ui file."""
 
-    def __init__(self, ui_file, catch_errors_=True, save_settings=True):
+    def __init__(self, ui_file, catch_errors_=True, save_settings=True,
+                 parent=None):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
             catch_errors_ (bool): apply error catcher to callbacks
             save_settings (bool): load/save settings on open/close
+            parent (QWidget): override parent widget
         """
         from psyhive import host
         self.ui_file = ui_file
         self._register_in_dialog_stack()
 
-        super(HUiDialog3, self).__init__(parent=host.get_main_window_ptr())
+        super(HUiDialog3, self).__init__(
+            parent=parent or host.get_main_window_ptr())
 
         self._load_ui()
         self._connect_elements(catch_errors_=catch_errors_)

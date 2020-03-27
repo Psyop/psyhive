@@ -119,6 +119,14 @@ class Path(object):
         """
         return os.path.getsize(self.path)
 
+    def is_file(self):
+        """Test if this path is a file.
+
+        Returns:
+            (bool): whether file
+        """
+        return os.path.isfile(self.path)
+
     def nice_age(self):
         """Get this file's age as a readable string.
 
@@ -744,6 +752,22 @@ def get_owner(path):
     _name, _, _ = _look_up_account_sid(_sid)
 
     return _name
+
+
+def get_path(path):
+    """Get a path string from the given arg.
+
+    Args:
+        path (str|Path): object to get path string from
+
+    Returns:
+        (str): path as a string
+    """
+    if isinstance(path, Path):
+        return path.path
+    elif isinstance(path, six.string_types):
+        return path
+    raise NotImplementedError(path)
 
 
 def launch_browser(dir_):

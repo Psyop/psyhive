@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="main_layout">
    <item row="0" column="0">
-    <widget class="QLabel" name="message">
+    <widget class="QLabel" name="Message">
      <property name="text">
       <string>This is a whole bunch of text and then this is some more text.</string>
      </property>
@@ -25,7 +25,7 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="HListWidget" name="items">
+    <widget class="HListWidget" name="Items">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
@@ -47,7 +47,7 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QPushButton" name="select">
+    <widget class="QPushButton" name="Select">
      <property name="text">
       <string>Select</string>
      </property>
@@ -59,7 +59,7 @@
   <customwidget>
    <class>HListWidget</class>
    <extends>QListWidget</extends>
-   <header location="global">hlistwidget.h</header>
+   <header>hlistwidget.h</header>
    <slots>
     <slot>blah()</slot>
     <slot>redraw()</slot>

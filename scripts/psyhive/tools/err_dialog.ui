@@ -67,9 +67,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="CopyText">
+        <widget class="QPushButton" name="SendEmail">
          <property name="text">
-          <string>Copy text</string>
+          <string>Send email</string>
          </property>
         </widget>
        </item>
