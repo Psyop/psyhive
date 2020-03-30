@@ -25,8 +25,8 @@ from . import _fr_vendor_ma, _fr_tools
 
 ICON = icons.EMOJI.find('Brain')
 
-_MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
-                     'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
+MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
+                    'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
 _DIR = abs_path(os.path.dirname(__file__))
 CAM_SETTINGS_FMT = abs_path(
     '_fr_{}_cam_{}.preset', root=os.path.dirname(__file__))
@@ -106,8 +106,8 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
 
     # Update rig
     _ref = ref.find_ref()
-    if not _ref.path == _MOTIONBURNER_RIG:
-        _ref.swap_to(_MOTIONBURNER_RIG)
+    if not _ref.path == MOTIONBURNER_RIG:
+        _ref.swap_to(MOTIONBURNER_RIG)
     _ref = _fix_nested_namespace(_ref)
     if not _ref.namespace == 'SK_Tier1_Male_CR':
         _ref.rename('SK_Tier1_Male_CR')

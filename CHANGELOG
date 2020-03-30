@@ -1,3 +1,15 @@
+#### v0.73.1 ####
+
+    Released: Mon 30th Mar 2020
+
+    Shader Bro: catch error on no shade step in asset (kcassidy),
+    
+    maya_psyhive:
+        shows.fraiser.MOTIONBURNER_RIG made public,
+        tools.shader_bro bugfix error on no shade step in asset,
+        tools.shader_bro catch errors on launch,
+
+
 #### v0.73.0 ####
 
     Released: Fri 27th Mar 2020

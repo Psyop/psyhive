@@ -5,6 +5,7 @@ import os
 from maya import cmds
 
 from psyhive import icons, tk2, qt
+from psyhive.tools import catch_error
 from psyhive.utils import (
     read_yaml, abs_path, store_result, get_single, dprint)
 
@@ -207,8 +208,8 @@ def _find_shaders(force=False, parent=None, verbose=0):
     for _asset in qt.progress_bar(
             tk2.obtain_assets(), 'Reading {:d} asset{}',
             parent=parent):
-        _shade = _asset.find_step_root('shade')
-        if not _shade.exists():
+        _shade = _asset.find_step_root('shade', catch=True)
+        if not _shade or not _shade.exists():
             continue
         for _work in _shade.find_work():
             _works.append(_work)
@@ -237,6 +238,7 @@ def _find_shaders(force=False, parent=None, verbose=0):
     return _shd_mbs
 
 
+@catch_error
 def launch():
     """Launch ShaderBro interface.
 
