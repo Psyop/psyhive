@@ -33,6 +33,7 @@ ignore:
         maya_psyhive/tank_support/ts_aistandin.py
         maya_psyhive/tank_support/ts_shaders.py
         maya_psyhive/tools/batch_cache/tmpl_cache.py
+        maya_psyhive/tools/batch_cache2/bc_tmpl_cache.py
     exec-used:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     expression-not-assigned:
@@ -230,7 +231,9 @@ allowed_names:
 
     // Qt
     closeEvent
+    deleteLater
     eventFilter
+    isVisible
     keyPressEvent
     mouseMoveEvent
     mousePressEvent

@@ -55,7 +55,7 @@ class ProgressBar(QtWidgets.QDialog):
 
     def __init__(
             self, items, title='Processing {:d} item{}', col=None, show=True,
-            pos=None, parent=None, stack_key='progress'):
+            pos=None, parent=None, stack_key='progress', plural=None):
         """Constructor.
 
         Args:
@@ -68,6 +68,7 @@ class ProgressBar(QtWidgets.QDialog):
             stack_key (str): override identifier for this dialog - if an
                 existing progress bar has the same stack key then this
                 will replace it
+            plural (str): override plural str (eg. 'es' for 'passes')
         """
         global _PROGRESS_BARS
 
@@ -93,7 +94,7 @@ class ProgressBar(QtWidgets.QDialog):
         super(ProgressBar, self).__init__(*_args)
 
         _title = title.format(
-            len(self.items), get_plural(self.items))
+            len(self.items), get_plural(self.items, plural=plural))
         self.setWindowTitle(_title)
         self.resize(408, 54)
 
@@ -128,6 +129,27 @@ class ProgressBar(QtWidgets.QDialog):
             self.show()
 
         _PROGRESS_BARS.append(self)
+
+    def isVisible(self):
+        """Garbage collection safe wrapper for isVisible."""
+        try:
+            return super(ProgressBar, self).isVisible()
+        except RuntimeError:
+            return False
+
+    def close(self):
+        """Garbage collection safe wrapper for close."""
+        try:
+            super(ProgressBar, self).close()
+        except RuntimeError:
+            pass
+
+    def deleteLater(self):
+        """Garbage collection safe wrapper for deleteLater."""
+        try:
+            super(ProgressBar, self).deleteLater()
+        except RuntimeError:
+            pass
 
     def print_eta(self):
         """Print expected time remaining."""

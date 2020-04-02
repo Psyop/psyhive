@@ -19,7 +19,7 @@ from psyhive.utils import find, abs_path, lprint, passes_filter, Seq
 from maya_psyhive import ref, open_maya as hom, ui
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
-from maya_psyhive.utils import blast
+from maya_psyhive.utils import blast, pause_viewports_on_exec
 
 from . import _fr_vendor_ma, _fr_tools
 
@@ -174,6 +174,7 @@ def _test_for_hik_issues(ref_):
     print 'DISABLED HUMAN IK'
 
 
+@pause_viewports_on_exec
 def _apply_kealeye_rig_mapping():
     """Apply rig mapping from Sean Kealeye MocapTools.
 
@@ -400,6 +401,8 @@ def _blast_work(work, seq=None, build_cam_func=None, view=False, force=False,
     """
     _seq = seq or work.blast
 
+    assert not cmds.ogs(query=True, pause=True)
+
     print 'BLAST', _seq
     print ' - FRAMES', _seq.find_range()
     if not force and _seq.exists(verbose=1):
@@ -450,15 +453,6 @@ def _face_blast_work(work, blast_=True, view=False, force=False):
         force (bool): force replace existing blast
     """
     print 'FACE BLAST', work.face_blast
-
-    # Build face blast cam
-    _cam = hom.CMDS.camera(name='FACE_BLAST')
-    _panel = ui.get_active_model_panel()
-    cmds.modelPanel(_panel, edit=True, camera=_cam)
-    cmds.parent(_cam, 'Tier1_Male_01:Head_M', relative=False)
-    cmds.setAttr(_cam+'.translate', -2.9, 54.3, 0.0)
-    cmds.setAttr(_cam+'.rotate', -56, -90, -25)
-
     _blast_work(work=work, view=view, seq=work.face_blast, blast_=blast_,
                 build_cam_func=_build_face_blast_cam, force=force)
 
@@ -472,7 +466,7 @@ def _build_face_blast_cam():
     _cam = hom.CMDS.camera(name='FACE_CAM')
     _panel = ui.get_active_model_panel()
     cmds.modelPanel(_panel, edit=True, camera=_cam)
-    cmds.parent(_cam, 'Tier1_Male_01:Head_M', relative=False)
+    cmds.parent(_cam, 'SK_Tier1_Male:Head_M', relative=False)
     cmds.setAttr(_cam+'.translate', -2.9, 54.3, 0.0)
     cmds.setAttr(_cam+'.rotate', -56, -90, -25)
 

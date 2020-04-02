@@ -179,6 +179,21 @@ class TTOutputVersion(TTDirBase):
         return sum([_out.find_files(extn=extn, format_=format_)
                     for _out in self.find_outputs()], [])
 
+    def find_latest(self):
+        """Find latest version of this output.
+
+        Returns:
+            (TTOutputVersion): latest version
+        """
+        _name = TTOutputName(self.path)
+        for _o_ver in reversed(_name.find_versions()):
+            if _o_ver == self:
+                return self
+            _out = self.map_to(version=_o_ver.version)
+            if _out.exists():
+                return _out
+        raise OSError('Failed to find latest version '+self.path)
+
     def find_outputs(self, filter_=None):
         """Find outputs within this version dir.
 
@@ -193,6 +208,14 @@ class TTOutputVersion(TTDirBase):
             _outs = apply_filter(
                 _outs, filter_, key=operator.attrgetter('path'))
         return _outs
+
+    def is_latest(self):
+        """Check if this is the latest version.
+
+        Returns:
+            (bool): latest status
+        """
+        return self.find_latest() == self
 
     def _read_outputs(self, class_=None):
         """Read outputs within this version dir from disk.
@@ -243,6 +266,30 @@ class TTOutput(TTDirBase):
         if format_ is not None:
             _files = [_file for _file in _files if _file.format == format_]
         return _files
+
+    def find_latest(self):
+        """Find latest version of this output.
+
+        Returns:
+            (TTOutput): latest version
+        """
+        _ver = TTOutputVersion(self.path)
+        _name = TTOutputName(self.path)
+        for _o_ver in reversed(_name.find_versions()):
+            if _o_ver == _ver:
+                return self
+            _out = self.map_to(version=_o_ver.version)
+            if _out.exists():
+                return _out
+        raise OSError('Failed to find latest version '+self.path)
+
+    def is_latest(self):
+        """Check if this is the latest version.
+
+        Returns:
+            (bool): latest status
+        """
+        return self.find_latest() == self
 
     def _read_files(self, verbose=0):
         """Read files/seqs within this output from disk.
@@ -312,30 +359,6 @@ class TTOutput(TTDirBase):
             _seq.set_frames(sorted(_frames))
 
         return _outputs
-
-    def find_latest(self):
-        """Find latest version of this output.
-
-        Returns:
-            (TTOutputFileBase): latest version
-        """
-        _ver = TTOutputVersion(self.path)
-        _name = TTOutputName(self.path)
-        for _o_ver in reversed(_name.find_versions()):
-            if _o_ver == _ver:
-                return self
-            _out = self.map_to(version=_o_ver.version)
-            if _out.exists():
-                return _out
-        raise OSError('Failed to find latest version '+self.path)
-
-    def is_latest(self):
-        """Check if this is the latest version.
-
-        Returns:
-            (bool): latest status
-        """
-        return self.find_latest() == self
 
 
 class _TTOutputFileBase(TTBase):

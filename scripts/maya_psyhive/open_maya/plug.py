@@ -235,6 +235,15 @@ class HPlug(om.MPlug):
         """
         return cmds.listConnections(self, **kwargs)
 
+    def list_enum(self):
+        """List enum values on this plug.
+
+        Returns:
+            (str list): enum values
+        """
+        return [str(_item) for _item in get_single(
+            self.attribute_query(listEnum=True)).split(":")]
+
     def list_incoming(self, **kwargs):
         """List incoming connections.
 

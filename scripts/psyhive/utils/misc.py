@@ -188,7 +188,8 @@ def get_plural(items, plural='s'):
         _count = items
     else:
         raise ValueError(items)
-    return '' if _count == 1 else plural
+    _plural = 's' if plural is None else plural
+    return '' if _count == 1 else _plural
 
 
 def get_ord(idx):

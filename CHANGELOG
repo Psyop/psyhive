@@ -1,3 +1,27 @@
+#### v0.74.0 ####
+
+    Released: Thu 2nd Apr 2020
+
+    Brawl Stars: tbm render tool renders mattes + generates alpha/bump,
+    Frasier: freeze viewports on update to HSL rig,
+    
+    maya_psyhive:
+        m_pipe.OutputRef added,
+        open_maya.HPlug.list_enum added,
+        shows.fraiser pause viewports on ingest,
+        shows.fraiser bugfix build face blast cam,
+        shows.brawlstarsbaked render passes + generate alpha/bump,
+        tools.batch_cache2 added wip,
+        utils.pause_viewports_on_exec added,
+    psyhive:
+        qt.progress_bar added plural override + fix garbage collection issues,
+        qt.HListWidget.set_items maintain selection,
+        tk2 use relative mods in __init__.py,
+        tk2.TTOutputVersion added find_latest/is_latest,
+        utils.get_plural catch plural as none,
+        utils.Seq added safe arg for non-standard seqs,
+
+
 #### v0.73.1 ####
 
     Released: Mon 30th Mar 2020

@@ -17,7 +17,8 @@ from ._fr_vendor_ma import FrasierVendorMa
 from ._fr_work import (
     FrasierWork, find_action_works, ASSETS, cur_work, EXPORT_FBX_ROOT)
 from ._fr_ingest import (
-    ingest_ma_files_to_pipeline, CAM_SETTINGS_FMT, MOTIONBURNER_RIG)
+    ingest_ma_files_to_pipeline, CAM_SETTINGS_FMT, MOTIONBURNER_RIG,
+    ingest_ma)
 
 ICON = icons.EMOJI.find('Brain')
 BUTTON_LABEL = 'frasier\ntools'
@@ -29,7 +30,7 @@ _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 
 __ALL__ = [FrasierWork, FrasierVendorMa, find_action_works,
            ASSETS, cur_work, EXPORT_FBX_ROOT, CAM_SETTINGS_FMT,
-           MOTIONBURNER_RIG]  # For lint
+           MOTIONBURNER_RIG, ingest_ma]  # For lint
 
 
 py_gui.set_section("Ingestion tools")
