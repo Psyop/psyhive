@@ -11,21 +11,23 @@ from psyhive.utils.misc import system, dprint, lprint
 class Seq(object):
     """Represents a sequences of files."""
 
-    def __init__(self, path, frames=None):
+    def __init__(self, path, frames=None, safe=True):
         """Constructor.
 
         Args:
             path (str): path to file sequence (eg. "seq.%04d.jpg")
             frames (int list): force list of frames
+            safe (bool): enforce blah.%04d.extn naming
         """
         self.path = abs_path(path)
         _file = File(self.path)
         self.dir = _file.dir
         self.extn = _file.extn
-        if not _file.filename.count('.%04d.') == 1:
-            raise ValueError(path)
         self.frame_expr = '%04d'
-        self.basename = _file.filename.split('.%04d.')[0]
+        if safe:
+            if not _file.filename.count('.%04d.') == 1:
+                raise ValueError(path)
+            self.basename = _file.filename.split('.%04d.')[0]
         if frames:
             self.set_frames(frames)
 

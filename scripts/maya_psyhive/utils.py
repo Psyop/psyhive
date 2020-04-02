@@ -628,6 +628,26 @@ def multiply_node(input1, input2, output, force=False, name='multiply'):
     return _out
 
 
+def pause_viewports_on_exec(func):
+    """Pause viewports on execute function and the unpause.
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _pause_viewport_func(*args, **kwargs):
+        cmds.ogs(pause=True)
+        _result = func(*args, **kwargs)
+        cmds.ogs(pause=True)
+        return _result
+
+    return _pause_viewport_func
+
+
 def render(file_, camera=None, layer='defaultRenderLayer'):
     """Render the current scene.
 

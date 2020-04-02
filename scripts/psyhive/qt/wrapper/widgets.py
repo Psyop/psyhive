@@ -245,21 +245,35 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             verbose (int): print process data
         """
         dprint('SET ITEMS', self, items, select, verbose=verbose)
+
+        if select:
+            _select = select if isinstance(select, list) else [select]
+            _text_list = isinstance(_select[0], six.string_types)
+        else:
+            _select = self.selected_text()  # Match current selection
+            _text_list = True
+
         self.blockSignals(True)
         self.clear()
-        _select = None
+
+        _selected = False
+
         for _idx, _item in enumerate(items):
             if isinstance(_item, six.string_types):
                 _item = HListWidgetItem(_item)
             self.addItem(_item)
-            if _item is select or _item.text() == select:
+            if (
+                    (not _text_list and _item in _select) or
+                    (_text_list and _item.text() in _select)):
                 lprint(' - MATCHED SELECT', select, _idx, verbose=verbose)
-                _select = _idx
-        if items:
-            _index = _select if _select is not None else 0
-            lprint(' - SELECT ITEM', _index, verbose=verbose)
-            self.setCurrentRow(_index)
+                _item.setSelected(True)
+                _selected = True
+
+        if not _selected:
+            self.setCurrentRow(0)
+
         self.blockSignals(False)
+
         self.itemSelectionChanged.emit()
 
 

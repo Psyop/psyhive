@@ -6,8 +6,10 @@ from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import get_parent
 
+from .output import OutputRef
 
-class RigRef(ref.FileRef):
+
+class RigRef(OutputRef):
     """Represents a rig referenced into a scene."""
 
     @store_result

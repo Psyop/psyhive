@@ -1,9 +1,15 @@
 """Toolkit for brawl stars baked project."""
 
+import tempfile
+
 from maya import cmds, mel
 
-from psyhive import icons, qt, py_gui, tk2
-from psyhive.utils import get_plural, Seq, get_single, lprint, check_heart
+import psylaunch
+
+from psyhive import icons, qt, py_gui, tk2, host
+from psyhive.utils import (
+    get_plural, Seq, get_single, lprint, check_heart, Dir, File,
+    abs_path)
 
 from maya_psyhive import open_maya as hom, ref
 
@@ -11,77 +17,12 @@ ICON = icons.EMOJI.find("Star")
 LABEL = "Brawlstars Baked"
 BUTTON_LABEL = 'brawl\nstars'
 _SEQS = [_seq.name for _seq in tk2.obtain_sequences()]
+_TMP_DIR = '{}/tbm_tmp/'.format(tempfile.gettempdir())
+_FACE_MATTES_NK = ('P:/projects/brawlstarsbaked_37322B/reference/documents/'
+                   'face_mattes/face_blur_setup_v003.nk')
 
 
 py_gui.set_section('Beast Makers Plugin')
-
-
-@py_gui.install_gui(choices={'which': ['All', 'Select']})
-def render_tbm_nodes(which='All'):
-    """Render TBM_2DRender nodes in the current scene.
-
-    Args:
-        which (str): which nodes to render:
-            all - render all nodes in the scene
-            select - select which nodes to render from a list
-    """
-    _cur_work = tk2.cur_work()
-
-    _renders = []
-    _tbms = hom.CMDS.ls(type='TBM_2DRenderer')
-    if which == 'Select' and len(_tbms) > 1:
-        _tbms = qt.multi_select(
-            _tbms, 'Which TBM nodes to render?', default=_tbms)
-
-    for _tbm in _tbms[:]:
-
-        print _tbm
-
-        # Read rig
-        _rig = _get_rig(_tbm)
-        if not _rig:
-            qt.notify_warning(
-                'No rig was found for {} - maybe it failed to connect.\n\n'
-                'This node cannot be exported.'.format(_tbm))
-            _tbms.remove(_tbm)
-            continue
-
-        # Set render path
-        _render = _cur_work.map_to(
-            tk2.TTOutputFileSeq, output_type='faceRender',
-            format=_tbm.clean_name, extension='png',
-            output_name=_rig.namespace)
-        print _render.path
-        _render_tmp = Seq('{}/{}_color.%04d.{}'.format(
-            _render.dir, _render.basename, _render.extn))
-        _render.get_frames(force=True)
-        _render.test_dir()
-        _render.delete(wording='replace')
-        _renders.append((_render, _render_tmp))
-
-        # Update tbm render node
-        _tbm.plug('directory').set_val(_render.dir)
-        _tbm.plug('fileName').set_val(_render.basename)
-        _tbm.plug('fileFormat').set_enum('png')
-        _tbm.plug('recordSizeX').set_val(2048)
-        _tbm.plug('recordSizeY').set_val(2048)
-        _tbm.plug('recordColorPrecision').set_enum('16 bit integer')
-
-        print
-
-    # Set record on/off on all render nodes
-    for _tbm in hom.CMDS.ls(type='TBM_2DRenderer'):
-        _tbm.plug('record').set_val(_tbm in _tbms)
-        _tbm.plug('record').set_val(True)
-
-    qt.ok_cancel(
-        'Render {:d} TBM node{}?'.format(len(_tbms), get_plural(_tbms)),
-        icon=icons.EMOJI.find('Ogre'))
-    mel.eval("TBM_2DRecord")
-
-    # Move images to correct path
-    for _render, _render_tmp in _renders:
-        _render_tmp.move(_render)
 
 
 def _get_rig(tbm, verbose=0):
@@ -113,6 +54,196 @@ def _get_rig(tbm, verbose=0):
     lprint(' - REF', _ref, verbose=verbose)
 
     return _ref
+
+
+def _get_render(tbm, pass_):
+    """Get render for the given pass/tbm node.
+
+    Args:
+        tbm (HFnDependencyNode): beast makers node
+        pass_ (str): pass name
+
+    Returns:
+        (TTOutputFileSeq): render
+    """
+    _cur_work = tk2.cur_work()
+    _tag = 'srgb' if pass_ == 'Diffuse' else 'data'
+    return _cur_work.map_to(
+        tk2.TTOutputFileSeq, output_type='faceRender',
+        format=str(tbm.clean_name), extension='png',
+        output_name='piper', channel=pass_, eye=_tag)
+
+
+def _prepare_tbms(tbms, force=False):
+    """Prepare beast maker nodes for export.
+
+    This stores render data on the nodes and checks output paths
+    are clear for rendering.
+
+    Args:
+        tbms (HFnDependencyNode list): list of nodes to export
+        force (bool): remove existing outputs without confirmation
+    """
+    Dir(_TMP_DIR).delete(force=True)
+
+    for _tbm in tbms:
+
+        print _tbm
+        _tbm.rig = _get_rig(_tbm)
+        _tbm.face_rig = ref.find_ref(_tbm.namespace)
+        _tbm.face_ctrl = _tbm.face_rig.get_node('face_Placer_Ctrl')
+
+        _tbm.renders = {}
+        _tbm.tmp_seqs = {}
+
+        for _pass in ['Bump', 'Alpha']:
+            _get_render(tbm=_tbm, pass_=_pass).delete(force=force)
+
+        for _pass in _tbm.face_ctrl.plug('matt').list_enum():
+
+            # Set up render
+            _render = _get_render(tbm=_tbm, pass_=_pass)
+            _render.delete(force=force)
+            _render.test_dir()
+            _tbm.renders[_pass] = _render
+            print _render
+
+            # Set up tmp seq
+            _tmp_seq = Seq('{}/{}/{}_color.%04d.png'.format(
+                _TMP_DIR, _tbm.rig.namespace, _pass))
+            _tmp_seq.test_dir()
+            _tbm.tmp_seqs[_pass] = _tmp_seq
+            print _tmp_seq
+
+    print
+
+
+def _render_tbms(tbms, start, end):
+    """Render beast maker nodes.
+
+    The list of passes is defined by the face_Placer_Ctrl.matt enum. Each
+    pass must be rendered separately.
+
+    Args:
+        tbms (HFnDependencyNode list): nodes to export
+        start (int): start frame
+        end (int): end frame
+    """
+
+    # Disable unused nodes
+    for _tbm in hom.CMDS.ls(type='TBM_2DRenderer'):
+        if _tbm not in tbms:
+            _tbm.plug('record').set_val(False)
+
+    # Render passes
+    _pass_count = max([len(_tbm.renders) for _tbm in tbms])
+    for _idx in qt.progress_bar(
+            range(_pass_count), 'Rendering {:d} pass{}', plural='es'):
+
+        # Prepare tbm nodes
+        _to_move = []
+        for _tbm in tbms:
+            _passes = sorted(_tbm.renders)
+            if _idx < len(_tbm.renders):
+                _pass = _passes[_idx]
+                _tbm.plug('fileFormat').set_enum('png')
+                _tbm.plug('recordSizeX').set_val(2048)
+                _tbm.plug('recordSizeY').set_val(2048)
+                _tbm.plug('recordColorPrecision').set_enum('16 bit integer')
+                _tbm.plug('directory').set_val(_tbm.tmp_seqs[_pass].dir)
+                _tbm.plug('fileName').set_val(_pass)
+                _tbm.plug('record').set_val(True)
+                _tbm.face_ctrl.plug('matt').set_enum(_pass)
+                _to_move.append((_tbm.tmp_seqs[_pass], _tbm.renders[_pass]))
+            else:
+                _tbm.plug('record').set_val(False)
+
+        # Render
+        mel.eval("TBM_2DRecord -fs {start:d} -fe {end:d}".format(
+            start=start, end=end))
+
+        # Move images to pipeline
+        for _tmp_seq, _render in _to_move:
+            _tmp_seq.move(_render)
+
+    # Revert to diffuse
+    for _tbm in tbms:
+        _tbm.face_ctrl.plug('matt').set_enum('Diffuse')
+
+
+def _comp_tbm_renders(tbms, start, end):
+    """Comp beast maker renders.
+
+    This generates the alpha and bump passes by passing the RGB render through
+    a nk file.
+
+    Args:
+        tbms (HFnDependencyNode list): nodes to export
+        start (int): start frame
+        end (int): end frame
+    """
+    _tmp_py = abs_path('{}/process_mattes.py'.format(_TMP_DIR))
+    print _tmp_py
+
+    _py = '\n'.join([
+        'import nuke',
+        '',
+        'nuke.scriptOpen("{nk}")',
+        '',
+        '_read_rgb = nuke.toNode("ReadRGB")',
+        '_write_bump = nuke.toNode("WriteBump")',
+        '_write_alpha = nuke.toNode("WriteAlpha")',
+        '',
+    ]).format(nk=_FACE_MATTES_NK)
+
+    for _tbm in tbms:
+        _bump = _get_render(tbm=_tbm, pass_='Bump')
+        _alpha = _get_render(tbm=_tbm, pass_='Alpha')
+        _rgb = _get_render(tbm=_tbm, pass_='RGB')
+        _py += '\n'.join([
+            '',
+            '# Process {tbm}',
+            '_read_rgb["file"].setValue("{matte_raw}")',
+            '_read_rgb["first"].setValue({start})',
+            '_read_rgb["last"].setValue({end})',
+            '_write_bump["file"].setValue("{bump}")',
+            'nuke.render(_write_bump, {start}, {end})',
+            '_write_alpha["file"].setValue("{alpha}")',
+            'nuke.render(_write_alpha, {start}, {end})',
+        ]).format(
+            tbm=_tbm, bump=_bump.path, alpha=_alpha.path, start=start,
+            end=end, matte_raw=_rgb.path)
+
+    # print _py
+    # print
+    File(_tmp_py).write_text(_py, force=True)
+
+    print 'launch nuke -- -t "{}"'.format(_tmp_py)
+    psylaunch.launch_app('nuke', args=['-t', _tmp_py])
+
+
+@py_gui.install_gui(choices={'which': ['All', 'Select']})
+def render_tbm_nodes(which='All', force=False):
+    """Render TBM_2DRender nodes in the current scene.
+
+    Args:
+        which (str): which nodes to render:
+            all - render all nodes in the scene
+            select - select which nodes to render from a list
+        force (bool): overwrite existing renders without confirmation
+    """
+    _cur_work = tk2.cur_work()
+    _start, _end = [int(_val) for _val in host.t_range()]
+
+    # Get list of tmb nodes to render
+    _tbms = hom.CMDS.ls(type='TBM_2DRenderer')
+    if which == 'Select' and len(_tbms) > 1:
+        _tbms = qt.multi_select(
+            _tbms, 'Which TBM nodes to render?', default=_tbms)
+
+    _prepare_tbms(tbms=_tbms, force=force)
+    _render_tbms(tbms=_tbms, start=_start, end=_end)
+    _comp_tbm_renders(tbms=_tbms, start=_start, end=_end)
 
 
 py_gui.set_section('Mesh XRay Plugin')
