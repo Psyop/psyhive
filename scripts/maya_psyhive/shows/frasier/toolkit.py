@@ -3,22 +3,23 @@
 import operator
 import os
 import sys
+import tempfile
+
+import psylaunch
 
 from psyhive import icons, py_gui, qt
-from psyhive.utils import CacheMissing, find, store_result, File, get_single
+from psyhive.utils import (
+    CacheMissing, find, store_result, File, get_single, abs_path)
 
 from maya_psyhive import ref
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
 from maya_psyhive.utils import restore_sel
 
-from . import _fr_browser, _fr_tools, _fr_ingest
-from ._fr_vendor_ma import FrasierVendorMa
-from ._fr_work import (
-    FrasierWork, find_action_works, ASSETS, cur_work, EXPORT_FBX_ROOT)
-from ._fr_ingest import (
-    ingest_ma_files_to_pipeline, CAM_SETTINGS_FMT, MOTIONBURNER_RIG,
-    ingest_ma)
+from . import fr_action_browser, fr_tools, fr_ingest
+from .fr_vendor_ma import FrasierVendorMa
+from .fr_work import find_action_works
+from .fr_ingest import ingest_ma_files_to_pipeline
 
 ICON = icons.EMOJI.find('Brain')
 BUTTON_LABEL = 'frasier\ntools'
@@ -27,10 +28,6 @@ _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
          'frasier/_ToolsPsy')
 _PY_ROOT = _ROOT+'/release/maya/v2018/hsl/python'
 _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
-
-__ALL__ = [FrasierWork, FrasierVendorMa, find_action_works,
-           ASSETS, cur_work, EXPORT_FBX_ROOT, CAM_SETTINGS_FMT,
-           MOTIONBURNER_RIG, ingest_ma]  # For lint
 
 
 py_gui.set_section("Ingestion tools")
@@ -54,10 +51,10 @@ def prepare_motionburner_ma_file(
     """
     _ma = None
     if ma_:
-        _fr_ingest.load_vendor_ma(ma_, fix_hik_issues=fix_hik_issues)
+        fr_ingest.load_vendor_ma(ma_, fix_hik_issues=fix_hik_issues)
         _ma = FrasierVendorMa(ma_)
-    _fr_ingest.ingest_ma(ma_=_ma, legs_to_ik=legs_to_ik, save=False,
-                         apply_mapping=use_hsl_rig, load_ma=False)
+    fr_ingest.ingest_ma(ma_=_ma, legs_to_ik=legs_to_ik, save=False,
+                        apply_mapping=use_hsl_rig, load_ma=False)
 
 
 @py_gui.install_gui(
@@ -70,7 +67,7 @@ def export_hsl_fbx(fbx=''):
     Args:
         fbx (str): path to export to
     """
-    _fr_tools.export_hsl_fbx_from_cur_scene(fbx)
+    fr_tools.export_hsl_fbx_from_cur_scene(fbx)
 
 
 py_gui.set_section('Batch ingestion')
@@ -97,6 +94,34 @@ def ingest_ma_files_to_pipeline_(
         verbose (int): print process data
     """
     ingest_ma_files_to_pipeline(**locals())
+
+
+@py_gui.install_gui(
+    browser={'src_dir': py_gui.BrowserLauncher(
+        default_dir=_INGEST_ROOT, mode='SingleDirExisting')})
+def process_movs_for_review(src_dir):
+    """Search dir for groups of 3 input movs to comp into review mov.
+
+    Args:
+        src_dir (str): dir to search for input movs
+    """
+    print 'SRC DIR', src_dir
+
+    _tmp_py = abs_path('{}/process_movs_for_review.py'.format(
+        tempfile.gettempdir()))
+    print ' - TMP PY', _tmp_py
+
+    _py = '\n'.join([
+        'import nuke',
+        'import psyhive',
+        'from nuke_psyhive.shows import frasier',
+        'frasier.process_review_movs(dir_="{dir}")'
+    ]).format(dir=src_dir)
+    print
+    print _py
+    print
+    File(_tmp_py).write_text(_py, force=True)
+    psylaunch.launch_app('nuke', args=['-t', _tmp_py], wait=True)
 
 
 py_gui.set_section('Search')
@@ -175,7 +200,7 @@ def launch_fkik_switcher():
 @py_gui.install_gui(label='Launch Action Browser')
 def launch_action_browser():
     """Launch Action Browser interface."""
-    _fr_browser.launch()
+    fr_action_browser.launch()
 
 
 @store_result

@@ -21,7 +21,7 @@ from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
 from maya_psyhive.utils import blast, pause_viewports_on_exec
 
-from . import _fr_vendor_ma, _fr_tools
+from . import fr_vendor_ma, fr_tools
 
 ICON = icons.EMOJI.find('Brain')
 
@@ -182,7 +182,7 @@ def _apply_kealeye_rig_mapping():
     then bakes the anim. The MotionBurner rig is left in the scene
     for comparison but it is placed in a group and hidden.
     """
-    _fr_tools.install_mocap_tools()
+    fr_tools.install_mocap_tools()
     from MocapTools.Scripts import PsyopMocapTools
 
     # Apply kealeye bake
@@ -223,7 +223,7 @@ def _find_ma_files_to_check(src_dir, ma_filter, work_filter, limit):
     """
     assert os.path.exists(src_dir)
     _mas = find(src_dir, extn='ma', type_='f', filter_=ma_filter,
-                class_=_fr_vendor_ma.FrasierVendorMa)
+                class_=fr_vendor_ma.FrasierVendorMa)
     if work_filter:
         _mas = [_ma for _ma in _mas
                 if passes_filter(_ma.get_work().path, work_filter)]

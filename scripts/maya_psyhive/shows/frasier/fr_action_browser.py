@@ -6,11 +6,11 @@ from psyhive import qt, host, tk2, icons
 from psyhive.tools import hive_bro
 from psyhive.utils import get_single, abs_path, dprint
 
-from . import _fr_work
+from . import fr_work
 
 DIALOG = None
 _DIR = abs_path(os.path.dirname(__file__))
-_UI_FILE = _DIR+'/_fr_action_browser.ui'
+_UI_FILE = _DIR+'/action_browser.ui'
 
 
 class _ActionBrowser(qt.HUiDialog3):
@@ -44,7 +44,7 @@ class _ActionBrowser(qt.HUiDialog3):
         print 'JUMPING TO', path
 
         try:
-            _work = _fr_work.FrasierWork(path)
+            _work = fr_work.FrasierWork(path)
         except ValueError:
             return
 
@@ -67,7 +67,7 @@ class _ActionBrowser(qt.HUiDialog3):
         Args:
             force (bool): force reread from disk
         """
-        self.o_works = _fr_work.find_action_works(force=force)
+        self.o_works = fr_work.find_action_works(force=force)
         self.c_works = {}
         for _o_work in self.o_works:
             _c_work = tk2.obtain_cacheable(tk2.TTWork(_o_work.path))

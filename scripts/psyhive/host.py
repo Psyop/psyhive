@@ -1,6 +1,6 @@
 """Tools for managing executing host across multiple host applications."""
 
-from psyhive.utils import wrap_fn
+from psyhive.utils import wrap_fn, abs_path
 
 NAME = None
 
@@ -66,6 +66,19 @@ if not NAME:
         NAME = 'unreal'
 
 
+if not NAME:
+    try:
+        import nuke
+    except ImportError:
+        pass
+    else:
+        from nuke_psyhive.utils import open_scene as open_scene_
+        NAME = 'nuke'
+        _force_open_scene = lambda file_: open_scene_(file_, force=True)
+        _get_cur_scene = nuke.Root()["name"].getValue
+        _scene_modified = nuke.modified
+
+
 def cur_scene():
     """Get the path to the current scene.
 
@@ -73,9 +86,9 @@ def cur_scene():
         (str|None): path to current scene (if any)
     """
     _cur_scene = _get_cur_scene()
-    if _cur_scene == 'unknown':
+    if not _cur_scene or _cur_scene == 'unknown':
         return None
-    return _cur_scene
+    return abs_path(_cur_scene)
 
 
 def handle_unsaved_changes():
