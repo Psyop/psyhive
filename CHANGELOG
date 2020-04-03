@@ -1,3 +1,20 @@
+#### v0.75.0 ####
+
+    Released: Fri 3rd Apr 2020
+
+    Frasier: added tool for processing review movs from maya,
+    Startup: catch no shelves found (ccesaro),
+    
+    nuke_psyhive:
+        added with utils + shows/frasier,
+    maya_psyhive:
+        shows.frasier moved to submodule,
+        startup shows allow toolkit.py in submodule,
+        ui.add_shelf catch no shelves found,
+    psyhive:
+        host added nuke handling,
+
+
 #### v0.74.0 ####
 
     Released: Thu 2nd Apr 2020

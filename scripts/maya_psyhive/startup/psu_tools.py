@@ -1,5 +1,6 @@
 """Tools to be run on maya startup."""
 
+import operator
 import logging
 import tempfile
 
@@ -335,23 +336,33 @@ def _ph_add_show_toolkits(parent):
         image=icons.EMOJI.find('Top Hat'))
 
     _shows_dir = File(shows.__file__).parent()
-    for _py in _shows_dir.find(extn='py', depth=1, type_='f'):
 
+    # Get list of toolkits
+    _toolkits = []
+    for _py in _shows_dir.find(extn='py', depth=1, type_='f'):
         _file = PyFile(_py)
         if _file.basename.startswith('_'):
             continue
+        _toolkits.append((_file, _file.basename))
+    for _dir in _shows_dir.find(depth=1, type_='d'):
+        _toolkit = PyFile('{}/toolkit.py'.format(_dir))
+        _name = _toolkit.parent().filename
+        _toolkits.append((_toolkit, _name))
+    _toolkits.sort(key=operator.itemgetter(1))
 
-        _mod = _file.get_module()
-        _rand = str_to_seed(_file.basename)
+    # Build show toolkit buttons
+    for _toolkit, _name in _toolkits:
+        _mod = _toolkit.get_module()
+        _rand = str_to_seed(_name)
         _icon = getattr(_mod, 'ICON', _rand.choice(icons.ANIMALS))
-        _label = getattr(_mod, 'LABEL', to_nice(_file.basename))
+        _label = getattr(_mod, 'LABEL', to_nice(_name))
         _title = '{} tools'.format(_label)
         _cmd = '\n'.join([
             'import {py_gui} as py_gui',
             '_path = "{file}"',
             '_title = "{title}"',
             'py_gui.MayaPyGui(_path, title=_title, all_defs=True)',
-        ]).format(py_gui=py_gui.__name__, file=_file.path, title=_title)
+        ]).format(py_gui=py_gui.__name__, file=_toolkit.path, title=_title)
         cmds.menuItem(command=_cmd, image=_icon, label=_label, parent=_shows)
 
         _btn_label = getattr(_mod, 'BUTTON_LABEL', _label)

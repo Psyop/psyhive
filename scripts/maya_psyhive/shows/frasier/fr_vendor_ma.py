@@ -35,7 +35,7 @@ class FrasierVendorMa(File):
         Returns:
             (FrasierWork): matching work file
         """
-        from . import frasier
+        from .fr_work import ASSETS, FrasierWork
         _tokens = self.basename.split('_')
 
         # Disposition
@@ -72,10 +72,10 @@ class FrasierVendorMa(File):
 
         lprint(' - TASK', _task, verbose=verbose)
         _tmpl = 'maya_asset_work'
-        _asset = frasier.ASSETS[_char]
+        _asset = ASSETS[_char]
         lprint(' - ASSET', _asset.path, verbose=verbose)
         _work = _asset.map_to(
-            frasier.FrasierWork, Task=_task, version=1, Step='animation',
+            FrasierWork, Task=_task, version=1, Step='animation',
             extension='mb')
 
         return _work

@@ -16,7 +16,7 @@ ignore:
         hv_test/diary/y19/d1114/foliage.py
         hv_test/diary/y19/d1122/qt_pygui_tests.py
         hv_test/tools/colour_bro/cb_ui.py
-        maya_psyhive/shows/frasier.py
+        maya_psyhive/shows/frasier/toolkit.py
         psyhive/host.py
         /tests/
     E722:  # Bare except

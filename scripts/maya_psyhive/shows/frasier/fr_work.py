@@ -19,7 +19,7 @@ from psyhive.utils import (
     apply_filter, get_time_f, get_time_t, store_result_on_obj,
     lprint, passes_filter, store_result_to_file)
 
-from . import _fr_tools, _fr_vendor_ma
+from . import fr_tools, fr_vendor_ma
 
 _DIR = abs_path(os.path.dirname(__file__))
 
@@ -181,7 +181,7 @@ class FrasierWork(tk2.TTWork):
             _vendor_file = self.get_vendor_file()
         except CacheMissing:
             return None
-        _dir = Dir(_fr_vendor_ma.MOBURN_ROOT).rel_path(
+        _dir = Dir(fr_vendor_ma.MOBURN_ROOT).rel_path(
             _vendor_file).split('/')[0]
         _date_str = _dir.split('_')[-1]
         return get_time_f(time.strptime(_date_str, '%Y-%m-%d'))
@@ -295,7 +295,7 @@ class FrasierWork(tk2.TTWork):
         Returns:
             (float tuple): start/end frames
         """
-        return _fr_vendor_ma.FrasierVendorMa(
+        return fr_vendor_ma.FrasierVendorMa(
             self.get_vendor_file()).get_range(force=force)
 
     def get_export_fbx(self, dated=False, anim=False):
@@ -326,7 +326,7 @@ class FrasierWork(tk2.TTWork):
         _fbx_path = _fmt.format(root=EXPORT_FBX_ROOT, work=self, char=_char)
 
         if dated:
-            _vendor_root = Dir(_fr_vendor_ma.MOBURN_ROOT)
+            _vendor_root = Dir(fr_vendor_ma.MOBURN_ROOT)
             _vendor_file = self.get_vendor_file()
             _delivery_dir = _vendor_root.rel_path(_vendor_file).split('/')[0]
             assert self.get_mtime_fmt('%Y-%m-%d') in _delivery_dir
@@ -374,7 +374,7 @@ class FrasierWork(tk2.TTWork):
         # Save top level fbx
         _fbx = self.get_export_fbx()
         print 'EXPORT FBX', _fbx.path
-        _fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path, force=force)
+        fr_tools.export_hsl_fbx_from_cur_scene(_fbx.path, force=force)
 
         # Save to dated folder
         _dated_fbx = self.get_export_fbx(dated=True)
