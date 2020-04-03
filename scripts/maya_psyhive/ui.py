@@ -59,13 +59,15 @@ def add_shelf(name, flush=False, verbose=0):
     _layout_name = name.replace(' ', '_')
 
     # Check if shelf exists
-    _shelves = cmds.lsUI(type='shelfLayout')
+    _shelves = cmds.lsUI(type='shelfLayout') or list()
     _exists = _layout_name in _shelves
     lprint('SHELF "{}" EXISTS: {}'.format(name, _exists), sorted(_shelves),
            verbose=verbose)
 
-    if not _exists:
+    if not _shelves:
+        lprint('NO SHELVES FOUND', verbose=verbose)
 
+    elif not _exists:
         # Get shelves parent
         _test_shelf = cmds.lsUI(type='shelfLayout')[0]
         lprint('TEST SHELF', _test_shelf, verbose=verbose)
