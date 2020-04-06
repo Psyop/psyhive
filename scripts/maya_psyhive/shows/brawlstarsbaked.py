@@ -99,7 +99,7 @@ def _prepare_tbms(tbms, force=False):
         for _pass in ['Bump', 'Alpha']:
             _get_render(tbm=_tbm, pass_=_pass).delete(force=force)
 
-        for _pass in _tbm.face_ctrl.plug('matt').list_enum():
+        for _pass in _tbm.face_ctrl.plug('matte').list_enum():
 
             # Set up render
             _render = _get_render(tbm=_tbm, pass_=_pass)
@@ -153,7 +153,7 @@ def _render_tbms(tbms, start, end):
                 _tbm.plug('directory').set_val(_tbm.tmp_seqs[_pass].dir)
                 _tbm.plug('fileName').set_val(_pass)
                 _tbm.plug('record').set_val(True)
-                _tbm.face_ctrl.plug('matt').set_enum(_pass)
+                _tbm.face_ctrl.plug('matte').set_enum(_pass)
                 _to_move.append((_tbm.tmp_seqs[_pass], _tbm.renders[_pass]))
             else:
                 _tbm.plug('record').set_val(False)
@@ -168,7 +168,7 @@ def _render_tbms(tbms, start, end):
 
     # Revert to diffuse
     for _tbm in tbms:
-        _tbm.face_ctrl.plug('matt').set_enum('Diffuse')
+        _tbm.face_ctrl.plug('matte').set_enum('Diffuse')
 
 
 def _comp_tbm_renders(tbms, start, end):
