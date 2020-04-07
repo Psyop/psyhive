@@ -2,7 +2,7 @@
 
 import tempfile
 
-from maya import cmds, mel
+from maya import cmds
 
 import psylaunch
 
@@ -12,6 +12,7 @@ from psyhive.utils import (
     abs_path)
 
 from maya_psyhive import open_maya as hom, ref
+from maya_psyhive.utils import mel_, restore_sel
 
 ICON = icons.EMOJI.find("Star")
 LABEL = "Brawlstars Baked"
@@ -47,7 +48,7 @@ def _get_rig(tbm, verbose=0):
               if not _node.namespace == tbm.namespace]
 
     if not _nodes:
-        return None
+        raise RuntimeError("No rig found for {}".format(tbm))
 
     _namespace = _nodes[0].namespace
     _ref = ref.find_ref(namespace=_namespace)
@@ -71,7 +72,7 @@ def _get_render(tbm, pass_):
     return _cur_work.map_to(
         tk2.TTOutputFileSeq, output_type='faceRender',
         format=str(tbm.clean_name), extension='png',
-        output_name='piper', channel=pass_, eye=_tag)
+        output_name=tbm.rig.namespace, channel=pass_, eye=_tag)
 
 
 def _prepare_tbms(tbms, force=False):
@@ -109,8 +110,8 @@ def _prepare_tbms(tbms, force=False):
             print _render
 
             # Set up tmp seq
-            _tmp_seq = Seq('{}/{}/{}_color.%04d.png'.format(
-                _TMP_DIR, _tbm.rig.namespace, _pass))
+            _tmp_seq = Seq('{}/{}/{}/{}_color.%04d.png'.format(
+                _TMP_DIR, _tbm.rig.namespace, _tbm.clean_name, _pass))
             _tmp_seq.test_dir()
             _tbm.tmp_seqs[_pass] = _tmp_seq
             print _tmp_seq
@@ -154,16 +155,23 @@ def _render_tbms(tbms, start, end):
                 _tbm.plug('fileName').set_val(_pass)
                 _tbm.plug('record').set_val(True)
                 _tbm.face_ctrl.plug('matte').set_enum(_pass)
-                _to_move.append((_tbm.tmp_seqs[_pass], _tbm.renders[_pass]))
+                _to_move.append((
+                    _tbm, _tbm.tmp_seqs[_pass], _tbm.renders[_pass]))
             else:
                 _tbm.plug('record').set_val(False)
 
         # Render
-        mel.eval("TBM_2DRecord -fs {start:d} -fe {end:d}".format(
+        mel_("TBM_2DRecord -fs {start:d} -fe {end:d}".format(
             start=start, end=end))
 
         # Move images to pipeline
-        for _tmp_seq, _render in _to_move:
+        for _tbm, _tmp_seq, _render in _to_move:
+            _rng = _tmp_seq.find_range()
+            print 'RNG', _rng
+            if _rng != (start, end):
+                raise RuntimeError(
+                    'TBM node {} failed to render - this could be due to '
+                    'disabled TBM nodes in the scene'.format(_tbm))
             _tmp_seq.move(_render)
 
     # Revert to diffuse
@@ -244,6 +252,93 @@ def render_tbm_nodes(which='All', force=False):
     _prepare_tbms(tbms=_tbms, force=force)
     _render_tbms(tbms=_tbms, start=_start, end=_end)
     _comp_tbm_renders(tbms=_tbms, start=_start, end=_end)
+
+
+py_gui.set_section('Face Rigs')
+
+
+@restore_sel
+def connect_faces_to_rigs():
+    """Connect all face rigs to their corresponding rigs."""
+    _chars = [
+        'barley', 'bibi', 'crow', 'dynamike', 'elprimo', 'emz', 'jessie',
+        'mortis', 'nita', 'piper', 'poco', 'rico']
+
+    _refs = ref.find_refs()
+
+    for _face_rig in _refs:
+
+        # Match to a char
+        _char = None
+        for _o_char in _chars:
+            if _o_char in _face_rig.namespace:
+                _char = _o_char
+        if not _char:
+            continue
+
+        # Check show name attr exists
+        _ctrl = '{}:face_Placer_Ctrl'.format(_face_rig.namespace)
+        if not cmds.objExists(_ctrl):
+            continue
+
+        print 'CONNECTING FACE RIG', _face_rig
+        _shader = '{}:TBM2Dskin__Shd'.format(_face_rig.namespace)
+        print ' - SHADER', _shader
+        _geo_name = cmds.getAttr(
+            '{}:face_Placer_Ctrl.geo'.format(_face_rig.namespace))
+        print ' - GEO NAME', _geo_name
+        _char_name = cmds.getAttr(
+            '{}:face_Placer_Ctrl.character'.format(_face_rig.namespace))
+        print ' - CHAR NAME', _char_name
+
+        _rig = get_single([
+            _ref for _ref in _refs
+            if _face_rig.namespace.startswith(_ref.namespace) and
+            not _ref == _face_rig])
+        print ' - RIG', _rig
+        _geo = _rig.get_node(_geo_name)
+        print ' - GEO', _geo
+
+        cmds.select(_geo)
+        cmds.hyperShade(assign=_shader)
+
+
+def unload_selected_face_rigs():
+    """Unload selected rigs."""
+    for _ref in ref.get_selected(multi=True):
+        print 'REF', _ref
+        for _tbm in _ref.find_nodes(type_='TBM_2DRenderer'):
+            print ' - TBM', _tbm
+            for _plug in _tbm.plug('shapes').list_incoming(plugs=True):
+                _conns = [
+                    _conn for _conn in hom.read_outgoing(_plug, class_=str)
+                    if _conn[1].startswith(str(_tbm))]
+                if not _conns:
+                    continue
+                _src, _dest = get_single(_conns)
+                cmds.disconnectAttr(_src, _dest)
+        _ref.unload()
+
+
+@py_gui.hide_from_gui
+def load_selected_rigs():
+    """Load selected face rigs."""
+    for _ref in ref.get_selected(multi=True):
+        print 'REF', _ref
+
+        if not _ref.is_loaded():
+            _ref.load()
+
+        for _edit in qt.progress_bar(cmds.referenceQuery(
+                _ref.ref_node, editStrings=True, editCommand="disconnectAttr",
+                showDagPath=True)):
+            if 'TBM_2DRenderer.shapes' not in _edit:
+                continue
+            # print _edit
+            _, _src, _trg = _edit.split()
+            cmds.referenceEdit(
+                _trg, removeEdits=True, failedEdits=True, successfulEdits=True,
+                editCommand="disconnectAttr")
 
 
 py_gui.set_section('Mesh XRay Plugin')

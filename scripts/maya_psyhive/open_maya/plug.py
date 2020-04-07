@@ -233,7 +233,7 @@ class HPlug(om.MPlug):
         Returns:
             (str list): connections
         """
-        return cmds.listConnections(self, **kwargs)
+        return cmds.listConnections(self, **kwargs) or []
 
     def list_enum(self):
         """List enum values on this plug.

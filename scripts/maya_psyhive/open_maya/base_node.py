@@ -388,6 +388,33 @@ class BaseNode(object):
         """
         return self.node+'.'+attr
 
+    def read_connections(self, **kwargs):
+        """Read connections on this node.
+
+        Returns:
+            (HPlug tuple list): list of plug pairs
+        """
+        from .. import open_maya as hom
+        return hom.read_connections(self, **kwargs)
+
+    def read_incoming(self, **kwargs):
+        """Read incoming connections on this node.
+
+        Returns:
+            (HPlug tuple list): list of plug pairs
+        """
+        from .. import open_maya as hom
+        return hom.read_incoming(self, **kwargs)
+
+    def read_outgoing(self, **kwargs):
+        """Read outgoing connections on this node.
+
+        Returns:
+            (HPlug tuple list): list of plug pairs
+        """
+        from .. import open_maya as hom
+        return hom.read_outgoing(self, **kwargs)
+
     def rename(self, name):
         """Rename this node.
 

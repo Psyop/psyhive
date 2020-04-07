@@ -58,6 +58,7 @@ _RELOAD_ORDER = [
     'maya_psyhive.open_maya.bounding_box',
     'maya_psyhive.open_maya.plug',
     'maya_psyhive.open_maya.dag_path',
+    'maya_psyhive.open_maya.base_node',
     'maya_psyhive.open_maya.base_transform',
     'maya_psyhive.open_maya.mesh',
     'maya_psyhive.open_maya.cpnt_mesh',

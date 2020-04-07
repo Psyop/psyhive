@@ -18,7 +18,8 @@ from .point import HPoint, get_p, ORIGIN
 from .transform import HFnTransform
 from .ray import HVRay
 from .utils import (
-    build_loc, build_arrow, get_selected, lerp, sph_rand, get_col)
+    build_loc, build_arrow, get_selected, lerp, sph_rand, get_col,
+    read_connections, read_incoming, read_outgoing)
 from .vector import HVector, X_AXIS, Y_AXIS, Z_AXIS
 from .cmds import CMDS
 

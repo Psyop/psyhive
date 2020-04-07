@@ -1,3 +1,32 @@
+#### v0.76.0 ####
+
+    Released: Tue 7th Apr 2020
+
+    Brawl Stars:
+        TBM render bugfix multiple TBM nodes in rig,
+        TBM render bugfix always rendering to piper,
+        TBM render better error on render fail,
+        added connect face rigs + unload selected rigs,
+    Frasier:
+        process review movs allow lower case tags,
+    
+    maya_psyhive:
+        open_maya read_connections/read_incoming/read_outgoing added,
+        open_maya.BaseNode.list_connections catch None on no results,
+        ref.FileRef.unload added,
+        shows.brawlstarsbaked tbm render bugfix always rendering to piper,
+        shows.brawlstarsbaked tbm render bugfix multiple nodes in rig,
+        shows.brawlstarsbaked tbm render catch render fail,
+        shows.brawlstarsbaked added connect face rigs + unload selected rigs,
+    nuke_psyhive:
+        shows.frasier.process_review_movs allow lower case tags,
+    psyhive:
+        refresh bugfix open_maya sorting,
+        tools.hive_bro use relative imports in __init__.py,
+        tools.hive_bro use output_name in ver outputs ctx,
+        utils.File.copy_to added force,
+
+
 #### v0.75.0 ####
 
     Released: Fri 3rd Apr 2020
