@@ -89,3 +89,15 @@ class TestOpenMaya(unittest.TestCase):
         assert len(hom.get_selected(multi=True)) == 3
         assert len(hom.get_selected('transform', multi=True)) == 2
         assert len(hom.get_selected('camera', multi=True)) == 2
+
+    @use_tmp_ns
+    def test_read_connections(self):
+        _sphere = hom.CMDS.polySphere()
+        _sphere.tx.connect(_sphere.ty)
+        _sphere.ty.connect(_sphere.tz)
+
+        assert hom.read_incoming(_sphere.ty) == [(_sphere.tx, _sphere.ty)]
+        assert hom.read_outgoing(_sphere.ty) == [(_sphere.ty, _sphere.tz)]
+
+        assert (_sphere.tx, _sphere.ty) in _sphere.read_outgoing()
+        assert (_sphere.ty, _sphere.tz) in _sphere.read_outgoing()

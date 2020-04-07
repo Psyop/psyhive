@@ -91,9 +91,8 @@ def _add_work_ctx_output_name(menu, name, files):
         name (TTOutputName): name to add options for
         files (TTOutputFile): files in name
     """
-    _label = name.output_type
-    _icon = _output_to_icon(name)
-    _name_menu = menu.add_menu(_label, icon=_icon)
+    _icon = _output_to_icon(files[0])
+    _name_menu = menu.add_menu(name, icon=_icon)
 
     for _file in files:
         _add_work_ctx_output_file(
@@ -108,11 +107,10 @@ def _add_work_ctx_output_file(menu, file_):
         file_ (TTOutputFile): output file to add options for
     """
     if file_.channel:
-        _label = '{} {} ({})'.format(
-            file_.output_type, file_.channel, file_.format)
+        _label_fmt = '{output_type} {channel} ({format})'
     else:
-        _label = '{} {}/{}'.format(
-            file_.output_type, file_.format, file_.extn)
+        _label_fmt = '{output_type} {output_name} ({format}/{extension})'
+    _label = _label_fmt.format(**file_.data)
     _icon = _output_to_icon(file_)
     _menu = menu.add_menu(_label, icon=_icon)
     _add_path_menu_items(menu=_menu, obj=file_)

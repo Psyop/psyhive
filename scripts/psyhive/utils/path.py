@@ -245,24 +245,24 @@ class File(Path):
         """
         return File('{}/{}.{}'.format(self.dir, self.basename, extn))
 
-    def copy_to(self, file_, diff_=False):
+    def copy_to(self, file_, diff_=False, force=False):
         """Copy this file to another location.
 
         Args:
             file_ (str): target path
             diff_ (bool): show diffs before copying files
+            force (bool): overwrite existing without confirmation
         """
         from psyhive import qt
-        _file = file_
-        if isinstance(_file, File):
-            _file = file_.path
+        _file = get_path(file_)
         test_path(os.path.dirname(_file))
         if os.path.exists(_file):
             if diff_:
                 self.diff(_file)
-            _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
-            if _result == 'No':
-                return
+            if not force:
+                _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
+                if _result == 'No':
+                    return
         shutil.copy(self.path, _file)
 
     def delete(self, force=False, wording='delete'):
@@ -486,7 +486,8 @@ def diff(left, right, tool=None, label=None, check_extn=True):
     if filecmp.cmp(left, right):
         raise RuntimeError("Files are identical")
     if check_extn and not File(left).extn in [
-            None, 'py', 'yml', 'ui', 'nk', 'json', 'mel', 'gizmo']:
+            None, 'py', 'yml', 'ui', 'nk', 'json', 'mel', 'gizmo',
+            'ma']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

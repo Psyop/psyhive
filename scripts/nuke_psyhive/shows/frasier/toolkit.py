@@ -37,8 +37,8 @@ class _InputReviewMov(File):
         self.review_mov = _OutputReviewMov(abs_path('{}/{}{}.mov'.format(
             _REVIEW_DIR, '_'.join(_tokens[:-1]),
             '_v{:03}'.format(self.version) if self.version else '')))
-        if self.tag not in [
-                'Producer', 'Front', 'Frontal', 'Right', 'Left', 'Rigth']:
+        if self.tag.lower() not in [
+                'producer', 'front', 'frontal', 'right', 'left', 'rigth']:
             raise ValueError
 
 

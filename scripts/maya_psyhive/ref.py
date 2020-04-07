@@ -207,6 +207,10 @@ class FileRef(object):
                 raise RuntimeError('Maya errored on opening file '+_file)
             raise _exc
 
+    def unload(self):
+        """Load this reference."""
+        cmds.file(self._file, unloadReference=True)
+
     def __cmp__(self, other):
         return cmp(self.ref_node, other.ref_node)
 

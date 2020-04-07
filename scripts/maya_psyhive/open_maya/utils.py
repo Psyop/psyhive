@@ -195,6 +195,68 @@ def lerp(fr_, pt1, pt2):
     return pt1 + (pt2 - pt1) * fr_
 
 
+def read_connections(obj, incoming=True, outgoing=True, class_=None):
+    """Read connections on the given plug/node.
+
+    Args:
+        obj (str): object to read
+        incoming (bool): include incoming connections
+        outgoing (bool): include outgoing connections
+        class_ (class): override plug class (eg. str)
+
+    Returns:
+        (HPlug tuple list): list of plug pairs
+    """
+    _conns = []
+    if incoming:
+        _conns += read_incoming(obj, class_=class_)
+    if outgoing:
+        _conns += read_outgoing(obj, class_=class_)
+    return _conns
+
+
+def read_incoming(obj, class_=None):
+    """Read incoming connections to the given plug/node.
+
+    Args:
+        obj (str): object to read
+        class_ (class): override plug class (eg. str)
+
+    Returns:
+        (HPlug tuple list): list of plug pairs
+    """
+    from .. import open_maya as hom
+    _class = class_ or hom.HPlug
+    _conns = []
+    _data = cmds.listConnections(
+        obj, destination=False, plugs=True, connections=True)
+    while _data:
+        _src, _trg = _class(_data.pop()), _class(_data.pop())
+        _conns.append((_src, _trg))
+    return _conns
+
+
+def read_outgoing(obj, class_=None):
+    """Read outgoing connections from the given plug/node.
+
+    Args:
+        obj (str): object to read
+        class_ (class): override plug class (eg. str)
+
+    Returns:
+        (HPlug tuple list): list of plug pairs
+    """
+    from .. import open_maya as hom
+    _class = class_ or hom.HPlug
+    _conns = []
+    _data = cmds.listConnections(
+        obj, source=False, plugs=True, connections=True)
+    while _data:
+        _trg, _src = _class(_data.pop()), _class(_data.pop())
+        _conns.append((_src, _trg))
+    return _conns
+
+
 def sph_rand():
     """Generate a random point on a sphere.
 
