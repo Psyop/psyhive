@@ -38,7 +38,12 @@ def _get_rig(tbm, verbose=0):
     """
     lprint('GET RIG', tbm, verbose=verbose)
 
-    _shd = get_single(tbm.find_connected(type_='lambert'))
+    _shds = sum([
+        tbm.find_connected(type_=_type)
+        for _type in ('lambert', 'blinn', 'phong')], [])
+    _shd = get_single(_shds, catch=True)
+    if not _shd:
+        raise RuntimeError("Couldn't determine rig for {}".format(tbm))
     lprint(' - SHADER', _shd, verbose=verbose)
 
     _se = get_single(_shd.find_connected(type_='shadingEngine'))
