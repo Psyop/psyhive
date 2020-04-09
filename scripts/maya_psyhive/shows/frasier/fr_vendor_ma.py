@@ -1,8 +1,11 @@
 """Tools for managing ma files in vendor_in dir on frasier."""
 
+import time
+
 from psyhive import host
 from psyhive.utils import (
-    File, Dir, lprint, CacheMissing, get_result_to_file_storer)
+    File, Dir, lprint, CacheMissing, get_result_to_file_storer,
+    get_time_f)
 
 MOBURN_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 
@@ -25,6 +28,17 @@ class FrasierVendorMa(File):
             MOBURN_ROOT, _rel_path, self.basename)
 
         self.get_work()  # Check this maps to valid work file
+        self.get_mtime()  # Check timestamp
+
+    def get_mtime(self):
+        """Get mtime of this file based on the timestamp of the parent dir.
+
+        Returns:
+            (float): mtime
+        """
+        _dir = Dir(MOBURN_ROOT).rel_path(self.path).split('/')[0]
+        _date_str = _dir.split('_')[-1]
+        return get_time_f(time.strptime(_date_str, '%Y-%m-%d'))
 
     def get_work(self, verbose=0):
         """Get work file object for this vendor file.

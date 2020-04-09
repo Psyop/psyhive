@@ -302,8 +302,11 @@ class _HiveBro(qt.HUiDialog3):
         self._redraw__Work()
 
     def _callback__TaskRefresh(self):
+        _sel_work = self.ui.Work.selected_data(single=True)
         tk2.clear_caches()
         self._redraw__Task()
+        if _sel_work:
+            self.jump_to(_sel_work.path)
 
     def _callback__Work(self):
 
