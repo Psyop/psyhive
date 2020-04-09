@@ -350,7 +350,10 @@ def _get_work_text(work, data=None):
     _text += '\n - Comment: '+_comment
     _text += '\n - Owner: '+_owner
 
-    if work.find_captures():
+    _outs = set(work.find_outputs())
+    _captures = set(work.find_captures())
+    if _captures:
+        _outs -= _captures
         _text += '\n - Captured'
     if work.find_renders():
         _text += '\n - Rendered'

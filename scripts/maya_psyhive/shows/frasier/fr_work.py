@@ -181,10 +181,7 @@ class FrasierWork(tk2.TTWork):
             _vendor_file = self.get_vendor_file()
         except CacheMissing:
             return None
-        _dir = Dir(fr_vendor_ma.MOBURN_ROOT).rel_path(
-            _vendor_file).split('/')[0]
-        _date_str = _dir.split('_')[-1]
-        return get_time_f(time.strptime(_date_str, '%Y-%m-%d'))
+        return fr_vendor_ma.FrasierVendorMa(_vendor_file).get_mtime()
 
     def get_mtime_fmt(self, fmt):
         """Get formatted modified time.

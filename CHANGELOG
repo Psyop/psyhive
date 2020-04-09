@@ -1,3 +1,16 @@
+#### v0.76.2 ####
+
+    Released: Thu 9th Apr 2020 10:48
+
+    Tank Support: cache use shade geo for rigs catch unreferenced cache set,
+    
+    maya_psyhive:
+        shows.fraiser ingest ma check ingest dir timestamp,
+        tank_support.drive_shade_geo_from_rig error on unreferenced cache set,
+    psyhive:
+        tools.hive_bro revert selection on refresh tasks,
+
+
 #### v0.76.1 ####
 
     Released: Tue 7th Apr 2020

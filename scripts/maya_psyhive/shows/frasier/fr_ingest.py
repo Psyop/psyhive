@@ -64,6 +64,7 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
         _work.set_comment('Copied from '+ma_.path)
         _work.set_vendor_file(ma_.path)
         assert _work.get_vendor_file() == ma_.path
+        assert _work.get_export_fbx(dated=True)  # Check timestamp
         _work.has_ik_legs()  # Store cache
         if legs_to_ik:
             assert _work.has_ik_legs()
