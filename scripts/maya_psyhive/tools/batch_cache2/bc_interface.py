@@ -7,8 +7,7 @@ from psyhive import qt, icons, tk2
 from psyhive.tools import get_usage_tracker
 from psyhive.utils import dprint, get_plural, lprint
 
-from .bc_disk_handler import DiskHandler
-from .bc_sg_handler import ShotgunHandler
+from .bc_handler import DiskHandler, ShotgunHandler
 from .bc_cache import cache_work_files
 from .bc_tmpl_cache import BCRoot
 
@@ -46,8 +45,8 @@ class _BatchCacheUi(qt.HUiDialog3):
         else:
             self._callback__Mode()
 
-        self._callback__hide_omitted()
-        self._callback__stale_only()
+        # self._callback__hide_omitted()
+        # self._callback__stale_only()
 
         self._redraw__Sequences()
 
@@ -75,12 +74,15 @@ class _BatchCacheUi(qt.HUiDialog3):
 
     def _redraw__Sequences(self):
 
+        print 'REDRAW Sequences'
+
         _items = []
         for _seq in tk2.find_sequences():
             _item = qt.HListWidgetItem(_seq.name)
             _item.set_data(_seq)
             _items.append(_item)
-        self.ui.Sequences.set_items(_items)
+        self.ui.Sequences.set_items(_items, verbose=2)
+        print 'SEL', self.ui.Sequences.selected_text()
 
     def _redraw__Shots(self, verbose=0):
 
@@ -146,13 +148,15 @@ class _BatchCacheUi(qt.HUiDialog3):
     def _redraw__Assets(self):
 
         print 'REDRAW ASSETS'
+        # return
 
         _handler = self._get_handler()
         _mode = self.ui.Mode.currentText()
         _shots = self.ui.Shots.selected_data()
         _steps = self.ui.Steps.selected_text()
         _tasks = self.ui.Tasks.selected_text()
-        _assets_mode = self.ui.AssetsMode.currentText()
+        _by_namespace = self.ui.ByNamespace.isChecked()
+        _by_asset = self.ui.ByAssetName.isChecked()
 
         if _mode == 'Shotgun':
             self._uncached_work_files = self._uncached_shots
@@ -171,20 +175,34 @@ class _BatchCacheUi(qt.HUiDialog3):
         if self._uncached_work_files:
             _exports = []
         else:
+            # if
             _exports = _handler.find_exports(
                 shots=_shots, steps=_steps, tasks=_tasks)
-        _assets = []
-        for _namespace, _output in _exports:
-            print
+        # _assets = []
+        # for _namespace, _output in _exports:
+        #     print
 
-        _items = []
-        for _asset in _assets:
-            _item = qt.HListWidgetItem(_asset)
-            _item.set_data(_asset)
-            _items.append(_item)
-        self.ui.Assets.set_items(_items)
+        if _by_namespace:
+            raise NotImplementedError
+        elif _by_asset:
+            raise NotImplementedError
+        else:
+            raise ValueError
 
-        raise NotImplementedError
+        # _items = set()
+        # for _work, _namespaces in _exports:
+        #     print 'ADDING', _work, type(_export)
+        #     if _by_namespace:
+        #         _items |= set(_namespaces)
+        #     elif _by_asset:
+        #         asdasd
+        #     else:
+        #         raise ValueError
+        #     _item = qt.HListWidgetItem(_asset)
+        #     _items.append(_item)
+        # self.ui.Assets.set_items(_items)
+
+        # raise NotImplementedError
 
     def _redraw__AssetsStale(self):
         _mode = self.ui.Mode.currentText()
@@ -251,7 +269,10 @@ class _BatchCacheUi(qt.HUiDialog3):
     def _callback__Assets(self):
         self._redraw__Info()
 
-    def _callback__AssetsMode(self):
+    def _callback__ByNamespace(self):
+        self._redraw__Assets()
+
+    def _callback__ByAssetName(self):
         self._redraw__Assets()
 
     def _callback__Mode(self):
@@ -325,6 +346,6 @@ def launch(mode=None):
     Args:
         mode (str): where to read data from
     """
-    from maya_psyhive.tools import batch_cache
-    batch_cache.DIALOG = _BatchCacheUi(mode=mode)
-    return batch_cache.DIALOG
+    from .. import batch_cache2
+    batch_cache2.DIALOG = _BatchCacheUi(mode=mode)
+    return batch_cache2.DIALOG

@@ -2,7 +2,7 @@
 
 import six
 
-from psyhive.utils import lprint, get_single, dprint
+from psyhive.utils import lprint, get_single, dprint, get_plural
 
 from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, Qt
 from psyhive.qt.misc import get_col, get_pixmap, get_p, get_icon
@@ -190,18 +190,33 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
             lprint(" - TESTING", _data, _data in items, verbose=verbose)
             _item.setSelected(_data in items)
 
-    def select_text(self, items, verbose=0):
+    def select_text(self, items, catch=False, verbose=0):
         """The items with text matching the given list.
 
         Args:
             items (str): list of text of items to select
+            catch (bool): no error on fail to select items
             verbose (int): print process data
+
+        Raises:
+            (ValueError): if items not found
         """
         lprint('SELECTING TEXT', items, verbose=verbose)
-        for _item in self.all_items():
+        _sel_text = [items] if isinstance(items, six.string_types) else items
+        _to_select = []
+        _all_items = self.all_items()
+        for _idx, _item in enumerate(_all_items):
             _text = _item.text()
             lprint(' -', _text, _text in items, verbose=verbose)
-            _item.setSelected(_text in items)
+            if _text in _sel_text:
+                _sel_text.remove(_text)
+                _to_select.append(_idx)
+        if _to_select:
+            for _idx, _item in enumerate(_all_items):
+                _item.setSelected(_idx in _to_select)
+        elif not catch:
+            raise ValueError('Unselected item{} - {}'.format(
+                get_plural(_sel_text), items))
 
     def selected_data(self, single=False):
         """Get data stored in selected items.
@@ -256,8 +271,8 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
         self.blockSignals(True)
         self.clear()
 
+        # Populate list
         _selected = False
-
         for _idx, _item in enumerate(items):
             if isinstance(_item, six.string_types):
                 _item = HListWidgetItem(_item)
@@ -270,6 +285,7 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
                 _selected = True
 
         if not _selected:
+            lprint(' - APPLYING ROW 0', verbose=verbose)
             self.setCurrentRow(0)
 
         self.blockSignals(False)

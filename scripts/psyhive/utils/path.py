@@ -487,7 +487,7 @@ def diff(left, right, tool=None, label=None, check_extn=True):
         raise RuntimeError("Files are identical")
     if check_extn and not File(left).extn in [
             None, 'py', 'yml', 'ui', 'nk', 'json', 'mel', 'gizmo',
-            'ma']:
+            'ma', 'gitignore']:
         raise ValueError(File(left).extn)
     _cmds = [_tool, left, right]
     if label and _tool == 'Meld':

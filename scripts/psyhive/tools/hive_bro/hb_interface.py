@@ -8,7 +8,7 @@ from psyhive.utils import (
     get_single, wrap_fn, abs_path, apply_filter, lprint, safe_zip, val_map,
     copy_text)
 
-from . import _hb_work, _hb_utils
+from . import hb_work, hb_utils
 
 DIALOG = None
 ICON = icons.EMOJI.find('Honeybee')
@@ -118,7 +118,7 @@ class _HiveBro(qt.HUiDialog3):
         self.ui.Step.clear()
         _sel = _cur if _cur in _steps else None
         for _step in _steps:
-            _work_area = _step.get_work_area(dcc=_hb_utils.cur_dcc())
+            _work_area = _step.get_work_area(dcc=hb_utils.cur_dcc())
             _col = 'grey'
             if os.path.exists(_work_area.yaml):
                 _col = 'white'
@@ -140,7 +140,7 @@ class _HiveBro(qt.HUiDialog3):
 
         self._work_files = []
         if _step:
-            _work_area = _step.get_work_area(dcc=_hb_utils.cur_dcc())
+            _work_area = _step.get_work_area(dcc=hb_utils.cur_dcc())
             self._work_files = _work_area.find_work()
 
         # Find mtimes of latest work versions
@@ -198,7 +198,7 @@ class _HiveBro(qt.HUiDialog3):
         self.ui.Work.blockSignals(True)
         self.ui.Work.clear()
         for _idx, _work_file in enumerate(reversed(_work_files)):
-            _item = _hb_work.create_work_item(_work_file, data=_work_data)
+            _item = hb_work.create_work_item(_work_file, data=_work_data)
             self.ui.Work.addItem(_item)
         self.ui.Work.setCurrentRow(0)
         self.ui.Work.blockSignals(False)
@@ -216,7 +216,7 @@ class _HiveBro(qt.HUiDialog3):
         _step = get_single(self.ui.Step.selected_data(), catch=True)
 
         if not _work and _task and _step:
-            _dcc = _hb_utils.cur_dcc()
+            _dcc = hb_utils.cur_dcc()
             _hint = '{dcc}_{area}_work'.format(dcc=_dcc, area=_step.area)
             _work = _step.map_to(
                 hint=_hint, class_=tk2.TTWork, Task=_task,
@@ -355,7 +355,7 @@ class _HiveBro(qt.HUiDialog3):
             print 'NEXT WORK', _next_work
 
             if _cur_task != _next_task:
-                _icon = _hb_work.get_work_icon(_next_work)
+                _icon = hb_work.get_work_icon(_next_work)
                 qt.ok_cancel(
                     'Are you sure you want to switch to a different task?'
                     '\n\nCurrent:\n{}\n\nNew:\n{}'.format(
@@ -397,7 +397,7 @@ class _HiveBro(qt.HUiDialog3):
     def _context__Work(self, menu):
         _work = get_single(self.ui.Work.selected_data(), catch=True)
         if _work:
-            _hb_work.get_work_ctx_opts(
+            hb_work.get_work_ctx_opts(
                 work=_work, menu=menu, redraw_work=self._redraw__Work,
                 parent=self)
 
@@ -407,12 +407,12 @@ class _HiveBro(qt.HUiDialog3):
 
         # Add jump to recent options
         menu.add_label("Jump to")
-        for _work in _hb_work.get_recent_work():
+        for _work in hb_work.get_recent_work():
             _work = _work.find_latest()
             if not _work:
                 continue
-            _label = _hb_work.get_work_label(_work)
-            _icon = _hb_work.get_work_icon(_work, mode='basic')
+            _label = hb_work.get_work_label(_work)
+            _icon = hb_work.get_work_icon(_work, mode='basic')
             _fn = wrap_fn(self.jump_to, _work.path)
             menu.add_action(_label, _fn, icon=_icon)
 
@@ -421,7 +421,7 @@ class _HiveBro(qt.HUiDialog3):
         # Jump to clipboard work
         _clip_work = tk2.get_work(qt.get_application().clipboard().text())
         if _clip_work:
-            _label = _hb_work.get_work_label(_clip_work)
+            _label = hb_work.get_work_label(_clip_work)
             _fn = wrap_fn(self.jump_to, _clip_work.path)
             menu.add_action('Jump to '+_label, _fn, icon=icons.COPY)
         else:

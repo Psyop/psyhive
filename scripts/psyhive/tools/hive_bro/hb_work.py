@@ -10,7 +10,7 @@ from psyhive.utils import (
     get_time_t, get_owner, chain_fns, lprint, copy_text,
     str_to_seed, launch_browser, Seq)
 
-from . import _hb_utils
+from . import hb_utils
 
 
 def get_work_ctx_opts(work, menu, redraw_work, parent):
@@ -214,7 +214,7 @@ def get_recent_work(verbose=0):
         _work = tk2.obtain_work(_path)
         if not _work:
             continue
-        if not _work.dcc == _hb_utils.cur_dcc():
+        if not _work.dcc == hb_utils.cur_dcc():
             continue
         _works.append(_work)
     return _works
@@ -298,7 +298,6 @@ def get_work_icon(
         _over = qt.HPixmap(icons.EMOJI.find('Money bag')).resize(
             overlay_size)
         _overlays.append(_over)
-    # for _idx, _over in reversed(list(enumerate(_overlays))):
     for _idx, _over in enumerate(_overlays):
         _offs = (13*_idx, _pix.height()-0*_idx)
         lprint(' - ADD OVERLAY', _idx, _offs, verbose=verbose)
@@ -350,17 +349,19 @@ def _get_work_text(work, data=None):
     _text += '\n - Comment: '+_comment
     _text += '\n - Owner: '+_owner
 
+    # Label outputs
     _outs = set(work.find_outputs())
-    _captures = set(work.find_captures())
-    if _captures:
-        _outs -= _captures
-        _text += '\n - Captured'
-    if work.find_renders():
-        _text += '\n - Rendered'
-    if work.find_publishes():
-        _text += '\n - Published'
-    if work.find_caches():
-        _text += '\n - Cached'
+    for _fn, _label in [
+            (work.find_captures, 'Captured'),
+            (work.find_renders, 'Rendered'),
+            (work.find_publishes, 'Published'),
+            (work.find_caches, 'Cached')]:
+        _results = set(_fn())
+        if _results:
+            _outs -= _results
+            _text += '\n - '+_label
+    if _outs:
+        _text += '\n - Outputs'
 
     return _text
 

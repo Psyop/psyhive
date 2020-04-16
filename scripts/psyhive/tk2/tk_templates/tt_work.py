@@ -229,7 +229,7 @@ class TTWork(TTBase, File):
             verbose (int): print process data
 
         Returns:
-            (TTOutput list): list of outputs
+            (TTOutputBase list): list of outputs
         """
         _outs = self.find_outputs(output_type=output_type)
         _files = sum([_out.find_files(verbose=verbose)
@@ -242,26 +242,27 @@ class TTWork(TTBase, File):
         """Find publishes associated with this work file.
 
         Returns:
-            (TTOutput list): list of publishes
+            (TTOutputBase list): list of publishes
         """
-        return [_output for _output in self.find_outputs()
-                if _output.output_type in ('rig', 'shadegeo')]
+        _types = ('rig', 'shadegeo', 'fxrig')
+        return [_output for _output in self.find_output_files()
+                if _output.output_type in _types]
 
     def find_renders(self):
         """Find renders associated with this work file.
 
         Returns:
-            (TTOutput list): list of renders
+            (TTOutputBase list): list of renders
         """
-        return self.find_outputs(output_type='render')
+        return self.find_output_files(output_type='render')
 
     def find_seqs(self):
         """Find sequences associated with this work file.
 
         Returns:
-            (TTOutput list): list of sequences
+            (TTOutputBase list): list of sequences
         """
-        return [_output for _output in self.find_outputs()
+        return [_output for _output in self.find_output_files()
                 if _output.output_type in ('render', 'capture') or
                 'blast' in _output.output_type.lower()]
 

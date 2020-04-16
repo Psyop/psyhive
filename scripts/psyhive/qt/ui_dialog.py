@@ -525,7 +525,7 @@ def get_list_redrawer(default_selection='first'):
 
             # Apply selection
             if not widget.selectedItems():
-                widget.select_text(_sel)
+                widget.select_text(_sel, catch=True)
             if not widget.selectedItems():
                 if default_selection == 'first':
                     widget.setCurrentRow(0)
