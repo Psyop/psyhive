@@ -157,13 +157,19 @@ def set_range(start, end):
     set_end(end)
 
 
-def t_range():
+def t_range(class_=None):
     """Get timeline range.
+
+    Args:
+        class_ (class): override class (eg. int)
 
     Returns:
         (tuple): start/end time
     """
-    return t_start(), t_end()
+    _vals = t_start(), t_end()
+    if class_:
+        _vals = tuple([class_(_val) for _val in _vals])
+    return _vals
 
 
 def t_frames(inc=1):

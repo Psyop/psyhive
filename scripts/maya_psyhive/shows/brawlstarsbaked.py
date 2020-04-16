@@ -46,7 +46,13 @@ def _get_rig(tbm, verbose=0):
         raise RuntimeError("Couldn't determine rig for {}".format(tbm))
     lprint(' - SHADER', _shd, verbose=verbose)
 
-    _se = get_single(_shd.find_connected(type_='shadingEngine'))
+    _ses = _shd.plug('outColor').list_outgoing(type='shadingEngine')
+    _se = get_single(_ses, catch=True)
+    if not _se:
+        print ' - SHADING ENGINES', _ses
+        raise RuntimeError(
+            "Found {:d} shading engine{} attached to {}".format(
+                len(_ses), get_plural(_ses), _shd))
     lprint(' - SHADING ENGINE', _se, verbose=verbose)
 
     _nodes = [_node for _node in hom.CMDS.sets(_se, query=True)
@@ -98,6 +104,10 @@ def _prepare_tbms(tbms, force=False):
         _tbm.rig = _get_rig(_tbm)
         _tbm.face_rig = ref.find_ref(_tbm.namespace)
         _tbm.face_ctrl = _tbm.face_rig.get_node('face_Placer_Ctrl')
+        _tbm.plug('fileFormat').set_enum('png')
+        _tbm.plug('recordSizeX').set_val(2048)
+        _tbm.plug('recordSizeY').set_val(2048)
+        _tbm.plug('recordColorPrecision').set_enum('16 bit integer')
 
         _tbm.renders = {}
         _tbm.tmp_seqs = {}
@@ -105,21 +115,27 @@ def _prepare_tbms(tbms, force=False):
         for _pass in ['Bump', 'Alpha']:
             _get_render(tbm=_tbm, pass_=_pass).delete(force=force)
 
-        for _pass in _tbm.face_ctrl.plug('matte').list_enum():
+        # Set up matte attr + remove any anim (kcassidy)
+        _tbm.matte_attr = _tbm.face_ctrl.plug('matte')
+        _tbm.matte_attr.break_connections()
+
+        # Set up passes
+        _tbm.passes = _tbm.matte_attr.list_enum()
+        for _pass in _tbm.passes:
 
             # Set up render
             _render = _get_render(tbm=_tbm, pass_=_pass)
             _render.delete(force=force)
             _render.test_dir()
             _tbm.renders[_pass] = _render
-            print _render
+            print ' - RENDER', _render
 
             # Set up tmp seq
             _tmp_seq = Seq('{}/{}/{}/{}_color.%04d.png'.format(
                 _TMP_DIR, _tbm.rig.namespace, _tbm.clean_name, _pass))
             _tmp_seq.test_dir()
             _tbm.tmp_seqs[_pass] = _tmp_seq
-            print _tmp_seq
+            print ' - TMP', _tmp_seq
 
     print
 
@@ -152,14 +168,10 @@ def _render_tbms(tbms, start, end):
             _passes = sorted(_tbm.renders)
             if _idx < len(_tbm.renders):
                 _pass = _passes[_idx]
-                _tbm.plug('fileFormat').set_enum('png')
-                _tbm.plug('recordSizeX').set_val(2048)
-                _tbm.plug('recordSizeY').set_val(2048)
-                _tbm.plug('recordColorPrecision').set_enum('16 bit integer')
                 _tbm.plug('directory').set_val(_tbm.tmp_seqs[_pass].dir)
                 _tbm.plug('fileName').set_val(_pass)
                 _tbm.plug('record').set_val(True)
-                _tbm.face_ctrl.plug('matte').set_enum(_pass)
+                _tbm.matte_attr.set_enum(_pass)
                 _to_move.append((
                     _tbm, _tbm.tmp_seqs[_pass], _tbm.renders[_pass]))
             else:
@@ -181,7 +193,7 @@ def _render_tbms(tbms, start, end):
 
     # Revert to diffuse
     for _tbm in tbms:
-        _tbm.face_ctrl.plug('matte').set_enum('Diffuse')
+        _tbm.matte_attr.set_enum('Diffuse')
 
 
 def _comp_tbm_renders(tbms, start, end):

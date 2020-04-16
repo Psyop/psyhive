@@ -1,10 +1,11 @@
 """General utilities for py_gui interfaces."""
 
 import functools
+import time
 
 from psyhive import icons, qt
 from psyhive.tools import catch_error, track_usage
-from psyhive.utils import PyFile, str_to_seed, to_nice, dprint
+from psyhive.utils import PyFile, str_to_seed, to_nice, dprint, nice_age
 
 NICE_COLS = [
     'salmon', 'tomato', 'darksalmon', 'coral', 'orangered', 'lightsalmon',
@@ -56,6 +57,7 @@ def get_exec_fn(
 
     @functools.wraps(_fn)
     def _exec_fn(*xargs):
+        _start = time.time()
         dprint('############ Start {} ##############'.format(def_.name))
         del xargs
         if not disable_reload:
@@ -71,7 +73,9 @@ def get_exec_fn(
             _fn = track_usage(_fn)
         _fn(**_kwargs)
         interface.save_settings()
-        dprint('############ Complete {} ############'.format(def_.name))
+        _dur = time.time() - _start
+        dprint('############ Complete {} ({}) ############'.format(
+            def_.name, nice_age(_dur)))
 
     return _exec_fn
 

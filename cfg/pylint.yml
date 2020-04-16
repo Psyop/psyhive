@@ -11,6 +11,7 @@ ignore:
     arguments-differ:
         hv_test/diary/di_entry.py
         hv_test/diary/y19/d0718/cleanup_job.py
+        hv_test/diary/y20/d0314/_mc_interface.py
         _machi/deck.py
         psyhive/tk2/tk_cache.py
     bare-except:
@@ -45,7 +46,7 @@ ignore:
         hv_test/diary/
     import-error:
         hv_test/diary/
-        hv-test/python/hv_test/startup/hsu_tools.py
+        hv-test/python/hv_test/startup/hsu_ninhenzo_shelf.py
         hv_test/toolkits/home_tools.py
         maya_psyhive/shows/frasier/fr_ingest.py
         maya_psyhive/shows/frasier/toolkit.py
@@ -55,9 +56,10 @@ ignore:
     import-self:
         psyhive/__init__.py
     invalid-name:
-        sanity_check/checks/
-        psyhive/host.py
         hv_test/diary/y19/d1021/scripts_manager.py
+        hv_test/diary/y20/d0314/RideOrDie_constants.py
+        psyhive/host.py
+        sanity_check/checks/
     invalid-unary-operand-type:
         maya_psyhive/tools/fkik_switcher/system.py
     line-too-long:

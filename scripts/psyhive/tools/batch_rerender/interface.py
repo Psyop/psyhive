@@ -43,8 +43,8 @@ class _BatchRerenderUi(qt.HUiDialog):
         self.ui.renders.itemSelectionChanged.connect(
             self.ui.info.redraw)
 
-        self.ui.steps.select_text('lighting')
-        self.ui.tasks.select_text('lighting')
+        self.ui.steps.select_text('lighting', catch=True)
+        self.ui.tasks.select_text('lighting', catch=True)
 
     @qt.list_redrawer
     def _redraw__sequences(self, widget):

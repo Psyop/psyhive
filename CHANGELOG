@@ -1,3 +1,23 @@
+#### v0.77.0 ####
+
+    Released: Thu 16th Apr 2020 11:23
+
+    Brawl Stars Baked (kcassidy):
+        fixed emz error due to multiple shading engines attached to face shader,
+        break connections on face ctrl mattr attr,
+    
+    maya_psyhive:
+        shows.brawlstarsbaked use shader.outColor to avoid multiple shading engines issue,
+        shows.brawlstarsbaked break connections on face_ctrl.matte attr,
+        tools.batch_cache2 wip,
+    psyhive:
+        host.t_range added class_ override attr,
+        py_gui print duration on exec,
+        qt.HListWidget.select_items error on fail to select + added catch,
+        tk2.TTWork.find_publishes added fxrig handling,
+        tools.hive_bro removed leading underscore in submodules,
+
+
 #### v0.76.2 ####
 
     Released: Thu 9th Apr 2020 10:48

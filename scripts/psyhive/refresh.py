@@ -70,6 +70,7 @@ _RELOAD_ORDER = [
     'maya_psyhive.tools.batch_cache2.bc_tmpl_cache',
     'maya_psyhive.tools.batch_cache2.bc_disk_handler',
     'maya_psyhive.tools.batch_cache2.bc_sg_handler',
+    'maya_psyhive.tools.batch_cache2.bc_interface',
     'maya_psyhive.tools.batch_cache2',
     'maya_psyhive.tools',
     'maya_psyhive.shows._fr_',
