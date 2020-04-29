@@ -2,10 +2,12 @@
 
 import os
 import shutil
+import time
 
-from psyhive.utils.cache import store_result_on_obj
-from psyhive.utils.path import File, abs_path, find, test_path, Dir
-from psyhive.utils.misc import system, dprint, lprint
+from .cache import store_result_on_obj
+from .misc import dprint, lprint, get_plural
+from .path import File, abs_path, find, test_path, Dir, nice_size
+from .range_ import ints_to_str
 
 
 class Seq(object):
@@ -66,7 +68,6 @@ class Seq(object):
             frames (int list): list of frames to delete (if not all)
         """
         from psyhive import qt
-        from psyhive.utils import ints_to_str, get_plural
 
         _frames = self.get_frames(force=True)
         if frames:
@@ -231,6 +232,28 @@ class Seq(object):
         """Test this sequence's parent directory exists."""
         test_path(self.dir)
 
+    def to_mov(self, file_, convertor=None, fps=None, force=False):
+        """Generate a mov from this image sequence.
+
+        Args:
+            file_ (str): path to mov file
+            convertor (str): tool to use to generate mov
+            fps (float): override mov frame rate (default is host fps)
+            force (bool): overwwrite existing without confirmation
+        """
+        from psyhive import host
+
+        _conv = convertor or os.environ['PSYHIVE_CONVERTOR']
+        _fps = fps or host.get_fps()
+
+        File(file_).delete(force=force)
+        if _conv == 'moviepy':
+            _seq_to_mov_moviepy(self, file_, fps=_fps)
+        elif _conv == 'ffmpeg':
+            _seq_to_mov_ffmpeg(self, file_, fps=_fps)
+        else:
+            raise ValueError(_conv)
+
     def view(self, viewer=None):
         """View this image sequence.
 
@@ -303,7 +326,8 @@ def _view_seq(path, viewer=None):
 
     if _viewer == 'djv_view':
         _path = path.replace("%04d", "#")
-        system('djv_view {}'.format(_path), result=False, verbose=1)
+        _cmd = 'djv_view "{}" &'.format(_path)
+        os.system(_cmd)
 
     elif _viewer == 'rv':
         import psylaunch
@@ -312,6 +336,68 @@ def _view_seq(path, viewer=None):
 
     else:
         raise ValueError(_viewer)
+
+
+def _seq_to_mov_moviepy(seq, mov, fps, audio=None, audio_offset=0.0):
+    """Genreate a to mov using moviepy.
+
+    Args:
+        seq (Seq): input sequence
+        mov (str): output mov
+        fps (float): mov frame rate
+        audio (str): path to audio
+        audio_offset (float): apply audio offset
+    """
+    import moviepy.editor as mpy
+
+    _start = time.time()
+    _frames = seq.get_frames()
+    print 'FRAMES', ints_to_str(_frames)
+    _mov = Movie(abs_path(mov))
+    print 'OUT FILE', _mov
+    print 'FPS', fps
+
+    # Build moviepy object
+    _clip = mpy.ImageSequenceClip(seq.dir, fps=fps)
+
+    # Add audio
+    if audio:
+        _audio = mpy.AudioFileClip(audio)
+        if audio_offset:
+            _audio = _audio.subclip(audio_offset)
+        _audio = _audio.set_duration(_clip.duration)
+        _clip.audio = _audio
+
+    # Write mov
+    _mov.delete()
+    _mov.test_dir()
+    _clip.write_videofile(_mov, codec="libx264")
+    dprint('WROTE VIDEO {} {:.02f}s {}'.format(
+        nice_size(_mov), time.time()-_start, _mov))
+
+
+def _seq_to_mov_ffmpeg(seq, mov, fps):
+    """Generate a mov using ffmpeg.
+
+    Args:
+        seq (Seq): input sequence
+        mov (str): output mov
+        fps (float): mov frame rate
+    """
+    _args = [
+        'ffmpeg',
+        '-r', str(fps),
+        '-f', 'image2',
+        '-i', '"{}"'.format(seq.path),
+        '-vcodec', 'libx264',
+        '-crf', '25',
+        '-pix_fmt', 'yuv420p',
+        '"{}"'.format(mov)]
+    _cmd = ' '.join(_args)
+    print _cmd
+    assert not os.path.exists(mov)
+    os.system(_cmd)
+    assert os.path.exists(mov)
 
 
 def seq_from_frame(file_, catch=False):

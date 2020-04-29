@@ -41,7 +41,14 @@ class _BaseShader(object):
             _file = hom.CMDS.shadingNode('file', asShader=True)
             cmds.connectAttr(_file+'.outColor', self.col_attr)
         cmds.setAttr(_file+'.fileTextureName', path, type='string')
-        cmds.setAttr(_file+'.colorSpace', 'linear', type='string')
+
+        # Apply colspace
+        _col_space = hom.HPlug(_file+'.colorSpace')
+        for _space in ['Raw', 'linear']:
+            _col_space.set_val(_space)
+            if _col_space.get_val() == _space:
+                break
+
         return _file
 
     def assign_to(self, geo):

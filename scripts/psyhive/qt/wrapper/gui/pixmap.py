@@ -488,7 +488,10 @@ class HPixmap(QtGui.QPixmap):
         lprint("SAVING", path, _fmt, verbose=verbose)
         if _file.exists():
             if not force:
-                qt.ok_cancel('Overwrite existing image?\n\n'+path)
+                _result = qt.yes_no_cancel(
+                    'Overwrite existing image?\n\n'+path)
+                if _result == 'No':
+                    return
             os.remove(_file.path)
         test_path(_file.dir)
 

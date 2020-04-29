@@ -263,6 +263,7 @@ class File(Path):
                 _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
                 if _result == 'No':
                     return
+        assert not self.path == _file
         shutil.copy(self.path, _file)
 
     def delete(self, force=False, wording='delete'):

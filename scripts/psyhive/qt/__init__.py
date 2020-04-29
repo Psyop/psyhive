@@ -1,6 +1,6 @@
 """Tools for managing qt."""
 
-from psyhive.qt.wrapper import (
+from .wrapper import (
 
     # Raw qt libs
     QtCore, QtGui, QtWidgets, QtUiTools, Qt,
@@ -12,22 +12,24 @@ from psyhive.qt.wrapper import (
     # QtCore/QtGui overrides
     HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN)
 
-from psyhive.qt.maya_palette import set_maya_palette
-from psyhive.qt.misc import (
-    get_application, get_col, get_p, get_size, get_pixmap, get_icon)
-from psyhive.qt.constants import COLS, NICE_COLS, BLANK, PINKS, GREENS, BLUES
+from .maya_palette import set_maya_palette
+from .misc import (
+    get_application, get_col, get_p, get_size, get_pixmap, get_icon, get_vect,
+    safe_timer_event)
+from .constants import COLS, NICE_COLS, BLANK, PINKS, GREENS, BLUES
 
-from psyhive.qt.ui_dialog import (
+# Dialogs
+from .dialog.ui_dialog import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
-    reset_interface_settings, get_ui_loader, safe_timer_event)
-from psyhive.qt.ui_dialog_2 import HUiDialog2, get_widget_sort
-from psyhive.qt.ui_dialog_3 import HUiDialog3
+    reset_interface_settings, get_ui_loader)
+from .dialog.ui_dialog_2 import HUiDialog2, get_widget_sort
+from .dialog.ui_dialog_3 import HUiDialog3
+from .dialog.pixmap_ui import HPixmapUi
+from .dialog.pixmap_ui_2 import HPixmapUi2, Anim
 
-from psyhive.qt.dialog import (
+from .msg_box import (
     ok_cancel, raise_dialog, notify, DialogCancelled, notify_warning,
     yes_no_cancel, help_)
-from psyhive.qt.progress import ProgressBar, progress_bar
-from psyhive.qt.input_ import read_input
-from psyhive.qt.multi_select_ import multi_select
-
-from psyhive.qt.pixmap_ui import HPixmapUi
+from .progress import ProgressBar, progress_bar
+from .input_ import read_input
+from .multi_select_ import multi_select

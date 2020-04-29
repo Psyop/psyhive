@@ -2,9 +2,8 @@
 
 import sys
 
-from psyhive.qt.wrapper import QtWidgets, HPixmap
-from psyhive.qt.ui_dialog import safe_timer_event
-from psyhive.qt.misc import get_size
+from ..wrapper import QtWidgets, HPixmap
+from ..misc import get_size, safe_timer_event
 
 
 class HPixmapUi(QtWidgets.QDialog):
@@ -30,7 +29,7 @@ class HPixmapUi(QtWidgets.QDialog):
         # Remove any existing intefaces
         _dialog_stack_key = type(self).__name__
         if _dialog_stack_key in sys.QT_DIALOG_STACK:
-            sys.QT_DIALOG_STACK[_dialog_stack_key].deleteLater()
+            sys.QT_DIALOG_STACK[_dialog_stack_key].delete()
         sys.QT_DIALOG_STACK[_dialog_stack_key] = self
 
         # Init base class
@@ -64,7 +63,10 @@ class HPixmapUi(QtWidgets.QDialog):
 
     def delete(self):
         """Delete this interface."""
-        self.deleteLater()
+        try:
+            self.deleteLater()
+        except RuntimeError:
+            pass
 
     def redraw(self):
         """Redraw interface."""

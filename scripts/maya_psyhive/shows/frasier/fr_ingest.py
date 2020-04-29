@@ -25,8 +25,13 @@ from . import fr_vendor_ma, fr_tools
 
 ICON = icons.EMOJI.find('Brain')
 
-MOTIONBURNER_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
-                    'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
+MOBURN_RIG = ('P:/projects/frasier_38732V/production/vendor_in/'
+              'Motion Burner/2020-02-11-BodyRig/SK_Tier1_Male_CR.ma')
+MOBURN_RIG = (r"P:\projects\frasier_38732V\production\vendor_in"
+              r"\Motion Burner\Faceware_2020-04-28\SK_Tier1_Male_CR3.ma")
+MOBURN_RIG = ("P:/projects/frasier_38732V/production/kealeye_tools"
+              "/MocapTools/Data/CaptureRig/SK_Tier1_Male_CR.ma")
+
 _DIR = abs_path(os.path.dirname(__file__))
 CAM_SETTINGS_FMT = abs_path(
     '_fr_{}_cam_{}.preset', root=os.path.dirname(__file__))
@@ -45,6 +50,8 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
         save (bool): save ma file is psyop work file
     """
     if ma_ and load_ma:
+        print 'NEW SCENE'
+        host.new_scene()
         print 'INGEST', ma_
         load_vendor_ma(ma_.path, force=force)
         ma_.get_range(force=True)  # Update caches
@@ -93,7 +100,8 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
 
         # Load the scene
         try:
-            cmds.file(path, open=True, prompt=False, force=True)
+            pause_viewports_on_exec(cmds.file)(
+                path, open=True, prompt=False, force=True)
         except RuntimeError as _exc:
             if "has no '.ai_translator' attribute" in _exc.message:
                 pass
@@ -107,8 +115,8 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
 
     # Update rig
     _ref = ref.find_ref()
-    if not _ref.path == MOTIONBURNER_RIG:
-        _ref.swap_to(MOTIONBURNER_RIG)
+    if not _ref.path == MOBURN_RIG:
+        _ref.swap_to(MOBURN_RIG)
     _ref = _fix_nested_namespace(_ref)
     if not _ref.namespace == 'SK_Tier1_Male_CR':
         _ref.rename('SK_Tier1_Male_CR')

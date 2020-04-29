@@ -56,6 +56,10 @@ if not NAME:
     else:
         NAME = 'hou'
         _get_cur_scene = hou.hipFile.name
+        get_fps = hou.fps
+        get_main_window_ptr = hou.ui.mainQtWindow
+        t_start = lambda: hou.playbar.frameRange()[0]
+        t_end = lambda: hou.playbar.frameRange()[1]
 
 if not NAME:
     try:

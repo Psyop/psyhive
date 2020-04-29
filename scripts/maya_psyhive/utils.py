@@ -247,7 +247,7 @@ def blast(seq, range_=None, res=None, force=False, verbose=0):
     _rng = range_ or host.t_range()
     _start, _end = _rng
 
-    seq.delete(wording='Replace')
+    seq.delete(wording='Replace', force=force)
     seq.test_dir()
 
     # Set image format

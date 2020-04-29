@@ -1,5 +1,6 @@
 """Tools for managing maya interface."""
 
+import functools
 import tempfile
 
 from maya import cmds, mel, OpenMayaUI
@@ -252,15 +253,16 @@ def obtain_menu(name, replace=False, verbose=0):
 
     # Find parent menu
     for _menu in cmds.lsUI(menus=True):
+        if not cmds.menu(_menu, query=True, exists=True):
+            continue
         _label = cmds.menu(_menu, query=True, label=True)
         lprint(' - TESTING name="{}" label="{}"'.format(_menu, _label),
                verbose=verbose)
         if _label == name:
-            lprint(' - MATCHED', verbose=verbose)
+            lprint(' - MATCHED', _label, name, verbose=verbose)
             if replace:
                 lprint(' - DELETING', _menu, verbose=verbose)
                 cmds.deleteUI(_menu)
-                break
             else:
                 return _menu
 
@@ -287,6 +289,46 @@ def populate_option_menu(name, choices):
     # Add choices
     for _choice in choices:
         cmds.menuItem(label=_choice, parent=name)
+
+
+def revert_viewport(func):
+    """Decorator which reverts viewport settings.
+
+    This includes:
+
+        - show grid
+        - show hud
+        - show resolution gate
+        - overscan
+
+    Args:
+        func (fn): function to decorate
+
+    Returns:
+        (fn): decorated function
+    """
+
+    @functools.wraps(func)
+    def _revert_viewport_fn(*args, **kwargs):
+
+        _model = get_active_model_panel()
+        _cam = cmds.modelPanel(_model, query=True, camera=True)
+
+        _hud = cmds.modelEditor(_model, query=True, headsUpDisplay=False)
+        _grid = cmds.modelEditor(_model, query=True, grid=True)
+
+        _disp_res = cmds.camera(_cam, query=True, displayResolution=True)
+        _overscan = cmds.camera(_cam, query=True, overscan=True)
+
+        _result = func(*args, **kwargs)
+
+        cmds.modelEditor(_model, edit=True, headsUpDisplay=_hud, grid=_grid)
+        cmds.camera(_cam, edit=True, displayResolution=_disp_res,
+                    overscan=_overscan)
+
+        return _result
+
+    return _revert_viewport_fn
 
 
 def read_option_menu(name, type_):

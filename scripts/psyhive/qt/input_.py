@@ -1,7 +1,7 @@
 """Tools for reading user input."""
 
-from psyhive.qt.wrapper import QtWidgets
-from psyhive.qt.dialog import notify_warning, DialogCancelled
+from .wrapper import QtWidgets
+from .msg_box import notify_warning, DialogCancelled
 
 
 def read_input(

@@ -13,10 +13,10 @@ import six
 
 from psyhive.utils import lprint, wrap_fn, abs_path, File, dprint
 
-from psyhive.qt.wrapper import QtWidgets, Qt, QtCore
-from psyhive.qt.ui_dialog import (
+from ..wrapper import QtWidgets, Qt, QtCore
+from .ui_dialog import (
     _build_redraw_method, _disable_while_executing, _build_context_fn,
-    _SETTINGS_DIR, touch, get_ui_loader)
+    SETTINGS_DIR, touch, get_ui_loader)
 
 
 class HUiDialog2(QtWidgets.QDialog):
@@ -93,7 +93,7 @@ class HUiDialog2(QtWidgets.QDialog):
             return
 
         _settings_file = abs_path('{}/{}.ini'.format(
-            _SETTINGS_DIR, File(self.ui_file).basename))
+            SETTINGS_DIR, File(self.ui_file).basename))
         touch(_settings_file)  # Check settings writable
         self.settings = QtCore.QSettings(
             _settings_file, QtCore.QSettings.IniFormat)

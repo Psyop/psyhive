@@ -8,15 +8,15 @@ from maya import cmds
 from psyhive import host, refresh
 from psyhive.utils import store_result, File, nice_size
 
-_KEALEYE_TOOLS_ROOT = 'P:/projects/frasier_38732V/production/kealeye_tools'
+KEALEYE_TOOLS_ROOT = 'P:/projects/frasier_38732V/production/kealeye_tools'
 
 
 @store_result
 def install_mocap_tools():
     """Install Sean Kealeye MocapTools module."""
-    refresh.add_sys_path(_KEALEYE_TOOLS_ROOT)
-    assert os.path.exists(_KEALEYE_TOOLS_ROOT)
-    assert os.path.exists(_KEALEYE_TOOLS_ROOT+'/MocapTools')
+    refresh.add_sys_path(KEALEYE_TOOLS_ROOT)
+    assert os.path.exists(KEALEYE_TOOLS_ROOT)
+    assert os.path.exists(KEALEYE_TOOLS_ROOT+'/MocapTools')
     import MocapTools
     print 'INSTALLED MocapTools MODULE', MocapTools
 
@@ -39,7 +39,7 @@ def export_hsl_fbx_from_cur_scene(fbx, force=False):
         _fbx.delete(wording='Overwrite', force=force)
 
     _tmp_fbx = File('{}/MocapTools/Anim/Export/{}_SK_Tier1_Male.fbx'.format(
-        _KEALEYE_TOOLS_ROOT, File(host.cur_scene()).basename))
+        KEALEYE_TOOLS_ROOT, File(host.cur_scene()).basename))
     print ' - TMP FBX', _tmp_fbx.path
 
     _setup = PsyopMocapTools.mocapSetupTools()

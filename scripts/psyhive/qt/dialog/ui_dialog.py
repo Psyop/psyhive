@@ -7,7 +7,6 @@ import re
 import sys
 import tempfile
 import time
-import traceback
 import types
 
 import six
@@ -17,14 +16,14 @@ from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode,
     read_file)
 
-from psyhive.qt.wrapper.mgr import QtWidgets, QtUiTools, QtCore, Qt
-from psyhive.qt.wrapper.widgets import HMenu
-from psyhive.qt.misc import get_pixmap, get_icon, get_p
+from ..wrapper.mgr import QtWidgets, QtUiTools, QtCore, Qt
+from ..wrapper.widgets import HMenu
+from ..misc import get_pixmap, get_icon, get_p
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
     sys.QT_DIALOG_STACK = {}
 
-_SETTINGS_DIR = abs_path('{}/psyhive/settings'.format(tempfile.gettempdir()))
+SETTINGS_DIR = abs_path('{}/psyhive/settings'.format(tempfile.gettempdir()))
 
 
 class HUiDialog(QtWidgets.QDialog):
@@ -98,7 +97,7 @@ class HUiDialog(QtWidgets.QDialog):
         # Handle settings
         if save_settings:
             _settings_file = abs_path('{}/{}.ini'.format(
-                _SETTINGS_DIR, File(ui_file).basename))
+                SETTINGS_DIR, File(ui_file).basename))
             touch(_settings_file)  # Check settings writable
             self.settings = QtCore.QSettings(
                 _settings_file, QtCore.QSettings.IniFormat)
@@ -611,39 +610,7 @@ def _localise_ui_imgs(ui_file):
 
 def reset_interface_settings():
     """Reset interface settings."""
-    dprint('RESET SETTINGS', _SETTINGS_DIR)
-    for _ini in find(_SETTINGS_DIR, depth=1, type_='f', extn='ini'):
+    dprint('RESET SETTINGS', SETTINGS_DIR)
+    for _ini in find(SETTINGS_DIR, depth=1, type_='f', extn='ini'):
         print ' - REMOVING', _ini
         os.remove(_ini)
-
-
-def safe_timer_event(timer_event):
-    """Decorator to execute timer event but kill timer if it errors.
-
-    Args:
-        timer_event (fn): timerEvent method
-
-    Returns:
-        (fn): safe method
-    """
-
-    def _safe_exec_timer(dialog, event):
-
-        # Try and exec timer event
-        _destroy = False
-        try:
-            _result = timer_event(dialog, event)
-        except Exception as _exc:
-            _tb = traceback.format_exc().strip()
-            print 'TIMER EVENT FAILED\n# '+'\n# '.join(_tb.split('\n'))
-            _destroy = True
-            _result = 1
-
-        # Destroy if event has failed or interface no longer visbible
-        if _destroy or not dialog.isVisible():
-            dialog.killTimer(dialog.timer)
-            dialog.deleteLater()
-
-        return _result
-
-    return _safe_exec_timer

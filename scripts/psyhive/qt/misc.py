@@ -1,6 +1,10 @@
 """Miscellaneous tools for managing qt."""
 
+import functools
 import os
+import math
+import traceback
+
 import six
 
 from psyhive.utils import get_result_storer
@@ -152,3 +156,53 @@ def get_qt_str(obj):
     else:
         _result = str(obj)
     return _result
+
+
+def get_vect(ang, dist):
+    """Get point vector based on the given angle and distance.
+
+    Args:
+        ang (float): angle (in degrees)
+        dist (float): vector length
+
+    Returns:
+        (QPoint): vector
+    """
+    _ang_r = math.radians(ang)
+    return get_p(dist*math.cos(_ang_r), dist*math.sin(_ang_r))
+
+
+def safe_timer_event(timer_event):
+    """Decorator to execute timer event but kill timer if it errors.
+
+    Args:
+        timer_event (fn): timerEvent method
+
+    Returns:
+        (fn): safe method
+    """
+
+    @functools.wraps(timer_event)
+    def _safe_exec_timer(dialog, event):
+
+        # Try and exec timer event
+        _destroy = False
+        try:
+            _result = timer_event(dialog, event)
+        except Exception as _exc:
+            _tb = traceback.format_exc().strip()
+            print 'TIMER EVENT FAILED\n# '+'\n# '.join(_tb.split('\n'))
+            _destroy = True
+            _result = 1
+
+        # Destroy if event has failed or interface no longer visbible
+        if _destroy or not dialog.isVisible():
+            dialog.killTimer(dialog.timer)
+            dialog.closeEvent(None)
+            dialog.deleteLater()
+
+        return _result
+
+    _safe_exec_timer.SAFE_TIMER = True
+
+    return _safe_exec_timer
