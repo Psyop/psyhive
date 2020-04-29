@@ -4,10 +4,10 @@ import os
 
 from psyhive.utils import get_single
 
-from psyhive.qt.wrapper.mgr import QtWidgets
-from psyhive.qt.wrapper.widgets import HListWidgetItem
-from psyhive.qt.misc import get_application
-from psyhive.qt.ui_dialog_3 import HUiDialog3
+from .wrapper.mgr import QtWidgets
+from .wrapper.widgets import HListWidgetItem
+from .misc import get_application
+from .dialog.ui_dialog_3 import HUiDialog3
 
 _DIALOG = None
 

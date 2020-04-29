@@ -10,10 +10,10 @@ import sys
 
 import six
 
-from psyhive.qt import QtCore, QtWidgets, Qt
 from psyhive.utils import abs_path, lprint, File, touch, dprint, dev_mode
 
-from psyhive.qt.ui_dialog import _SETTINGS_DIR
+from ..wrapper import QtCore, QtWidgets, Qt
+from .ui_dialog import SETTINGS_DIR
 
 PYGUI_COL = 'Yellow'
 
@@ -188,7 +188,7 @@ class HUiDialog3(QtWidgets.QDialog):
             (QSettings): settings
         """
         _settings_file = abs_path('{}/{}.ini'.format(
-            _SETTINGS_DIR, File(self.ui_file).basename))
+            SETTINGS_DIR, File(self.ui_file).basename))
         touch(_settings_file)  # Check settings writable
         return QtCore.QSettings(
             _settings_file, QtCore.QSettings.IniFormat)
@@ -331,7 +331,10 @@ class HUiDialog3(QtWidgets.QDialog):
 
     def delete(self):
         """Delete this interface."""
-        self.deleteLater()
+        try:
+            self.deleteLater()
+        except RuntimeError:
+            pass
 
     def closeEvent(self, event=None):
         """Executed on close.

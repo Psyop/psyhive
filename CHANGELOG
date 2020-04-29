@@ -1,3 +1,30 @@
+#### v0.78.0 ####
+
+    Released: Wed 29th Apr 2020 15:52
+
+    Frasier: updated ingestion to use CR3 rig,
+    
+    maya_psyhive:
+        m_pipe.OutputRef.output added,
+        shows.frasier updated globals naming MOTIONBURNER -> MOBURN,
+        shows.frasier KEALEYE_TOOLS_ROOT/MOBURN_ROOT added, 
+        shows.frasier update moburn rig to CR3,
+        tex.apply_texture apply Raw/linear colspace,
+        tools.shader_bro added usage tracker,
+        ui.obtain_menu replace removes multiple existing,
+        ui.revert_viewport added,
+        utils.blast force arg passed to Seq.delete,
+    psyhive:
+        host houdini added get_fps/get_main_window_ptr/t_start/t_end,
+        py_gui.install_gui allow browser as list,
+        qt moved submodule dialog -> msg_box,
+        qt moved ui_dialog/pixmap_ui modules to dialog submodule,
+        qt HPixmapUi2/Anim/get_vect added,
+        qt.safe_timer_event moved ui_dialog -> misc,
+        qt.HPixmap.save_as updated confirm dialog to YesNoCancel,
+        utils.Seq.to_mov added,
+
+
 #### v0.77.0 ####
 
     Released: Thu 16th Apr 2020 11:23

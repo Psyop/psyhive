@@ -79,6 +79,9 @@ _RELOAD_ORDER = [
     'maya_psyhive.startup',
     'maya_psyhive',
 
+    'hv_test.startup.hsu_buttons',
+    'hv_test.startup',
+
     'hv_test.tools.qube.qb_subjob',
     'hv_test.tools.qube.qb_task',
     'hv_test.tools.qube.qb_job',

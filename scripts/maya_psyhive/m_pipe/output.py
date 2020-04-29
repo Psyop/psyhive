@@ -9,6 +9,18 @@ from maya_psyhive import ref
 class OutputRef(ref.FileRef):
     """Represents a output file referenced into a scene."""
 
+    @property
+    def output(self):
+        """Get the corresponding output for this reference.
+
+        Returns:
+            (TTOutputFile): tank output object
+        """
+        try:
+            return tk2.TTOutputFile(self.path)
+        except ValueError:
+            return None
+
     def _get_latest_path(self):
         """Get path to latest version of this output.
 

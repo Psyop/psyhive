@@ -13,8 +13,9 @@ from psyhive.utils import (
     PyFile, to_nice, last, get_single, lprint, abs_path, write_yaml,
     read_yaml, dprint, Collection, str_to_seed, PyDef, PyBase,
     wrap_fn)
-from psyhive.py_gui import pyg_install
-from psyhive.py_gui.pyg_misc import (
+
+from . import pyg_install
+from .pyg_misc import (
     NICE_COLS, get_def_icon, get_exec_fn, get_help_fn, get_code_fn)
 
 _EMPTY_SETTINGS = {
@@ -161,13 +162,24 @@ class BasePyGui(object):
             last_ (bool): whether this is last def in interface
             verbose (int): print process data
         """
-        _browser = opts.get('browser') or {}
         _update = opts.get('update') or {}
         _choices = opts.get('choices') or {}
         _hide = opts.get('hide') or []
         _disable_reload = opts.get('disable_reload') or False
         _section = opts.get('section')
         _catch_error = opts.get('catch_error_', True)
+
+        # If browser if list convert to default dict
+        _browser = opts.get('browser') or {}
+        if isinstance(_browser, list):
+            _browser_dict = {}
+            for _arg_name in _browser:
+                print 'FIND ARG', _arg_name
+                _arg = def_.find_arg(_arg_name)
+                print 'ARG', _arg
+                _browser_dict[_arg_name] = pyg_install.BrowserLauncher(
+                    default_dir=_arg.default)
+            _browser = _browser_dict
 
         if _section:
             self.set_section(_section)

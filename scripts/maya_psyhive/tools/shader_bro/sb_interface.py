@@ -5,7 +5,7 @@ import os
 from maya import cmds
 
 from psyhive import icons, tk2, qt
-from psyhive.tools import catch_error
+from psyhive.tools import catch_error, get_usage_tracker
 from psyhive.utils import (
     read_yaml, abs_path, store_result, get_single, dprint)
 
@@ -238,6 +238,7 @@ def _find_shaders(force=False, parent=None, verbose=0):
     return _shd_mbs
 
 
+@get_usage_tracker('launch_shader_bro')
 @catch_error
 def launch():
     """Launch ShaderBro interface.
