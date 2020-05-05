@@ -50,10 +50,12 @@ def ingest_ma(ma_, load_ma=True, force=False, apply_mapping=True,
         save (bool): save ma file is psyop work file
     """
     if ma_ and load_ma:
+
+        # Try to get around hanging issues
         print 'NEW SCENE'
-        host.new_scene()
+        host.new_scene(force=force)
         print 'INGEST', ma_
-        load_vendor_ma(ma_.path, force=force)
+        load_vendor_ma(ma_.path, force=True)
         ma_.get_range(force=True)  # Update caches
 
     if apply_mapping:
@@ -113,6 +115,8 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
 
         assert host.get_fps() == 30
 
+    _fix_cr_namespaces()
+
     # Update rig
     _ref = ref.find_ref()
     if not _ref.path == MOBURN_RIG:
@@ -124,6 +128,22 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
     # Test for hik issues
     if fix_hik_issues:
         _test_for_hik_issues(_ref)
+
+
+def _fix_cr_namespaces():
+    """Fix namespaces with _CR tag in.
+
+    This namespace should only appear after the Kealeye tools have brought
+    in the HSL rig. Having a namespace with that tag in will confuse the
+    retargetting.
+    """
+    for _ns in cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True):
+        if '_CR' not in _ns:
+            continue
+        print 'FIXING _CR NAMESPACE', _ns
+        cmds.namespace(moveNamespace=(_ns, ':'))
+        assert not cmds.ls(_ns+":*")
+        cmds.namespace(removeNamespace=_ns)
 
 
 def _fix_nested_namespace(ref_):
