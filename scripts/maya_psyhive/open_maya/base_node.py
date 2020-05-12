@@ -284,6 +284,14 @@ class BaseNode(object):
 
         return _fmt.format(_presets_dir, _type)
 
+    def is_referenced(self):
+        """Test whether this node is referenced.
+
+        Returns:
+            (bool): whether node is referenced
+        """
+        return cmds.referenceQuery(self, isNodeReferenced=True)
+
     def has_attr(self, attr):
         """Check if the given attribute exists on this node.
 
@@ -426,6 +434,18 @@ class BaseNode(object):
         """
         _type = self.__class__
         return _type(cmds.rename(self, name))
+
+    def replace(self, find, replace):
+        """Apply str.replace to the string value of this node.
+
+        Args:
+            find (str): find string
+            replace (str): replace string
+
+        Returns:
+            (str): updated node name
+        """
+        return str(self).replace(find, replace)
 
     def reset(self, filter_=None, break_connections=False, verbose=0):
         """Reset node plugs to default values.

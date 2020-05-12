@@ -257,7 +257,13 @@ class MayaPyGui(pyg_base.BasePyGui):
             image=icons.EMOJI.find('Locked'),
             command=wrap_fn(cmds.button, _btn, edit=True, enable=False))
         cmds.menuItem(
-            'Refresh and execute', parent=_menu,
+            'Refresh and execute (gui safe)', parent=_menu,
+            image=icons.REFRESH,
+            command=chain_fns(
+                wrap_fn(refresh.reload_libs, filter_='-py_gui -py_file'),
+                exec_fn))
+        cmds.menuItem(
+            'Refresh and execute (full)', parent=_menu,
             image=icons.REFRESH,
             command=chain_fns(refresh.reload_libs, exec_fn))
         cmds.menuItem(

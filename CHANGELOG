@@ -1,3 +1,32 @@
+#### v0.79.0 ####
+
+    Released: Tue 12th May 2020 14:18
+
+    Frasier: fix ingest issue with _CR namespaces in vendor ma file (hmeinertrita),
+    
+    maya_psyhive:
+        open_maya.BaseNode is_referenced/replace added,
+        open_maya.HPlug.read_incoming added,
+        ref added handling for prefix rigs,
+        shows.fraiser bugfix force merge _CR namespaces,
+        utils bake_results/open_scene added,
+        utils.get_val added enum handling,
+    psyhive:
+        host maya _force_open_scene use ignoreVersion,
+        host.open_scene added lazy flag,
+        py_gui added gui safe refresh ctx option,
+        tk2.TTBase.cache_fmt added point to temp dir,
+        tk2.TTBase cache_read/cache_write added,
+        tk2.TTBase.map_to added auto dcc for mb extn,
+        tk2._TTOutputFileBase.find_latest no vers returns None for symmetry with TTWork,
+        tk2.TTWork.cache_fmt added as property (for inheritance),
+        tk2.TTWork.find_output_files added format_ filter,
+        tk2.TTWork.is_latest added,
+        tk2.TTWork.load added lazy arg,
+        tk2.reference_publish added file_ as File,
+        tools.err_dialog added wrap on message label widget,
+
+
 #### v0.78.1 ####
 
     Released: Tue 5th May 2020 10:20

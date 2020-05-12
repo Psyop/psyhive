@@ -278,6 +278,15 @@ class HPlug(om.MPlug):
         _result = multiply_node(self, input_, output, force=force)
         return HPlug(_result)
 
+    def read_incoming(self):
+        """Read any incoming connections to this node.
+
+        Returns:
+            (HPlug|None): incoming connections (if any)
+        """
+        _in = [HPlug(_plug) for _plug in self.list_incoming(plugs=True)]
+        return get_single(_in, catch=True)
+
     def reset(self, break_connections=False):
         """Reset this plug - set value to default.
 

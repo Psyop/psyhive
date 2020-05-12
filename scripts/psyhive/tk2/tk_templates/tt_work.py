@@ -162,6 +162,15 @@ class TTWork(TTBase, File):
                 if _out.output_type == 'capture' or
                 'blast' in _out.output_type.lower()]
 
+    @property
+    def cache_fmt(self):
+        """Get cache format path.
+
+        Returns:
+            (str): cache format
+        """
+        return '{}/cache/{}_{{}}.cache'.format(self.dir, self.basename)
+
     def find_increments(self, verbose=0):
         """Find increments of this work file.
 
@@ -220,12 +229,14 @@ class TTWork(TTBase, File):
             task=self.task, version=self.version, filter_=filter_,
             output_type=output_type, verbose=verbose)
 
-    def find_output_files(self, output_type=None, extension=None, verbose=0):
+    def find_output_files(self, output_type=None, extension=None, format_=None,
+                          verbose=0):
         """Find output files associated with this work file.
 
         Args:
             output_type (str): filter by output type
             extension (str): filter by extension
+            format_ (str): filter by output format
             verbose (int): print process data
 
         Returns:
@@ -234,6 +245,8 @@ class TTWork(TTBase, File):
         _outs = self.find_outputs(output_type=output_type)
         _files = sum([_out.find_files(verbose=verbose)
                       for _out in _outs], [])
+        if format_ is not None:
+            _files = [_file for _file in _files if _file.format == format_]
         if extension is not None:
             _files = [_file for _file in _files if _file.extn == extension]
         return _files
@@ -381,12 +394,24 @@ class TTWork(TTBase, File):
         """
         return TTRoot(self.path)
 
-    def load(self, force=True):
+    def is_latest(self):
+        """Test if this is the latest work.
+
+        Returns:
+            (bool): whether this is latest
+        """
+        return self == self.find_latest()
+
+    def load(self, force=True, lazy=False):
         """Load this work file.
 
         Args:
             force (bool): open with no scene modified warning
+            lazy (bool): abandon load if file is already open
         """
+        if lazy and host.cur_scene() == self.path:
+            print "SCENE ALREADY OPEN", self.path
+            return
         _fileops = find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
@@ -435,7 +460,10 @@ class TTWork(TTBase, File):
         Args:
             comment (str): comment
         """
-        assert host.cur_scene() == self.path
+        if not host.cur_scene() == self.path:
+            print 'CUR', host.cur_scene()
+            print 'TRG', self.path
+            raise ValueError
         _fileops = find_tank_app('psy-multi-fileops')
         _fileops.save_increment_file(comment=comment)
 

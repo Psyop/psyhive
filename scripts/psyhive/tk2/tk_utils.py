@@ -5,10 +5,12 @@ import pprint
 import sys
 import time
 
+import six
 import tank
 
 from psyhive import qt, icons, refresh
-from psyhive.utils import lprint, store_result, get_single, dprint, abs_path
+from psyhive.utils import (
+    lprint, store_result, get_single, dprint, abs_path, get_path)
 
 
 def find_tank_app(name, catch=True):
@@ -98,6 +100,8 @@ def reference_publish(file_, verbose=0):
         file_ (str): path to reference
         verbose (int): print process data
     """
+    _file = get_path(file_)
+    assert isinstance(_file, six.string_types)
 
     # Find ref util module
     _mgr = find_tank_app('assetmanager')
@@ -110,8 +114,10 @@ def reference_publish(file_, verbose=0):
 
     _ref_list = _mgr.reference_list
     _pub_dir = _ref_list.asset_manager.publish_directory
-    _publish = _pub_dir.publish_from_path(file_)
+    _publish = _pub_dir.publish_from_path(_file)
     lprint('PUBLISH', _publish, verbose=verbose)
+    if not _publish:
+        raise RuntimeError('Failed to build publish '+_file)
 
     _ref = _ref_util.reference_publish(_publish)
     lprint('REF', _ref, verbose=verbose)
