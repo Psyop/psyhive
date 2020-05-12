@@ -3,13 +3,14 @@
 import copy
 import operator
 import pprint
+import tempfile
 
 import tank
 
 from psyhive import pipe, host
 from psyhive.utils import (
     Path, abs_path, lprint, Dir, find, apply_filter, get_single,
-    passes_filter)
+    passes_filter, obj_read, obj_write, File)
 
 from psyhive.tk2.tk_templates.tt_utils import get_area, get_dcc, get_template
 from psyhive.tk2.tk_utils import get_current_engine
@@ -64,6 +65,44 @@ class TTBase(Path):
         self.area = get_area(_path)
         self.dcc = get_dcc(_path, allow_none=True)
 
+    @property
+    def cache_fmt(self):
+        """Get generic cache format path.
+
+        By default, data is cached to tmp dir.
+
+        Returns:
+            (str): cache format
+        """
+        _rel_path = File(Dir(pipe.cur_project().path).rel_path(self.path))
+        return abs_path('{}/psyhive_cache/{}/{}_{{}}.{}'.format(
+            tempfile.gettempdir(), _rel_path.dir, self.basename, self.extn))
+
+    def cache_read(self, tag):
+        """Read cached data from the given tag.
+
+        Args:
+            tag (str): data tag to read
+
+        Returns:
+            (any): cached data
+        """
+        _file = self.cache_fmt.format(tag)
+        try:
+            return obj_read(file_=_file)
+        except OSError:
+            return None
+
+    def cache_write(self, tag, data):
+        """Write data to the given cache.
+
+        Args:
+            tag (str): tag to store data to
+            data (any): data to store
+        """
+        _file = self.cache_fmt.format(tag)
+        obj_write(file_=_file, obj=data)
+
     def map_to(self, class_=None, hint=None, verbose=0, **kwargs):
         """Map this template's values to a different template.
 
@@ -90,7 +129,7 @@ class TTBase(Path):
                 _dcc = kwargs.get('dcc', self.dcc)
                 if not _dcc:  # Try to determine dcc from extn
                     _extn = kwargs.get('extension')
-                    _dcc = {'mb': 'maya'}.get(_extn)
+                    _dcc = {'mb': 'maya', 'ma': 'maya'}.get(_extn)
                 if '{dcc}' in _class.hint_fmt and not _dcc:
                     raise ValueError('No value for dcc')
             _hint = _class.hint_fmt.format(area=self.area, dcc=_dcc)

@@ -63,8 +63,11 @@ class FileRef(object):
         return [_class(_node)
                 for _node in cmds.ls(self.namespace+":*", **_kwargs)]
 
-    def find_top_node(self):
+    def find_top_node(self, verbose=0):
         """Find top node of this reference.
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (HFnTransform): top node
@@ -73,10 +76,10 @@ class FileRef(object):
             self.namespace+":*", long=True, dagObjects=True,
             type='transform')
         _min_pipes = min([_node.count('|') for _node in _nodes])
-        print 'MIN PIPES', _min_pipes
+        lprint('MIN PIPES', _min_pipes, verbose=verbose)
         _top_nodes = sorted(set([
             _node for _node in _nodes if _node.count('|') == _min_pipes]))
-        print _top_nodes
+        lprint(' - TOP NODES', _top_nodes, verbose=verbose)
         return get_single(_top_nodes).split('|')[-1]
 
     def get_attr(self, attr):
@@ -148,14 +151,22 @@ class FileRef(object):
     @property
     def namespace(self):
         """Get this ref's namespace."""
-        return str(cmds.file(self._file, query=True, namespace=True))
+        return cmds.referenceQuery(self.ref_node, namespace=True).lstrip(':')
 
     @property
     def path(self):
+    
         """Get path to this ref's scene file (without copy number)."""
         if not self._file:
             return None
         return abs_path(self._file.split('{')[0])
+
+    @property
+    def prefix(self):
+        """Get this ref's prefix."""
+        if self.namespace:
+            return None
+        return str(cmds.file(self._file, query=True, namespace=True))
 
     def remove(self, force=False):
         """Remove this reference from the scene.
@@ -218,8 +229,14 @@ class FileRef(object):
         return hash(self.ref_node)
 
     def __repr__(self):
-        return '<{}:{}>'.format(
-            type(self).__name__.strip('_'), self.namespace)
+        if self.namespace:
+            _tag = ''
+            _name = self.namespace
+        else:
+            _tag = '[P]'
+            _name = self.prefix
+        return '<{}{}:{}>'.format(
+            type(self).__name__.strip('_'), _tag, _name)
 
 
 @restore_ns
@@ -279,8 +296,8 @@ def create_ref(file_, namespace, class_=None, force=False):
     return _class(_ref)
 
 
-def find_ref(
-        namespace=None, filter_=None, catch=False, class_=None, verbose=0):
+def find_ref(namespace=None, filter_=None, catch=False, class_=None,
+             prefix=None, verbose=0):
     """Find reference with given namespace.
 
     Args:
@@ -288,23 +305,28 @@ def find_ref(
         filter_ (str): apply filter to names list
         catch (bool): no error on fail to find matching ref
         class_ (FileRef): override FileRef class
+        prefix (str): match reference by prefix (prefix references don't
+            use namespaces)
         verbose (int): print process data
 
     Returns:
         (FileRef): matching ref
     """
-    _refs = find_refs(namespace=namespace, filter_=filter_, class_=class_)
+    _refs = find_refs(namespace=namespace, filter_=filter_, class_=class_,
+                      prefix=prefix)
     lprint('Found {:d} refs'.format(len(_refs)), _refs, verbose=verbose)
-    return get_single(_refs, catch=catch)
+    return get_single(_refs, catch=catch, name='ref')
 
 
-def find_refs(namespace=None, filter_=None, class_=None):
+def find_refs(namespace=None, filter_=None, class_=None, prefix=None):
     """Find reference with given namespace.
 
     Args:
         namespace (str): namespace to match
         filter_ (str): namespace filter
         class_ (FileRef): override FileRef class
+        prefix (str): filter by reference prefix (prefix references don't
+            use namespaces)
 
     Returns:
         (FileRef list): scene refs
@@ -312,6 +334,8 @@ def find_refs(namespace=None, filter_=None, class_=None):
     _refs = _read_refs(class_=class_)
     if namespace:
         _refs = [_ref for _ref in _refs if _ref.namespace == namespace]
+    if prefix:
+        _refs = [_ref for _ref in _refs if _ref.prefix == prefix]
     if filter_:
         _refs = apply_filter(
             _refs, filter_, key=operator.attrgetter('namespace'))
@@ -334,18 +358,16 @@ def get_selected(catch=False, multi=False, class_=None, verbose=0):
     Raises:
         (ValueError): if no ref is selected
     """
-    _nss = sorted(set([
-        _node.split(":")[0] for _node in cmds.ls(selection=True)
-        if ":" in _node]))
-    lprint('SEL NAMESPACES', _nss, verbose=verbose)
-    _refs = [find_ref(_ns, class_=class_, catch=True) for _ns in _nss]
-    _refs = [_ref for _ref in _refs if _ref]
-    _class = class_ or FileRef
-    _sel_ref_nodes = [
-        _class(_ref_node) for _ref_node in cmds.ls(
-            selection=True, type='reference')]
+    _sel_ref_nodes = cmds.ls(selection=True, type='reference')
     lprint('SEL REF NODES', _sel_ref_nodes, verbose=verbose)
-    _refs += _sel_ref_nodes
+
+    _ref_nodes = sorted(set(_sel_ref_nodes + [
+        cmds.referenceQuery(_node, referenceNode=True)
+        for _node in cmds.ls(selection=True)]))
+    lprint('REF NODES', _ref_nodes, verbose=verbose)
+
+    _class = class_ or FileRef
+    _refs = [_class(_ref_node) for _ref_node in _ref_nodes]
     lprint('REFS', _refs, verbose=verbose)
     if multi:
         return _refs

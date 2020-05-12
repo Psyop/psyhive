@@ -1,6 +1,6 @@
 """Tools for managing executing host across multiple host applications."""
 
-from psyhive.utils import wrap_fn, abs_path
+from psyhive.utils import wrap_fn, abs_path, get_path
 
 NAME = None
 
@@ -36,7 +36,8 @@ else:
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
-    _force_open_scene = lambda file_: cmds.file(file_, open=True, force=True)
+    _force_open_scene = lambda file_: cmds.file(
+        file_, open=True, force=True, ignoreVersion=True)
     _force_new_scene = wrap_fn(cmds.file, new=True, force=True)
     refresh = cmds.refresh
     reference_scene = ref.create_ref
@@ -121,7 +122,7 @@ def handle_unsaved_changes():
         raise ValueError(_result)
 
 
-def open_scene(file_, func=None, force=False):
+def open_scene(file_, func=None, force=False, lazy=False):
     """Open the given scene file.
 
     A warning is raised if the current scene has been modified.
@@ -130,10 +131,15 @@ def open_scene(file_, func=None, force=False):
         file_ (str): file to open
         func (fn): override save function
         force (bool): lose current scene with no warning
+        lazy (bool): abandon open scene if file is already open
     """
+    _file = get_path(file_)
+    if lazy and cur_scene() == _file:
+        print 'SCENE ALREADY OPEN', _file
+        return
     if not force and _scene_modified():
         handle_unsaved_changes()
-    _func = func or wrap_fn(_force_open_scene, file_)
+    _func = func or wrap_fn(_force_open_scene, _file)
     _func()
 
 

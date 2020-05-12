@@ -141,7 +141,7 @@ def _fix_cr_namespaces():
         if '_CR' not in _ns:
             continue
         print 'FIXING _CR NAMESPACE', _ns
-        cmds.namespace(moveNamespace=(_ns, ':'))
+        cmds.namespace(moveNamespace=(_ns, ':'), force=True)
         assert not cmds.ls(_ns+":*")
         cmds.namespace(removeNamespace=_ns)
 

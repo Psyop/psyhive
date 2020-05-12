@@ -281,7 +281,7 @@ class TTOutput(TTDirBase):
             _out = self.map_to(version=_o_ver.version)
             if _out.exists():
                 return _out
-        raise OSError('Failed to find latest version '+self.path)
+        return None  # Consistent with TTWork.find_latest
 
     def is_latest(self):
         """Check if this is the latest version.
@@ -381,7 +381,7 @@ class _TTOutputFileBase(TTBase):
             _out = self.map_to(version=_o_ver.version)
             if _out.exists():
                 return _out
-        raise OSError('Failed to find latest version '+self.path)
+        return None  # Consistent with TTWork.find_latest
 
     def is_latest(self):
         """Check if this is the latest version.

@@ -10,7 +10,7 @@ from maya.app.general import createImageFormats
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint, File, abs_path, dprint
+from psyhive.utils import get_single, lprint, File, abs_path, dprint, get_path
 
 COLS = (
     "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
@@ -131,65 +131,6 @@ def add_node(input1, input2, output=None, name='add', force=False):
     return _output
 
 
-def create_attr(attr, value, keyable=True, update=True, verbose=0):
-    """Add an attribute.
-
-    Args:
-        attr (str): attr name (eg. persp1.blah)
-        value (any): attribute value to apply
-        keyable (bool): keyable state of attribute
-        update (bool): update attribute to value provided
-            (default is true)
-        verbose (int): print process data
-
-    Returns:
-        (str): full attribute name (eg. persp.blah)
-    """
-    _node, _attr = attr.split('.')
-
-    # Create attr
-    _type = _class = None
-    _created = False
-    if not cmds.attributeQuery(_attr, node=_node, exists=True):
-        if isinstance(value, qt.HColor):
-            cmds.addAttr(
-                _node, longName=_attr, attributeType='float3',
-                usedAsColor=True)
-            for _chan in 'RGB':
-                print 'ADDING', _attr+_chan
-                cmds.addAttr(
-                    _node, longName=_attr+_chan, attributeType='float',
-                    parent=_attr)
-            _class = qt.HColor
-        else:
-            _kwargs = {
-                'longName': _attr,
-                'keyable': keyable,
-            }
-            if isinstance(value, six.string_types):
-                _kwargs['dataType'] = 'string'
-                _type = 'string'
-            elif isinstance(value, float):
-                _kwargs['attributeType'] = 'float'
-                _kwargs['defaultValue'] = value
-            elif isinstance(value, int):
-                _kwargs['attributeType'] = 'long'
-                _kwargs['defaultValue'] = value
-            else:
-                raise ValueError(value)
-            lprint("ADDING ATTR", _node, _kwargs, verbose=verbose)
-            cmds.addAttr(_node, **_kwargs)
-        _created = True
-
-    # Apply value
-    _cur_val = get_val(attr, type_=_type, class_=_class)
-    if not _cur_val == value and (_created or update):
-        _kwargs = {}
-        set_val(attr, value)
-
-    return attr
-
-
 @restore_ns
 def add_to_grp(obj, grp):
     """Add the given object to the given group, creating it if required.
@@ -219,6 +160,17 @@ def add_to_set(obj, set_, verbose=0):
         cmds.namespace(set=':')
         cmds.sets(name=set_, empty=True)
     cmds.sets(obj, addElement=set_)
+
+
+def bake_results(chans, simulation=False):
+    """Bake anim on the given list of channels.
+
+    Args:
+        chans (str list): list of channels to bake
+        simulation (bool): bake as simulation (scrub timeline)
+    """
+    from psyhive import host
+    cmds.bakeResults(chans, time=host.t_range(), simulation=simulation)
 
 
 def blast(seq, range_=None, res=None, force=False, verbose=0):
@@ -276,6 +228,65 @@ def break_conns(attr):
     """
     _conns = cmds.listConnections(attr, destination=False)
     cmds.delete(_conns)
+
+
+def create_attr(attr, value, keyable=True, update=True, verbose=0):
+    """Add an attribute.
+
+    Args:
+        attr (str): attr name (eg. persp1.blah)
+        value (any): attribute value to apply
+        keyable (bool): keyable state of attribute
+        update (bool): update attribute to value provided
+            (default is true)
+        verbose (int): print process data
+
+    Returns:
+        (str): full attribute name (eg. persp.blah)
+    """
+    _node, _attr = attr.split('.')
+
+    # Create attr
+    _type = _class = None
+    _created = False
+    if not cmds.attributeQuery(_attr, node=_node, exists=True):
+        if isinstance(value, qt.HColor):
+            cmds.addAttr(
+                _node, longName=_attr, attributeType='float3',
+                usedAsColor=True)
+            for _chan in 'RGB':
+                print 'ADDING', _attr+_chan
+                cmds.addAttr(
+                    _node, longName=_attr+_chan, attributeType='float',
+                    parent=_attr)
+            _class = qt.HColor
+        else:
+            _kwargs = {
+                'longName': _attr,
+                'keyable': keyable,
+            }
+            if isinstance(value, six.string_types):
+                _kwargs['dataType'] = 'string'
+                _type = 'string'
+            elif isinstance(value, float):
+                _kwargs['attributeType'] = 'float'
+                _kwargs['defaultValue'] = value
+            elif isinstance(value, int):
+                _kwargs['attributeType'] = 'long'
+                _kwargs['defaultValue'] = value
+            else:
+                raise ValueError(value)
+            lprint("ADDING ATTR", _node, _kwargs, verbose=verbose)
+            cmds.addAttr(_node, **_kwargs)
+        _created = True
+
+    # Apply value
+    _cur_val = get_val(attr, type_=_type, class_=_class)
+    if not _cur_val == value and (_created or update):
+        _kwargs = {}
+        set_val(attr, value)
+
+    return attr
 
 
 def cycle_check():
@@ -502,7 +513,8 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     if _type in ('typed', 'string'):
         _kwargs['asString'] = True
     elif _type in ['float', 'long', 'doubleLinear', 'float3', 'double',
-                   'double3', 'time', 'byte', 'bool', 'int', 'doubleAngle']:
+                   'double3', 'time', 'byte', 'bool', 'int', 'doubleAngle',
+                   'enum']:
         pass
     else:
         raise ValueError('Unhandled type {} on attr {}'.format(_type, attr))
@@ -626,6 +638,24 @@ def multiply_node(input1, input2, output, force=False, name='multiply'):
     _out_node = _out.split('.')[0]
     cmds.setAttr(_out_node+'.operation', 1)
     return _out
+
+
+def open_scene(file_, force=False, prompt=False, lazy=False):
+    """Open the given scene.
+
+    Args:
+        file_ (str): file to open
+        force (bool): lose unsaved changes without confirmation
+        prompt (bool): show missing reference dialogs
+        lazy (bool): abandon load if scene is already open
+    """
+    from psyhive import host
+    _file = get_path(file_)
+    if lazy and host.cur_scene() == _file:
+        return
+    if not force:
+        host.handle_unsaved_changes()
+    cmds.file(_file, open=True, force=True, prompt=prompt)
 
 
 def pause_viewports_on_exec(func):

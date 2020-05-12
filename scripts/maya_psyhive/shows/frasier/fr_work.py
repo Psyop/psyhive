@@ -81,8 +81,6 @@ class FrasierWork(tk2.TTWork):
         """
         super(FrasierWork, self).__init__(path)
 
-        self.cache_fmt = '{}/cache/{}_{{}}.cache'.format(
-            self.dir, self.basename)
         self.blast = self.map_to(
             tk2.TTOutputFileSeq, output_type='blast', output_name='blast_cam',
             extension='jpg', format='jpg')
