@@ -473,7 +473,9 @@ def _read_action_works(force=False, progress=True):
     _works = []
     for _asset in qt.progress_bar(
             ASSETS.values(), 'Checking {:d} asset{}', show=progress):
-        _anim = _asset.find_step_root('animation')
+        _anim = _asset.find_step_root('animation', catch=True)
+        if not _anim:
+            continue
         for _work in _anim.find_work(class_=FrasierWork, dcc='maya'):
             _works.append(_work)
     return _works

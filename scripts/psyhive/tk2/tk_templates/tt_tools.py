@@ -1,11 +1,11 @@
 """Tools for managing tank template representations."""
 
 from psyhive import pipe, host
-from psyhive.utils import find, get_single
+from psyhive.utils import find, get_single, passes_filter
 
-from psyhive.tk2.tk_templates.tt_base import TTSequenceRoot, TTRoot, TTStepRoot
-from psyhive.tk2.tk_templates.tt_work import TTWork
-from psyhive.tk2.tk_templates.tt_output import TTOutput
+from .tt_base import TTSequenceRoot, TTRoot, TTStepRoot, TTShot
+from .tt_work import TTWork
+from .tt_output import TTOutput
 
 
 def cur_shot():
@@ -17,7 +17,7 @@ def cur_shot():
     _work = cur_work()
     if not _work:
         return None
-    return _work.shot
+    return TTShot(_work.path)
 
 
 def cur_work(class_=None):
@@ -37,6 +37,19 @@ def cur_work(class_=None):
         return _class(_cur_scene)
     except ValueError:
         return None
+
+
+def find_asset(filter_):
+    """Find asset matching given filter.
+
+    Args:
+        filter_ (str): filter by path
+
+    Returns:
+        (TTRoot): matching asset root
+    """
+    return get_single([_asset for _asset in find_assets()
+                       if passes_filter(_asset.path, filter_)], verbose=1)
 
 
 def find_assets():

@@ -655,7 +655,7 @@ def open_scene(file_, force=False, prompt=False, lazy=False):
         return
     if not force:
         host.handle_unsaved_changes()
-    cmds.file(_file, open=True, force=True, prompt=prompt)
+    cmds.file(_file, open=True, force=True, prompt=prompt, ignoreVersion=True)
 
 
 def pause_viewports_on_exec(func):

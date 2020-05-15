@@ -1,3 +1,20 @@
+#### v0.79.1 ####
+
+    Released: Fri 15th May 2020 08:27
+
+    Frasier: action browser catch missing asset animation step (plindkvist),
+    
+    maya_psyhive:
+        ref.namespace catch error on prefix ref,
+        frasier.read_action_works catch missing animation step,
+        utils.open_scene use ignoreVersion,
+    psyhive:
+        qt.HPixmapUi2.keyPressEvent added pause,
+        qt.HPixmap.save_test added verbose,
+        tk2 added find_asset/cur_shot,
+        tk2.TTShot.get_frame_range added use_cut flag,
+
+
 #### v0.79.0 ####
 
     Released: Tue 12th May 2020 14:18

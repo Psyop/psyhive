@@ -151,11 +151,15 @@ class FileRef(object):
     @property
     def namespace(self):
         """Get this ref's namespace."""
-        return cmds.referenceQuery(self.ref_node, namespace=True).lstrip(':')
+        try:
+            return cmds.referenceQuery(
+                self.ref_node, namespace=True).lstrip(':')
+        except RuntimeError:
+            return None
 
     @property
     def path(self):
-    
+
         """Get path to this ref's scene file (without copy number)."""
         if not self._file:
             return None

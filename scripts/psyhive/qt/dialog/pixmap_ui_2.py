@@ -161,6 +161,8 @@ class HPixmapUi2(QtWidgets.QDialog):
         elif event.text() in 'qx':
             print 'EXIT', event.text()
             self.delete()
+        elif event.text() == 'p':
+            self.pause = not self.pause
         super(HPixmapUi2, self).keyPressEvent(event)
 
     def resizeEvent(self, event):
