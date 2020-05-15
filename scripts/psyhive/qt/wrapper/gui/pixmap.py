@@ -498,13 +498,14 @@ class HPixmap(QtGui.QPixmap):
         self.save(abs_path(path, win=True), format=_fmt, quality=100)
         assert _file.exists()
 
-    def save_test(self, file_=None, timestamp=True):
+    def save_test(self, file_=None, timestamp=True, verbose=1):
         """Save test image and copy it to pictures dir.
 
         Args:
             file_ (str): override save file path - this can be used
                 to switch this method with a regular save
             timestamp (bool): write timestamped file
+            verbose (int): print process data
 
         Returns:
             (str): path to saved file
@@ -514,13 +515,13 @@ class HPixmap(QtGui.QPixmap):
             return file_
 
         _tmp_file = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
-        self.save_as(_tmp_file, verbose=1, force=True)
+        self.save_as(_tmp_file, verbose=verbose, force=True)
         _file = _tmp_file
 
         if timestamp:
             _timestamp_file = abs_path(time.strftime(
                 '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
-            self.save_as(_timestamp_file, verbose=1, force=True)
+            self.save_as(_timestamp_file, verbose=verbose, force=True)
             _file = _timestamp_file
 
         return _file

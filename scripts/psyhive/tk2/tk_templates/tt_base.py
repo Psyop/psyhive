@@ -299,15 +299,23 @@ class TTRoot(TTDirBase):
 class TTShot(TTRoot):
     """Represents a shot folder."""
 
-    def get_frame_range(self):
+    def get_frame_range(self, use_cut=False):
         """Read shot frame range from shotgun.
+
+        This uses head in/tail out data values.
+
+        Args:
+            use_cut (bool): use cut in/out data
 
         Returns:
             (tuple): start/end frames
         """
         from psyhive import tk2
         _shotgun = tank.platform.current_engine().shotgun
-        _fields = ["sg_head_in", "sg_tail_out"]
+        if not use_cut:
+            _fields = ["sg_head_in", "sg_tail_out"]
+        else:
+            _fields = ["sg_cut_in", "sg_cut_out"]
         _sg_data = _shotgun.find_one(
             "Shot", filters=[
                 ["project", "is", [tk2.get_project_sg_data(self.project)]],

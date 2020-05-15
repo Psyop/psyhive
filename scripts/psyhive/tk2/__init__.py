@@ -12,7 +12,7 @@ from .tk_templates import (
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,
     TTOutputFileSeq, get_work, cur_work, get_shot, get_step_root, TTShot,
     get_extn, get_output, find_shots, find_assets, find_shot,
-    find_sequences)
+    find_sequences, find_asset, cur_shot)
 
 from .tk_cache import (
     obtain_work, obtain_cur_work, obtain_sequences, obtain_cacheable,
