@@ -90,16 +90,17 @@ class _CTTWorkArea(TTWorkArea):
         return [obtain_cacheable(_inc) for _inc in _incs]
 
     @store_result_on_obj
-    def find_work(self, class_=None):
+    def find_work(self, class_=None, task=None):
         """Find work files inside this step root.
 
         Args:
             class_ (class): override work class
+            task (str): filter works by task
 
         Returns:
             (TTWork list): list of work files
         """
-        _works = super(_CTTWorkArea, self).find_work(class_=class_)
+        _works = super(_CTTWorkArea, self).find_work(class_=class_, task=task)
         return [obtain_cacheable(_work) for _work in _works]
 
     @store_result_on_obj

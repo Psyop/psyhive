@@ -2,7 +2,7 @@
 
 from .tk_utils import (
     reference_publish, get_current_engine, find_tank_app,
-    find_tank_mod, restart_tank)
+    find_tank_mod, restart_tank, cache_scene)
 from .tk_sg import (
     get_project_sg_data, get_shot_sg_data, get_root_sg_data,
     get_asset_sg_data)

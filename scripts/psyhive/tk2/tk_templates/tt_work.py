@@ -12,10 +12,10 @@ from psyhive.utils import (
     File, abs_path, lprint, find, dprint, read_yaml, get_single,
     write_yaml, diff)
 
-from psyhive.tk2.tk_utils import find_tank_app, find_tank_mod
-from psyhive.tk2.tk_templates.tt_base import (
-    TTDirBase, TTBase, TTStepRoot, TTRoot)
-from psyhive.tk2.tk_templates.tt_utils import (
+from ..tk_utils import find_tank_app, find_tank_mod
+from .tt_base import (
+    TTDirBase, TTBase, TTStepRoot, TTRoot, TTShot)
+from .tt_utils import (
     get_area, get_dcc, get_template, get_extn)
 
 
@@ -48,11 +48,12 @@ class TTWorkArea(TTDirBase):
             extension=get_extn(self.dcc), version=0)
         return find(_tmp_inc.dir, depth=1, type_='f', class_=TTIncrement)
 
-    def find_work(self, class_=None):
+    def find_work(self, class_=None, task=None):
         """Find work files in this shot area.
 
         Args:
             class_ (class): override work file class
+            task (str): filter works by task
 
         Returns:
             (TTWork list): list of work files
@@ -64,6 +65,8 @@ class TTWorkArea(TTDirBase):
             hint=_hint, Task=self.step, extension=get_extn(self.dcc),
             version=1, class_=TTWork)
         _works = find(_test_work.dir, depth=1, type_='f', class_=_class)
+        if task:
+            _works = [_work for _work in _works if _work.task == task]
         return _works
 
     def get_metadata(self, verbose=1):
@@ -214,12 +217,14 @@ class TTWork(TTBase, File):
         _path = get_template(self.hint).apply_fields(_data)
         return self.__class__(_path)
 
-    def find_outputs(self, filter_=None, output_type=None, verbose=0):
+    def find_outputs(self, filter_=None, output_type=None,
+                     output_name=None, verbose=0):
         """Find outputs from this work file.
 
         Args:
             filter_ (str): path filter
             output_type (str): filter by output type
+            output_name (str): filter by output name
             verbose (int): print process data
 
         Returns:
@@ -227,22 +232,25 @@ class TTWork(TTBase, File):
         """
         return self.get_step_root().find_outputs(
             task=self.task, version=self.version, filter_=filter_,
-            output_type=output_type, verbose=verbose)
+            output_type=output_type, output_name=output_name,
+            verbose=verbose)
 
-    def find_output_files(self, output_type=None, extension=None, format_=None,
-                          verbose=0):
+    def find_output_files(self, output_type=None, extension=None,
+                          format_=None, output_name=None, verbose=0):
         """Find output files associated with this work file.
 
         Args:
             output_type (str): filter by output type
             extension (str): filter by extension
             format_ (str): filter by output format
+            output_name (str): filter by output name
             verbose (int): print process data
 
         Returns:
             (TTOutputBase list): list of outputs
         """
-        _outs = self.find_outputs(output_type=output_type)
+        _outs = self.find_outputs(
+            output_type=output_type, output_name=output_name)
         _files = sum([_out.find_files(verbose=verbose)
                       for _out in _outs], [])
         if format_ is not None:
@@ -367,7 +375,7 @@ class TTWork(TTBase, File):
             (TTRoot|None): shot (if any)
         """
         if self.shot:
-            return TTRoot(self.path)
+            return TTShot(self.path)
         return None
 
     def get_step_root(self):

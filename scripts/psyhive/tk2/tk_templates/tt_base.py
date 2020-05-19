@@ -299,6 +299,29 @@ class TTRoot(TTDirBase):
 class TTShot(TTRoot):
     """Represents a shot folder."""
 
+    @property
+    def idx_s(self):
+        """Get shot index string.
+
+        Returns:
+            (str): index str (eg. 0010)
+        """
+        _idx_s = ''
+        for _chr in reversed(self.name):
+            if not _chr.isdigit():
+                break
+            _idx_s = _chr+_idx_s
+        return _idx_s
+
+    @property
+    def idx(self):
+        """Get shot index.
+
+        Returns:
+            (int): shot index (eg. 10)
+        """
+        return int(self.idx_s)
+
     def get_frame_range(self, use_cut=False):
         """Read shot frame range from shotgun.
 
@@ -399,7 +422,7 @@ class TTStepRoot(TTDirBase):
         return _names
 
     def find_outputs(self, filter_=None, task=None, version=None,
-                     output_type=None, verbose=0):
+                     output_type=None, output_name=None, verbose=0):
         """Find outputs within this step root.
 
         Args:
@@ -407,6 +430,7 @@ class TTStepRoot(TTDirBase):
             task (str): filter by task
             version (str): filter by version
             output_type (str): filter by version type
+            output_name (str): filter by output name
             verbose (int): print process data
 
         Returns:
@@ -414,7 +438,8 @@ class TTStepRoot(TTDirBase):
         """
         _outs = []
         for _name in self.find_output_names(
-                task=task, output_type=output_type):
+                task=task, output_type=output_type,
+                output_name=output_name):
             lprint('TESTING NAME', _name, verbose=verbose)
             for _ver in _name.find_versions(version=version):
                 lprint('TESTING VER', _ver, verbose=verbose)
@@ -430,17 +455,19 @@ class TTStepRoot(TTDirBase):
         return [_name for _name in self.find_output_names()
                 if _name.output_type == 'render']
 
-    def find_work(self, dcc=None, class_=None):
+    def find_work(self, dcc=None, class_=None, task=None):
         """Find work files inside this step root.
 
         Args:
             dcc (str): dcc to find work for
             class_ (class): override work class
+            task (str): filter by task
 
         Returns:
             (TTWork list): list of work files
         """
-        return self.get_work_area(dcc=dcc).find_work(class_=class_)
+        return self.get_work_area(dcc=dcc).find_work(
+            class_=class_, task=task)
 
     def get_work_area(self, dcc):
         """Get work area in this step for the given dcc.

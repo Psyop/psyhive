@@ -1,5 +1,6 @@
 """Utilities for managing tank."""
 
+import collections
 import os
 import pprint
 import sys
@@ -11,6 +12,91 @@ import tank
 from psyhive import qt, icons, refresh
 from psyhive.utils import (
     lprint, store_result, get_single, dprint, abs_path, get_path)
+
+
+class _FakeResolver(object):
+    """Used to communicate with cache tool."""
+
+    def __init__(self, all_items, conflicts, version):
+        """Constructor.
+
+        Args:
+            all_items (CacheItem list): all cache items
+            conflicts (FakeConflict list): data on which items to cache
+            version (int): model version
+        """
+        self.user_data = all_items, version
+        self.conflicts = conflicts
+
+
+class _FakeConflict(object):
+    """Used to communicate with cache tool."""
+
+    def __init__(self, id_, cache):
+        """Constructor.
+
+        Args:
+            id_ (str): cache item namespace
+            cache (bool): whether to cache item
+        """
+        _mod = find_tank_mod('psy_multi_cache.cache')
+        _skip = _mod.PublishConflictResolution.SKIP
+        _user_data = collections.namedtuple('UserData', ['id'])
+        self.id_ = id_
+        self.user_data = _user_data(id=self.id_)
+        self.resolution = None if cache else _skip
+
+    def __repr__(self):
+        return '<Conflict:{}>'.format(self.id_)
+
+
+def cache_scene(namespaces=None, farm=False, verbose=0):
+    """Cache the current scene.
+
+    Args:
+        namespaces (str list): limit namespaces which are cached
+        farm (bool): cache using farm
+        verbose (int): print process data
+    """
+    _app = find_tank_app('cache')
+    _app.init_app()
+
+    if namespaces:
+
+        # Use FakeResolver to limit items to cache
+        _model = _app.cache_controller.model
+        _all_items = [
+            _item.item_data
+            for _item in _model.cache_list.selected_items]
+        lprint(
+            ' - ALL ITEMS', len(_all_items), pprint.pformat(_all_items),
+            verbose=verbose > 1)
+        _conflicts = []
+        for _item in _all_items:
+            _cache = _item.id.replace(":renderCamShape", "") in namespaces
+            _conflict = _FakeConflict(id_=_item.id, cache=_cache)
+            _conflicts.append(_conflict)
+        lprint(
+            ' - CONFLICTS', len(_conflicts), pprint.pformat(_conflicts),
+            verbose=verbose > 1)
+        _resolver = _FakeResolver(
+            all_items=_all_items, conflicts=_conflicts, version=_model.version)
+
+        # Check cache
+        _to_cache = [
+            _conflict for _conflict in _conflicts if not _conflict.resolution]
+        if not _to_cache:
+            raise RuntimeError("Nothing found to cache")
+        lprint(' - FOUND {:d} ITEMS TO CACHE'.format(len(_to_cache)))
+
+    else:
+        _resolver = None
+
+    # Execute cache
+    if farm:
+        _app.cache_controller.model.cache_on_farm(resolver=_resolver)
+    else:
+        _app.cache_controller.model.cache(resolver=_resolver)
 
 
 def find_tank_app(name, catch=True):

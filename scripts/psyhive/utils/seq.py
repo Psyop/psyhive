@@ -243,7 +243,7 @@ class Seq(object):
         """
         from psyhive import host
 
-        _conv = convertor or os.environ['PSYHIVE_CONVERTOR']
+        _conv = convertor or os.environ.get('PSYHIVE_CONVERTOR', 'ffmpeg')
         _fps = fps or host.get_fps()
 
         File(file_).delete(force=force)
