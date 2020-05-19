@@ -342,7 +342,8 @@ class File(Path):
         Returns:
             (bool): whether files match
         """
-        return filecmp.cmp(self.path, other.path)
+        _path = get_path(other)
+        return filecmp.cmp(self.path, _path)
 
     def read(self):
         """Read the text contents of this file."""

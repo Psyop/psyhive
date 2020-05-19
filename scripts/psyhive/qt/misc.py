@@ -183,12 +183,12 @@ def safe_timer_event(timer_event):
     """
 
     @functools.wraps(timer_event)
-    def _safe_exec_timer(dialog, event):
+    def _safe_exec_timer(dialog, event, verbose=0):
 
         # Try and exec timer event
         _destroy = False
         try:
-            _result = timer_event(dialog, event)
+            _result = timer_event(dialog, event, verbose=verbose)
         except Exception as _exc:
             _tb = traceback.format_exc().strip()
             print 'TIMER EVENT FAILED\n# '+'\n# '.join(_tb.split('\n'))

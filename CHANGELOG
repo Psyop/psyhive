@@ -1,3 +1,26 @@
+#### v0.79.2 ####
+
+    Released: Tue 19th May 2020 09:33
+
+    Tank Support: 
+        frustrum test blast updated use of deprecated remove rigs ui,
+        build aiStandIn from shade bugfix error on old arnold version,
+    
+    maya_psyhive:
+        ref.FileRef.get_top_node added class_ + bugfix not using HFnTransform,
+        tank_support.frustrum_test_blast bugfix using deprecated remove rigs ui,
+        tank_support.build_aistandin_from_shade catch outdated arnold,
+    psyhive:
+        qt.safe_timer_event added verbose flag,
+        tk2.cache_scene added,
+        tk2.TTShot added idx/idx_s,
+        tk2 TTStepRoot/TTWork find_outputs/find_output_files added output_name filter,
+        tk2 TTStepRoot/TTWorkArea/TTWork find_work added task filter,
+        tk2.TTWork.get_shot returns TTShot,
+        utils.File.matches allow other as File,
+        utils.Seq.to_mov use ffmpeg as default convertor,
+
+
 #### v0.79.1 ####
 
     Released: Fri 15th May 2020 08:27

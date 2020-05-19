@@ -10,8 +10,9 @@ from psyhive.utils import lprint, passes_filter, ints_to_str
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
-from maya_psyhive.tools.frustrum_test_blast import remove_rigs
 from maya_psyhive.utils import cycle_check, is_visible
+
+from . import remove_rigs
 
 
 class _Rig(ref.FileRef):

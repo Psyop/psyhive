@@ -453,7 +453,12 @@ def build_aistandin_from_shade(
 
     _merge = hom.CMDS.createNode(
         'aiMerge', name='{}_mergeOperators'.format(_name))
-    _merge.plug('out').connect(_standin.plug('operators[0]'))
+    try:
+        _operators = _standin.plug('operators[0]')
+    except RuntimeError:
+        print ' - MISSING ATTR: {}.operators[0]'.format(_standin)
+        return None
+    _merge.plug('out').connect(_operators)
 
     _build_col_switches_aip(
         shade=shade, merge=_merge, name=_name)
@@ -531,7 +536,8 @@ def build_shader_outputs(output, force=True, verbose=1):
     host.save_as(file_=_standin.path, force=force)
 
     # Remove standin + save shaders
-    cmds.delete('AIS')
+    if cmds.objExists('AIS'):
+        cmds.delete('AIS')
     _ses = [str(_se) for _se in cmds.ls(type='shadingEngine')
             if _se not in DEFAULT_NODES]
     lprint(" - SHADING ENGINES", _ses, verbose=verbose)
