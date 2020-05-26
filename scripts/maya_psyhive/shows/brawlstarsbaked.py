@@ -86,7 +86,24 @@ def _get_render(tbm, pass_):
         output_name=tbm.rig.namespace, channel=pass_, eye=_tag)
 
 
-def _prepare_tbms(tbms, force=False):
+def _get_all_tbms():
+    """Get all tbm nodes in the scene and embed metadata.
+
+    Returns:
+        (HFnDepdendencyNode list): tbm nodes
+    """
+    _tbms = hom.CMDS.ls(type='TBM_2DRenderer')
+    for _tbm in _tbms:
+        _tbm.rig = _get_rig(_tbm)
+        _tbm.face_rig = ref.find_ref(_tbm.namespace)
+        _tbm.face_ctrl = _tbm.face_rig.get_node('face_Placer_Ctrl')
+        _tbm.matte_attr = _tbm.face_ctrl.plug('matte')
+        _tbm.all_passes = _tbm.matte_attr.list_enum()
+
+    return _tbms
+
+
+def _prepare_tbm_render(tbms, passes, force=False):
     """Prepare beast maker nodes for export.
 
     This stores render data on the nodes and checks output paths
@@ -94,6 +111,7 @@ def _prepare_tbms(tbms, force=False):
 
     Args:
         tbms (HFnDependencyNode list): list of nodes to export
+        passes (str list): list of passes to render
         force (bool): remove existing outputs without confirmation
     """
     Dir(_TMP_DIR).delete(force=True)
@@ -101,9 +119,6 @@ def _prepare_tbms(tbms, force=False):
     for _tbm in tbms:
 
         print _tbm
-        _tbm.rig = _get_rig(_tbm)
-        _tbm.face_rig = ref.find_ref(_tbm.namespace)
-        _tbm.face_ctrl = _tbm.face_rig.get_node('face_Placer_Ctrl')
         _tbm.plug('fileFormat').set_enum('png')
         _tbm.plug('recordSizeX').set_val(2048)
         _tbm.plug('recordSizeY').set_val(2048)
@@ -112,15 +127,15 @@ def _prepare_tbms(tbms, force=False):
         _tbm.renders = {}
         _tbm.tmp_seqs = {}
 
-        for _pass in ['Bump', 'Alpha']:
-            _get_render(tbm=_tbm, pass_=_pass).delete(force=force)
+        if 'RGB' in passes:
+            for _pass in ['Bump', 'Alpha']:
+                _get_render(tbm=_tbm, pass_=_pass).delete(force=force)
 
         # Set up matte attr + remove any anim (kcassidy)
-        _tbm.matte_attr = _tbm.face_ctrl.plug('matte')
         _tbm.matte_attr.break_connections()
 
         # Set up passes
-        _tbm.passes = _tbm.matte_attr.list_enum()
+        _tbm.passes = [_pass for _pass in _tbm.all_passes if _pass in passes]
         for _pass in _tbm.passes:
 
             # Set up render
@@ -158,6 +173,7 @@ def _render_tbms(tbms, start, end):
             _tbm.plug('record').set_val(False)
 
     # Render passes
+    _renders = []
     _pass_count = max([len(_tbm.renders) for _tbm in tbms])
     for _idx in qt.progress_bar(
             range(_pass_count), 'Rendering {:d} pass{}', plural='es'):
@@ -190,10 +206,13 @@ def _render_tbms(tbms, start, end):
                     'TBM node {} failed to render - this could be due to '
                     'disabled TBM nodes in the scene'.format(_tbm))
             _tmp_seq.move(_render)
+            _renders.append(_render)
 
     # Revert to diffuse
     for _tbm in tbms:
         _tbm.matte_attr.set_enum('Diffuse')
+
+    return _renders
 
 
 def _comp_tbm_renders(tbms, start, end):
@@ -221,6 +240,7 @@ def _comp_tbm_renders(tbms, start, end):
         '',
     ]).format(nk=_FACE_MATTES_NK)
 
+    _renders = []
     for _tbm in tbms:
         _bump = _get_render(tbm=_tbm, pass_='Bump')
         _alpha = _get_render(tbm=_tbm, pass_='Alpha')
@@ -238,37 +258,54 @@ def _comp_tbm_renders(tbms, start, end):
         ]).format(
             tbm=_tbm, bump=_bump.path, alpha=_alpha.path, start=start,
             end=end, matte_raw=_rgb.path)
+        _renders += [_bump, _alpha]
 
-    # print _py
-    # print
     File(_tmp_py).write_text(_py, force=True)
 
     print 'launch nuke -- -t "{}"'.format(_tmp_py)
-    psylaunch.launch_app('nuke', args=['-t', _tmp_py])
+    psylaunch.launch_app('nuke', args=['-t', _tmp_py], wait=True)
+
+    return _renders
 
 
-@py_gui.install_gui(choices={'which': ['All', 'Select']})
-def render_tbm_nodes(which='All', force=False):
+@py_gui.install_gui(
+    choices={'tbms': ['All', 'Select'], 'passes': ['All', 'Select']})
+def render_tbm_nodes(tbms='All', passes='All', force=False):
     """Render TBM_2DRender nodes in the current scene.
 
     Args:
-        which (str): which nodes to render:
+        tbms (str): which tbm nodes to render:
             all - render all nodes in the scene
             select - select which nodes to render from a list
+        passes (str): which passes to render:
+            all - render all passes on all tbm nodes
+            select - select which passes to render from a list
         force (bool): overwrite existing renders without confirmation
     """
     _cur_work = tk2.cur_work()
     _start, _end = [int(_val) for _val in host.t_range()]
 
     # Get list of tmb nodes to render
-    _tbms = hom.CMDS.ls(type='TBM_2DRenderer')
-    if which == 'Select' and len(_tbms) > 1:
+    _tbms = _get_all_tbms()
+    if tbms == 'Select' and len(_tbms) > 1:
         _tbms = qt.multi_select(
             _tbms, 'Which TBM nodes to render?', default=_tbms)
 
-    _prepare_tbms(tbms=_tbms, force=force)
-    _render_tbms(tbms=_tbms, start=_start, end=_end)
-    _comp_tbm_renders(tbms=_tbms, start=_start, end=_end)
+    # Get passes to render
+    _passes = sorted(set(sum([_tbm.all_passes for _tbm in _tbms], [])))
+    if passes == 'Select' and len(_passes) > 1:
+        _passes = qt.multi_select(
+            _passes, 'Which passes to render?', default=_passes)
+
+    _prepare_tbm_render(tbms=_tbms, passes=_passes, force=force)
+    _renders = _render_tbms(tbms=_tbms, start=_start, end=_end)
+    if "RGB" in _passes:
+        _renders += _comp_tbm_renders(tbms=_tbms, start=_start, end=_end)
+
+    for _render in qt.progress_bar(_renders, "Registering {:d} render{}"):
+        print _render
+        _render.register_in_shotgun(
+            component_type='image/render', renderer='tbm_2D')
 
 
 py_gui.set_section('Face Rigs')

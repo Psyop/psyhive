@@ -1,3 +1,21 @@
+#### v0.80.0 ####
+
+    Released: Tue 26th May 2020 15:49
+
+    Brawl Stars Baked: 
+        tbm render register renders in shotgun (ccesareo),
+        tbm render allow pass selection (kcassidy),
+    
+    maya_psyhive:
+        shows.brawlstarsbaked render tbms register renders in sg,
+        shows.brawlstarsbaked render tbms added passes filter,
+    psyhive:
+        refresh bugfix qt.multi_select sorting,
+        tk2._TTOutputFileBase.register_in_shotgun added,
+        tk2.find_tank_app added verbose,
+        utils.search_files_for_text catch unicode error on apply filter,
+
+
 #### v0.79.2 ####
 
     Released: Tue 19th May 2020 09:33

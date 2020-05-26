@@ -99,17 +99,22 @@ def cache_scene(namespaces=None, farm=False, verbose=0):
         _app.cache_controller.model.cache(resolver=_resolver)
 
 
-def find_tank_app(name, catch=True):
+def find_tank_app(name, catch=True, verbose=0):
     """Find tank app for the given name.
 
     Args:
         name (str): app name
         catch (bool): offer to restart tank if app is missing
+        verbose (int): print process data
 
     Returns:
         (SgtkApp): tank app
     """
     _engine = tank.platform.current_engine()
+
+    if verbose:
+        print 'TANK APPS:'
+        pprint.pprint(_engine.apps.keys())
 
     # Try exact match
     if name in _engine.apps:

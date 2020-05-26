@@ -19,9 +19,9 @@ COLS = (
     "pink", "orange", "lightyellow", "fadedgreen", "darktan", "tanyellow",
     "olivegreen", "woodgreen", "cyan", "greyblue", "purple", "crimson")
 
-DEFAULT_NODES = [
+DEFAULT_NODES = (
     'initialParticleSE', 'initialShadingGroup', 'persp', 'top',
-    'front', 'side', 'lambert1']
+    'front', 'side', 'lambert1')
 
 _FPS_LOOKUP = {
     23.97: "film",
