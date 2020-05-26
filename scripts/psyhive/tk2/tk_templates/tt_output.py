@@ -391,6 +391,17 @@ class _TTOutputFileBase(TTBase):
         """
         return self.find_latest() == self
 
+    def register_in_shotgun(self, complete=False, **kwargs):
+        """Register this output in shotgun.
+
+        Args:
+            complete (bool): complete status
+        """
+        from psyhive import tk2
+        _mod = tk2.find_tank_mod('shotgun', app='psy-framework-publish')
+        _path = self.path.replace(".%04d.", ".####.")
+        _mod.register_publish(_path, complete=complete, **kwargs)
+
 
 class TTOutputFile(_TTOutputFileBase, File):
     """Represents an output file."""

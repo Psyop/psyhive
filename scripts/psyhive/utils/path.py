@@ -899,13 +899,18 @@ def search_files_for_text(
             except UnicodeDecodeError:
                 continue
 
+            try:
+                _filter_in_line = filter_ and passes_filter(
+                    _line, filter_, case_sensitive=True)
+            except UnicodeDecodeError:
+                continue
+
             # Check if this line should be printed
             _print_line = False
             if _text_in_line:
                 lprint(' - MATCHED TEXT IN LINE', text, verbose=verbose)
                 _print_line = True
-            elif filter_ and passes_filter(
-                    _line, filter_, case_sensitive=True):
+            elif _filter_in_line:
                 lprint(' - MATCHED FILTER IN LINE', filter_, verbose=verbose)
                 _print_line = True
 
