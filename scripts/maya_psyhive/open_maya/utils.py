@@ -111,6 +111,28 @@ def cast_result(func, verbose=0):
     return _casted_result_fn
 
 
+def find_nodes(filter_=None, class_=None, type_=None, long_=False):
+    """Find nodes on the current scene (uses ls command).
+
+    Args:
+        filter_ (str): filter in ls format (eg. "tmp:*")
+        class_ (class): override node class (default is HFnDepdendencyNode)
+        type_ (str): ls type flag
+        long_ (bool): ls long flag
+
+    Returns:
+        (HFnDepdendencyNode list): nodes
+    """
+    from maya_psyhive import open_maya as hom
+
+    _class = class_ or hom.HFnDependencyNode
+    _args = [filter_] if filter_ else []
+    _kwargs = {'long': long_}
+    if type_:
+        _kwargs['type'] = type_
+    return [_class(_node) for _node in cmds.ls(*_args, **_kwargs)]
+
+
 def get_col(col):
     """Get an OpenMaya colour object.
 

@@ -302,8 +302,11 @@ class HPixmap(QtGui.QPixmap):
         """
         from psyhive import qt
 
-        _col = qt.get_col(col)
-        _brush = QtGui.QBrush(qt.get_col(_col))
+        if isinstance(col, QtGui.QPixmap):
+            _col = col
+        else:
+            _col = qt.get_col(col)
+        _brush = QtGui.QBrush(_col)
         _rect = _get_rect(pos=pos, size=size, anchor=anchor)
 
         # Set pen

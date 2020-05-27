@@ -128,6 +128,16 @@ class BaseTransform(BaseNode):
         from maya_psyhive import open_maya as hom
         return hom.get_p(self)
 
+    def orient_constraint(self, *args, **kwargs):
+        """Orient constrain a node to this node.
+
+        Returns:
+            (HFnTransform): orient constraint
+        """
+        from maya_psyhive import open_maya as hom
+        _constr = cmds.orientConstraint(self, *args, **kwargs)[0]
+        return hom.HFnTransform(_constr)
+
     def parent(self, *args, **kwargs):
         """Wrapper for cmds.parent command."""
         cmds.parent(self, *args, **kwargs)

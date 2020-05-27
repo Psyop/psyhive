@@ -69,6 +69,7 @@ ignore:
     no-member:
         hv_test/diary/
         maya_psyhive/shows/_fr_browser.py
+        psyhive/qt/dialog/dg_base.py
         psyhive/qt/dialog/pixmap_ui.py
         psyhive/qt/dialog/pixmap_ui_2.py
         psyhive/qt/wrapper/widgets.py
@@ -162,7 +163,7 @@ ignore:
         hv_test/diary/
         hv_test/toolkits/_tank_app.py
         hv_test/toolkits/tank_tools.py
-        hv_test/tools/colour_bro/cb_ui.py
+        hv_test/tools/colour_bro/cb_ui.pyno-member
         maya_psyhive/shows/vampirebloodline.py
         maya_psyhive/tools/fkik_switcher/system.py
         maya_psyhive/shows/frasier/fr_work.py
@@ -170,6 +171,7 @@ ignore:
         psyhive/pipe/work_file.py
         psyhive/py_gui/pyg_base.py
         psyhive/qt/progress.py
+        psyhive/qt/dialog/pixmap_ui_2.py
         psyhive/utils/py_file/base.py
         psyhive/utils/py_file/docs.py
     too-many-lines:
@@ -242,6 +244,7 @@ allowed_names:
     eventFilter
     isVisible
     keyPressEvent
+    keyReleaseEvent
     mouseMoveEvent
     mousePressEvent
     mouseReleaseEvent

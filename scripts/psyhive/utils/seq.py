@@ -5,8 +5,8 @@ import shutil
 import time
 
 from .cache import store_result_on_obj
-from .misc import dprint, lprint, get_plural
-from .path import File, abs_path, find, test_path, Dir, nice_size
+from .misc import dprint, lprint, get_plural, bytes_to_str
+from .path import File, abs_path, find, test_path, Dir, nice_size, get_path
 from .range_ import ints_to_str
 
 
@@ -190,6 +190,17 @@ class Seq(object):
         """
         return [self[_frame] for _frame in self.get_frames()]
 
+    def get_size(self):
+        """Get size in bytes of this file sequence.
+
+        Returns:
+            (int): size in bytes
+        """
+        _size = 0
+        for _path in self.get_paths():
+            _size += File(_path).get_size()
+        return _size
+
     def has_missing_frames(self):
         """Test if this sequence has missing frames.
 
@@ -212,6 +223,14 @@ class Seq(object):
         for _frame in self.get_frames(force=True):
             shutil.move(self[_frame], target[_frame])
 
+    def nice_size(self):
+        """Get size of this image sequence in a readable form.
+
+        Returns:
+            (str): size string
+        """
+        return bytes_to_str(self.get_size())
+
     def parent(self):
         """Get parent dir of this seq.
 
@@ -232,7 +251,7 @@ class Seq(object):
         """Test this sequence's parent directory exists."""
         test_path(self.dir)
 
-    def to_mov(self, file_, convertor=None, fps=None, force=False):
+    def to_mov(self, file_, convertor=None, fps=None, force=False, view=False):
         """Generate a mov from this image sequence.
 
         Args:
@@ -240,27 +259,35 @@ class Seq(object):
             convertor (str): tool to use to generate mov
             fps (float): override mov frame rate (default is host fps)
             force (bool): overwwrite existing without confirmation
+            view (bool): view mov on generation
         """
         from psyhive import host
 
+        _mov = Movie(get_path(file_))
         _conv = convertor or os.environ.get('PSYHIVE_CONVERTOR', 'ffmpeg')
         _fps = fps or host.get_fps()
 
-        File(file_).delete(force=force)
+        _mov.delete(wording='replace', force=force)
         if _conv == 'moviepy':
-            _seq_to_mov_moviepy(self, file_, fps=_fps)
+            _seq_to_mov_moviepy(self, _mov.path, fps=_fps)
         elif _conv == 'ffmpeg':
-            _seq_to_mov_ffmpeg(self, file_, fps=_fps)
+            _seq_to_mov_ffmpeg(self, _mov.path, fps=_fps)
         else:
             raise ValueError(_conv)
 
-    def view(self, viewer=None):
+        if view:
+            _mov.view()
+
+        return _mov
+
+    def view(self, viewer=None, verbose=0):
         """View this image sequence.
 
         Args:
             viewer (str): viewer to use
+            verbose (int): print process data
         """
-        _view_seq(self.path, viewer=viewer)
+        _view_seq(self.path, viewer=viewer, verbose=verbose)
 
     def __getitem__(self, idx):
         return self.get_path(idx)
@@ -314,12 +341,13 @@ class Movie(File):
         _view_seq(self.path, viewer=viewer)
 
 
-def _view_seq(path, viewer=None):
+def _view_seq(path, viewer=None, verbose=0):
     """View an image sequence or movie file.
 
     Args:
         path (str): path to images/movie to view
         viewer (str): viewer to use
+        verbose (int): print process data
     """
     _viewer = viewer or os.environ.get('VIEWER', 'rv')
     print 'VIEW SEQ', path, _viewer
@@ -327,6 +355,7 @@ def _view_seq(path, viewer=None):
     if _viewer == 'djv_view':
         _path = path.replace("%04d", "#")
         _cmd = 'djv_view "{}" &'.format(_path)
+        lprint(_cmd, verbose=verbose)
         os.system(_cmd)
 
     elif _viewer == 'rv':

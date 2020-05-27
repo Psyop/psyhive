@@ -16,9 +16,9 @@ from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode,
     read_file)
 
-from ..wrapper.mgr import QtWidgets, QtUiTools, QtCore, Qt
+from ..wrapper.mgr import QtWidgets, QtCore, Qt
 from ..wrapper.widgets import HMenu
-from ..misc import get_pixmap, get_icon, get_p
+from ..misc import get_pixmap, get_icon, get_p, get_ui_loader
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):
     sys.QT_DIALOG_STACK = {}
@@ -536,25 +536,6 @@ def get_list_redrawer(default_selection='first'):
         return _redraw_list
 
     return _list_redrawer
-
-
-def get_ui_loader():
-    """Build ui loader object with psyhive overrides registered.
-
-    Returns:
-        (QUiLoader): ui loader
-    """
-    from psyhive import qt
-    _loader = QtUiTools.QUiLoader()
-    _loader.registerCustomWidget(qt.HCheckBox)
-    _loader.registerCustomWidget(qt.HComboBox)
-    _loader.registerCustomWidget(qt.HLabel)
-    _loader.registerCustomWidget(qt.HListWidget)
-    _loader.registerCustomWidget(qt.HPushButton)
-    _loader.registerCustomWidget(qt.HTabWidget)
-    _loader.registerCustomWidget(qt.HTextBrowser)
-    _loader.registerCustomWidget(qt.HTreeWidget)
-    return _loader
 
 
 def list_redrawer(func):

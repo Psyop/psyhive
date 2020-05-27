@@ -118,7 +118,7 @@ def load_vendor_ma(path, fix_hik_issues=False, force=False, lazy=False):
     _fix_cr_namespaces()
 
     # Update rig
-    _ref = ref.find_ref()
+    _ref = ref.find_ref(filter_='-camera -cemera')
     if not _ref.path == MOBURN_RIG:
         _ref.swap_to(MOBURN_RIG)
     _ref = _fix_nested_namespace(_ref)

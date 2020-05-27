@@ -1,3 +1,38 @@
+#### v0.81.0 ####
+
+    Released: Wed 27th May 2020 14:17
+
+    Frasier: ingest vender files ignore cameras in scene (hmeinertrita),
+    
+    maya_psyhive:
+        open_maya.find_nodes added,
+        open_maya.HFnAnimCurve.get_ktvs added,
+        open_maya.HFnTransform.orient_constraint added,
+        open_maya.HPlug.connect added catch,
+        ref.FileRef.namespace bugfix bad result for unloaded ref,
+        ref.create_ref implemented existing unreferenced nodes,
+        shows.frasier ingest vendor ma ignore camera refs in scene,
+        startup ignore unimportable toolkits,
+        utils.bake_results added range_ arg,
+        utils.blast added cam/view args,
+        utils.del_namespace added force arg,
+        utils.open_scene added fbx handling,
+        utils.set_namespace bugfix clean child ns nodes,
+    psyhive:
+        icons.find_emoji catch unicode error on print clocks,
+        qt.HUiDialog2.fps added,
+        qt.dialog added BaseDialog for HUiDialog3/HPixmapUi2,
+        qt.HUiDialog3.find_widgets added,
+        qt.HUiDialog3 added QSlider handling,
+        qt.get_ui_loader moved to misc,
+        qt.HPixmap.add_rounded_rect allow col as QPixmap,
+        utils.Cacheable added cache_read/cache_write,
+        utils.build_cache_fmt namespace as psyhive for default,
+        utils.PyDef.get_docs_suggestion wip implement qt signal suggestions,
+        utils.Seq get_size/nice_size added,
+        utils.Seq.to_mov added view arg,
+
+
 #### v0.80.0 ####
 
     Released: Tue 26th May 2020 15:49

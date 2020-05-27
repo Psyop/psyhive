@@ -10,13 +10,38 @@ import time
 
 import six
 
-from psyhive.utils.filter_ import passes_filter
-from psyhive.utils.misc import lprint, dprint
+from .filter_ import passes_filter
+from .misc import lprint, dprint
 
 
 class Cacheable(object):
     """Base class for any cacheable object."""
     cache_fmt = None
+
+    def cache_read(self, tag):
+        """Read cached data from the given tag.
+
+        Args:
+            tag (str): data tag to read
+
+        Returns:
+            (any): cached data
+        """
+        _file = self.cache_fmt.format(tag)
+        try:
+            return obj_read(file_=_file)
+        except OSError:
+            return None
+
+    def cache_write(self, tag, data):
+        """Write data to the given cache.
+
+        Args:
+            tag (str): tag to store data to
+            data (any): data to store
+        """
+        _file = self.cache_fmt.format(tag)
+        obj_write(file_=_file, obj=data)
 
 
 class CacheMissing(OSError):
@@ -31,7 +56,7 @@ class WriteError(RuntimeError):
     """Raised on fail to write cached object."""
 
 
-def build_cache_fmt(path, namespace):
+def build_cache_fmt(path, namespace='psyhive'):
     """Build cache format string for the given namespace.
 
     This maps the path to a location in tmp dir.
@@ -43,7 +68,7 @@ def build_cache_fmt(path, namespace):
     Returns:
         (str): cache format path
     """
-    from psyhive.utils.path import Path, abs_path
+    from .path import Path, abs_path
     _path = Path(path)
 
     return abs_path(
@@ -278,7 +303,7 @@ def get_result_to_file_storer(
         @functools.wraps(method)
         def _result_writer(*args, **kwargs):
 
-            from psyhive.utils import abs_path
+            from .path import abs_path
 
             dprint('READING RESULT', method.__name__, verbose=verbose)
 
@@ -343,7 +368,7 @@ def obj_read(file_, verbose=0):
         file_ (str): path to read
         verbose (int): print process data
     """
-    from psyhive.utils.path import abs_path
+    from .path import abs_path
 
     assert isinstance(file_, six.string_types)
     _path = abs_path(file_)
@@ -370,7 +395,7 @@ def obj_write(obj, file_, create_dir=True, verbose=0):
         create_dir (bool): create the parent dir if it doesn't exist
         verbose (int): print process data
     """
-    from psyhive.utils.path import abs_path, test_path
+    from .path import abs_path, test_path
 
     _path = abs_path(file_)
     lprint('WRITING TO', _path, verbose=verbose)
