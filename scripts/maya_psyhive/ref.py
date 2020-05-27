@@ -1,12 +1,11 @@
 """Tools for managing references in maya."""
 
-import operator
 import os
 
 from maya import cmds
 
 from psyhive.utils import (
-    File, get_single, lprint, apply_filter, abs_path, get_path)
+    File, get_single, lprint, abs_path, get_path, passes_filter)
 from maya_psyhive.utils import (
     restore_ns, get_parent, set_namespace, del_namespace)
 
@@ -45,23 +44,25 @@ class FileRef(object):
             _meshes.append(_mesh)
         return _meshes
 
-    def find_nodes(self, type_=None, class_=None):
+    def find_nodes(self, type_=None, class_=None, namespace=None):
         """Find nodes within this reference.
 
         Args:
             type_ (str): filter nodes by type
             class_ (class): override node class
+            namespace (str): override search namespace
 
         Returns:
             (HFnDepenencyNode list): list of nodes
         """
         from maya_psyhive import open_maya as hom
+        _namespace = namespace or self.namespace
         _kwargs = {'referencedNodes': True}
         _class = class_ or hom.HFnDependencyNode
         if type_:
             _kwargs['type'] = type_
         return [_class(_node)
-                for _node in cmds.ls(self.namespace+":*", **_kwargs)]
+                for _node in cmds.ls(_namespace+":*", **_kwargs)]
 
     def find_top_node(self, class_=None, verbose=0):
         """Find top node of this reference.
@@ -156,6 +157,8 @@ class FileRef(object):
     @property
     def namespace(self):
         """Get this ref's namespace."""
+        if not self.is_loaded():
+            return str(cmds.file(self._file, query=True, namespace=True))
         try:
             return cmds.referenceQuery(
                 self.ref_node, namespace=True).lstrip(':')
@@ -277,14 +280,14 @@ def create_ref(file_, namespace, class_=None, force=False):
     # Test for existing
     cmds.namespace(set=":")
     if cmds.namespace(exists=namespace):
-        _ref = find_ref(namespace)
+        _ref = find_ref(namespace, catch=True)
         if _ref:
             if not force:
                 qt.ok_cancel('Replace existing {} reference?'.format(
                     namespace))
             _ref.remove(force=True)
         else:
-            raise NotImplementedError
+            del_namespace(namespace, force=force)
 
     # Create the reference
     _cur_refs = set(cmds.ls(type='reference'))
@@ -346,8 +349,8 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None):
     if prefix:
         _refs = [_ref for _ref in _refs if _ref.prefix == prefix]
     if filter_:
-        _refs = apply_filter(
-            _refs, filter_, key=operator.attrgetter('namespace'))
+        _refs = [_ref for _ref in _refs
+                 if _ref.namespace and passes_filter(_ref.namespace, filter_)]
     return _refs
 
 

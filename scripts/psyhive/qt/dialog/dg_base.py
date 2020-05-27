@@ -1,0 +1,27 @@
+"""Tools for managing base class for psyhive.qt dialogs."""
+
+import ctypes
+import time
+
+
+class BaseDialog(object):
+    """Base class for psyhive.qt dialogs."""
+
+    def set_icon(self, icon):
+        """Set icon for this interface.
+
+        Args:
+            icon (str|QPixmap): icon to apply
+        """
+        from psyhive import qt, host
+
+        _pix = qt.get_pixmap(icon)
+        _icon = qt.get_icon(_pix)
+        self.setWindowIcon(_icon)
+
+        if not host.NAME:
+            _uid = time.strftime('%y%m%d_%H%M%S_'+type(self).__name__)
+            _app = qt.get_application()
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(_uid)
+            _app.setWindowIcon(_icon)
+            print 'SET WINDOW ICON', icon, _app

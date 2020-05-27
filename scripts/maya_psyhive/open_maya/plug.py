@@ -99,19 +99,24 @@ class HPlug(om.MPlug):
         lprint('BREAK CONN', _src, _dest, verbose=verbose)
         cmds.disconnectAttr(_src, _dest)
 
-    def connect(self, other, force=False, axes=None):
+    def connect(self, other, force=False, axes=None, catch=False):
         """Connect this plug to another one.
 
         Args:
             other (str|HPlug): target for connection
             force (bool): break any existing connections
             axes (list): apply connect to list of suffixes (eg. xyz)
+            catch (bool): no error if connection fails
         """
         if axes:
             for _axis in axes:
                 self.connect(str(other)+_axis, force=force)
             return
-        cmds.connectAttr(self, other, force=force)
+        try:
+            cmds.connectAttr(self, other, force=force)
+        except RuntimeError as _exc:
+            if not catch:
+                raise _exc
 
     def connect_attr(self, other, **kwargs):
         """Connect this plug to another one.

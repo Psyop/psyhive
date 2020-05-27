@@ -346,6 +346,10 @@ def _ph_add_show_toolkits(parent):
         _toolkits.append((_file, _file.basename))
     for _dir in _shows_dir.find(depth=1, type_='d'):
         _toolkit = PyFile('{}/toolkit.py'.format(_dir))
+        try:
+            _mod = _toolkit.get_module()
+        except ImportError:
+            continue
         _name = _toolkit.parent().filename
         _toolkits.append((_toolkit, _name))
     _toolkits.sort(key=operator.itemgetter(1))

@@ -8,7 +8,8 @@ import traceback
 import six
 
 from psyhive.utils import get_result_storer
-from psyhive.qt.wrapper.mgr import QtWidgets, QtCore, QtGui
+
+from .wrapper.mgr import QtWidgets, QtCore, QtGui, QtUiTools
 
 
 @get_result_storer(ignore_args=True)
@@ -158,6 +159,27 @@ def get_qt_str(obj):
     return _result
 
 
+def get_ui_loader():
+    """Build ui loader object with psyhive overrides registered.
+
+    Returns:
+        (QUiLoader): ui loader
+    """
+    from psyhive import qt
+
+    _loader = QtUiTools.QUiLoader()
+    _loader.registerCustomWidget(qt.HCheckBox)
+    _loader.registerCustomWidget(qt.HComboBox)
+    _loader.registerCustomWidget(qt.HLabel)
+    _loader.registerCustomWidget(qt.HListWidget)
+    _loader.registerCustomWidget(qt.HPushButton)
+    _loader.registerCustomWidget(qt.HTabWidget)
+    _loader.registerCustomWidget(qt.HTextBrowser)
+    _loader.registerCustomWidget(qt.HTreeWidget)
+
+    return _loader
+
+
 def get_vect(ang, dist):
     """Get point vector based on the given angle and distance.
 
@@ -183,12 +205,12 @@ def safe_timer_event(timer_event):
     """
 
     @functools.wraps(timer_event)
-    def _safe_exec_timer(dialog, event, verbose=0):
+    def _safe_exec_timer(dialog, event, **kwargs):
 
         # Try and exec timer event
         _destroy = False
         try:
-            _result = timer_event(dialog, event, verbose=verbose)
+            _result = timer_event(dialog, event, **kwargs)
         except Exception as _exc:
             _tb = traceback.format_exc().strip()
             print 'TIMER EVENT FAILED\n# '+'\n# '.join(_tb.split('\n'))

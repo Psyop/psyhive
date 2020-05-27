@@ -133,7 +133,8 @@ class EmojiSet(Seq):
             return _filter_match
 
         pprint.pprint(sorted([
-            str(_emoji.name) for _emoji in _filter_matches]))
+            str(_emoji.name.replace(u'\u2019', "'"))
+            for _emoji in _filter_matches]))
         raise ValueError('Filter {} matched {:d} emojis'.format(
             match, len(_filter_matches)))
 

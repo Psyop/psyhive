@@ -12,6 +12,14 @@ from psyhive.utils.py_file.arg import PyArg
 from psyhive.utils.py_file.base import PyBase
 from psyhive.utils.py_file.docs import PyDefDocs, MissingDocs
 
+_QT_DOCS_FMT = '''
+{indent}"""Triggered by {desc}.
+
+{indent}Args:
+{indent}    event ({event}: triggered event.
+{indent}"""'''.lstrip()
+_QT_SUGGESTION_MAP = {}
+
 
 class PyDef(PyBase):
     """Represents a python definition."""
@@ -108,13 +116,17 @@ class PyDef(PyBase):
         Args:
             verbose (int): print process data
         """
+        _indent = ' '*(self._ast.col_offset+4)
+
+        if self.name in _QT_SUGGESTION_MAP:
+            return _QT_DOCS_FMT.format(indent=_QT_SUGGESTION_MAP[self.name])
+
         _docs = self.get_docs()
         lprint('DOCS', _docs, verbose=verbose)
         if self.name.endswith('.__init__'):
             _header = 'Constructor.'
         else:
             _header = _docs.header or to_nice(self.clean_name)
-        _indent = ' '*(self._ast.col_offset+4)
 
         _docs = '{}"""{}'.format(_indent, _header)
 

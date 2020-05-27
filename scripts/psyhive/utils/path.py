@@ -917,7 +917,8 @@ def search_files_for_text(
             if _print_line:
                 if not _printed_path:
                     lprint(abs_path(_file, win=win))
-                lprint('{:>6} {}'.format('[{:d}]'.format(_idx+1), _line))
+                lprint('{:>6} {}'.format(
+                    '[{:d}]'.format(_idx+1), _line.rstrip()))
                 _printed_path = True
                 _found_instance = True
                 if edit:

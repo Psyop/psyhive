@@ -50,6 +50,14 @@ class HFnAnimCurve(BaseNode, oma.MFnAnimCurve):
         _frames = self.get_key_frames()
         return min(_frames), max(_frames)
 
+    def get_ktvs(self):
+        """Get key time values list.
+
+        Returns:
+            (tuple list): list of key values/times
+        """
+        return cmds.getAttr(self.plugs('keyTimeValue[:]'))
+
     def get_plug(self):
         """Get plug which this curve is driving.
 

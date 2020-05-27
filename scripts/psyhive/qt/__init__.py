@@ -15,13 +15,13 @@ from .wrapper import (
 from .maya_palette import set_maya_palette
 from .misc import (
     get_application, get_col, get_p, get_size, get_pixmap, get_icon, get_vect,
-    safe_timer_event)
+    safe_timer_event, get_ui_loader)
 from .constants import COLS, NICE_COLS, BLANK, PINKS, GREENS, BLUES
 
 # Dialogs
 from .dialog.ui_dialog import (
     HUiDialog, close_all_interfaces, get_list_redrawer, list_redrawer,
-    reset_interface_settings, get_ui_loader)
+    reset_interface_settings)
 from .dialog.ui_dialog_2 import HUiDialog2, get_widget_sort
 from .dialog.ui_dialog_3 import HUiDialog3
 from .dialog.pixmap_ui import HPixmapUi

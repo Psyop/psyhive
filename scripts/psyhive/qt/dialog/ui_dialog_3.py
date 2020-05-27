@@ -14,6 +14,7 @@ from psyhive.utils import abs_path, lprint, File, touch, dprint, dev_mode
 
 from ..wrapper import QtCore, QtWidgets, Qt
 from .ui_dialog import SETTINGS_DIR
+from .dg_base import BaseDialog
 
 PYGUI_COL = 'Yellow'
 
@@ -31,7 +32,7 @@ def _get_widget_label(widget):
     return '<{}:{}>'.format(type(widget).__name__, _name)
 
 
-class HUiDialog3(QtWidgets.QDialog):
+class HUiDialog3(QtWidgets.QDialog, BaseDialog):
     """Dialog based on a ui file."""
 
     def __init__(self, ui_file, catch_errors_=True, save_settings=True,
@@ -95,8 +96,6 @@ class HUiDialog3(QtWidgets.QDialog):
             catch_errors_ (bool): apply error catcher to callbacks
             verbose (int): print process data
         """
-        from psyhive.tools import err_catcher
-        _err_catcher = err_catcher.get_error_catcher(remove_args=True)
 
         # Get list of widgets
         _widgets = self.findChildren(QtWidgets.QWidget)
@@ -114,23 +113,9 @@ class HUiDialog3(QtWidgets.QDialog):
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
             if _callback:
-                if catch_errors_:
-                    _callback = _err_catcher(_callback)
-                _signal = None
-                if isinstance(_widget, QtWidgets.QListWidget):
-                    _signal = _widget.itemSelectionChanged
-                elif isinstance(_widget, QtWidgets.QComboBox):
-                    _signal = _widget.currentIndexChanged
-                elif isinstance(_widget, QtWidgets.QLineEdit):
-                    _signal = _widget.textChanged
-                elif isinstance(_widget, QtWidgets.QPushButton):
-                    _signal = _widget.clicked
-                elif isinstance(_widget, QtWidgets.QTabWidget):
-                    _signal = _widget.currentChanged
-                if _signal:
-                    _signal.connect(_callback)
-                    lprint(' - CONNECTING CALLBACK', _callback,
-                           verbose=verbose)
+                _connect_callback(
+                    widget=_widget, callback=_callback, verbose=verbose,
+                    catch_errors_=catch_errors_)
 
             # Connect context
             _context = getattr(self, '_context__'+_name, None)
@@ -179,6 +164,18 @@ class HUiDialog3(QtWidgets.QDialog):
                     _tooltips[_tooltip].objectName(),
                     _widget.objectName(), _tooltip))
             _tooltips[_tooltip] = _widget
+
+    def find_widgets(self):
+        """Find this interface's managed widgets.
+
+        Returns:
+            (QWidget list): list of managed widget
+        """
+        _widgets = self.findChildren(QtWidgets.QWidget)
+        _widgets = [_widget for _widget in _widgets
+                    if _is_pascal(_widget.objectName())]
+        _widgets.sort(key=operator.methodcaller('objectName'))
+        return _widgets
 
     @property
     def settings(self):
@@ -260,6 +257,9 @@ class HUiDialog3(QtWidgets.QDialog):
             lprint('SET SPLITTER SIZE', _value, verbose=verbose)
             widget.setSizes(_value)
 
+        elif isinstance(widget, QtWidgets.QSlider):
+            widget.setValue(int(_value))
+
         elif isinstance(widget, QtWidgets.QLabel):
             pass
 
@@ -297,6 +297,8 @@ class HUiDialog3(QtWidgets.QDialog):
                 _val = _widget.currentIndex()
             elif isinstance(_widget, QtWidgets.QSplitter):
                 _val = _widget.sizes()
+            elif isinstance(_widget, QtWidgets.QSlider):
+                _val = _widget.value()
             else:
                 continue
 
@@ -315,10 +317,9 @@ class HUiDialog3(QtWidgets.QDialog):
             icon (str|QPixmap): icon to apply
         """
         from psyhive import qt
-        _pix = qt.get_pixmap(icon)
-        _icon = qt.get_icon(_pix)
-        self.setWindowIcon(_pix)
-        self.ui.setWindowIcon(_pix)
+        super(HUiDialog3, self).set_icon(icon)
+        _icon = qt.get_icon(icon)
+        self.ui.setWindowIcon(_icon)
 
     def get_c(self):
         """Get interface centre.
@@ -327,7 +328,7 @@ class HUiDialog3(QtWidgets.QDialog):
             (QPoint): centre
         """
         from psyhive import qt
-        return self.pos()+qt.get_p(self.size()/2)
+        return self.pos() + qt.get_p(self.size()/2)
 
     def delete(self):
         """Delete this interface."""
@@ -361,6 +362,43 @@ def _build_context_fn(callback, widget):
         _menu.exec_(widget.mapToGlobal(pos))
 
     return _context_fn
+
+
+def _connect_callback(widget, callback, catch_errors_, verbose):
+    """Connect element callback.
+
+    Args:
+        widget (QWidget): widget to connect
+        callback (fn): callback to connect to
+        catch_errors_ (bool): apply error catcher to callbacks
+        verbose (int): print process data
+    """
+    from psyhive.tools import err_catcher
+
+    # Preare callback
+    _callback = callback
+    if catch_errors_:
+        _err_catcher = err_catcher.get_error_catcher(remove_args=True)
+        _callback = _err_catcher(_callback)
+
+    # Get single
+    _signal = None
+    if isinstance(widget, QtWidgets.QListWidget):
+        _signal = widget.itemSelectionChanged
+    elif isinstance(widget, QtWidgets.QComboBox):
+        _signal = widget.currentIndexChanged
+    elif isinstance(widget, QtWidgets.QLineEdit):
+        _signal = widget.textChanged
+    elif isinstance(widget, QtWidgets.QPushButton):
+        _signal = widget.clicked
+    elif isinstance(widget, QtWidgets.QTabWidget):
+        _signal = widget.currentChanged
+    elif isinstance(widget, QtWidgets.QSlider):
+        _signal = widget.valueChanged
+
+    if _signal:
+        _signal.connect(_callback)
+        lprint(' - CONNECTING CALLBACK', _callback, verbose=verbose)
 
 
 def _is_pascal(string):

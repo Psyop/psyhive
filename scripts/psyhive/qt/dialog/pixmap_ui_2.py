@@ -9,9 +9,10 @@ from psyhive.utils import lprint, val_map, wrap_fn, dprint, abs_path, touch
 from ..wrapper import QtWidgets, HPixmap, ORIGIN, QtCore
 from ..misc import get_size, get_pixmap, get_p, safe_timer_event
 from .ui_dialog import SETTINGS_DIR
+from .dg_base import BaseDialog
 
 
-class HPixmapUi2(QtWidgets.QDialog):
+class HPixmapUi2(QtWidgets.QDialog, BaseDialog):
     """Base class for an interface with just an updating pixmap."""
 
     def __init__(self, size=(640, 640), base_col='red', fps=None, title=None,
@@ -31,7 +32,6 @@ class HPixmapUi2(QtWidgets.QDialog):
 
         self.base_col = base_col
         self.frame = 0
-        self.pause = False
         self.anims = []
 
         # Remove any existing intefaces
@@ -62,6 +62,7 @@ class HPixmapUi2(QtWidgets.QDialog):
         # Timer attrs
         self.pause = False
         self.timer = None
+        self.fps = fps
         if fps:
             self.timer = self.startTimer(1000.0/fps)
         assert self.timerEvent.SAFE_TIMER

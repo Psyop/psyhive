@@ -162,18 +162,21 @@ def add_to_set(obj, set_, verbose=0):
     cmds.sets(obj, addElement=set_)
 
 
-def bake_results(chans, simulation=False):
+def bake_results(chans, simulation=False, range_=None):
     """Bake anim on the given list of channels.
 
     Args:
         chans (str list): list of channels to bake
         simulation (bool): bake as simulation (scrub timeline)
+        range_ (tuple): override bake range
     """
     from psyhive import host
-    cmds.bakeResults(chans, time=host.t_range(), simulation=simulation)
+    _range = range_ or host.t_range()
+    cmds.bakeResults(chans, time=_range, simulation=simulation)
 
 
-def blast(seq, range_=None, res=None, force=False, verbose=0):
+def blast(seq, range_=None, res=None, force=False, cam=None, view=False,
+          verbose=0):
     """Execute a playblast.
 
     Args:
@@ -181,9 +184,12 @@ def blast(seq, range_=None, res=None, force=False, verbose=0):
         range_ (tuple): start/end frame
         res (tuple): override image resolution
         force (bool): overwrite existing images without confirmation
+        cam (str): override camera
+        view (bool): view blast on complete
         verbose (int): print process data
     """
     from psyhive import host
+    from maya_psyhive import ui
 
     # Get res
     if res:
@@ -198,6 +204,10 @@ def blast(seq, range_=None, res=None, force=False, verbose=0):
     # Get range
     _rng = range_ or host.t_range()
     _start, _end = _rng
+
+    if cam:
+        _panel = ui.get_active_model_panel()
+        cmds.modelEditor(_panel, edit=True, camera=cam)
 
     seq.delete(wording='Replace', force=force)
     seq.test_dir()
@@ -218,6 +228,9 @@ def blast(seq, range_=None, res=None, force=False, verbose=0):
     assert seq.get_frames(force=True)
 
     _fmt_mgr.popRenderGlobals()
+
+    if view:
+        seq.view()
 
 
 def break_conns(attr):
@@ -299,12 +312,15 @@ def cycle_check():
 
 
 @restore_ns
-def del_namespace(namespace):
+def del_namespace(namespace, force=True):
     """Delete the given namespace.
 
     Args:
         namespace (str): namespace to delete
+        force (bool): delete nodes without confirmation
     """
+    if not force:
+        raise NotImplementedError
     set_namespace(namespace, clean=True)
     set_namespace(":")
     cmds.namespace(removeNamespace=namespace)
@@ -655,6 +671,8 @@ def open_scene(file_, force=False, prompt=False, lazy=False):
         return
     if not force:
         host.handle_unsaved_changes()
+    if File(_file).extn == 'fbx':
+        load_plugin('fbxmaya')
     cmds.file(_file, open=True, force=True, prompt=prompt, ignoreVersion=True)
 
 
@@ -787,24 +805,35 @@ def set_col(node, col):
     cmds.setAttr(node+'.overrideColor', COLS.index(col))
 
 
-def set_namespace(namespace, clean=False):
+def set_namespace(namespace, clean=False, verbose=0):
     """Set current namespace, creating it if required.
 
     Args:
         namespace (str): namespace to apply
         clean (bool): delete all nodes in this namespace
+        verbose (int): print process data
     """
-    _namespace = namespace
-    assert _namespace.startswith(':')
+    assert namespace.startswith(':')
 
-    if clean:
-        _nodes = cmds.ls(_namespace+":*")
-        if _nodes:
-            cmds.delete(_nodes)
+    if clean and cmds.namespace(exists=namespace):
 
-    if not cmds.namespace(exists=_namespace):
-        cmds.namespace(addNamespace=_namespace)
-    cmds.namespace(setNamespace=_namespace)
+        # Remove nodes
+        _to_delete = [_node for _node in cmds.ls()
+                      if _node.split('->')[-1].startswith(
+                          namespace.lstrip(":")+":")]
+        if _to_delete:
+            lprint('DELETING', _to_delete, verbose=verbose)
+            cmds.delete(_to_delete)
+
+        # Remove namespaces
+        _sub_nss = cmds.namespaceInfo(namespace, listNamespace=True) or []
+        for _ns in reversed(_sub_nss):
+            # if not cmds.namespace(exists=
+            cmds.namespace(removeNamespace=':'+_ns)
+
+    if not cmds.namespace(exists=namespace):
+        cmds.namespace(addNamespace=namespace)
+    cmds.namespace(setNamespace=namespace)
 
 
 def set_res(res):
