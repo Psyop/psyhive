@@ -47,8 +47,9 @@ ignore:
         hv_test/diary/
     import-error:
         hv_test/diary/
-        hv-test/python/hv_test/startup/hsu_ninhenzo_shelf.py
+        hv_test/startup/hsu_ninhenzo_shelf.py
         hv_test/toolkits/home_tools.py
+        hv_test/u_pipe/home.py
         maya_psyhive/shows/frasier/fr_ingest.py
         maya_psyhive/shows/frasier/toolkit.py
         maya_psyhive/shows/frasier/fr_tools.py

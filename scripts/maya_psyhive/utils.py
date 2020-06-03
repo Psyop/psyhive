@@ -132,6 +132,23 @@ def add_node(input1, input2, output=None, name='add', force=False):
 
 
 @restore_ns
+def add_to_dlayer(obj, layer, verbose=0):
+    """Add the specified object to a display layer, creating it if needed.
+
+    Args:
+        obj (str): object to add
+        layer (str): layer to add to
+        verbose (int): print process data
+    """
+    if not cmds.objExists(layer):
+        set_namespace(":")
+        dprint("Creating displaylayer", layer, verbose=verbose)
+        cmds.createDisplayLayer(name=layer, number=True, empty=True)
+
+    cmds.editDisplayLayerMembers(layer, obj, noRecurse=1)
+
+
+@restore_ns
 def add_to_grp(obj, grp):
     """Add the given object to the given group, creating it if required.
 
@@ -243,7 +260,8 @@ def break_conns(attr):
     cmds.delete(_conns)
 
 
-def create_attr(attr, value, keyable=True, update=True, verbose=0):
+def create_attr(attr, value, keyable=True, update=True, locked=False,
+                verbose=0):
     """Add an attribute.
 
     Args:
@@ -252,6 +270,7 @@ def create_attr(attr, value, keyable=True, update=True, verbose=0):
         keyable (bool): keyable state of attribute
         update (bool): update attribute to value provided
             (default is true)
+        locked (bool): create attr as locked
         verbose (int): print process data
 
     Returns:
@@ -299,6 +318,9 @@ def create_attr(attr, value, keyable=True, update=True, verbose=0):
         _kwargs = {}
         set_val(attr, value)
 
+    if locked:
+        cmds.setAttr(attr, lock=True)
+
     return attr
 
 
@@ -319,8 +341,17 @@ def del_namespace(namespace, force=True):
         namespace (str): namespace to delete
         force (bool): delete nodes without confirmation
     """
+    from maya_psyhive import ref
+
+    if not cmds.namespace(exists=namespace):
+        return
+
+    _ref = ref.find_ref(namespace=namespace.lstrip(':'), catch=True)
+    if _ref:
+        _ref.remove(force=force)
+
     if not force:
-        raise NotImplementedError
+        raise NotImplementedError(namespace)
     set_namespace(namespace, clean=True)
     set_namespace(":")
     cmds.namespace(removeNamespace=namespace)
@@ -366,6 +397,23 @@ def divide_node(input1, input2, output=None, force=False, name='divide'):
         cmds.connectAttr(_output, output, force=force)
 
     return _output
+
+
+def find_cams(orthographic=False):
+    """List cameras in the scene.
+
+    This is useful for py_gui camera lists.
+
+    Args:
+        orthographic (bool): include orthographic cams
+
+    Returns:
+        (str list): list of camera transforms
+    """
+    return [
+        get_single(cmds.listRelatives(_cam, parent=True))
+        for _cam in cmds.ls(type='camera')
+        if orthographic or not cmds.getAttr(_cam+'.orthographic')]
 
 
 def freeze_viewports_on_exec(func, verbose=0):
@@ -676,6 +724,30 @@ def open_scene(file_, force=False, prompt=False, lazy=False):
     cmds.file(_file, open=True, force=True, prompt=prompt, ignoreVersion=True)
 
 
+def pause_viewports(pause=True):
+    """Pause viewports.
+
+    This is a wrapper for the cmds.ogs function which acts as a toggle, which
+    can be a bit unpredictable sometimes.
+
+    Args:
+        pause (bool): pause state to apply
+    """
+    _paused = cmds.ogs(query=True, pause=True)
+    if pause:
+        if _paused:
+            print 'VIEWPORTS ALREADY PAUSED'
+        else:
+            print 'PAUSING VIEWPORTS'
+            cmds.ogs(pause=True)
+    else:
+        if not _paused:
+            print 'VIEWPORTS ALREADY UNPAUSED'
+        else:
+            print 'UNPAUSING VIEWPORTS'
+            cmds.ogs(pause=True)
+
+
 def pause_viewports_on_exec(func):
     """Pause viewports on execute function and the unpause.
 
@@ -688,21 +760,22 @@ def pause_viewports_on_exec(func):
 
     @functools.wraps(func)
     def _pause_viewport_func(*args, **kwargs):
-        cmds.ogs(pause=True)
+        pause_viewports(True)
         _result = func(*args, **kwargs)
-        cmds.ogs(pause=True)
+        pause_viewports(False)
         return _result
 
     return _pause_viewport_func
 
 
-def render(file_, camera=None, layer='defaultRenderLayer'):
+def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True):
     """Render the current scene.
 
     Args:
         file_ (str): path to save rendered image
         camera (str): camera to render through
         layer (str): layer to render
+        col_mgt (bool): apply colour management
     """
     cmds.loadPlugin('mtoa', quiet=True)
     from mtoa.cmds import arnoldRender
@@ -711,7 +784,7 @@ def render(file_, camera=None, layer='defaultRenderLayer'):
     if not _cam:
         raise NotImplementedError
 
-    _file = File(file_)
+    _file = File(get_path(file_))
     _file.test_dir()
 
     _editor = 'renderView'
@@ -724,9 +797,10 @@ def render(file_, camera=None, layer='defaultRenderLayer'):
 
     arnoldRender.arnoldRender(
         640, 640, True, True, _cam, ' -layer '+layer)
-    cmds.renderWindowEditor(_editor, edit=True, writeImage=file_,
-                            colorManage=True)
+    cmds.renderWindowEditor(_editor, edit=True, writeImage=_file.path,
+                            colorManage=col_mgt)
 
+    assert _file.exists()
     _fmt_mgr.popRenderGlobals()
 
 
@@ -828,7 +902,9 @@ def set_namespace(namespace, clean=False, verbose=0):
         # Remove namespaces
         _sub_nss = cmds.namespaceInfo(namespace, listNamespace=True) or []
         for _ns in reversed(_sub_nss):
-            # if not cmds.namespace(exists=
+            if cmds.objExists(_ns):
+                cmds.delete(_ns)
+                continue
             cmds.namespace(removeNamespace=':'+_ns)
 
     if not cmds.namespace(exists=namespace):

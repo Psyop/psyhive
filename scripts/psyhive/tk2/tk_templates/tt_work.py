@@ -449,6 +449,11 @@ class TTWork(TTBase, File):
                     path=_prev.path)
                 _tk_workfile = _tk_workfile.get_next_version()
             else:
+
+                _step_root = self.get_step_root()
+                if not _step_root.exists():
+                    raise RuntimeError('Missing step root '+_step_root.path)
+
                 assert self.version == 1
                 _tk_workspace = _mod.get_workspace_from_path(
                     app=_fileops, path=self.path)

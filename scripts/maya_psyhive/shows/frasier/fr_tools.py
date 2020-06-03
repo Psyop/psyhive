@@ -8,6 +8,8 @@ from maya import cmds
 from psyhive import host, refresh
 from psyhive.utils import store_result, File, nice_size
 
+from maya_psyhive.utils import pause_viewports_on_exec
+
 KEALEYE_TOOLS_ROOT = 'P:/projects/frasier_38732V/production/kealeye_tools'
 
 
@@ -21,6 +23,7 @@ def install_mocap_tools():
     print 'INSTALLED MocapTools MODULE', MocapTools
 
 
+@pause_viewports_on_exec
 def export_hsl_fbx_from_cur_scene(fbx, force=False):
     """Export HSL format fbx from the current scene.
 

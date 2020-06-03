@@ -1,3 +1,34 @@
+#### v0.82.0 ####
+
+    Released: Wed 3rd Jun 2020 10:00
+
+    Brawl Stars: bugfix error on render if face shader attached to deformed mesh (kcassidy),
+    Frasier: bugfix error on ingest sequence with start frame not 1 (hmeinertrita),
+    
+    maya_psyhive:
+        open_maya.HFnAnimCurve.input added,
+        open_maya.BaseNode.add_to_dlayer added,
+        open_maya.BaseTransform.reset_transforms added,
+        shows.brawlstarsbaked._get_rig ignore non-namespace nodes with shader,
+        shows.frasier tmp comp images start at frame 1,
+        shows.frasier pause viewports on generate fbx,
+        utils add_to_dlayer/find_cams/pause_viewports added,
+        utils.create_attr added locked arg,
+        utils.del_namespace added handling for ref using ns,
+        utils.render added col_mgt arg,
+    psyhive:
+        pipe.LOCATION added,
+        qt.HUiDialog3 added option to make ui icon paths absolute,
+        qt.HUiDialog3 added QComboBox load/save handling,
+        qt.HPixmap._get_rect added BL anchor handling,
+        refresh fix qt.dialog.bg_base sort,
+        tk2.TTWork.save better error on missing step root,
+        utils.read_yaml better error on parse yaml fail,
+        utils.write_yaml allow File as arg,
+        utils.PyDef.get_docs_suggestion added default qt signal suggestions,
+        utils.Seq.to_mov added ffmpeg using psylaunch handling,
+
+
 #### v0.81.0 ####
 
     Released: Wed 27th May 2020 14:17

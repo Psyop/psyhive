@@ -573,6 +573,8 @@ def _get_rect(anchor, pos, size):
         _root = _pos
     elif anchor == 'TR':
         _root = _pos - qt.get_p(_size.width(), 0)
+    elif anchor == 'BL':
+        _root = _pos - qt.get_p(0, _size.height())
     else:
         raise ValueError(anchor)
 
