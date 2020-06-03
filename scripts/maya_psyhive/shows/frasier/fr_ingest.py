@@ -211,10 +211,13 @@ def _apply_kealeye_rig_mapping():
     then bakes the anim. The MotionBurner rig is left in the scene
     for comparison but it is placed in a group and hidden.
     """
+    print 'APPLY KEALEYE RIG MAP'
+    assert cmds.ogs(query=True, pause=True)
     fr_tools.install_mocap_tools()
     from MocapTools.Scripts import PsyopMocapTools
 
     # Apply kealeye bake
+    print 'BAKING CONTROL RIG SCENE'
     PsyopMocapTools.mocapSetupTools().bakeControlRigScene(incFace=True)
 
     # Clean up scene
@@ -430,6 +433,8 @@ def _blast_work(work, seq=None, build_cam_func=None, view=False, force=False,
     """
     _seq = seq or work.blast
 
+    if cmds.ogs(query=True, pause=True):
+        cmds.ogs(pause=True)
     assert not cmds.ogs(query=True, pause=True)
 
     print 'BLAST', _seq
@@ -627,7 +632,7 @@ def _generate_blast_comp_mov(
             _out.add_overlay(
                 _face, pos=(_out.width()-margin, margin), anchor="TR")
 
-            _out.save(_comp_tmp_jpgs[_src_frame])
+            _out.save(_comp_tmp_jpgs[_idx+1])
         print ' - WROTE TMP IMAGES', _comp_tmp_jpgs.path
     print ' - COMP IMAGES {} {}'.format(
         _comp_tmp_jpgs.find_range(force=True), _comp_tmp_jpgs.path)

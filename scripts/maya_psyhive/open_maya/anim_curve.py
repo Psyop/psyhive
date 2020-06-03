@@ -76,6 +76,15 @@ class HFnAnimCurve(BaseNode, oma.MFnAnimCurve):
         return get_single(
             self.output.list_connections(source=False, plugs=True))
 
+    @property
+    def input(self):
+        """Get input plug for this curve.
+
+        Returns:
+            (HPlug): input
+        """
+        return self.plug('input')
+
     def is_static(self):
         """Test whether this is a static anim.
 

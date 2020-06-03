@@ -32,6 +32,7 @@ _RELOAD_ORDER = [
     'psyhive.qt.wrapper',
     'psyhive.qt.misc',
     'psyhive.qt.msg_box',
+    'psyhive.qt.dialog.dg_base',
     'psyhive.qt.dialog.ui_dialog_3',
     'psyhive.qt.multi_select_',
     'psyhive.qt',

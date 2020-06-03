@@ -7,6 +7,7 @@ create issues.
 
 import operator
 import sys
+import tempfile
 
 import six
 
@@ -17,6 +18,46 @@ from .ui_dialog import SETTINGS_DIR
 from .dg_base import BaseDialog
 
 PYGUI_COL = 'Yellow'
+
+
+def _fix_icon_paths(ui_file, verbose=0):
+    """Fix icon paths in the given ui file.
+
+    This makes the paths absolute - the relative paths seem to confuse the ui
+    loader in some cases. If updates are required, the new ui file is
+    written to a tmp file and the path to that file is returned. If no update
+    is required, the original ui file is returned.
+
+    Args:
+        ui_file (str): ui file to update
+        verbose (int): print process data
+
+    Returns:
+        (str): path to ui file to use
+    """
+    lprint("FIXING", ui_file, verbose=verbose)
+    _file = File(ui_file)
+    _body = _file.read()
+    _changed = set()
+    for _chunk in _body.split('normaloff>'):
+        if '<' not in _chunk:
+            continue
+        _ui_path = _chunk.split('<')[0].strip()
+        if not _ui_path or _ui_path in _changed:
+            continue
+        lprint(' - UI PATH', _ui_path, verbose=verbose)
+        _path = abs_path(_ui_path, root=_file.dir)
+        lprint(' - PATH', _path, verbose=verbose)
+        if not File(_path).exists():
+            raise NotImplementedError
+        _changed.add(_ui_path)
+        _body = _body.replace(_ui_path, _path)
+    if not _changed:
+        return ui_file
+    _tmp_ui = '{}/tmp.ui'.format(tempfile.gettempdir())
+    File(_tmp_ui).write_text(_body, force=True)
+    lprint('WROTE TMP UI', _tmp_ui, verbose=verbose)
+    return _tmp_ui
 
 
 def _get_widget_label(widget):
@@ -79,10 +120,20 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
         sys.QT_DIALOG_STACK[self.ui_file] = self
 
-    def _load_ui(self):
-        """Load ui file."""
+    def _load_ui(self, fix_icon_paths=True):
+        """Load ui file.
+
+        Args:
+            fix_icon_paths (bool): update icon paths in ui file
+        """
         from psyhive import qt
-        self.ui = qt.get_ui_loader().load(self.ui_file)
+
+        _ui_file = self.ui_file
+        if fix_icon_paths:
+            _ui_file = _fix_icon_paths(_ui_file)
+
+        self.ui = qt.get_ui_loader().load(_ui_file)
+
         self.resize(self.ui.size())
         if not self.ui.layout():
             raise RuntimeError('HUiDialog3 requires root level layout in ui')
@@ -232,16 +283,10 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
         if isinstance(widget, QtWidgets.QLineEdit):
             widget.setText(_value)
 
-        elif isinstance(widget, (
-                QtWidgets.QRadioButton,
-                QtWidgets.QCheckBox,
-                QtWidgets.QPushButton)):
-            if isinstance(_value, six.string_types):
-                _value = {'true': True, 'false': False}[_value]
-            if isinstance(_value, bool):
-                widget.setChecked(_value)
-            else:
-                print ' - FAILED TO APPLY:', widget, _value, type(_value)
+        elif isinstance(widget, (QtWidgets.QRadioButton,
+                                 QtWidgets.QCheckBox,
+                                 QtWidgets.QPushButton)):
+            _load_setting_bool(value=_value, widget=widget)
 
         elif isinstance(widget, QtWidgets.QListWidget):
             _load_setting_list_widget(value=_value, widget=widget)
@@ -259,6 +304,9 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
         elif isinstance(widget, QtWidgets.QSlider):
             widget.setValue(int(_value))
+
+        elif isinstance(widget, QtWidgets.QComboBox):
+            widget.setCurrentText(_value)
 
         elif isinstance(widget, QtWidgets.QLabel):
             pass
@@ -299,6 +347,8 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
                 _val = _widget.sizes()
             elif isinstance(_widget, QtWidgets.QSlider):
                 _val = _widget.value()
+            elif isinstance(_widget, QtWidgets.QComboBox):
+                _val = _widget.currentText()
             else:
                 continue
 
@@ -435,3 +485,20 @@ def _load_setting_list_widget(widget, value):
         return
     for _item in _items:
         _item.setSelected(_item.text() in value)
+
+
+def _load_setting_bool(widget, value):
+    """Load a setting to a boolean widget.
+
+    Args:
+        widget (QWidget): widget to update
+        value (bool): value to apply
+    """
+    _value = value
+    if isinstance(_value, six.string_types):
+        _value = {'true': True, 'false': False}[_value]
+
+    if isinstance(_value, bool):
+        widget.setChecked(_value)
+    else:
+        print ' - FAILED TO APPLY:', widget, _value, type(_value)

@@ -56,12 +56,13 @@ def _get_rig(tbm, verbose=0):
     lprint(' - SHADING ENGINE', _se, verbose=verbose)
 
     _nodes = [_node for _node in hom.CMDS.sets(_se, query=True)
-              if not _node.namespace == tbm.namespace]
-
+              if _node.namespace and not _node.namespace == tbm.namespace]
+    lprint(' - NODES', _nodes, verbose=verbose)
     if not _nodes:
         raise RuntimeError("No rig found for {}".format(tbm))
 
     _namespace = _nodes[0].namespace
+    lprint(' - NAMESPACE', _namespace, verbose=verbose)
     _ref = ref.find_ref(namespace=_namespace)
     lprint(' - REF', _ref, verbose=verbose)
 

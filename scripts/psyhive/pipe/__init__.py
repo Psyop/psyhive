@@ -1,8 +1,14 @@
 """Tools for managing and interacting with the pipeline."""
 
-from psyhive.pipe.misc import read_ver_n
-from psyhive.pipe.project import (
+import os
+
+from .misc import read_ver_n
+from .project import (
     find_projects, find_project, Project, cur_project, get_project)
-from psyhive.pipe.shot import Shot
-from psyhive.pipe.work_file import WorkFile, WorkFileInc
-from psyhive.pipe.asset import AssetFile
+from .shot import Shot
+from .work_file import WorkFile, WorkFileInc
+from .asset import AssetFile
+
+LOCATION = None
+if 'PSYOP_ROOT' in os.environ:
+    LOCATION = 'psy'

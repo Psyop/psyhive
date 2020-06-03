@@ -16,9 +16,16 @@ _QT_DOCS_FMT = '''
 {indent}"""Triggered by {desc}.
 
 {indent}Args:
-{indent}    event ({event}: triggered event.
-{indent}"""'''.lstrip()
-_QT_SUGGESTION_MAP = {}
+{indent}    event ({event}): triggered event
+{indent}"""
+'''.lstrip()
+_QT_SUGGESTION_MAP = {
+    'mousePressEvent': {'desc': 'mouse press', 'event': 'QMouseEvent'},
+    'mouseReleaseEvent': {'desc': 'mouse release', 'event': 'QMouseEvent'},
+    'mouseMoveEvent': {'desc': 'mouse move', 'event': 'QMouseEvent'},
+    'timerEvent': {'desc': 'timer', 'event': 'QTimerEvent'},
+    'resizeEvent': {'desc': 'resize', 'event': 'QResizeEvent'},
+}
 
 
 class PyDef(PyBase):
@@ -117,9 +124,9 @@ class PyDef(PyBase):
             verbose (int): print process data
         """
         _indent = ' '*(self._ast.col_offset+4)
-
-        if self.name in _QT_SUGGESTION_MAP:
-            return _QT_DOCS_FMT.format(indent=_QT_SUGGESTION_MAP[self.name])
+        if self.clean_name in _QT_SUGGESTION_MAP:
+            return _QT_DOCS_FMT.format(
+                indent=_indent, **_QT_SUGGESTION_MAP[self.clean_name])
 
         _docs = self.get_docs()
         lprint('DOCS', _docs, verbose=verbose)

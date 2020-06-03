@@ -3,12 +3,12 @@
 import ast
 import operator
 
-from psyhive.utils.filter_ import apply_filter
-from psyhive.utils.cache import store_result_on_obj
-from psyhive.utils.misc import copy_text, lprint, get_single
-from psyhive.utils.path import FileError
+from ..filter_ import apply_filter
+from ..cache import store_result_on_obj
+from ..misc import copy_text, lprint, get_single
+from ..path import FileError
 
-from psyhive.utils.py_file.docs import MissingDocs
+from .docs import MissingDocs
 
 
 class PyBase(object):
@@ -25,7 +25,7 @@ class PyBase(object):
             name (str): override name for this object
             read_docs (bool): read docstring from ast
         """
-        from psyhive.utils.py_file.file_ import PyFile
+        from .file_ import PyFile
         assert isinstance(py_file, PyFile)
 
         self._ast = ast_
@@ -150,7 +150,7 @@ class PyBase(object):
         Raises:
             (ValueError): if exactly one matching child wasn't found
         """
-        from psyhive.utils.py_file.def_ import PyDef
+        from .def_ import PyDef
         return self.find_child(
             match=match, recursive=recursive, catch=catch, type_=PyDef,
             private=private)
@@ -166,7 +166,7 @@ class PyBase(object):
         Returns:
             (PyDef list): list of matching defs
         """
-        from psyhive.utils.py_file.def_ import PyDef
+        from .def_ import PyDef
         return self.find_children(
             filter_=filter_, recursive=recursive, type_=PyDef,
             private=private)
@@ -247,9 +247,9 @@ class PyBase(object):
         Returns:
             (PyBase|None): def/class object (if any)
         """
-        from psyhive.utils.py_file.class_ import PyClass
-        from psyhive.utils.py_file.def_ import PyDef
-        from psyhive.utils.py_file.file_ import PyFile
+        from .class_ import PyClass
+        from .def_ import PyDef
+        from .file_ import PyFile
 
         _name = getattr(ast_item, 'name', '-')
         if not isinstance(self, PyFile):

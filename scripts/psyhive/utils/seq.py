@@ -332,13 +332,14 @@ class Collection(object):
 class Movie(File):
     """Represents a movie file, eg. a mov/mp4."""
 
-    def view(self, viewer=None):
+    def view(self, viewer=None, verbose=0):
         """View this movie.
 
         Args:
             viewer (str): override movie viewer
+            verbose (int): print process data
         """
-        _view_seq(self.path, viewer=viewer)
+        _view_seq(self.path, viewer=viewer, verbose=verbose)
 
 
 def _view_seq(path, viewer=None, verbose=0):
@@ -413,19 +414,39 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
         mov (str): output mov
         fps (float): mov frame rate
     """
-    _args = [
-        'ffmpeg',
-        '-r', str(fps),
-        '-f', 'image2',
-        '-i', '"{}"'.format(seq.path),
-        '-vcodec', 'libx264',
-        '-crf', '25',
-        '-pix_fmt', 'yuv420p',
-        '"{}"'.format(mov)]
-    _cmd = ' '.join(_args)
-    print _cmd
+    from psyhive import pipe
+
     assert not os.path.exists(mov)
-    os.system(_cmd)
+
+    # Use ffmpeg through psylaunch
+    if pipe.LOCATION == 'psy':
+        import psylaunch
+        _args = [
+            '-r', str(fps),
+            '-f', 'image2',
+            '-i', seq.path,
+            '-vcodec', 'libx264',
+            '-crf', '25',
+            '-pix_fmt', 'yuv420p',
+            mov]
+        print 'launch ffmpeg --', ' '.join(_args)
+        psylaunch.launch_app('ffmpeg', args=_args, wait=True)
+
+    # Use ffmpeg directly
+    else:
+        _args = [
+            'ffmpeg',
+            '-r', str(fps),
+            '-f', 'image2',
+            '-i', '"{}"'.format(seq.path),
+            '-vcodec', 'libx264',
+            '-crf', '25',
+            '-pix_fmt', 'yuv420p',
+            '"{}"'.format(mov)]
+        _cmd = ' '.join(_args)
+        print _cmd
+        os.system(_cmd)
+
     assert os.path.exists(mov)
 
 

@@ -819,10 +819,16 @@ def read_yaml(file_):
         (any): yaml data
     """
     import yaml
-    if not os.path.exists(file_):
-        raise OSError('Missing file '+file_)
-    _body = read_file(file_)
-    return yaml.load(_body)
+    _file = File(get_path(file_))
+    if not _file.exists():
+        raise OSError('Missing file '+_file.path)
+    _body = _file.read()
+    try:
+        return yaml.load(_body)
+    except yaml.scanner.ScannerError as _exc:
+        print 'SCANNER ERROR:', _exc
+        print ' - MESSAGE', _exc.message
+        raise RuntimeError('Yaml scanner error '+_file.path)
 
 
 def replace_file(source, replace, force=False):
@@ -988,6 +994,7 @@ def write_yaml(file_, data):
         data (dict): data to write to yaml
     """
     import yaml
-    test_path(os.path.dirname(file_))
-    with open(file_, 'w') as _file:
-        yaml.dump(data, _file, default_flow_style=False)
+    _file = File(get_path(file_))
+    _file.test_dir()
+    with open(_file.path, 'w') as _hook:
+        yaml.dump(data, _hook, default_flow_style=False)

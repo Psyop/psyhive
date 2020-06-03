@@ -5,9 +5,9 @@ from maya import cmds
 from psyhive.utils import get_single, lprint
 from maya_psyhive.utils import add_to_grp, set_col
 
-from maya_psyhive.open_maya.base_node import BaseNode
-from maya_psyhive.open_maya.plug import HPlug
-from maya_psyhive.open_maya.point import ORIGIN
+from .base_node import BaseNode
+from .plug import HPlug
+from .point import ORIGIN
 
 
 class BaseTransform(BaseNode):
@@ -161,6 +161,12 @@ class BaseTransform(BaseNode):
         from maya_psyhive import open_maya as hom
         _constr = cmds.pointConstraint(self, *args, **kwargs)[0]
         return hom.HFnTransform(_constr)
+
+    def reset_transforms(self):
+        """Reset transforms on this node."""
+        self.translate.set_val((0, 0, 0))
+        self.rotate.set_val((0, 0, 0))
+        self.scale.set_val((1, 1, 1))
 
     def set_col(self, col):
         """Set colour of this node in maya viewport.

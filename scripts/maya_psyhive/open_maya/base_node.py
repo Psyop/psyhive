@@ -11,8 +11,10 @@ import six
 from psyhive.utils import (
     abs_path, diff, store_result, test_path, lprint, apply_filter,
     passes_filter)
-from maya_psyhive.utils import create_attr, get_unique, add_to_set, get_parent
-from maya_psyhive.open_maya.plug import HPlug
+from maya_psyhive.utils import (
+    create_attr, get_unique, add_to_set, get_parent, add_to_dlayer)
+
+from .plug import HPlug
 
 
 class BaseNode(object):
@@ -32,6 +34,15 @@ class BaseNode(object):
                 node, type(node).__name__))
         self.node = node
         self.clean_name = self.node.split(':')[-1]
+
+    def add_to_dlayer(self, layer, verbose=0):
+        """Add this object to a display layer, creating it if needed.
+
+        Args:
+            layer (str): display layer to add to
+            verbose (int): print process data
+        """
+        add_to_dlayer(self, layer, verbose=verbose)
 
     def add_to_set(self, set_, verbose=0):
         """Add this node to a set, creating it if required.
