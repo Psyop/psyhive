@@ -1,3 +1,13 @@
+#### v0.82.1 ####
+
+    Released: Wed 3rd Jun 2020 10:49
+
+    Tank support: bugfix error on publish if no shade found (ccesareo),
+    
+    maya_psyhive:
+        tank_support drive shade geo from rig bugfix error on no shade found,
+
+
 #### v0.82.0 ####
 
     Released: Wed 3rd Jun 2020 10:00
