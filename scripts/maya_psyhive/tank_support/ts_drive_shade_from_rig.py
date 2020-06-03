@@ -108,9 +108,9 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     print ' - RIG OUT', _rig_out.path
     _shade_out = _rig_out.map_to(
         Step='shade', output_type='shadegeo', Task='shade').find_latest()
-    print ' - SHADE OUT', _shade_out.path
-    if not _shade_out.exists():
+    if not _shade_out or not _shade_out.exists():
         raise RuntimeError("Missing shade file "+_shade_out.path)
+    print ' - SHADE OUT', _shade_out.path
     _shade_file = _shade_out.find_file(extn='mb', format_='maya')
     print ' - SHADE FILE', _shade_file
     _shade = ref.create_ref(
