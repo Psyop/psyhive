@@ -260,7 +260,8 @@ class MayaPyGui(pyg_base.BasePyGui):
             'Refresh and execute (gui safe)', parent=_menu,
             image=icons.REFRESH,
             command=chain_fns(
-                wrap_fn(refresh.reload_libs, filter_='-py_gui -py_file'),
+                wrap_fn(refresh.reload_libs, close_interfaces=False,
+                        filter_='-py_gui -py_file -path -seq'),
                 exec_fn))
         cmds.menuItem(
             'Refresh and execute (full)', parent=_menu,

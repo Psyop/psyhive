@@ -398,9 +398,27 @@ class _TTOutputFileBase(TTBase):
             complete (bool): complete status
         """
         from psyhive import tk2
-        _mod = tk2.find_tank_mod('shotgun', app='psy-framework-publish')
+
+        # Get tank apps/modules
+        _fileops = tk2.find_tank_app('psy-multi-fileops')
+        _workspace_fo = tk2.find_tank_mod(
+            'workspace', app='psy-multi-fileops')
+        _workspace_sg = tk2.find_tank_mod(
+            "shotgun", app="psy-framework-workspace")
+        _framework_sg = tk2.find_tank_mod(
+            'shotgun', app='psy-framework-publish')
+
+        # Create workspace
+        _work = self.map_to(tk2.TTWork, dcc='maya', extension='ma')
+        _fo_workspace = _workspace_fo.get_workspace_from_path(
+            app=_fileops, path=_work.path)  # To access context
+        _sg_workspace = _workspace_sg.workspace_from_context(
+            _fo_workspace.context)
+
+        # Register
         _path = self.path.replace(".%04d.", ".####.")
-        _mod.register_publish(_path, complete=complete, **kwargs)
+        _framework_sg.register_publish(
+            _path, complete=complete, workspace=_sg_workspace, **kwargs)
 
 
 class TTOutputFile(_TTOutputFileBase, File):

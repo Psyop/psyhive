@@ -58,7 +58,12 @@ class _EmojiIndexParser(HTMLParser):
                 _url = _val
         if not _title:
             return
-        _title = _title.replace(u'\u201c', '"').replace(u'\u201d', '"')
+        for _find, _replace in [
+                (u'\u201c', '"'),
+                (u'\u201d', '"'),
+                (u'\xc5', ''),
+        ]:
+            _title = _title.replace(_find, _replace)
         self.names[_title] = self._count
         self.urls[_title] = _url
         self._count += 1
