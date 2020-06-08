@@ -1,9 +1,21 @@
+#### v0.82.3 ####
+
+    Released: Mon 8th Jun 2020 10:48
+
+    Brawl stars: bugfix error on publish tbm renders to shotgun (kcassidy),
+    
+    psyhive:
+        icons added unicode cleanup for emoji names,
+        py_gui improved gui-safe refresh,
+        tk2.TTOutputFileBase.register_in_shotgun create/send workspace,
+
+
 #### v0.82.2 ####
 
     Released: Wed 3rd Jun 2020 11:27
 
     Tank support: bugfix error on publish if no shade found (ccesareo),
-    
+
     maya_psyhive:
         tank_support drive shade geo from rig bugfix error on no shade found,
 
@@ -13,7 +25,7 @@
     Released: Wed 3rd Jun 2020 10:49
 
     Tank support: bugfix error on publish if no shade found (ccesareo),
-    
+
     maya_psyhive:
         tank_support drive shade geo from rig bugfix error on no shade found,
 
@@ -24,7 +36,7 @@
 
     Brawl Stars: bugfix error on render if face shader attached to deformed mesh (kcassidy),
     Frasier: bugfix error on ingest sequence with start frame not 1 (hmeinertrita),
-    
+
     maya_psyhive:
         open_maya.HFnAnimCurve.input added,
         open_maya.BaseNode.add_to_dlayer added,
@@ -53,8 +65,8 @@
 
     Released: Wed 27th May 2020 14:17
 
-    Frasier: ingest vender files ignore cameras in scene (hmeinertrita),
-    
+    Frasier: ingest vendor files ignore cameras in scene (hmeinertrita),
+
     maya_psyhive:
         open_maya.find_nodes added,
         open_maya.HFnAnimCurve.get_ktvs added,
@@ -88,10 +100,10 @@
 
     Released: Tue 26th May 2020 15:49
 
-    Brawl Stars Baked: 
+    Brawl Stars Baked:
         tbm render register renders in shotgun (ccesareo),
         tbm render allow pass selection (kcassidy),
-    
+
     maya_psyhive:
         shows.brawlstarsbaked render tbms register renders in sg,
         shows.brawlstarsbaked render tbms added passes filter,
@@ -106,10 +118,10 @@
 
     Released: Tue 19th May 2020 09:33
 
-    Tank Support: 
+    Tank Support:
         frustrum test blast updated use of deprecated remove rigs ui,
         build aiStandIn from shade bugfix error on old arnold version,
-    
+
     maya_psyhive:
         ref.FileRef.get_top_node added class_ + bugfix not using HFnTransform,
         tank_support.frustrum_test_blast bugfix using deprecated remove rigs ui,
@@ -130,7 +142,7 @@
     Released: Fri 15th May 2020 08:27
 
     Frasier: action browser catch missing asset animation step (plindkvist),
-    
+
     maya_psyhive:
         ref.namespace catch error on prefix ref,
         frasier.read_action_works catch missing animation step,
@@ -147,7 +159,7 @@
     Released: Tue 12th May 2020 14:18
 
     Frasier: fix ingest issue with _CR namespaces in vendor ma file (hmeinertrita),
-    
+
     maya_psyhive:
         open_maya.BaseNode is_referenced/replace added,
         open_maya.HPlug.read_incoming added,
@@ -176,7 +188,7 @@
     Released: Tue 5th May 2020 10:20
 
     Frasier: fix ingest issue with _CR namespaces in vendor ma file (hmeinertrita),
-    
+
     maya_psyhive:
         shows.frasier ingest rename _CR namespaces on ma file open,
 
@@ -186,11 +198,11 @@
     Released: Wed 29th Apr 2020 15:52
 
     Frasier: updated ingestion to use CR3 rig,
-    
+
     maya_psyhive:
         m_pipe.OutputRef.output added,
         shows.frasier updated globals naming MOTIONBURNER -> MOBURN,
-        shows.frasier KEALEYE_TOOLS_ROOT/MOBURN_ROOT added, 
+        shows.frasier KEALEYE_TOOLS_ROOT/MOBURN_ROOT added,
         shows.frasier update moburn rig to CR3,
         tex.apply_texture apply Raw/linear colspace,
         tools.shader_bro added usage tracker,
@@ -215,7 +227,7 @@
     Brawl Stars Baked (kcassidy):
         fixed emz error due to multiple shading engines attached to face shader,
         break connections on face ctrl mattr attr,
-    
+
     maya_psyhive:
         shows.brawlstarsbaked use shader.outColor to avoid multiple shading engines issue,
         shows.brawlstarsbaked break connections on face_ctrl.matte attr,
@@ -233,7 +245,7 @@
     Released: Thu 9th Apr 2020 10:48
 
     Tank Support: cache use shade geo for rigs catch unreferenced cache set,
-    
+
     maya_psyhive:
         shows.fraiser ingest ma check ingest dir timestamp,
         tank_support.drive_shade_geo_from_rig error on unreferenced cache set,
@@ -246,7 +258,7 @@
     Released: Tue 7th Apr 2020
 
     Brawl Stars: TBM render added handling for blinn/phong shds,
-    
+
     maya_psyhive:
         shows.brawlstarsbaked tbm render added handling for blinn/phong shds,
 
@@ -262,7 +274,7 @@
         added connect face rigs + unload selected rigs,
     Frasier:
         process review movs allow lower case tags,
-    
+
     maya_psyhive:
         open_maya read_connections/read_incoming/read_outgoing added,
         open_maya.BaseNode.list_connections catch None on no results,
@@ -286,7 +298,7 @@
 
     Frasier: added tool for processing review movs from maya,
     Startup: catch no shelves found (ccesaro),
-    
+
     nuke_psyhive:
         added with utils + shows/frasier,
     maya_psyhive:
@@ -303,7 +315,7 @@
 
     Brawl Stars: tbm render tool renders mattes + generates alpha/bump,
     Frasier: freeze viewports on update to HSL rig,
-    
+
     maya_psyhive:
         m_pipe.OutputRef added,
         open_maya.HPlug.list_enum added,
@@ -326,7 +338,7 @@
     Released: Mon 30th Mar 2020
 
     Shader Bro: catch error on no shade step in asset (kcassidy),
-    
+
     maya_psyhive:
         shows.fraiser.MOTIONBURNER_RIG made public,
         tools.shader_bro bugfix error on no shade step in asset,
@@ -339,7 +351,7 @@
 
     Brawl Stars: added previs cleanup tools (kcassidy),
     Error Catcher: copy text button replaced with send email,
-    
+
     maya_psyhive:
         ref.FileRef.rename added update ref node feature,
         shows.brawlstarsbaked added previs cleanup tools,
@@ -360,7 +372,7 @@
 
     Frasier Ingest: fix nested namespace issues (hmeinertrita),
     Startup: fix issues with missing script editor file menu (ccessaro),
-    
+
     maya_psyhive:
         shows.frasier ingest added fix for nested namespaces,
         startup fix error on missing script editor file menu,
@@ -373,7 +385,7 @@
     Released: Wed 25th Mar 2020
 
     Tank Support: bugfix error on generate shaders for asset with no rest cache (csage),
-    
+
     maya_psyhive:
         tank_support.build_shader_outputs bugfix error on no rest cache,
 
@@ -383,7 +395,7 @@
     Released: Tue 24th Mar 2020
 
     Brawl Stars: added tool for rendering tbm nodes into pipeline,
-    
+
     maya_psyhive:
         shows.brawlstarsbaked addded render tbm nodes tool,
     psyhive:
@@ -395,7 +407,7 @@
     Released: Tue 24th Mar 2020
 
     frasier ingestion: bugfix replace removes timestamped fbx,
-    
+
     maya_psyhive:
         shows.frasier action browser added handling for no cached range,
         shows.frasier.ingest_ma force range cache + error if range cache write fails,
@@ -411,7 +423,7 @@
 
     tank support: added publish shader outputs tools,
     shader bro: added,
-    
+
     ROOT/__init__.py:
         applied linting,
     maya_psyhive:
@@ -436,7 +448,7 @@
     psyhive:
         qt.notify_warning added parent flag,
         qt.HPixmapUi added show arg,
-        qt.HUiDialog3 added QComboBox handling + catch no layout in ui, 
+        qt.HUiDialog3 added QComboBox handling + catch no layout in ui,
         qt.HPixmap.whiten catch bad result on no alpha,
         qt HComboBox/HListWidget added set_items,
         qt.HListWidget selected_data/selected_text added single flag,
@@ -452,7 +464,7 @@
         added tool to swap rigs,
     Tank Support:
         catch error on frustrum test blast for rig with empty bake set [WHD-15782],
-    
+
     maya_psyhive:
         open_maya.MPlug list_incoming/list_outgoing pass kwargs,
         shows.frasier added option to disable hik on ingest,
@@ -476,7 +488,7 @@
     Released: Thu 5th Mar 2020
 
     Brawlstars Viewport Plugin: added hide angle,
-    
+
     plug-ins:
         mesh_xrayer added hide_angle/draw_mesh/draw_control,
     maya_psyhive:
@@ -491,7 +503,7 @@
     Released: Thu 5th Mar 2020
 
     Maya Plugins: updated to accomodate psylaunch,
-    
+
     maya_psyhive:
         renamed plugins -> plug-ins to accomodate psylaunch,
         shows.brawlstarsbaked better button labels + bugfix not loading plugin,
@@ -502,14 +514,14 @@
     Released: Thu 5th Mar 2020
 
     Brawlstars Baked: added tool to render meshes in xray in viewport,
-    
+
     maya_psyhive:
         plugins/mesh_xrayer added,
         open_maya.get_col added,
         open_maya BaseNode/HPlug list_incoming/list_outgoing added,
         open_maya.HPlug.multiply_node added force,
         shows.frasier.search_ingested_files dated fbx sorts by path,
-        shows.brawlstarsbaked 
+        shows.brawlstarsbaked
         utils.get_val added doubleAngle handling,
         utils.render added with mesh xray tools,
         utils.multiple_node bugfix force,
@@ -519,7 +531,7 @@
         qt.HPixmapUi parent to host main window,
         qt.HPixmapUi added default key press s/q/x,
         qt.HUiDialog.connect_elements bugfix error on signal with args,
-        tools.get_error_catcher added remove_args opt, 
+        tools.get_error_catcher added remove_args opt,
     psyaddon.py added for plugin config,
 
 
@@ -528,7 +540,7 @@
     Released: Tue 3rd Mar 2020
 
     FK/IK Switcher: bugfix failing to switch through ui,
-    
+
     maya_psyhive:
         ref.FileRef.rename added,
         shows.frasier.CAM_SETTINGS_FMT made public,
@@ -548,7 +560,7 @@
     Released: Fri 28th Feb 2020
 
     User Setup: bugfix shows submenu not populating,
-    
+
     maya_psyhive:
         startup bugfix shows submenu not populating,
 
@@ -558,7 +570,7 @@
     Released: Fri 28th Feb 2020
 
     Frasier Tools: added batch ingestion tool,
-    
+
     maya_psyhive:
         shows.frasier action browser more quiet,
         shows.frasier added batch ingestion tool,
@@ -571,7 +583,7 @@
     Released: Fri 28th Feb 2020
 
     FK/IK Switcher + Error Dialog: updated to use more stable base class,
-    
+
     maya_psyhive:
         startup build PsyHive shelf,
         tools.fkik_switcher updated to HUiDialog3,
@@ -590,7 +602,7 @@
 
     Qt Wrapper: fixed cyclical import errors,
     Frasier: action browser fixed bad tooltips,
-    
+
     maya_psyhive:
         shows.frasier fixed bad tooltip,
     psyhive:
@@ -603,9 +615,9 @@
 
     Released: Fri 28th Feb 2020
 
-    Frasier Tools: 
+    Frasier Tools:
         action browser added options to view sequences + refresh,
-    
+
     maya_psyhive:
         shows.frasier action browser as HUiDialog3,
         shows.frasier action browser added PlaySeq/Refresh,
@@ -627,11 +639,11 @@
 
     Released: Wed 26th Feb 2020
 
-    Frasier Tools: 
+    Frasier Tools:
         bugfix action browser not showing vignettes,
         bugfix action browser not updating shotgun env,
         added tools to search fbxs,
-    
+
     maya_psyhive:
         shows.frasier action browser fix vignettes not populating,
         shows.frasier action browser fix shotgun env not updating on load,
@@ -649,7 +661,7 @@
     Released: Tue 25th Feb 2020
 
     Frasier Tools: action browser export fbx stores in dated anim folder,
-    
+
     maya_psyhive:
         shows.frasier action browser export fbx saves to anim folder,
 
@@ -659,7 +671,7 @@
     Released: Tue 25th Feb 2020
 
     Frasier Tools: added action browser,
-    
+
     maya_psyhive:
         shows.frasier added FrasierWork/FrasierVendorMa,
         shows.frasier.launch_action_browser added,
@@ -674,12 +686,12 @@
 
     Released: Mon 24th Feb 2020
 
-    Frasier Tools: 
+    Frasier Tools:
         added tools to ingest ma file + export fbx,
         added FK/IK switcher,
     FK/IK switcher:
         bugfix interface dissappears behind main maya window,
-    
+
     maya_psyhive:
         ref.FileRef.path apply abs_path,
         shows.frasier added prepare ma file + export fbx tools,
@@ -719,7 +731,7 @@
     Released: Wed 12th Feb 2020
 
     Usage Tracking: don't use day in index name,
-    
+
     maya_psyhive:
         ref.get_selected catch error on ns node w/o ref selected,
         startup split into submodules,
@@ -758,7 +770,7 @@
     Released: Tue 14th Jan 2020
 
     Frasier: added tool to install Hardsuit-Labs tools,
-    
+
     maya_psyhive:
         shows.frasier added with hsl tools setup,
         startup._add_show_toolkits better default menu item label,
@@ -772,7 +784,7 @@
     Released: Tue 14th Jan 2020
 
     Shot Builder [TOOLS-154]: bugfix error on no update applied,
-    
+
     maya_psyhive:
         tools.m_shot_builder bugfix error on no update applied,
 
@@ -781,10 +793,10 @@
 
     Released: Tue 14th Jan 2020
 
-    Shot Builder [TOOLS-154]: 
+    Shot Builder [TOOLS-154]:
         added to clash short shows menu,
         added 3D/<project> as qube cluster requirement,
-    
+
     maya_psyhive:
         open_maya.base_node.find_connected type_ as first arg,
         ref.swap_to better error message on maya command error,
@@ -813,7 +825,7 @@
     Tank Support: added support for shade aiStandIn in publish/assetmanager [
     TOOLS-207],
     Blast and Cache tool: bugfix overriding default maya cache behaviour [TOOLS-209],
-    
+
     maya_psyhive:
         shows.clashroyaleholi moved code to maya_psyhive.tank_support,
         tank_support added with aiStandIn publish/assetmanager tools,
@@ -840,7 +852,7 @@
     Released: Fri 13th Dec 2019
 
     Clash Holiday tools: added aiMerge node to pass overrides though [TOOLS-193],
-    
+
     maya_psyhive:
         shows.clashroyaleholi.create_standin_from_sel_shade added user attr sorting,
 
@@ -850,7 +862,7 @@
     Released: Fri 13th Dec 2019
 
     Clash Holiday tools: added aiMerge node to pass overrides though [TOOLS-193],
-    
+
     maya_psyhive:
         shows.clashroyaleholi.create_standin_from_sel_shade added merge node,
 
@@ -860,7 +872,7 @@
     Released: Fri 13th Dec 2019
 
     Tech Anim tools: added blast + cache tool [TOOLS-209],
-    
+
     maya_psyhive:
         startup added TechAnim toolkit,
         toolkits.tech_anim added,
@@ -878,7 +890,7 @@
 
     Clash Holiday tools [TOOLS-193]:
         bugfix not finding sg shot with cid00Aid000 naming,
-    
+
     psyhive:
         tk2.find_shot added,
         tk2.get_shot_sg_data bugfix not appling _get_shot_sg_name,
@@ -895,7 +907,7 @@
         added override for displacement,
         bugfix interface not launching,
         added integration test,
-    
+
     maya_psyhive:
         open_maya.HEulerRotation.apply_to added relative flag,
         open_maya.HEulerRotation.to_tuple added,
@@ -917,12 +929,12 @@
 
     Released: Wed 11th Dec 2019
 
-    Vampire Bloodline tools [TOOLS-214]: 
+    Vampire Bloodline tools [TOOLS-214]:
         added IK/FK switcher for vampire rig,
     Clash Holiday tools [TOOLS-193]:
         fixed bad loop expression on range missing from sg,
         colour switch attrs have types in override expressions,
-    
+
     maya_psyhive:
         open_maya.HEulerRotation added __neg__/__sub__,
         open_maya.HMatrix.as_euler added,
@@ -945,11 +957,11 @@
 
     Released: Fri 6th Dec 2019
 
-    Clash Holiday aiStandIn Tool [TOOLS-193]: 
+    Clash Holiday aiStandIn Tool [TOOLS-193]:
         use *:tfm/* format,
         read cut in/out from sg for range,
         create col switches AIP,
-    
+
     maya_psyhive.shows.clashroyaleholi:
         create_standin_from_sel_shade use *:tfm/* format,
         create_standin_from_sel_shade read cut in/out from sg for range,
@@ -966,13 +978,13 @@
     Released: Thu 5th Dec 2019
 
     Yeti Tools: moved output paths to work with asset manager,
-    
+
     maya_psyhive:
         open_maya.BaseNode.clean_name added,
         tools.yeti separated read/write/ui mods,
         tools.yeti updated output paths to fit with asset manager,
         ui added add_shelf_button/add_separator,
-    psyhive:    
+    psyhive:
         host added basic hou handling,
         icons.EmojiSet.find on verbose prints name,
         py_gui.BasePyGui made public,
@@ -997,7 +1009,7 @@
     Build aiStandin from shade/abc tool:
         read/apply abc range from sg,
         added special case for colour switch geo,
-    
+
     maya_psyhive:
         open_maya.HFnMesh.clean_name added,
         shows.clashroyaleholi.create_ai_standin added col switch special case,
@@ -1006,7 +1018,7 @@
         tex.find_shd added _AiStandardSurface handling,
         tex.read_shd force shading engine on shader,
         utils.get_val added int handling,
-    psyhive:    
+    psyhive:
         pipe.Project.psylaunch_cfg added,
         pipe.find_project better info on fail,
         py_gui.get_selection_reader added transform handling,
@@ -1014,7 +1026,7 @@
         tk.TTAssetOutputRoot made public,
         tk.TTRootBase.find_step_root added catch,
         tk.find_shots added filter_ arg,
-        tools.toggle_err_catcher added val override, 
+        tools.toggle_err_catcher added val override,
         utils.File.delete no error if file doesn't exist,
 
 
@@ -1022,9 +1034,9 @@
 
     Released: Thu 21st Nov 2019
 
-    cache tool: 
+    cache tool:
         added support function for cache tool to allow shade geo to be used for rig cache [TOOLS-194]
-    
+
     maya_psyhive:
         open_maya.BaseNode get_parent/find_parents added,
         open_maya.CMDS.blendShape added,
@@ -1038,7 +1050,7 @@
         tools.oculus_quest.oculus_vr_bake cleaned redundant shiboken,
         utils.del_namespace added,
         utils.restore_ns catch cur ns removed,
-    psyhive:    
+    psyhive:
         icons.DELETE added,
         qt.HUiDialog removed parenting to maya main window to fix thread crashing,
         qt.HPainter.begin removed HighQualityAntialiasing by default,
@@ -1053,11 +1065,11 @@
 
     Released: Tue 19th Nov 2019
 
-    Clash Royale Holidays: 
+    Clash Royale Holidays:
         add tool to build aiStandIn node from achive + shade asset [TOOLS-193]
-    
+
     maya_psyhive:
-        open_maya.BaseNode find_attrs/list_attr added,    
+        open_maya.BaseNode find_attrs/list_attr added,
         open_maya.CpntMesh.to_uvs added,
         open_maya.CpntUV.to_vals added,
         open_maya.HPlug added get_attr/get_type,
@@ -1068,7 +1080,7 @@
         tex._BaseShader.get_se returns HFnDependencyNode,
         tools.oculus_quest QtCore.Qt -> Qt,
         utils.get_val added byte/bool handling + better fail message,
-    psyhive:    
+    psyhive:
         pipe.cur_project catch no PSYOP_PROJECT_PATH env,
         py_gui.BrowserLauncher added,
         py_gui added pyg prefix to submodules,
@@ -1085,11 +1097,11 @@
     Released: Fri 15th Nov 2019
 
     oculus tools [TOOLS-186]: conformed line endings to match dev code,
-    
+
     maya_psyhive:
         tools.oculus_quest use psyhive.qt,
         tools.oculus_quest applied autofix to conform line endings,
-    psyhive:    
+    psyhive:
         tools.batch_rerender added close to close ui element,
 
 
@@ -1102,7 +1114,7 @@
         removed render in background option,
         fixed presets with tiny bounding boxes,
         warning on launch with no current work file,
-    
+
     maya_psyhive:
         open_maya added shp_rand/CpntMesh,
         open_maya.cpnt_mesh added,
@@ -1114,7 +1126,7 @@
         tools.oculus_quest removed render background option,
         tools.oculus_quest added warning for no current scene,
         tools.oculus_quest fixed presets with tiny bbox,
-    psyhive:    
+    psyhive:
         qt.get_col allow 255 int cols,
         tools.hive_bro.get_recent_work made public,
         utils.PyFile.get_ast raise FileError on SyntaxError,
@@ -1126,7 +1138,7 @@
     Released: Wed 13th Nov 2019
 
     oculus tools: added oculus quest toolkit [TOOLS-186]
-    
+
     maya_psyhive:
         lerp added,
         BaseArray3.__mul__ added,
@@ -1157,7 +1169,7 @@
         set disable override cache with inputs on load cache,
         added option to cache all assets in the scene,
         added option to load cache after generation,
-    
+
     maya_psyhive:
         startup better matching of script editor file menu + less verbose,
         tools.yeti allow cache multiple assets,
@@ -1183,7 +1195,7 @@
     Released: Wed 23rd Oct 2019
 
     script editor: catch error on cancel save to project
-    
+
     maya_psyhive: startup catch error on cancel save to project
 
 
@@ -1192,7 +1204,7 @@
     Released: Wed 23rd Oct 2019
 
     startup: added load/save to project script editor options (kcassidy)
-    
+
     maya_psyhive:
         startup added script editor project load/save options,
     psyhive:
@@ -1214,7 +1226,7 @@
     Released: Thu 17th Oct 2019
 
     animation: added tool to duplicate rig with anim [TOOLS-173]
-    
+
     maya_psyhive:
         m_pipe added with RigRef/get_selected_rig,
         open_maya.BaseNode.find_plugs fix error on node has no plugs,
@@ -1244,7 +1256,7 @@
         bugfix error on update abc outside shot (srivet),
     yeti tools:
         hide steps with no caches in (ecunha),
-    
+
     maya_psyhive:
         open_maya.HFnAnimCurve added connect/get_key_frames/get_key_range/get_plug/is_static/loop/output,
         open_maya.BaseNode added find_children/find_plugs/reset,
@@ -1281,7 +1293,7 @@
     Released: Mon 7th Oct 2019
 
     shot builder tool: fix error on build shot from different sequence (iirvin)
-    
+
     maya_psyhive:
         open_maya.HPlug.create_enum added keyable arg,
         tools.m_shot_builder bugfix not casting new shot across sequence,
@@ -1318,7 +1330,7 @@
     yeti tools:
         added option to read/write caches in assets,
         added option to read caches into root namespace,
-    
+
     maya_psyhive:
         ref.import_nodes added,
         tex.apply_texture create file node if not present,
@@ -1339,7 +1351,7 @@
     yeti tools:
         bugfix error on read multiple caches in single asset,
         allow select transform on cache selected nodes,
-    
+
     maya_psyhive:
         open_maya.BaseNode create_enum/find_upstream/find_connected added,
         open_maya.HPlug attribute_query/delete/set_enum added,
@@ -1367,7 +1379,7 @@
     Released: Mon 16th Sep 2019
 
     shot_builder: fix error on ref node without path in scene (iirvin)
-    
+
     maya_psyhive:
         open_maya.BaseNode.split added,
         ref._read_refs ignore ref w/o path,
@@ -1384,7 +1396,7 @@
         added tool to fix bad vdb aiVolume shaders,
     shot builder:
         added nk file handling,
-    
+
     bin:
         shot_builder add nk handling,
     maya_psyhive:
@@ -1407,7 +1419,7 @@
     Released: Tue 10th Sep 2019
 
     yeti tools: added interface for caching yeti,
-    
+
     bin:
         shot_builder catch cwd not shot,
     maya_psyhive:
@@ -1436,7 +1448,7 @@
     Released: Thu 15th Aug 2019
 
     shot_builder: fix output paths no updated on build scene (iirvin),
-    
+
     maya_psyhive:
         open_maya.BaseTransform.set_key added,
         open_maya.CMDS.polyPyramid added,
@@ -1455,7 +1467,7 @@
     Released: Wed 14th Aug 2019
 
     shot_builder: added [TOOLS-154],
-    
+
     bin:
         shot_builder added,
     maya_psyhive:
@@ -1476,7 +1488,7 @@
     Released: Tue 13th Aug 2019
 
     batch rerender: bugfix submit jobs from qube,
-    
+
     psyhive:
         tools.batch_rerender force USERNAME to bugfix fileops error,
         utils.py_file.PyFile.docs catch SyntaxError,
@@ -1487,7 +1499,7 @@
     Released: Tue 13th Aug 2019
 
     batch rerender: fix missing batch rerender option in PsyHive menu,
-    
+
     maya_psyhive:
         startup fix missing batch rerender item,
 
@@ -1497,11 +1509,11 @@
     Released: Tue 13th Aug 2019
 
     batch rerender: added standalone interface (iirvine),
-    
+
     maya_psyhive:
         tools renamed batch_rerender -> m_batch_rerender,
     psyhive:
-        host._get_cur_scene added for no dcc,    
+        host._get_cur_scene added for no dcc,
         farm added,
         qt.get_application remove dcc specific code for natron,
         tools.batch_rerender added,
@@ -1519,7 +1531,7 @@
     batch rerender:
         catch error on exocortex abc off pipeline (iirvine),
         fix missing outputpaths tank app warning (iirvine),
-    
+
     maya_psyhive:
         tools.batch_rerender catch exo abc not tk output,
     psyhive:
@@ -1532,7 +1544,7 @@
     Released: Mon 12th Aug 2019
 
     frustrum test blast: added progress bar to allow cancel blast (aboyce),
-    
+
     maya_psyhive:
         tools.frustrum_test_blast added progress bar to allow cancel blast,
     psyhive:
@@ -1548,7 +1560,7 @@
         get frame range from existing render,
     py_gui:
         added QtPyGui tool,
-    
+
     maya_psyhive:
         open_maya.CMDS.referenceQuery added,
         tex.build_texture_path added,
@@ -1575,7 +1587,7 @@
     Released: Thu 1st Aug 2019
 
     batch rerender: released
-    
+
     maya_psyhive:
         open_maya.HFnDependencyNode.rename added,
         open_maya.HFnTransform.add_to_grp returns HFnTransform,
@@ -1609,7 +1621,7 @@
     Released: Tue 23rd Jul 2019
 
     tk tools: bugfix error on import,
-    
+
     psyhive:
         tk bugfix import error,
 
@@ -1619,7 +1631,7 @@
     Released: Tue 23rd Jul 2019
 
     frustrum test blast: added handling for duplicate nodes in rig
-    
+
     maya_psyhive:
         open_maya.base_name added handling for duplicate nodes,
         open_maya.CMDS.group added,
@@ -1636,7 +1648,7 @@
     Released: Mon 22nd Jul 2019
 
     FK/IK switcher: bugfix error on apply
-    
+
     maya_psyhive:
         open_maya.base_node added select/__add__,
         tools.fkik_switcher fix error on apply + added test,
@@ -1647,7 +1659,7 @@
     Released: Mon 22nd Jul 2019
 
     frustrum test blast + restore image planes: added usage tracking
-    
+
     maya_psyhive:
         startup better shows icon,
         tools frustrum_test_blast/img_plane_restore added usage tracker,
