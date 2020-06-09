@@ -55,6 +55,7 @@ ignore:
         maya_psyhive/shows/frasier/fr_tools.py
         maya_psyhive/shows/frasier/fr_ingest.py
         psyhive/psyaddon.py
+        psyhive/utils/email_.py
     import-self:
         psyhive/__init__.py
     invalid-name:

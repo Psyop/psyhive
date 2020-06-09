@@ -314,8 +314,7 @@ class File(Path):
         # Try using sublime executable
         _subl_exe = r'C:\Program Files\Sublime Text 3\subl.exe'
         if os.path.exists(_subl_exe):
-            _cmds = [_subl_exe, _arg]
-            _cmds = ['subl', _arg]
+            _cmds = [abs_path(_subl_exe, win=True), _arg]
             system(_cmds, verbose=verbose)
             return
 
