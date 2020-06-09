@@ -1,3 +1,17 @@
+#### v0.83.0 ####
+
+    Released: Tue 9th Jun 2020 14:15
+
+    Fraiser: added tool to scale anim on face joints (plindkvist),
+    
+    maya_psyhive:
+        ref.FileRef.reload_ added,
+        shows.fraiser.scale_joint_anim added,
+    psyhive:
+        utils.send_email added html arg,
+        utils.File.edit don't use subl alias,
+
+
 #### v0.82.3 ####
 
     Released: Mon 8th Jun 2020 10:48

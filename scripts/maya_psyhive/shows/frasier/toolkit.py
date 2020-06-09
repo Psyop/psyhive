@@ -5,6 +5,8 @@ import os
 import sys
 import tempfile
 
+from maya import cmds
+
 import psylaunch
 
 from psyhive import icons, py_gui, qt
@@ -234,6 +236,41 @@ def switch_selected_rig(rig):
     print 'TARGET', _trg.path
     qt.ok_cancel('Update "{}" rig to "{}"?'.format(_sel.namespace, _trg.name))
     _sel.swap_to(_trg.path)
+
+
+@py_gui.install_gui(choices={'which': ['Default', 'Selection']})
+def scale_joint_anim(which='Default', scale=1.0):
+    """Scale animation on joints.
+
+    Args:
+        which (str): which joints to scale
+        scale (float): anim scale (1.0 has no effect)
+    """
+    if which == 'Default':
+        _jnts = [
+            u'LipUpper_03_R', u'LipUpper_02_L', u'LipUpper_02_R',
+            u'LipUpper_04_R', u'LipUpper_01_M', u'LipUpper_05_M',
+            u'LipCorner_01_R', u'LipLower_03_R', u'Depressor_01_R',
+            u'LipLower_02_R', u'LipCorner_01_L', u'LipLower_03_L',
+            u'LipUpper_04_L', u'LipUpper_03_L', u'Depressor_01_L',
+            u'LipLower_02_L', u'Mentalis_01_M', u'LipLower_01_M',
+            u'Buccinator_01_R', u'LevatorLower_R', u'LevatorUpper_R',
+            u'Nostril_01_R', u'Nose_01_M', u'Nostril_01_L', u'LevatorUpper_L',
+            u'LevatorLower_L', u'Buccinator_01_L', u'Depressor_02_R',
+            u'Mentalis_02_M', u'Depressor_02_L', u'ZygomaticMajor_01_R',
+            u'ZygomaticMajor_01_L', u'NasalisLower_R', u'NasalisLower_L']
+    elif which == 'Selection':
+        _jnts = cmds.ls(selection=True)
+    else:
+        raise ValueError(which)
+    print 'FOUND {:d} JOINTS'.format(len(_jnts))
+
+    _crvs = []
+    for _jnt in _jnts:
+        print _jnt,
+        _crvs += cmds.listConnections(_jnt, type='animCurve') or []
+    print 'FOUND {:d} CURVES'.format(len(_crvs))
+    cmds.scaleKey(_crvs, valueScale=scale)
 
 
 py_gui.set_section("HSL Tools")

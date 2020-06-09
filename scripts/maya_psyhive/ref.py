@@ -180,6 +180,11 @@ class FileRef(object):
             return None
         return str(cmds.file(self._file, query=True, namespace=True))
 
+    def reload_(self):
+        """Reload this reference."""
+        self.unload()
+        self.load()
+
     def remove(self, force=False):
         """Remove this reference from the scene.
 
