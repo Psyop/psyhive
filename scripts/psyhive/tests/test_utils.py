@@ -174,6 +174,9 @@ class TestPath(unittest.TestCase):
         _path = 'file:///W:/Temp/icons/Emoji/icon.2469.png'
         assert abs_path(_path) == 'W:/Temp/icons/Emoji/icon.2469.png'
 
+        _path = r"\\la1nas006\homedir\hvanderbeek\Downloads\SK_Tier1_Male.ma"
+        assert abs_path(_path) == 'Z:/Downloads/SK_Tier1_Male.ma'
+
     def test_find(self):
 
         _test_dir = '{}/psyhive/testing/blah'.format(tempfile.gettempdir())

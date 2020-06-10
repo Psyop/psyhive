@@ -14,6 +14,10 @@ CODE_ROOT = 'P:/global/code/pipeline/bootstrap'
 _RELOAD_ORDER = [
     'psyhive.utils.misc',
     'psyhive.utils.cache',
+    'psyhive.utils.path.p_utils',
+    'psyhive.utils.path.p_path',
+    'psyhive.utils.path.p_dir',
+    'psyhive.utils.path.p_file',
     'psyhive.utils.path',
     'psyhive.utils.py_file.docs',
     'psyhive.utils.py_file.base',
@@ -83,6 +87,8 @@ _RELOAD_ORDER = [
     'hv_test.startup.hsu_buttons',
     'hv_test.startup',
 
+    'hv_test.tools.colour_bro.pantone',
+    'hv_test.tools.colour_bro',
     'hv_test.tools.qube.qb_subjob',
     'hv_test.tools.qube.qb_task',
     'hv_test.tools.qube.qb_job',

@@ -158,7 +158,7 @@ ignore:
         psyhive/tk/templates/base.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
-        psyhive/utils/path.py
+        psyhive/utils/path/p_tools.py
         psyhive/utils/py_file/arg.py
         psyhive/utils/range_.py
     too-many-instance-attributes:

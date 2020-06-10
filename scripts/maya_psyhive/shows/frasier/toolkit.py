@@ -9,11 +9,11 @@ from maya import cmds
 
 import psylaunch
 
-from psyhive import icons, py_gui, qt
+from psyhive import icons, py_gui, qt, pipe
 from psyhive.utils import (
     CacheMissing, find, store_result, File, get_single, abs_path)
 
-from maya_psyhive import ref
+from maya_psyhive import ref, open_maya as hom
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
 from maya_psyhive.utils import restore_sel
@@ -238,15 +238,18 @@ def switch_selected_rig(rig):
     _sel.swap_to(_trg.path)
 
 
-@py_gui.install_gui(choices={'which': ['Default', 'Selection']})
-def scale_joint_anim(which='Default', scale=1.0):
+@py_gui.install_gui(choices={'which': ['Face', 'Selection']})
+def scale_joint_anim(which='Face', scale=1.0):
     """Scale animation on joints.
 
     Args:
         which (str): which joints to scale
         scale (float): anim scale (1.0 has no effect)
     """
-    if which == 'Default':
+    _rest_pose = pipe.cur_project().cache_read('SK_Tier1_Male rest pose')
+
+    # Get list of joints
+    if which == 'Face':
         _jnts = [
             u'LipUpper_03_R', u'LipUpper_02_L', u'LipUpper_02_R',
             u'LipUpper_04_R', u'LipUpper_01_M', u'LipUpper_05_M',
@@ -263,14 +266,25 @@ def scale_joint_anim(which='Default', scale=1.0):
         _jnts = cmds.ls(selection=True)
     else:
         raise ValueError(which)
+    _jnts = [hom.HFnTransform(_jnt) for _jnt in _jnts]
     print 'FOUND {:d} JOINTS'.format(len(_jnts))
 
-    _crvs = []
+    # Get curves to scale
+    _to_scale = []
     for _jnt in _jnts:
-        print _jnt,
-        _crvs += cmds.listConnections(_jnt, type='animCurve') or []
-    print 'FOUND {:d} CURVES'.format(len(_crvs))
-    cmds.scaleKey(_crvs, valueScale=scale)
+        print _jnt
+        for _attr in ['tx', 'ty', 'tz', 'rz', 'ry', 'rz']:
+            _plug = _jnt.plug(_attr)
+            _crv = _plug.find_anim()
+            if not _crv:
+                continue
+            _rest_val = _rest_pose[str(_plug)]
+            _to_scale.append((_crv, _rest_val))
+    print 'FOUND {:d} CURVES TO SCALE'.format(len(_to_scale))
+
+    # Apply scale
+    for _crv, _rest_val in qt.progress_bar(_to_scale, 'Scaling {:d} anims'):
+        cmds.scaleKey(_crv, valueScale=scale, valuePivot=_rest_val)
 
 
 py_gui.set_section("HSL Tools")
