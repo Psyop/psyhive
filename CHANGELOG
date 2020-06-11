@@ -1,3 +1,15 @@
+#### v0.84.3 ####
+
+    Released: Thu 11th Jun 2020 11:59am
+
+    Tank Support: bugfix error on capture with frustrum test blast (ccesareo/aboyce),
+    
+    maya_psyhive:
+        ref.FileRef raise ValueError if no path,
+    psyhive:
+        py_gui.reset_settings catch setting missing from ui,
+
+
 #### v0.84.2 ####
 
     Released: Thu 11th Jun 2020 11:27

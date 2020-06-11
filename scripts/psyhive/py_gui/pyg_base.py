@@ -373,10 +373,13 @@ class BasePyGui(object):
             if def_ and not def_ == _py_def:
                 continue
             print' - ADDING', _fn, _data
+            _set_fns = self.set_settings_fns['def'][_py_def.name]
             for _py_arg in _py_def.find_args():
+                if _py_arg.name not in _set_fns:
+                    print ' - SETTING MISSING', _py_arg
+                    continue
                 print '   - SETTING', _py_arg, _py_arg.default
-                _set_fn = self.set_settings_fns[
-                    'def'][_py_def.name][_py_arg.name]
+                _set_fn = _set_fns[_py_arg.name]
                 _set_fn(_py_arg.default)
 
             _section = _data.get('section')
