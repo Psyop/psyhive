@@ -20,6 +20,8 @@ class FileRef(object):
             ref_node (str): reference node
         """
         self.ref_node = ref_node
+        if not self.path:
+            raise ValueError
 
     @property
     def _file(self):
@@ -430,8 +432,6 @@ def _read_refs(class_=None):
         try:
             _ref = _class(_ref_node)
         except ValueError:
-            continue
-        if not _ref.path:
             continue
         _refs.append(_ref)
     return _refs
