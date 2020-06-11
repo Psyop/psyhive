@@ -1,3 +1,13 @@
+#### v0.84.2 ####
+
+    Released: Thu 11th Jun 2020 11:27
+
+    Frasier: bugfix import error,
+    
+    maya_psyhive:
+        shows.frasier bugfix reference to missing scale anim func,
+
+
 #### v0.84.1 ####
 
     Released: Thu 11th Jun 2020 11:07
