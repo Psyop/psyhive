@@ -1,3 +1,15 @@
+#### v0.84.1 ####
+
+    Released: Thu 11th Jun 2020 11:07
+
+    Frasier: scale face anim tool added namespace handling (plindkvist),
+    
+    maya_psyhive:
+        shows.frasier renamed scale_joint_anim -> scale_face_anim,
+        shows.frasier.scale_face_anim added namespace handling + made standalone,
+        shows.frasier.copy_scale_face_anim_script added,
+
+
 #### v0.84.0 ####
 
     Released: Wed 10th Jun 2020 13:53

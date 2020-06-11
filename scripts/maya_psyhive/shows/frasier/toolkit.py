@@ -5,20 +5,18 @@ import os
 import sys
 import tempfile
 
-from maya import cmds
-
 import psylaunch
 
-from psyhive import icons, py_gui, qt, pipe
+from psyhive import icons, py_gui, qt
 from psyhive.utils import (
-    CacheMissing, find, store_result, File, get_single, abs_path)
+    CacheMissing, find, store_result, File, get_single, abs_path, copy_text)
 
-from maya_psyhive import ref, open_maya as hom
+from maya_psyhive import ref
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.shows import vampirebloodline
 from maya_psyhive.utils import restore_sel
 
-from . import fr_action_browser, fr_tools, fr_ingest
+from . import fr_action_browser, fr_tools, fr_ingest, fr_scale_anim
 from .fr_vendor_ma import FrasierVendorMa
 from .fr_work import find_action_works
 from .fr_ingest import ingest_ma_files_to_pipeline
@@ -238,53 +236,25 @@ def switch_selected_rig(rig):
     _sel.swap_to(_trg.path)
 
 
-@py_gui.install_gui(choices={'which': ['Face', 'Selection']})
-def scale_joint_anim(which='Face', scale=1.0):
-    """Scale animation on joints.
+py_gui.set_section("Scale face anim")
+
+
+def scale_face_anim(namespace='Tier1_Male_01', scale=1.0):
+    """Scale animation on face joints.
 
     Args:
-        which (str): which joints to scale
+        namespace (str): namespace of skeleton to read joints from
         scale (float): anim scale (1.0 has no effect)
     """
-    _rest_pose = pipe.cur_project().cache_read('SK_Tier1_Male rest pose')
+    reload(fr_scale_anim)
+    fr_scale_anim.scale_face_joint_anim(**locals())
 
-    # Get list of joints
-    if which == 'Face':
-        _jnts = [
-            u'LipUpper_03_R', u'LipUpper_02_L', u'LipUpper_02_R',
-            u'LipUpper_04_R', u'LipUpper_01_M', u'LipUpper_05_M',
-            u'LipCorner_01_R', u'LipLower_03_R', u'Depressor_01_R',
-            u'LipLower_02_R', u'LipCorner_01_L', u'LipLower_03_L',
-            u'LipUpper_04_L', u'LipUpper_03_L', u'Depressor_01_L',
-            u'LipLower_02_L', u'Mentalis_01_M', u'LipLower_01_M',
-            u'Buccinator_01_R', u'LevatorLower_R', u'LevatorUpper_R',
-            u'Nostril_01_R', u'Nose_01_M', u'Nostril_01_L', u'LevatorUpper_L',
-            u'LevatorLower_L', u'Buccinator_01_L', u'Depressor_02_R',
-            u'Mentalis_02_M', u'Depressor_02_L', u'ZygomaticMajor_01_R',
-            u'ZygomaticMajor_01_L', u'NasalisLower_R', u'NasalisLower_L']
-    elif which == 'Selection':
-        _jnts = cmds.ls(selection=True)
-    else:
-        raise ValueError(which)
-    _jnts = [hom.HFnTransform(_jnt) for _jnt in _jnts]
-    print 'FOUND {:d} JOINTS'.format(len(_jnts))
 
-    # Get curves to scale
-    _to_scale = []
-    for _jnt in _jnts:
-        print _jnt
-        for _attr in ['tx', 'ty', 'tz', 'rz', 'ry', 'rz']:
-            _plug = _jnt.plug(_attr)
-            _crv = _plug.find_anim()
-            if not _crv:
-                continue
-            _rest_val = _rest_pose[str(_plug)]
-            _to_scale.append((_crv, _rest_val))
-    print 'FOUND {:d} CURVES TO SCALE'.format(len(_to_scale))
-
-    # Apply scale
-    for _crv, _rest_val in qt.progress_bar(_to_scale, 'Scaling {:d} anims'):
-        cmds.scaleKey(_crv, valueScale=scale, valuePivot=_rest_val)
+def copy_scale_face_anim_script():
+    """Copy code for scale face anim script to send to motionburner."""
+    _body = File(fr_scale_anim.__file__).read()
+    _body += "\n\nscale_face_joint_anim(namespace='Tier1_Male_01', scale=0.5)"
+    copy_text(_body)
 
 
 py_gui.set_section("HSL Tools")
