@@ -1,3 +1,31 @@
+#### v0.84.1 ####
+
+    Released: Thu 11th Jun 2020 11:07
+
+    Frasier: scale face anim tool added namespace handling (plindkvist),
+    
+    maya_psyhive:
+        shows.frasier renamed scale_joint_anim -> scale_face_anim,
+        shows.frasier.scale_face_anim added namespace handling + made standalone,
+        shows.frasier.copy_scale_face_anim_script added,
+
+
+#### v0.84.0 ####
+
+    Released: Wed 10th Jun 2020 13:53
+
+    Fraiser: scale joint anim uses rest pose as scale pivot (plindkvist)
+    
+    maya_psyhive:
+        shows.frasier.scale_joint_anim use rest pose as pivot,
+    psyhive:
+        host maya _force_open_scene uses maya_psyhive.utils.open_scene,
+        pipe.Project as Cacheabled + added cache_fmt,
+        utils.Cacheable.cache_write added verbose,
+        utils.path broke into submodule,
+        utils.abs_path refactor to accommodate nas paths in all forms,
+
+
 #### v0.83.0 ####
 
     Released: Tue 9th Jun 2020 14:15

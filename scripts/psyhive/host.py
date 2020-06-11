@@ -32,12 +32,12 @@ except ImportError:
     pass
 else:
     from maya_psyhive import ref, ui
-    from maya_psyhive.utils import get_fps, save_as, save_scene
+    from maya_psyhive.utils import (
+        get_fps, save_as, save_scene, open_scene as open_scene_)
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
-    _force_open_scene = lambda file_: cmds.file(
-        file_, open=True, force=True, ignoreVersion=True)
+    _force_open_scene = lambda file_: open_scene_(file_, force=True)
     _force_new_scene = wrap_fn(cmds.file, new=True, force=True)
     refresh = cmds.refresh
     reference_scene = ref.create_ref

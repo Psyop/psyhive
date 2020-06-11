@@ -1,10 +1,8 @@
-"""Tools for managing paths in a file structure."""
+"""General tools for managing paths."""
 
 import filecmp
-import functools
 import os
 import shutil
-import tempfile
 import time
 
 import ctypes
@@ -12,392 +10,14 @@ from ctypes import wintypes
 
 import six
 
-from psyhive.utils.misc import (
-    lprint, system, dprint, bytes_to_str, copy_text, get_ord,
-    nice_age)
-from psyhive.utils.heart import check_heart
-from psyhive.utils.filter_ import passes_filter
+from ..misc import lprint, system, dprint, bytes_to_str, copy_text
+from ..heart import check_heart
+from ..filter_ import passes_filter
+
+from .p_file import File
+from .p_dir import Dir
 
 TMP = 'W:/Temp'
-
-
-def restore_cwd(func):
-    """Decorator to restore cwd after executing a function.
-
-    Args:
-        func (fn): function to decorate
-    """
-
-    @functools.wraps(func)
-    def _restore_cwd_fn(*args, **kwargs):
-        _cwd = os.getcwd()
-        _result = func(*args, **kwargs)
-        os.chdir(_cwd)
-        return _result
-
-    return _restore_cwd_fn
-
-
-class FileError(RuntimeError):
-    """Raises when a file causes an issue."""
-
-    def __init__(self, message, file_, line_n=None):
-        """Constructor.
-
-        Args:
-            message (str): error message
-            file_ (str): path to file
-            line_n (int): line of file causing issue
-        """
-        super(FileError, self).__init__(message)
-        self.file_ = file_
-        self.line_n = line_n
-
-
-class Path(object):
-    """Represents a path on disk."""
-
-    def __init__(self, path, extn=None):
-        """Constructor.
-
-        Args:
-            path (str): path in file structure
-            extn (str): override extension (eg. tar.gz)
-        """
-        self.path = path
-        self.dir = os.path.dirname(path)
-        self.filename = os.path.basename(path)
-        if extn:
-            assert self.filename.endswith('.'+extn)
-            self.extn = extn
-            self.basename = self.filename[:-len(extn)-1]
-        elif '.' in self.filename:
-            _tokens = self.filename.split('.')
-            self.extn = _tokens[-1]
-            self.basename = '.'.join(_tokens[:-1])
-        else:
-            self.extn = None
-            self.basename = self.filename
-
-    def abs_path(self):
-        """Get absolute value of this path.
-
-        Returns:
-            (str): abs path
-        """
-        return abs_path(self.path)
-
-    def exists(self):
-        """Check whether this path exists.
-
-        Returns:
-            (bool): whether file exists
-        """
-        return os.path.exists(self.path)
-
-    def get_age(self):
-        """Get age of this file (based on mtime).
-
-        Returns:
-            (float): age in seconds
-        """
-        return time.time() - self.get_mtime()
-
-    def get_mtime(self):
-        """Get mtime of this path.
-
-        Returns:
-            (float): mtime
-        """
-        return os.path.getmtime(self.path)
-
-    def get_size(self):
-        """Get size of this path.
-
-        Returns
-            (int): size of path in bytes
-        """
-        return os.path.getsize(self.path)
-
-    def is_file(self):
-        """Test if this path is a file.
-
-        Returns:
-            (bool): whether file
-        """
-        return os.path.isfile(self.path)
-
-    def nice_age(self):
-        """Get this file's age as a readable string.
-
-        Returns:
-            (str): age as string
-        """
-        return nice_age(self.get_age())
-
-    def nice_mtime(self, fmt=None):
-        """Get mtime of this file in a readable format.
-
-        Args:
-            fmt (str): override strftime format
-
-        Returns:
-            (str): mtime as readable string
-        """
-        _mtime = self.get_mtime()
-        _mtime_t = time.localtime(_mtime)
-        if fmt:
-            _fmt = fmt
-        else:
-            _month = int(time.strftime('%d', _mtime_t))
-            _ord = get_ord(_month)
-            _day = '{:d}{}'.format(_month, _ord)
-            _fmt = '%a {} %Y %b %H:%M:%S'.format(_day)
-        return time.strftime(_fmt, _mtime_t)
-
-    def nice_size(self):
-        """Get size of this path as a readable str.
-
-        Returns
-            (str): readable size of path
-        """
-        return nice_size(self.path)
-
-    def parent(self):
-        """Get parent dir of this path.
-
-        Returns:
-            (Dir): parent
-        """
-        return Dir(os.path.dirname(self.path))
-
-    def rel_path(self, path):
-        """Get relative path of the given path from this path.
-
-        Args:
-            path (str): path to compare
-        """
-        return rel_path(root=self.path, path=path)
-
-    def __cmp__(self, other):
-        if hasattr(other, 'path'):
-            return cmp(self.path, other.path)
-        return cmp(self.path, other)
-
-    def __hash__(self):
-        return hash(self.path)
-
-    def __repr__(self):
-        return '<{}|{}>'.format(type(self).__name__.strip('_'), self.path)
-
-
-class Dir(Path):
-    """Represents a directory on disk."""
-
-    def delete(self, force=False, wording='delete'):
-        """Delete this directory.
-
-        Args:
-            force (bool): force delete with no confirmation
-            wording (str): override wording for dialog
-        """
-        if not self.exists():
-            return
-        if not force:
-            from psyhive import qt
-            qt.ok_cancel(
-                "{} this directory?\n\n{}".format(
-                    wording.capitalize(), self.path),
-                title='Confirm '+wording)
-        shutil.rmtree(self.path)
-
-    def find(self, **kwargs):
-        """Search for files in this dir.
-
-        Returns:
-            (str list): list of files
-        """
-        return find(self.path, **kwargs)
-
-    @restore_cwd
-    def launch_browser(self):
-        """Launch browser set to this dir."""
-        print 'LAUNCH BROWSER'
-        os.chdir(self.path)
-        system('explorer .', verbose=1)
-
-    def test_path(self):
-        """Test this dir exists, creating if needed."""
-        test_path(self.path)
-
-
-class File(Path):
-    """Represents a file on disk."""
-
-    def apply_extn(self, extn):
-        """Update this file path with a different extension.
-
-        Args:
-            extn (str): new extension
-
-        Returns:
-            (File): new file path
-        """
-        return File('{}/{}.{}'.format(self.dir, self.basename, extn))
-
-    def copy_to(self, file_, diff_=False, force=False):
-        """Copy this file to another location.
-
-        Args:
-            file_ (str): target path
-            diff_ (bool): show diffs before copying files
-            force (bool): overwrite existing without confirmation
-        """
-        from psyhive import qt
-        _file = get_path(file_)
-        test_path(os.path.dirname(_file))
-        if os.path.exists(_file):
-            if diff_:
-                self.diff(_file)
-            if not force:
-                _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
-                if _result == 'No':
-                    return
-        assert not self.path == _file
-        shutil.copy(self.path, _file)
-
-    def delete(self, force=False, wording='delete'):
-        """Delete this file.
-
-        Args:
-            force (bool): delete with no confirmation
-            wording (str): wording for confirmation dialog
-        """
-        if not self.exists():
-            return
-        if not force:
-            from psyhive import qt
-            qt.ok_cancel("{} file?\n\n{}".format(
-                wording.capitalize(), self.path))
-
-        try:
-            os.remove(self.path)
-        except WindowsError as _exc:
-            print 'FAILED TO DELETE', self.path
-            raise _exc
-
-    def diff(self, other, label=None, check_extn=True):
-        """Show diffs between this and another text file.
-
-        Args:
-            other (str): path to other file
-            label (str): pass label to diff app
-            check_extn (bool): check extension is approved (to avoid
-                binary compares)
-       """
-        _other = other
-        if isinstance(_other, File):
-            _other = _other.path
-        diff(self.path, _other, label=label, check_extn=check_extn)
-
-    def edit(self, line_n=None, verbose=0):
-        """Edit this file in a text editor.
-
-        Args:
-            line_n (int): line of the file to open
-            verbose (int): print process data
-        """
-        _arg = self.path
-        if line_n:
-            _arg += ':{:d}'.format(line_n)
-
-        # Try using sublime executable
-        _subl_exe = r'C:\Program Files\Sublime Text 3\subl.exe'
-        if os.path.exists(_subl_exe):
-            _cmds = [abs_path(_subl_exe, win=True), _arg]
-            system(_cmds, verbose=verbose)
-            return
-
-        # Try using psylaunch
-        dprint('Using psylaunch sublime - it may be quicker to install it '
-               'locally on your machine.')
-        import psylaunch
-        psylaunch.launch_app('sublimetext', args=[_arg])
-
-    def is_writable(self):
-        """Check if this path is writable.
-
-        Returns:
-            (bool): writable status
-        """
-        return os.access(self.path, os.W_OK)
-
-    def matches(self, other):
-        """Test if the contents of this file matches another.
-
-        Args:
-            other (str): path to file to compare with
-
-        Returns:
-            (bool): whether files match
-        """
-        _path = get_path(other)
-        return filecmp.cmp(self.path, _path)
-
-    def read(self):
-        """Read the text contents of this file."""
-        return read_file(self.path)
-
-    def read_lines(self):
-        """Read text lines of this file.
-
-        Returns:
-            (str list): list of lines
-        """
-        return [_line.strip('\n') for _line in self.read().split('\n')]
-
-    def set_writable(self, writable=True):
-        """Set writable state of this path.
-
-        Args:
-            writable (bool): writable state
-        """
-        _perms = 0o777 if writable else 0o444
-        os.chmod(self.path, _perms)
-
-    def test_dir(self):
-        """Test this file's parent directory exists."""
-        test_path(self.dir)
-
-    def touch(self):
-        """Touch this path."""
-        touch(self.path)
-
-    def write_text(self, text, force=False):
-        """Write text to this file.
-
-        Args:
-            text (str): text to write
-            force (bool): overwrite existing file with no warning
-        """
-        _force = force
-        if not force and self.exists():
-            from psyhive import qt, icons
-            _result = qt.raise_dialog(
-                'Overwrite file?\n\n{}'.format(self.path),
-                title='Confirm overwrite',
-                icon=icons.EMOJI.find('Worried Face'),
-                buttons=['Yes', 'Diff', 'Cancel'])
-            if _result == 'Yes':
-                _force = True
-            elif _result == 'Diff':
-                _tmp = File('{}/_{}_diff_tmp.{}'.format(
-                    tempfile.gettempdir(), self.basename, self.extn))
-                _tmp.write_text(text, force=True)
-                _tmp.diff(self.path, check_extn=False)
-            else:
-                raise ValueError(_result)
-        write_file(file_=self.path, text=text, force=_force)
 
 
 def abs_path(path, win=False, root=None, verbose=0):
@@ -409,50 +29,52 @@ def abs_path(path, win=False, root=None, verbose=0):
         root (str): override root dir (otherwise cwd is used)
         verbose (int): print process data
     """
-    _path = path
-    if isinstance(_path, Path):
-        _path = _path.path
+    _path = get_path(path)
     if not isinstance(_path, six.string_types):
         raise ValueError(_path)
-    _path = str(_path)
     lprint('USING PATH', _path, verbose=verbose)
 
+    # Clean path
+    _path = str(_path)
+    for _find, _replace in [
+            ('\\', '/'),
+            ('//', '/'),
+            ('/./', '/'),
+    ]:
+        _path = _path.replace(_find, _replace)
+    lprint(' - CLEANED', _path, verbose=verbose)
+
     # Handle file:/// prefix
-    if _path.startswith('file:///'):
-        _path = _path[8:]
+    if _path.startswith('file:/'):
+        _path = _path[6:].lstrip('/')
+        lprint(' - STRIPPED FILE', _path, verbose=verbose)
 
     # Handle home dir paths
+    for _find, _replace in [
+            ('/la1nas006/homedir/hvanderbeek', 'Z:'),
+            ('c:/users/hvande~1', 'C:/users/hvanderbeek'),
+    ]:
+        _path = _path.replace(_find, _replace)
     if _path.startswith('~/'):
         _path = '{}/{}'.format(
             os.environ.get('HOME') or os.environ['HOMEDRIVE'],
-            _path[2:])
+            _path[2:]).replace('//', '/')
+    lprint(' - APPLIED HOME', _path, verbose=verbose)
 
     # Handle relative paths
     if not (
             _path.startswith('/') or
             (len(_path) >= 2 and _path[1] == ':')):
-        _root = root or os.getcwd()
+        _root = abs_path(root or os.getcwd())
         lprint(' - ADDING ROOT', _root, verbose=verbose)
-        _path = '{}/{}'.format(_root, _path)
+        _path = '{}/{}'.format(_root, _path).replace('/./', '/')
+        lprint(' - FIXED RELATIVE', _path, verbose=verbose)
 
-    _path = os.path.abspath(_path)
-    lprint(' - FIXED PATH', _path, verbose=verbose)
-
-    # Unify different dir separators
-    for _find, _replace in [
-            ('\\', '/'),
-            ('//', '/'),
-            ('/./', '/'),
-            ('c:/users/hvande~1', 'C:/users/hvanderbeek'),
-            ('/la1nas006/homedir/hvanderbeek', 'Z:'),
-    ]:
-        _path = _path.replace(_find, _replace)
-    lprint('CLEANED', _path, verbose=verbose)
-
-    # Fix MINGW64 style single drive letters with leading /
+    # Fix MINGW64 style single drive letters with leading / (eg. "/c/")
     _tokens = _path.split('/')
-    if len(_tokens) > 1 and len(_tokens[1]) == 1:
+    if len(_tokens) > 1 and len(_tokens[1]) == 1 and not _tokens[0]:
         _path = '/'.join([_tokens[1]+':']+_tokens[2:])
+        lprint(' - APPLIED MINGW64', _path, verbose=verbose)
 
     # Fix embedded relative dir up
     while '../' in _path:
@@ -469,6 +91,7 @@ def abs_path(path, win=False, root=None, verbose=0):
 
     if win:
         return _path.replace('/', '\\')
+    lprint(' - RESULT', _path, verbose=verbose)
     return _path
 
 
@@ -605,6 +228,7 @@ def _find_path_passes_filters(path, is_dir, type_, extn, base, filter_,
     Returns:
         (bool): whether path passes filters
     """
+    from .p_path import Path
 
     # Apply type filter
     if type_ is None:
@@ -765,6 +389,7 @@ def get_path(path):
     Returns:
         (str): path as a string
     """
+    from .p_path import Path
     if isinstance(path, Path):
         return path.path
     elif isinstance(path, six.string_types):
@@ -818,6 +443,7 @@ def read_yaml(file_):
         (any): yaml data
     """
     import yaml
+
     _file = File(get_path(file_))
     if not _file.exists():
         raise OSError('Missing file '+_file.path)

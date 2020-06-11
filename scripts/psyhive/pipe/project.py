@@ -5,13 +5,13 @@ import os
 
 from psyhive.utils import (
     find, store_result, Dir, get_single, lprint, passes_filter,
-    apply_filter, read_yaml, File, abs_path)
+    apply_filter, read_yaml, File, abs_path, Cacheable)
 
 PROJECTS_ROOT = 'P:/projects'
 _PSYLAUNCH_CFG_FMT = r'{}\code\primary\config\psylaunch\settings.yml'
 
 
-class Project(Dir):
+class Project(Dir, Cacheable):
     """Represents a project on disk."""
 
     def __init__(self, path):
@@ -39,6 +39,8 @@ class Project(Dir):
         self.maya_scripts_path = '{}/code/primary/addons/maya/scripts'.format(
             os.environ.get('PSYOP_PROJECT_PATH'))
         self.psylaunch_cfg = abs_path(_PSYLAUNCH_CFG_FMT.format(self.path))
+        self.cache_fmt = '{}/production/psyhive/cache/{{}}.pkl'.format(
+            self.path)
 
     def find_shot(self, name):
         """Find shot matching the given name.

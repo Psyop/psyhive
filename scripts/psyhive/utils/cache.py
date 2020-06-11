@@ -33,15 +33,16 @@ class Cacheable(object):
         except OSError:
             return None
 
-    def cache_write(self, tag, data):
+    def cache_write(self, tag, data, verbose=0):
         """Write data to the given cache.
 
         Args:
             tag (str): tag to store data to
             data (any): data to store
+            verbose (int): print process data
         """
         _file = self.cache_fmt.format(tag)
-        obj_write(file_=_file, obj=data)
+        obj_write(file_=_file, obj=data, verbose=verbose)
 
 
 class CacheMissing(OSError):
