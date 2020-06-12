@@ -1,3 +1,16 @@
+#### v0.85.0 ####
+
+    Released: Fri 12th Jun 2020 14:57pm
+
+    Frasier: added tool for batch scaling fbx face anim (hmeinertrita/plindkvist)
+    
+    maya_psyhive:
+        shows.frasier.scale_face_joint_anim bugfix scale attrs list,
+        shows.frasier.batch_scale_anim added,
+    psyhive:
+        utils.build_cache_fmt added level arg,
+
+
 #### v0.84.3 ####
 
     Released: Thu 11th Jun 2020 11:59am

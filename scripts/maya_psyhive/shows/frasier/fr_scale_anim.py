@@ -125,7 +125,7 @@ def scale_face_joint_anim(namespace='Tier1_Male_01', scale=1.0):
     # Get curves to scale
     _to_scale = []
     for _jnt in sorted(_JNTS):
-        for _attr in ['tx', 'ty', 'tz', 'rz', 'ry', 'rz']:
+        for _attr in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']:
             _plug = '{}:{}.{}'.format(namespace, _jnt, _attr)
             _key = '{}.{}'.format(_jnt, _attr)
             _rest_val = _REST_POSES.get(_key, 0)
@@ -140,4 +140,4 @@ def scale_face_joint_anim(namespace='Tier1_Male_01', scale=1.0):
     # Apply scaling
     for _crv, _rest_val in _to_scale:
         cmds.scaleKey(_crv, valueScale=scale, valuePivot=_rest_val)
-    print 'SCALED {:d} CURVES'.format(len(_to_scale))
+    print 'SCALED {:d} CURVES - scale={:.03f}'.format(len(_to_scale), scale)
