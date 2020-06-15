@@ -5,11 +5,14 @@ import os
 import sys
 import tempfile
 
+from maya import mel
+
 import psylaunch
 
-from psyhive import icons, py_gui, qt
+from psyhive import icons, py_gui, qt, host
 from psyhive.utils import (
-    CacheMissing, find, store_result, File, get_single, abs_path, copy_text)
+    CacheMissing, find, store_result, File, get_single, abs_path, copy_text,
+    Cacheable, build_cache_fmt, get_path, dprint, Dir)
 
 from maya_psyhive import ref
 from maya_psyhive.tools import fkik_switcher
@@ -28,6 +31,7 @@ _ROOT = ('P:/projects/frasier_38732V/code/primary/addons/general/'
          'frasier/_ToolsPsy')
 _PY_ROOT = _ROOT+'/release/maya/v2018/hsl/python'
 _INGEST_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
+_SCALED_FBX_ROOT = 'P:/projects/frasier_38732V/production/scaled_fbx'
 
 
 py_gui.set_section("Ingestion tools")
@@ -250,10 +254,114 @@ def scale_face_anim(namespace='Tier1_Male_01', scale=1.0):
     fr_scale_anim.scale_face_joint_anim(**locals())
 
 
+class _FASInputFbx(File):
+    """Represents a face anim scale input fbx."""
+
+    def __init__(self, file_):
+        """Constructor.
+
+        Args:
+            file_ (str): path to input fbx
+        """
+        super(_FASInputFbx, self).__init__(file_)
+        _rel_path = Dir(_SCALED_FBX_ROOT).rel_path(self.path)
+        self.anim_scale = float(get_single([
+            _token for _token in _rel_path.split('/')
+            if _token.startswith('scale_')]).split('_')[-1])
+
+    @property
+    def output(self):
+        """Get corresponding output.
+
+        Returns:
+            (FASOutputFbx): output fbx
+        """
+        return _FASOutputFbx('{}/output/{}'.format(
+            _SCALED_FBX_ROOT, self.filename))
+
+
+class _FASOutputFbx(File, Cacheable):
+    """Represents a face anim scale output fbx."""
+
+    @property
+    def cache_fmt(self):
+        """Get cache format.
+
+        Returns:
+            (str): cache format
+        """
+        return build_cache_fmt(self.path, level='project')
+
+
+def _save_fbx(file_, force=False):
+    """Save fbx file.
+
+    Args:
+        file_ (str): fbx path
+        force (bool): replace without confirmation
+    """
+    _file = File(get_path(file_))
+    _file.delete(wording='Replace', force=force)
+    for _mel in [
+            'FBXExportUpAxis z',
+            'FBXExportFileVersion -v FBX201800',
+            'FBXExportSmoothingGroups -v true',
+            'FBXExportSmoothMesh -v true',
+            'FBXExportTangents -v true',
+            'FBXExportSkins -v true',
+            'FBXExportShapes -v true',
+            'FBXExportEmbeddedTextures -v false',
+            'FBXExportApplyConstantKeyReducer -v true',
+            'FBXExportSplitAnimationIntoTakes -c',
+            'FBXExport -f "{}"'.format(_file.path),
+    ]:
+        mel.eval(_mel)
+    dprint('Wrote file', _file.nice_size(), _file.path)
+    assert _file.exists()
+
+
+def batch_scale_anim(filter_='', replace=False):
+    """Batch scale face anim fbxs.
+
+    Fbxs are read from scale folders in:
+
+        P:/projects/frasier_38732V/production/scaled_fbx
+
+    Args:
+        filter_ (str): filter fbx list
+        replace (bool): replace existing output files
+    """
+
+    # Get latest version of each filename
+    _to_process = {}
+    for _fbx in find(_SCALED_FBX_ROOT, extn='fbx', class_=_FASInputFbx,
+                     filter_=filter_, type_='f'):
+        _to_process[_fbx.filename] = _fbx
+    _inputs = sorted(_to_process.values())
+    print 'FOUND {:d} INPUT FBXS'.format(len(_inputs))
+    if not replace:
+        _inputs = [_input for _input in _inputs
+                   if not _input.output.exists() or
+                   _input.output.cache_read('source') != _input]
+        print ' - {:d} NEED REPLACING'.format(len(_inputs))
+
+    # Generate output fbxs
+    for _input in qt.progress_bar(_inputs, 'Processing {:d} fbx{}'):
+        print _input
+        print _input.anim_scale
+        print _input.output
+        print _input.output.cache_fmt
+        host.open_scene(_input, force=True, lazy=False)
+        scale_face_anim(namespace='', scale=_input.anim_scale)
+        _save_fbx(_input.output, force=True)
+        _input.output.cache_write('source', _input)
+        print
+
+
 def copy_scale_face_anim_script():
     """Copy code for scale face anim script to send to motionburner."""
     _body = File(fr_scale_anim.__file__).read()
-    _body += "\n\nscale_face_joint_anim(namespace='Tier1_Male_01', scale=0.5)"
+    _body += "\n\nscale_face_joint_anim(namespace='', scale=0.5)"
     copy_text(_body)
 
 
