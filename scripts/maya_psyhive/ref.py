@@ -182,6 +182,14 @@ class FileRef(object):
             return None
         return str(cmds.file(self._file, query=True, namespace=True))
 
+    def reference_query(self, **kwargs):
+        """Wrapper for maya.cmds referenceQuery function.
+
+        Returns:
+            (any): referenceQuery result
+        """
+        return cmds.referenceQuery(self.ref_node, referenceNode=True, **kwargs)
+
     def reload_(self):
         """Reload this reference."""
         self.unload()
@@ -338,7 +346,7 @@ def find_ref(namespace=None, filter_=None, catch=False, class_=None,
 
 
 def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
-              unloaded=True):
+              unloaded=True, nested=False):
     """Find reference with given namespace.
 
     Args:
@@ -348,6 +356,7 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
         prefix (str): filter by reference prefix (prefix references don't
             use namespaces)
         unloaded (bool): return unloaded refs (default is True)
+        nested (bool): include nested references in results
 
     Returns:
         (FileRef list): scene refs
@@ -362,6 +371,9 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
                  if _ref.namespace and passes_filter(_ref.namespace, filter_)]
     if unloaded:
         _refs = [_ref for _ref in _refs if _ref.is_loaded()]
+    if not nested:
+        _refs = [_ref for _ref in _refs
+                 if not _ref.reference_query(parent=True)]
     return _refs
 
 

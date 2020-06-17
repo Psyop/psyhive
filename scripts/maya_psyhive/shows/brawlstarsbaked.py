@@ -569,7 +569,7 @@ def cleanup_previz_scene(
         print '{:d} REFS TO RENAME'.format(len(_rename))
         if _rename:
             if not force:
-                qt.ok_cancel('Rename {:d} asset{}?'.format(
+                qt.ok_cancel('Rename {:d} reference{}?'.format(
                     len(_rename), get_plural(_rename)))
             for _ref, _namespace in qt.progress_bar(_rename):
                 _ref.rename(_namespace)
