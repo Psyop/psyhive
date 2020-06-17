@@ -12,12 +12,13 @@ from .p_utils import restore_cwd
 class Dir(Path):
     """Represents a directory on disk."""
 
-    def delete(self, force=False, wording='delete'):
+    def delete(self, force=False, wording='delete', icon=None):
         """Delete this directory.
 
         Args:
             force (bool): force delete with no confirmation
             wording (str): override wording for dialog
+            icon (str): override interface icon
         """
         if not self.exists():
             return
@@ -26,7 +27,7 @@ class Dir(Path):
             qt.ok_cancel(
                 "{} this directory?\n\n{}".format(
                     wording.capitalize(), self.path),
-                title='Confirm '+wording)
+                title='Confirm '+wording, icon=icon)
         shutil.rmtree(self.path)
 
     def find(self, **kwargs):
@@ -44,6 +45,20 @@ class Dir(Path):
         print 'LAUNCH BROWSER'
         os.chdir(self.path)
         system('explorer .', verbose=1)
+
+    def move_to(self, trg, force=False):
+        """Move this dir to another location.
+
+        Args:
+            trg (str|Dir): target location
+            force (bool): replace existing without confirmation
+        """
+        from .p_tools import get_path
+        assert self.exists()
+        assert self.is_dir()
+        _target = Dir(get_path(trg))
+        _target.delete(force=force)
+        shutil.move(self.path, _target.path)
 
     def test_path(self):
         """Test this dir exists, creating if needed."""

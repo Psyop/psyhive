@@ -35,6 +35,8 @@ def _fix_icon_paths(ui_file, verbose=0):
     Returns:
         (str): path to ui file to use
     """
+    from psyhive import icons
+
     lprint("FIXING", ui_file, verbose=verbose)
     _file = File(ui_file)
     _body = _file.read()
@@ -48,8 +50,11 @@ def _fix_icon_paths(ui_file, verbose=0):
         lprint(' - UI PATH', _ui_path, verbose=verbose)
         _path = abs_path(_ui_path, root=_file.dir)
         lprint(' - PATH', _path, verbose=verbose)
+        if not File(_path).exists() and '/EMOJI/' in _path:
+            _path = '{}/{}'.format(
+                icons.EMOJI.dir, _path.split('/EMOJI/')[1])
         if not File(_path).exists():
-            raise NotImplementedError
+            raise NotImplementedError(_path)
         _changed.add(_ui_path)
         _body = _body.replace(_ui_path, _path)
     if not _changed:

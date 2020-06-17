@@ -16,9 +16,11 @@ class Path(object):
             path (str): path in file structure
             extn (str): override extension (eg. tar.gz)
         """
-        self.path = path
-        self.dir = os.path.dirname(path)
-        self.filename = os.path.basename(path)
+        from .p_tools import get_path
+
+        self.path = get_path(path)
+        self.dir = os.path.dirname(self.path)
+        self.filename = os.path.basename(self.path)
         if extn:
             assert self.filename.endswith('.'+extn)
             self.extn = extn
@@ -72,6 +74,14 @@ class Path(object):
         """
         return os.path.getsize(self.path)
 
+    def is_dir(self):
+        """Check if this path is a directory.
+
+        Returns:
+            (bool): whether dir
+        """
+        return os.path.isdir(self.path)
+
     def is_file(self):
         """Test if this path is a file.
 
@@ -79,6 +89,15 @@ class Path(object):
             (bool): whether file
         """
         return os.path.isfile(self.path)
+
+    def move_to(self, trg, force=False):
+        """To be implemented in sub classes.
+
+        Args:
+            trg (str): target location
+            force (bool): replace without confirmation
+        """
+        raise NotImplementedError
 
     def nice_age(self):
         """Get this file's age as a readable string.

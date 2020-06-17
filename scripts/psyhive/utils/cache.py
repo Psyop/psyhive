@@ -57,7 +57,7 @@ class WriteError(RuntimeError):
     """Raised on fail to write cached object."""
 
 
-def build_cache_fmt(path, namespace='psyhive', level='tmp'):
+def build_cache_fmt(path, namespace='psyhive', root=None, level='tmp'):
     """Build cache format string for the given namespace.
 
     This maps the path to a location in tmp dir.
@@ -65,6 +65,7 @@ def build_cache_fmt(path, namespace='psyhive', level='tmp'):
     Args:
         path (str): path of cacheable
         namespace (str): namespace for cache
+        root (str): force dir for cache (overrides level)
         level (str): cache level
             tmp - use temp drive
             project - cache to project
@@ -75,7 +76,9 @@ def build_cache_fmt(path, namespace='psyhive', level='tmp'):
     from .path import Path, abs_path
 
     _path = Path(path)
-    if level == 'tmp':
+    if root:
+        _root = root
+    elif level == 'tmp':
         _root = tempfile.gettempdir()
     elif level == 'project':
         from psyhive import pipe

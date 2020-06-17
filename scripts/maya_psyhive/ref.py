@@ -337,7 +337,8 @@ def find_ref(namespace=None, filter_=None, catch=False, class_=None,
     return get_single(_refs, catch=catch, name='ref')
 
 
-def find_refs(namespace=None, filter_=None, class_=None, prefix=None):
+def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
+              unloaded=True):
     """Find reference with given namespace.
 
     Args:
@@ -346,6 +347,7 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None):
         class_ (FileRef): override FileRef class
         prefix (str): filter by reference prefix (prefix references don't
             use namespaces)
+        unloaded (bool): return unloaded refs (default is True)
 
     Returns:
         (FileRef list): scene refs
@@ -358,6 +360,8 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None):
     if filter_:
         _refs = [_ref for _ref in _refs
                  if _ref.namespace and passes_filter(_ref.namespace, filter_)]
+    if unloaded:
+        _refs = [_ref for _ref in _refs if _ref.is_loaded()]
     return _refs
 
 

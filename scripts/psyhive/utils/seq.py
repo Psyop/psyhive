@@ -43,6 +43,21 @@ class Seq(object):
         _frames.add(frame)
         self.set_frames(sorted(_frames))
 
+    def copy_to(self, seq, parent=None):
+        """Copy this sequence to a new location.
+
+        Args:
+            seq (Seq): target location
+            parent (QDialog): parent dialog for progress bar
+        """
+        from psyhive import qt
+        seq.delete(wording='Replace')
+        seq.test_dir()
+        for _frame in qt.progress_bar(
+                self.get_frames(), 'Copying {:d} frame{}',
+                parent=parent):
+            shutil.copy(self[_frame], seq[_frame])
+
     def contains(self, file_):
         """Test if the given file is contained in this seq.
 
@@ -57,7 +72,7 @@ class Seq(object):
         _frame = self.get_frame(file_)
         return _frame is not None
 
-    def delete(self, wording='remove', force=False, frames=None):
+    def delete(self, wording='remove', force=False, frames=None, icon=None):
         """Delete this sequence's frames.
 
         The user is asked to confirm before deletion.
@@ -66,6 +81,7 @@ class Seq(object):
             wording (str): wording for confirmation dialog
             force (bool): force delete with no confirmation
             frames (int list): list of frames to delete (if not all)
+            icon (str): override interface icon
         """
         from psyhive import qt
 
@@ -79,7 +95,7 @@ class Seq(object):
                 '{} existing frame{} {} of image sequence?\n\n{}'.format(
                     wording.capitalize(), get_plural(_frames),
                     ints_to_str(_frames), self.path),
-                title='Confirm '+wording)
+                title='Confirm '+wording, icon=icon)
         for _frame in _frames:
             os.remove(self[_frame])
         self.get_frames(force=True)

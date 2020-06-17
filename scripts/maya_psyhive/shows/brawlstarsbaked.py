@@ -441,7 +441,7 @@ def remove_mesh_xrayer_from_sel():
 py_gui.set_section('Previs Cleanup')
 
 
-def _get_correct_namespace(ref_, used=()):
+def _get_correct_namespace(ref_, used=(), verbose=0):
     """Get target namespace for the given reference.
 
     If it is the first instance, just use the asset name - for subsequent
@@ -450,13 +450,31 @@ def _get_correct_namespace(ref_, used=()):
     Args:
         ref_ (FileRef): reference to check
         used (tuple): list of namespaces to avoid
+        verbose (int): print process data
 
     Returns:
         (str): target namespace
     """
-    _asset = tk2.TTOutputName(ref_.path)
 
-    _ns = _asset.asset
+    # Try and get namespace base
+    _ns_base = None
+    try:
+        _asset = tk2.TTOutputName(ref_.path)
+    except ValueError:
+        pass
+    else:
+        _ns_base = _asset.asset
+    try:
+        _work = tk2.TTWork(ref_.path)
+    except ValueError:
+        pass
+    else:
+        _ns_base = _work.asset
+    if not _ns_base:
+        raise ValueError(ref_.path)
+
+    # Get next avaliable ns slot
+    _ns = _ns_base
     _count = 1
     while (
             _ns in used or
@@ -466,39 +484,99 @@ def _get_correct_namespace(ref_, used=()):
             break
         check_heart()
         _count += 1
-        _ns = '{}_{:d}'.format(_asset.asset, _count)
-        print 'TESTING', _ns
+        _ns = '{}_{:d}'.format(_ns_base, _count)
+        lprint(' - TESTING', _ns, verbose=verbose)
 
     return _ns
 
 
-def cleanup_previz_namespaces(force=False):
+def _update_work_refs(filter_, force):
+    """Update work file references to outputs where possible.
+
+    Args:
+        filter_ (str): filter the list of references to check
+        force (bool): update without confirmation
+    """
+    _out_kwargs = {
+        'rig': {'output_type': 'rig',
+                'output_name': 'main',
+                'extension': 'mb',
+                'format': 'maya'},
+    }
+
+    # Find refs to fix
+    _unfixable = []
+    _to_fix = []
+    for _ref in ref.find_refs(unloaded=False, filter_=filter_):
+        try:
+            _work = tk2.TTWork(_ref.path)
+        except ValueError:
+            continue
+        if _work.step not in _out_kwargs:
+            _unfixable.append(_ref.namespace)
+            continue
+        _out = _work.map_to(
+            tk2.TTOutputFile, **_out_kwargs[_work.step]).find_latest()
+        if not _out:
+            _unfixable.append(_ref.namespace)
+            continue
+        _to_fix.append((_ref, _out))
+        print ' - WORK', _work
+    if _unfixable and not force:
+        qt.notify_warning(
+            'Failed to update {:d} work file reference{}:'
+            '\n\n    {}'.format(
+                len(_unfixable), get_plural(_unfixable),
+                '\n    '.join(_unfixable)))
+
+    if _to_fix:
+        if not force:
+            qt.ok_cancel(
+                'Update {:d} work file reference{} to asset{}?'.format(
+                    len(_to_fix), get_plural(_to_fix), get_plural(_to_fix)))
+        for _ref, _out in qt.progress_bar(_to_fix):
+            _ref.swap_to(_out)
+
+
+@py_gui.install_gui(label_width=90)
+def cleanup_previz_scene(
+        fix_namespaces=True, update_work=True, force=False, filter_=''):
     """Clean up previz namespaces in the current scene.
 
     This updates namespaces to match asset manager style naming and updates
     the reference node names to match the new namespace.
 
     Args:
+        fix_namespaces (bool): update namespaces to follow asset manager style
+        update_work (bool): update work file refs to use published outputs
         force (bool): update without confirmation
+        filter_ (str): filter the list of references to check
     """
-    _used = set()
-    _rename = []
-    for _ref in ref.find_refs():
-        if not _ref.is_loaded():
-            continue
-        _namespace = _get_correct_namespace(_ref, used=_used)
-        if _namespace == _ref.namespace:
-            continue
-        # _root
-        print '{:30} {}'.format(_ref.namespace, _namespace)
-        _used.add(_namespace)
-        _rename.append((_ref, _namespace))
 
-    if not force:
-        qt.ok_cancel('Rename {:d} asset{}?'.format(
-            len(_rename), get_plural(_rename)))
-    for _ref, _namespace in qt.progress_bar(_rename):
-        _ref.rename(_namespace)
+    # Fix namespaces
+    if fix_namespaces:
+        _used = set()
+        _rename = []
+        for _ref in ref.find_refs(unloaded=False, filter_=filter_):
+            if not _ref.is_loaded():
+                continue
+            _namespace = _get_correct_namespace(_ref, used=_used)
+            if _namespace == _ref.namespace:
+                continue
+            print '{:30} {}'.format(_ref.namespace, _namespace)
+            _used.add(_namespace)
+            _rename.append((_ref, _namespace))
+        print '{:d} REFS TO RENAME'.format(len(_rename))
+        if _rename:
+            if not force:
+                qt.ok_cancel('Rename {:d} asset{}?'.format(
+                    len(_rename), get_plural(_rename)))
+            for _ref, _namespace in qt.progress_bar(_rename):
+                _ref.rename(_namespace)
+
+    # Fix work files
+    if update_work:
+        _update_work_refs(filter_, force)
 
 
 def _load_and_cleanup_workfile(work):
@@ -545,7 +623,7 @@ def _load_and_cleanup_workfile(work):
         _ref.swap_to(_latest)
         print
 
-    cleanup_previz_namespaces(force=True)
+    cleanup_previz_scene(force=True)
 
     work.find_next().save('Cleaned up namespaces')
 
