@@ -1,3 +1,29 @@
+#### v0.86.0 ####
+
+    Released: Wed 17th Jun 2020 16:17pm
+
+    Brawl Stars: cleanup previs scene bugfix error on workfile reference + added option to updated work -> asset (scomly),
+    
+    maya_psyhive:
+        ref.find_refs added unloaded flag,
+        shows.brawlstarsbaked renamed cleanup_previz_namespaces -> cleanup_previz_scene,
+        shows.brawlstarsbaked.cleanup_previz_scene added work ref handling,
+        shows.brawlstarsbaked.cleanup_previz_scene added opt to replace work ref with asset,
+        utils.render use arnold render directly + support multi channel exrs,
+    psyhive:
+        qt.UiDialog3 added handling for fix icon paths of moved ui files,
+        qt.safe_timer_event allow event as None,
+        utils str_to_frames/str_to_range added,
+        utils.build_cache_fmt added root arg,
+        utils.Dir.delete added dialog icon override flag,
+        utils File/Dir move_to added,
+        utils.Path allow init from Path object,
+        utils.Path.is_dir added,
+        utils.PyDef.get_docs_suggestion added default for keyPressEvent,
+        utils.Seq.copy_to added,
+        utils.Seq.delete added dialog icon override flag,
+
+
 #### v0.85.0 ####
 
     Released: Fri 12th Jun 2020 14:57pm

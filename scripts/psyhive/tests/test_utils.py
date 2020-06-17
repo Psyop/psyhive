@@ -208,6 +208,23 @@ class TestPath(unittest.TestCase):
         _test.delete(force=True)
 
 
+class TestDir(unittest.TestCase):
+
+    def test_move_to(self):
+
+        _file_a = File(abs_path(
+            '{}/A/file.text'.format(tempfile.gettempdir())))
+        _file_b = File(abs_path(
+            '{}/B/file.text'.format(tempfile.gettempdir())))
+        _file_a.touch()
+        _dir = _file_a.parent()
+        print _dir
+        _file_a.parent().move_to(_file_b.parent())
+        assert _file_b.exists()
+        _file_b.parent().delete(force=True)
+        assert not _file_b.parent().exists()
+
+
 class TestSeq(unittest.TestCase):
 
     def test_contains(self):

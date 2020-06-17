@@ -768,7 +768,8 @@ def pause_viewports_on_exec(func):
     return _pause_viewport_func
 
 
-def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True):
+def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
+           force=False):
     """Render the current scene.
 
     Args:
@@ -776,32 +777,40 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True):
         camera (str): camera to render through
         layer (str): layer to render
         col_mgt (bool): apply colour management
+        force (bool): replace existing without confirmation
     """
+    from maya_psyhive import open_maya as hom
     cmds.loadPlugin('mtoa', quiet=True)
     from mtoa.cmds import arnoldRender
 
     _cam = camera
     if not _cam:
-        raise NotImplementedError
+        _cam = hom.get_active_cam()
 
+    # Prepare output path
     _file = File(get_path(file_))
     _file.test_dir()
+    _file.delete(force=force)
 
-    _editor = 'renderView'
+    # Prepare arnold
+    cmds.setAttr("defaultArnoldRenderOptions.abortOnError", False)
+    cmds.setAttr("defaultArnoldDriver.colorManagement", int(col_mgt))
+    _extn = {'jpg': 'jpeg'}.get(_file.extn, _file.extn)
+    cmds.setAttr('defaultArnoldDriver.aiTranslator', _extn, type='string')
+    cmds.setAttr('defaultArnoldDriver.prefix',
+                 "{}/{}".format(_file.dir, _file.basename), type='string')
 
-    _fmt_mgr = createImageFormats.ImageFormats()
-    _fmt_mgr.pushRenderGlobalsForDesc({
-        'jpg': "JPEG",
-        'exr': "EXR",
-    }[_file.extn])
-
+    # Execute renders
+    assert not _file.exists()
     arnoldRender.arnoldRender(
         640, 640, True, True, _cam, ' -layer '+layer)
-    cmds.renderWindowEditor(_editor, edit=True, writeImage=_file.path,
-                            colorManage=col_mgt)
-
+    if not _file.exists():
+        _tmp_file = File('{}/{}_1.{}'.format(
+            _file.dir, _file.basename, _file.extn))
+        print ' - TMP FILE', _tmp_file.path
+        assert _tmp_file.exists()
+        _tmp_file.move_to(_file)
     assert _file.exists()
-    _fmt_mgr.popRenderGlobals()
 
 
 def restore_sel(func):

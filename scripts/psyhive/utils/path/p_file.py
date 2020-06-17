@@ -135,6 +135,19 @@ class File(Path):
         from .p_tools import read_file
         return read_file(self.path)
 
+    def move_to(self, trg, force=False):
+        """Move this file to somewhere else.
+
+        Args:
+            trg (str): new location
+            force (bool): replace any existing file without confirmation
+        """
+        from .p_tools import get_path
+        _trg = File(get_path(trg))
+        if not force and _trg.exists():
+            raise NotImplementedError
+        shutil.move(self.path, _trg.path)
+
     def read_lines(self):
         """Read text lines of this file.
 

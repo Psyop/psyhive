@@ -120,6 +120,7 @@ ignore:
         hv-test/bin/machi5
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
+        hv_test/u_pipe/home.py
         psyhive/farm/psyq_plugin/mayapy_worker.p
         psyhive/tk/misc.py
         psyhive/tk/templates/tt_base_work.py

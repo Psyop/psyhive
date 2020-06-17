@@ -270,3 +270,50 @@ def str_to_ints(string, chunk_sep=",", rng_sep="-", end=None):
             _ints.append(int(_rng))
 
     return _ints
+
+
+def str_to_frames(string):
+    """Get a list of frames from a string.
+
+    eg:
+
+        - '1-4' -> [1, 2, 3, 4]
+        - '1-4,5,7' -> [1, 2, 3, 4, 5, 7]
+        - '*' -> timeline frames
+        - '' -> timeline frames
+        - None -> timeline frames
+
+    Args:
+        string (str): string to read
+
+    Returns:
+        (int list): list of frames
+    """
+    from psyhive import host
+    if not string or string == '*':
+        return host.t_frames()
+    return str_to_ints(string)
+
+
+def str_to_range(string):
+    """Get a start/end range from a string.
+
+    eg:
+        - '1-10' -> 1, 10
+        - '1-5,10-15' -> ValueError incomplete range
+        -  '*' -> timeline range
+
+    Args:
+        string (str): string to read
+
+    Returns:
+        (int tuple): start/end frame range
+
+    Raises:
+        (ValueError): on incomplete range
+    """
+    _frames = str_to_frames(string)
+    _start, _end = min(_frames), max(_frames)
+    if _frames != range(_start, _end+1):
+        raise ValueError("Incomplete range {}".format(string))
+    return _start, _end

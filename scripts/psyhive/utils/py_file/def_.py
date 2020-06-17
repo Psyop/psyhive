@@ -20,6 +20,7 @@ _QT_DOCS_FMT = '''
 {indent}"""
 '''.lstrip()
 _QT_SUGGESTION_MAP = {
+    'keyPressEvent': {'desc': 'key press', 'event': 'QKeyEvent'},
     'mousePressEvent': {'desc': 'mouse press', 'event': 'QMouseEvent'},
     'mouseReleaseEvent': {'desc': 'mouse release', 'event': 'QMouseEvent'},
     'mouseMoveEvent': {'desc': 'mouse move', 'event': 'QMouseEvent'},
