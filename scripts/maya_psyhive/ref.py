@@ -369,7 +369,7 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
     if filter_:
         _refs = [_ref for _ref in _refs
                  if _ref.namespace and passes_filter(_ref.namespace, filter_)]
-    if unloaded:
+    if not unloaded:
         _refs = [_ref for _ref in _refs if _ref.is_loaded()]
     if not nested:
         _refs = [_ref for _ref in _refs

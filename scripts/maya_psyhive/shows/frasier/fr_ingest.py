@@ -318,13 +318,11 @@ def ingest_ma_files_to_pipeline(
                 print ' - COMP BLAST', _work.blast_comp.path
                 print ' - FBX', _work.get_export_fbx().path
                 print ' - NO PROCESSING NEEDED'
+                print
                 continue
 
         _to_process.append([_ma, _work])
 
-        print
-
-    print
     print
     print 'FOUND {:d} FILES TO PROCESS'.format(len(_to_process))
     print
