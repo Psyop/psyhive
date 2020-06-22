@@ -1,3 +1,18 @@
+#### v0.87.2 ####
+
+    Released: Mon 22nd Jun 2020 16:02pm
+
+    Fraiser: added Jaw_M joint to scale face anim tool (hmeinertrita),
+    
+    maya_psyhive:
+        shows.fraiser.SCALE_ANIM_JNTS made public,
+        shows.fraiser scale anim added Jaw_M joint,
+        utils.del_namespace fix double confirm on remove ref,
+    psyhive:
+        host.handle_unsaved_changes added icon/dialog flags,
+        utils.HEART added,
+
+
 #### v0.87.1 ####
 
     Released: Wed 17th Jun 2020 17:30pm

@@ -6,7 +6,7 @@ from .cache import (
     store_result_content_dependent, build_cache_fmt, ReadError, CacheMissing)
 from .dev_ import dev_mode, set_dev_mode, revert_dev_mode
 from .email_ import send_email
-from .heart import check_heart
+from .heart import check_heart, HEART
 from .filter_ import passes_filter, apply_filter
 from .misc import (
     lprint, system, dprint, wrap_fn, chain_fns, get_cfg, to_nice, get_single,

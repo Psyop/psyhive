@@ -346,12 +346,16 @@ def del_namespace(namespace, force=True):
     if not cmds.namespace(exists=namespace):
         return
 
+    _force = force
     _ref = ref.find_ref(namespace=namespace.lstrip(':'), catch=True)
     if _ref:
-        _ref.remove(force=force)
+        _ref.remove(force=_force)
+        _force = True
 
-    if not force:
-        raise NotImplementedError(namespace)
+    if not _force:
+        qt.ok_cancel(
+            'Are you sure you want to delete the namespace {}?'.format(
+                namespace))
     set_namespace(namespace, clean=True)
     set_namespace(":")
     cmds.namespace(removeNamespace=namespace)
@@ -795,6 +799,7 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
     # Prepare arnold
     cmds.setAttr("defaultArnoldRenderOptions.abortOnError", False)
     cmds.setAttr("defaultArnoldDriver.colorManagement", int(col_mgt))
+    cmds.setAttr("defaultArnoldDriver.mergeAOVs", True)
     _extn = {'jpg': 'jpeg'}.get(_file.extn, _file.extn)
     cmds.setAttr('defaultArnoldDriver.aiTranslator', _extn, type='string')
     cmds.setAttr('defaultArnoldDriver.prefix',

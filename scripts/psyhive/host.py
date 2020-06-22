@@ -96,10 +96,14 @@ def cur_scene():
     return abs_path(_cur_scene)
 
 
-def handle_unsaved_changes():
+def handle_unsaved_changes(icon=None, parent=None):
     """Handle unsaved changes in the current scene.
 
     If there are unsaved changes, offer to save or ignore them.
+
+    Args:
+        icon (str): override dialog icon
+        parent (QDialog): override dialog parent
     """
     from psyhive import qt, icons
 
@@ -110,10 +114,9 @@ def handle_unsaved_changes():
         _msg += '\n\n{}'.format(_cur_scene)
 
     _result = qt.raise_dialog(
-        _msg,
-        title='Save changes',
+        _msg, title='Save changes', parent=parent,
         buttons=["Save", "Don't Save", "Cancel"],
-        icon=icons.EMOJI.find('Octopus'))
+        icon=icon or icons.EMOJI.find('Octopus'))
     if _result == "Save":
         save_scene()
     elif _result == "Don't Save":
