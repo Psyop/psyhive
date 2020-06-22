@@ -11,7 +11,6 @@ from ctypes import wintypes
 import six
 
 from ..misc import lprint, system, dprint, bytes_to_str, copy_text
-from ..heart import check_heart
 from ..filter_ import passes_filter
 
 from .p_file import File
@@ -78,7 +77,6 @@ def abs_path(path, win=False, root=None, verbose=0):
 
     # Fix embedded relative dir up
     while '../' in _path:
-        check_heart()
         _tokens = _path.split("/")
         _idx = _tokens.index('..')
         _tokens.pop(_idx)

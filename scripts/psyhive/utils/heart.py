@@ -1,7 +1,10 @@
 """Tools for managing the check heart loop breaker tool."""
 
-import os
 import time
+
+from .path import File, abs_path
+
+HEART = File(abs_path('~/.heart'))
 
 _INITIATED = False
 _LAST_CHECK = None
@@ -18,24 +21,19 @@ def check_heart():
     Raises:
         (RuntimeError): if the heart file is missing
     """
-
-    from psyhive.utils.path import touch, abs_path
-
-    global _INITIATED, _LAST_CHECK
-
-    _heart = abs_path('~/.heart')
+    global _INITIATED, _LAST_CHECK, HEART
 
     # Make sure heart exists
     if not _INITIATED:
-        touch(_heart)
+        HEART.touch()
         _INITIATED = True
 
     # Only check once a second
     if _LAST_CHECK and time.time() - _LAST_CHECK < 1.0:
         return
 
-    if not os.path.exists(_heart):
-        touch(_heart)
+    if not HEART.exists():
+        HEART.touch()
         raise RuntimeError("Missing heart")
 
     _LAST_CHECK = time.time()

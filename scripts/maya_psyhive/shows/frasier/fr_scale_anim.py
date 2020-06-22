@@ -2,7 +2,7 @@
 
 from maya import cmds
 
-_JNTS = [
+SCALE_ANIM_JNTS = [
     'LipUpper_03_R', 'LipUpper_02_L', 'LipUpper_02_R',
     'LipUpper_04_R', 'LipUpper_01_M', 'LipUpper_05_M',
     'LipCorner_01_R', 'LipLower_03_R', 'Depressor_01_R',
@@ -13,7 +13,7 @@ _JNTS = [
     'Nostril_01_R', 'Nose_01_M', 'Nostril_01_L', 'LevatorUpper_L',
     'LevatorLower_L', 'Buccinator_01_L', 'Depressor_02_R',
     'Mentalis_02_M', 'Depressor_02_L', 'ZygomaticMajor_01_R',
-    'ZygomaticMajor_01_L', 'NasalisLower_R', 'NasalisLower_L']
+    'ZygomaticMajor_01_L', 'NasalisLower_R', 'NasalisLower_L', 'Jaw_M']
 
 _REST_POSES = {
     'Buccinator_01_L.tx': -2.8742,
@@ -34,6 +34,8 @@ _REST_POSES = {
     'Depressor_02_R.tx': 11.4379,
     'Depressor_02_R.ty': -0.2005,
     'Depressor_02_R.tz': -1.6216,
+    'Jaw_M.tx': 1.4277,
+    'Jaw_M.ty': 3.6461,
     'LevatorLower_L.tx': -1.5475,
     'LevatorLower_L.ty': 11.3206,
     'LevatorLower_L.tz': 3.7592,
@@ -124,7 +126,7 @@ def scale_face_joint_anim(namespace='Tier1_Male_01', scale=1.0):
 
     # Get curves to scale
     _to_scale = []
-    for _jnt in sorted(_JNTS):
+    for _jnt in sorted(SCALE_ANIM_JNTS):
         for _attr in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']:
             _plug = '{}:{}.{}'.format(namespace, _jnt, _attr)
             _key = '{}.{}'.format(_jnt, _attr)
