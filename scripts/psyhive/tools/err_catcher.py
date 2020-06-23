@@ -10,7 +10,7 @@ import webbrowser
 from psyhive import qt, icons, host, pipe
 from psyhive.utils import (
     abs_path, check_heart, File, FileError, lprint, dprint, dev_mode,
-    get_single, send_email)
+    get_single, send_email, wrap_fn, copy_text)
 
 _UI_FILE = abs_path('err_dialog.ui', root=os.path.dirname(__file__))
 
@@ -78,18 +78,30 @@ class _ErrDialog(qt.HUiDialog3):
     def _callback__SendEmail(self):
         send_email('hvanderbeek@psyop.tv',
                    subject='[ERR] {}'.format(self.message),
-                   body=self._get_summary())
+                   body=self.summary)
 
     def _callback__MakeTicket(self):
         _make_ticket(
             summary='[PSYHIVE] Error: {}'.format(self.message),
-            description=self._get_summary())
+            description=self.summary)
 
     def _callback__ViewCode(self):
         _line = get_single(self.ui.Traceback.selected_data())
         _line.edit()
 
-    def _get_summary(self):
+    def _context__SendEmail(self, menu):
+        _fn = wrap_fn(copy_text, self.summary)
+        menu.add_action('Copy email text', icon=icons.COPY, func=_fn)
+
+    def _context__MakeTicket(self, menu):
+        _url = _make_ticket(
+            summary='[PSYHIVE] Error: {}'.format(self.message),
+            description=self.summary, open_=False)
+        _fn = wrap_fn(copy_text, _url)
+        menu.add_action('Copy ticket url', icon=icons.COPY, func=_fn)
+
+    @property
+    def summary(self):
         """Get error summary for email/ticket.
 
         Returns:
@@ -274,7 +286,7 @@ def get_error_catcher(exit_on_error=False, remove_args=False, verbose=1):
     return _error_catcher
 
 
-def _make_ticket(summary, description):
+def _make_ticket(summary, description, open_=True):
     """Open a browser at the create YouTrack ticket page.
 
     The fields should be filled out with summary/description/assignee.
@@ -282,13 +294,17 @@ def _make_ticket(summary, description):
     Args:
         summary (str): ticket summary/title
         description (str): ticket description
+        open_ (bool): open url in browser
     """
     _url = ('https://ticket.ny.psyop.tv/newIssue?'
             'summary={}&description={}'
             '&c=Type%20Performance%20Problem'
             '&c=Assignee%20hvanderbeek')
-    webbrowser.open(_url.format(
-        urllib.quote_plus(summary), urllib.quote_plus(description)))
+    _url = _url.format(
+        urllib.quote_plus(summary), urllib.quote_plus(description))
+    if open_:
+        webbrowser.open(_url)
+    return _url
 
 
 def _pass_exception_to_sentry(exc):
