@@ -1,3 +1,13 @@
+#### v0.87.3 ####
+
+    Released: Tue 23rd Jun 2020 10:42am
+
+    Error catcher: added context options for copy email text + copy make ticket url,
+    
+    psyhive:
+        tools.catch_error added added copy email text + ticket url ctx opts,
+
+
 #### v0.87.2 ####
 
     Released: Mon 22nd Jun 2020 16:02pm
