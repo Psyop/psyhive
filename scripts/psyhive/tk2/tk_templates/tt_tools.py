@@ -137,7 +137,7 @@ def get_shot(path):
         (TTRoot|None): shot root (if any)
     """
     try:
-        _root = TTRoot(path)
+        _root = TTShot(path)
     except ValueError:
         return None
     if not _root.shot:

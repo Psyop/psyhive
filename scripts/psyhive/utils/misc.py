@@ -335,14 +335,14 @@ def read_url(url, edit=False, attempts=5):
     Returns:
         (str): url response
     """
-    from psyhive.utils import write_file, File, abs_path
+    from .path import write_file, File, abs_path
 
     # Attempt to read data
-    _data = None
+    _data = _response = None
     for _idx in range(attempts):
         try:
-            _response = urllib2.urlopen(url)
-            _data = _response.read()
+            _connection = urllib2.urlopen(url)
+            _data = _connection.read()
         except (urllib2.HTTPError, httplib.IncompleteRead) as _exc:
             print 'FAILED({}) - {:d}'.format(type(_exc).__name__, _idx+1)
             time.sleep(2)

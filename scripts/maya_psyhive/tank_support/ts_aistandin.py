@@ -217,19 +217,8 @@ def _get_abc_range_from_sg(abc, mode='shot', verbose=0):
         _shot = tk2.get_shot(_out.path)
         if not _shot:
             return None
-        _data = get_single(tank.platform.current_engine().shotgun.find(
-            'Shot', filters=[
-                ["project", "is", [tk2.get_project_sg_data(_project)]],
-                ["code", "is", [_shot.get_sg_data()['name']]]],
-            fields=["sg_cut_in", "sg_cut_out"]), catch=True)
-        if verbose:
-            print 'SHOT DATA', _shot.get_sg_data()
-        if (
-                _data and
-                _data.get('sg_cut_in') is not None and
-                _data.get('sg_cut_out') is not None):
-            _result = _data['sg_cut_in'], _data['sg_cut_out']
-        else:
+        _result = _shot.get_frame_range()
+        if not _result or None in _result:
             _result = None
     else:
         raise ValueError(mode)

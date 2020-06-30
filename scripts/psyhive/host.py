@@ -44,6 +44,7 @@ else:
     _scene_modified = wrap_fn(cmds.file, query=True, modified=True)
     t_start = wrap_fn(cmds.playbackOptions, query=True, minTime=True)
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
+    save = wrap_fn(cmds.file, save=True)
     set_start = wrap_fn(cmds.playbackOptions, arg_to_kwarg='minTime')
     set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
     get_main_window_ptr = ui.get_main_window_ptr
@@ -55,12 +56,15 @@ if not NAME:
     except ImportError:
         pass
     else:
+        from hou_psyhive.utils import save_as
         NAME = 'hou'
         _get_cur_scene = hou.hipFile.name
         get_fps = hou.fps
         get_main_window_ptr = hou.ui.mainQtWindow
+        save = hou.hipFile.save
         t_start = lambda: hou.playbar.frameRange()[0]
         t_end = lambda: hou.playbar.frameRange()[1]
+
 
 if not NAME:
     try:

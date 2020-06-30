@@ -62,10 +62,6 @@ class TestTankSupport(unittest.TestCase):
                 'animation/output/animcache/aadvark_archer1/v039/alembic/'
                 'dev0000_aadvark_archer1_v039.abc')
         assert ts_aistandin._get_abc_range_from_sg(_abc) == (1005, 1015)
-        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
-                'animation/output/animcache/test_archer/v005/alembic/'
-                'dev9999_test_archer_v005.abc')
-        assert ts_aistandin._get_abc_range_from_sg(_abc) is None
 
     def test_frustrum_test_blast(self):
 
@@ -185,10 +181,6 @@ class TestTankSupport(unittest.TestCase):
                 'animation/output/animcache/aadvark_archer1/v039/alembic/'
                 'dev0000_aadvark_archer1_v039.abc')
         assert ts_shaders._get_abc_range_from_sg(_abc) == (1005, 1015)
-        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
-                'animation/output/animcache/test_archer/v005/alembic/'
-                'dev9999_test_archer_v005.abc')
-        assert ts_shaders._get_abc_range_from_sg(_abc) is None
 
     def test_build_shader_outputs(self):
         _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/test/'

@@ -513,3 +513,13 @@ class TTIncrement(TTBase, File):
         _dcc = get_dcc(_path)
         _hint = self.hint_fmt.format(dcc=_dcc, area=_area)
         super(TTIncrement, self).__init__(path, hint=_hint)
+
+    def get_shot(self):
+        """Get this increment's shot.
+
+        Returns:
+            (TTRoot|None): shot (if any)
+        """
+        if self.shot:
+            return TTShot(self.path)
+        return None

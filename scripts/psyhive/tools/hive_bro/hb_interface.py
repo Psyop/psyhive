@@ -218,9 +218,13 @@ class _HiveBro(qt.HUiDialog3):
         if not _work and _task and _step:
             _dcc = hb_utils.cur_dcc()
             _hint = '{dcc}_{area}_work'.format(dcc=_dcc, area=_step.area)
-            _work = _step.map_to(
-                hint=_hint, class_=tk2.TTWork, Task=_task,
-                extension=tk2.get_extn(_dcc), version=1)
+            try:
+                _work = _step.map_to(
+                    hint=_hint, class_=tk2.TTWork, Task=_task,
+                    extension=tk2.get_extn(_dcc), version=1)
+            except ValueError:
+                _work = None
+
         self.ui.WorkPath.setText(_work.path if _work else '')
 
     def _redraw__WorkSave(self):

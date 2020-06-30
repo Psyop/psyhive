@@ -794,7 +794,7 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
     # Prepare output path
     _file = File(get_path(file_))
     _file.test_dir()
-    _file.delete(force=force)
+    _file.delete(force=force, wording='Replace')
 
     # Prepare arnold
     cmds.setAttr("defaultArnoldRenderOptions.abortOnError", False)

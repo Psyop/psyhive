@@ -1,6 +1,7 @@
 ignore:
     abstract-method:
         hv_test/diary/y19/d0726/_machi/robot.py
+        psyhive/tk2/tk_templates/tt_base.py
     anomalous-backslash-in-string:
         hv_test/diary/y19/d0528/bro_tools_tests.py
         hv_test/diary/y19/d0717/make_littlezoo_zip.py

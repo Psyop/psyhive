@@ -140,6 +140,18 @@ class FileRef(object):
         from maya_psyhive import open_maya as hom
         return hom.HPlug(self.get_attr(plug))
 
+    def get_tfm(self, name):
+        """Get transform node from this reference.
+
+        Args:
+            name (str): node name
+
+        Returns:
+            (HFnTransform): transform node
+        """
+        from maya_psyhive import open_maya as hom
+        return self.get_node(name, class_=hom.HFnTransform)
+
     def import_nodes(self):
         """Import nodes from this reference."""
         cmds.file(self._file, importReference=True)
@@ -396,9 +408,14 @@ def get_selected(catch=False, multi=False, class_=None, verbose=0):
     _sel_ref_nodes = cmds.ls(selection=True, type='reference')
     lprint('SEL REF NODES', _sel_ref_nodes, verbose=verbose)
 
-    _ref_nodes = sorted(set(_sel_ref_nodes + [
-        cmds.referenceQuery(_node, referenceNode=True)
-        for _node in cmds.ls(selection=True)]))
+    _ref_nodes = set(_sel_ref_nodes)
+    for _node in cmds.ls(selection=True):
+        try:
+            _ref_node = cmds.referenceQuery(_node, referenceNode=True)
+        except RuntimeError:
+            continue
+        _ref_nodes.add(_ref_node)
+    _ref_nodes = sorted(_ref_nodes)
     lprint('REF NODES', _ref_nodes, verbose=verbose)
 
     _class = class_ or FileRef

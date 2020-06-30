@@ -322,7 +322,7 @@ class TTShot(TTRoot):
         """
         return int(self.idx_s)
 
-    def get_frame_range(self, use_cut=False):
+    def get_frame_range(self, use_cut=True):
         """Read shot frame range from shotgun.
 
         This uses head in/tail out data values.
@@ -335,10 +335,7 @@ class TTShot(TTRoot):
         """
         from psyhive import tk2
         _shotgun = tank.platform.current_engine().shotgun
-        if not use_cut:
-            _fields = ["sg_head_in", "sg_tail_out"]
-        else:
-            _fields = ["sg_cut_in", "sg_cut_out"]
+        _fields = _get_rng_fields(use_cut)
         _sg_data = _shotgun.find_one(
             "Shot", filters=[
                 ["project", "is", [tk2.get_project_sg_data(self.project)]],
@@ -346,6 +343,35 @@ class TTShot(TTRoot):
             ],
             fields=_fields)
         return tuple([_sg_data[_field] for _field in _fields])
+
+    def set_frame_range(self, rng, use_cut=True):
+        """Set frame range in shotgun.
+
+        Args:
+            rng (int tuple): start/end frames
+            use_cut (bool): set cut in/out fields
+        """
+        _start, _end = rng
+        _fields = _get_rng_fields(use_cut)
+        _sg = tank.platform.current_engine().shotgun
+        _sg.update(
+            entity_type='Shot',
+            entity_id=self.get_sg_data()['id'],
+            data={'sg_cut_in': _start, 'sg_cut_out': _end})
+
+
+def _get_rng_fields(use_cut):
+    """Get shotgun frame range fields.
+
+    Args:
+        use_cut (bool): use cut in/out
+
+    Returns:
+        (list): range fields
+    """
+    if not use_cut:
+        return ["sg_head_in", "sg_tail_out"]
+    return ["sg_cut_in", "sg_cut_out"]
 
 
 class TTStepRoot(TTDirBase):
