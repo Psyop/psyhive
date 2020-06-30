@@ -388,10 +388,14 @@ def get_path(path):
         (str): path as a string
     """
     from .p_path import Path
+    from ..seq import Seq
+
     if isinstance(path, Path):
         return path.path
     elif isinstance(path, six.string_types):
         return path
+    elif isinstance(path, Seq):
+        return path.path
     raise NotImplementedError(path)
 
 
@@ -446,6 +450,7 @@ def read_yaml(file_):
     if not _file.exists():
         raise OSError('Missing file '+_file.path)
     _body = _file.read()
+    assert isinstance(_body, six.string_types)
     try:
         return yaml.load(_body)
     except yaml.scanner.ScannerError as _exc:

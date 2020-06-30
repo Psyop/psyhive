@@ -1,3 +1,27 @@
+#### v0.88.0 ####
+
+    Released: Tue 30th Jun 2020 16:34pm
+
+    tank templates wrapper: added tools for setting shot frame range,
+    
+    hou_psyhive:
+        added,
+    maya_psyhive:
+        ref.FileRef.get_tfm added,
+        ref.get_selected bugfix error on non-ref nodes selected,
+        tanks_support.ts_aistandin use TTShot.get_frame_range for shot range,
+        utils.render updated replace frame dialog wording,
+    psyhive:
+        host.save added in maya/hou,
+        tk2.TTShot.set_frame_range added,
+        tk2.TTShot.get_frame_range use_cut is on by default,
+        tk2.get_shot returns TTShot not TTRoot,
+        tk2.TTIncrement.get_shot added,
+        tools.hive_bro catch bad task name in task field,
+        utils.get_path added Seq handling,
+        utils.Seq.to_mov catch error on dir missing + better error on fail to generate,
+
+
 #### v0.87.3 ####
 
     Released: Tue 23rd Jun 2020 10:42am

@@ -432,7 +432,9 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
     """
     from psyhive import pipe
 
-    assert not os.path.exists(mov)
+    _mov = Movie(get_path(mov))
+    assert not _mov.exists()
+    _mov.test_dir()
 
     # Use ffmpeg through psylaunch
     if pipe.LOCATION == 'psy':
@@ -444,7 +446,7 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
             '-vcodec', 'libx264',
             '-crf', '25',
             '-pix_fmt', 'yuv420p',
-            mov]
+            _mov.path]
         print 'launch ffmpeg --', ' '.join(_args)
         psylaunch.launch_app('ffmpeg', args=_args, wait=True)
 
@@ -458,12 +460,13 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
             '-vcodec', 'libx264',
             '-crf', '25',
             '-pix_fmt', 'yuv420p',
-            '"{}"'.format(mov)]
+            '"{}"'.format(_mov.path)]
         _cmd = ' '.join(_args)
         print _cmd
         os.system(_cmd)
 
-    assert os.path.exists(mov)
+    if not _mov.exists():
+        raise RuntimeError("Failed to generate "+_mov.path)
 
 
 def seq_from_frame(file_, catch=False):
