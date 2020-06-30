@@ -1,0 +1,7 @@
+job:
+  variables: {GIT_STRATEGY: none}
+  script:
+    - echo Deploying repo...
+    - ssh -tt la1dply001.psyop.tv "sudo ansible-playbook /etc/ansible/pipeline.yml -t ${CI_PROJECT_NAME}"
+  only:
+    - master
