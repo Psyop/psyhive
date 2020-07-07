@@ -569,6 +569,8 @@ def _get_rect(anchor, pos, size):
         _root = _pos - qt.get_p(0, _size.height()/2)
     elif anchor == 'R':
         _root = _pos - qt.get_p(_size.width(), _size.height()/2)
+    elif anchor == 'T':
+        _root = _pos - qt.get_p(_size.width()/2, 0)
     elif anchor == 'TL':
         _root = _pos
     elif anchor == 'TR':

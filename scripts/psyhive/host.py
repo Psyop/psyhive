@@ -56,12 +56,15 @@ if not NAME:
     except ImportError:
         pass
     else:
-        from hou_psyhive.utils import save_as
+        from hou_psyhive.utils import save_as, set_start, set_end
         NAME = 'hou'
+        _force_open_scene = lambda file_: hou.hipFile.load(
+            file_, suppress_save_prompt=True)
         _get_cur_scene = hou.hipFile.name
         get_fps = hou.fps
         get_main_window_ptr = hou.ui.mainQtWindow
         save = hou.hipFile.save
+        _scene_modified = hou.hipFile.hasUnsavedChanges
         t_start = lambda: hou.playbar.frameRange()[0]
         t_end = lambda: hou.playbar.frameRange()[1]
 

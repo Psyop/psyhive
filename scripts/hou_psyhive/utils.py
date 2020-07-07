@@ -27,3 +27,25 @@ def save_as(file_, revert_filename=True, force=False, verbose=0):
 
     if revert_filename:
         hou.hipFile.setName(_cur_filename)
+
+
+def set_end(frame):
+    """Set timeline end frame.
+
+    Args:
+        frame (int): frame to apply
+    """
+    from psyhive import host
+    _start, _ = host.t_range()
+    hou.playbar.setFrameRange(_start, frame)
+
+
+def set_start(frame):
+    """Set timeline start frame.
+
+    Args:
+        frame (int): frame to apply
+    """
+    from psyhive import host
+    _, _end = host.t_range()
+    hou.playbar.setFrameRange(frame, _end)

@@ -2,6 +2,7 @@
 
 import functools
 import tempfile
+import types
 
 from maya import cmds, mel, OpenMayaUI
 
@@ -89,8 +90,32 @@ def add_shelf(name, flush=False, verbose=0):
     return _layout_name
 
 
+def _get_clean_cmd(cmd):
+    """Get a clean version of the given command for comparison.
+
+    If a command is a python function which has been converted to a string,
+    the function name is returned. If the command is a function, the function
+    name is returned. Otherwise, the command is returned.
+
+    Args:
+        cmd (str): command to check
+
+    Returns:
+        (str): cleaned command
+    """
+    if isinstance(cmd, types.FunctionType):
+        return cmd.__name__
+    if not cmd.endswith('>') or not cmd.startswith('<'):
+        return cmd
+
+    _tokens = cmd.split()
+    assert len(_tokens) == 4
+    assert _tokens[-1].startswith('0x')
+    return _tokens[1]
+
+
 def add_shelf_button(name, image, command, annotation=None, parent='Henry',
-                     width=None, force=True, enabled=True):
+                     width=None, force=True, enabled=True, verbose=0):
     """Add a shelf button.
 
     Args:
@@ -102,13 +127,17 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
         width (int): button width
         force (bool): force replace any existing buttons
         enabled (bool): enabled state for button
+        verbose (int): print process data
     """
 
     # Replace existing buttons with matching name or command/image
     if cmds.shelfButton(name, query=True, exists=True):
         cmds.deleteUI(name)
     for _btn in _find_shelf_buttons():
-        if _btn.image != image or _btn.command != command:
+        if _btn.image != image:
+            continue
+        lprint(' - CHECKING', _get_clean_cmd(_btn.command), verbose=verbose)
+        if _get_clean_cmd(_btn.command) != _get_clean_cmd(command):
             continue
         if not force:
             qt.ok_cancel('Replace existing {} button?'.format(name))
@@ -315,6 +344,8 @@ def revert_viewport(func):
         _cam = cmds.modelPanel(_model, query=True, camera=True)
 
         _hud = cmds.modelEditor(_model, query=True, headsUpDisplay=False)
+        _shl = cmds.modelEditor(
+            _model, query=True, selectionHiliteDisplay=False)
         _grid = cmds.modelEditor(_model, query=True, grid=True)
 
         _disp_res = cmds.camera(_cam, query=True, displayResolution=True)
@@ -322,7 +353,9 @@ def revert_viewport(func):
 
         _result = func(*args, **kwargs)
 
-        cmds.modelEditor(_model, edit=True, headsUpDisplay=_hud, grid=_grid)
+        cmds.modelEditor(
+            _model, edit=True, headsUpDisplay=_hud, grid=_grid,
+            selectionHiliteDisplay=_shl)
         cmds.camera(_cam, edit=True, displayResolution=_disp_res,
                     overscan=_overscan)
 
