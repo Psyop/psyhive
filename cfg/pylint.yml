@@ -21,6 +21,7 @@ ignore:
         /plug-ins/
         hv_test/dev.py
         hv_test/diary/
+        hv_test/tools/melon_mocap_lib/ml_ui.py
         maya_psyhive/utils.py
         psyhive/qt/dialog/ui_dialog.py
         psyhive/scripts/psyhive/qt/misc.py
@@ -50,7 +51,7 @@ ignore:
         hv_test/diary/
         hv_test/startup/hsu_ninhenzo_shelf.py
         hv_test/toolkits/home_tools.py
-        hv_test/u_pipe/home.py
+        hv_test/u_pipe/up_home.py
         maya_psyhive/shows/frasier/fr_ingest.py
         maya_psyhive/shows/frasier/toolkit.py
         maya_psyhive/shows/frasier/fr_tools.py
@@ -77,6 +78,7 @@ ignore:
         psyhive/qt/dialog/pixmap_ui_2.py
         psyhive/qt/wrapper/widgets.py
         psyhive/tk/cache.py
+        psyhive/utils/path/p_tools.py
         sanity_check/checks/maya/general/shotgun.py
     no-name-in-module:
         hv_test/tools/qube/__init__.py
@@ -121,7 +123,7 @@ ignore:
         hv-test/bin/machi5
         hv_test/diary/
         hv_test/toolkits/tank_tools.py
-        hv_test/u_pipe/home.py
+        hv_test/u_pipe/up_home.py
         psyhive/farm/psyq_plugin/mayapy_worker.p
         psyhive/tk/misc.py
         psyhive/tk/templates/tt_base_work.py
@@ -168,6 +170,8 @@ ignore:
         hv_test/toolkits/_tank_app.py
         hv_test/toolkits/tank_tools.py
         hv_test/tools/colour_bro/cb_ui.pyno-member
+        hv_test/tools/melon_mocap_lib/ml_tile.py
+        hv_test/tools/melon_mocap_lib/ml_ui.py
         maya_psyhive/shows/vampirebloodline.py
         maya_psyhive/tools/fkik_switcher/system.py
         maya_psyhive/shows/frasier/fr_work.py

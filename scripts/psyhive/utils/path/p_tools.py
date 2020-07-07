@@ -4,6 +4,7 @@ import filecmp
 import os
 import shutil
 import time
+import types
 
 import ctypes
 from ctypes import wintypes
@@ -366,7 +367,7 @@ def get_owner(path):
         _lpd_word,  # Name Size (inout)
         wintypes.LPCWSTR,  # Domain(out_opt)
         _lpd_word,  # Domain Size (inout)
-        _lpd_word, ]  # SID Type (out)
+        _lpd_word]  # SID Type (out)
 
     _request = _owner_security_info
 
@@ -378,11 +379,11 @@ def get_owner(path):
     return _name
 
 
-def get_path(path):
+def get_path(obj):
     """Get a path string from the given arg.
 
     Args:
-        path (str|Path): object to get path string from
+        obj (str|Path): object to get path string from
 
     Returns:
         (str): path as a string
@@ -390,13 +391,15 @@ def get_path(path):
     from .p_path import Path
     from ..seq import Seq
 
-    if isinstance(path, Path):
-        return path.path
-    elif isinstance(path, six.string_types):
-        return path
-    elif isinstance(path, Seq):
-        return path.path
-    raise NotImplementedError(path)
+    if isinstance(obj, Path):
+        return obj.path
+    elif isinstance(obj, six.string_types):
+        return obj
+    elif isinstance(obj, Seq):
+        return obj.path
+    elif isinstance(obj, types.ModuleType):
+        return obj.__file__
+    raise NotImplementedError(obj)
 
 
 def launch_browser(dir_):
@@ -417,7 +420,7 @@ def nice_size(path):
     Returns:
         (str): size as a string
     """
-    _size = os.path.getsize(path)
+    _size = os.path.getsize(get_path(path))
     return bytes_to_str(_size)
 
 
@@ -445,14 +448,24 @@ def read_yaml(file_):
         (any): yaml data
     """
     import yaml
+    from ..misc import wrap_fn
 
+    # Read contents
     _file = File(get_path(file_))
     if not _file.exists():
         raise OSError('Missing file '+_file.path)
     _body = _file.read()
     assert isinstance(_body, six.string_types)
+
+    # Get load func depending one which yaml we have
+    if hasattr(yaml, 'FullLoader'):
+        _func = wrap_fn(yaml.load, _body, Loader=yaml.FullLoader)
+    else:
+        _func = wrap_fn(yaml.load, _body)
+
+    # Parse contents
     try:
-        return yaml.load(_body)
+        return _func()
     except yaml.scanner.ScannerError as _exc:
         print 'SCANNER ERROR:', _exc
         print ' - MESSAGE', _exc.message

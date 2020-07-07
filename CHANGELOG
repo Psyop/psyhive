@@ -1,3 +1,25 @@
+#### v0.89.0 ####
+
+    Released: Tue 7th Jul 2020 15:45pm
+
+    Shot builder tool: bugfix error on no abc found in shot (srivet);
+    
+    hou_psyhive:
+        utils added set_start/set_end,
+    maya_psyhive:
+        tools.m_shot_builder update abc fix error on no abc found in shot,
+        ui.add_shelf_button bugfix not replacing buttons with converted py func,
+        ui.revert_viewport revert selection highlighting,
+    psyhive:
+        host houdinid added _force_open_scene/_scene_modified,
+        py_gui.build added,
+        qt.HPixmap._get_rect added T anchor handling,
+        utils.get_path added module handling,
+        utils.read_yaml supress unsafe loaded warning,
+        utils.Seq updated move -> move_to for File/Dir symmetry,
+        utils.Seq.to_mov added arbitrary start frame handling,
+
+
 #### v0.88.0 ####
 
     Released: Tue 30th Jun 2020 16:34pm

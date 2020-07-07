@@ -228,7 +228,7 @@ class Seq(object):
         _start, _end = self.find_range()
         return self.get_frames() != range(_start, _end+1)
 
-    def move(self, target):
+    def move_to(self, target):
         """Move this image sequence.
 
         Args:
@@ -432,6 +432,7 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
     """
     from psyhive import pipe
 
+    _start, _end = seq.find_range(force=True)
     _mov = Movie(get_path(mov))
     assert not _mov.exists()
     _mov.test_dir()
@@ -461,6 +462,10 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
             '-crf', '25',
             '-pix_fmt', 'yuv420p',
             '"{}"'.format(_mov.path)]
+        if _start != 1:
+            _idx = _args.index('-i')
+            _args.insert(_idx, '-start_number')
+            _args.insert(_idx+1, str(_start))
         _cmd = ' '.join(_args)
         print _cmd
         os.system(_cmd)

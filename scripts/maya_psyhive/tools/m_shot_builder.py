@@ -87,7 +87,7 @@ def _update_abcs(shot='rnd0080', verbose=0):
             hom.CMDS.ls(type='ExocortexAlembicFile'), 'Updating {:d} abc{}'):
         lprint('CHECKING EXO', _exo, verbose=verbose)
         _path = _exo.plug('fileName').get_val()
-        _status, _to_remove = _update_abc(exo=_exo, shot=shot, verbose=verbose)
+        _status, _to_remove = _update_abc(exo=_exo, shot=shot)
         if _to_remove:
             _refs_to_remove.add(_to_remove)
         print ' - {:60} {:30} {}'.format(_exo, _status, _path)
@@ -117,6 +117,7 @@ def _update_abc(exo, shot, verbose=0):
     lprint(' - REF', _ref, verbose=verbose)
     _tmpl_abc = exo.plug('fileName').get_val()
     _tmpl_output = tk2.TTOutputFile(_tmpl_abc)
+    lprint(' - TMPL ABC', _tmpl_abc, verbose=verbose)
     if not _tmpl_output or not _tmpl_output.shot:
         lprint(' - NO OUTPUT FOUND', exo, _tmpl_abc, verbose=verbose)
         return 'off pipeline', None
@@ -125,11 +126,8 @@ def _update_abc(exo, shot, verbose=0):
         return 'no update needed', None
 
     # Map to this shot
-    lprint(' - TMPL ABC', _tmpl_abc, verbose=verbose)
-    _shot_output = _tmpl_output.map_to(Shot=shot)
-    try:
-        _shot_output = _shot_output.find_latest()
-    except OSError:
+    _shot_output = _tmpl_output.map_to(Shot=shot).find_latest()
+    if not _shot_output:
         lprint(' - NO VERSIONS FOUND', _shot_output, verbose=verbose)
         return 'no {} versions found'.format(shot), _ref
 

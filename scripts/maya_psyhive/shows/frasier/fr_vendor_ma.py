@@ -2,11 +2,12 @@
 
 import time
 
-from psyhive import host
+from psyhive import host, tk2
 from psyhive.utils import (
     File, Dir, lprint, CacheMissing, get_result_to_file_storer,
     get_time_f)
 
+_LINT_TAG = tk2  # Keep pylint happy - prevent import outside psyop
 MOBURN_ROOT = 'P:/projects/frasier_38732V/production/vendor_in/Motion Burner'
 
 
