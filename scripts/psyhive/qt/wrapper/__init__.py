@@ -1,10 +1,10 @@
 """Tools for managing and wrapping qt libraries."""
 
-from psyhive.qt.wrapper.mgr import (
+from .mgr import (
     QtCore, QtGui, QtWidgets, QtUiTools, Qt, X_AXIS, Y_AXIS, ORIGIN)
-from psyhive.qt.wrapper.widgets import (
+from .widgets import (
     HLabel, HTreeWidgetItem, HListWidgetItem, HProgressBar, HPushButton,
     HCheckBox, HListWidget, HComboBox, HMenu, HTreeWidget, HTabWidget,
     HTextBrowser)
-from psyhive.qt.wrapper.gui import HPixmap, HColor, HPainter
-from psyhive.qt.wrapper.core import HPoint
+from .gui import HPixmap, HColor, HPainter, TEST_IMG
+from .core import HPoint

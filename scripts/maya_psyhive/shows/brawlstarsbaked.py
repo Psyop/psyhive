@@ -206,7 +206,7 @@ def _render_tbms(tbms, start, end):
                 raise RuntimeError(
                     'TBM node {} failed to render - this could be due to '
                     'disabled TBM nodes in the scene'.format(_tbm))
-            _tmp_seq.move(_render)
+            _tmp_seq.move_to(_render)
             _renders.append(_render)
 
     # Revert to diffuse

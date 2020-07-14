@@ -90,6 +90,7 @@ class File(Path):
             line_n (int): line of the file to open
             verbose (int): print process data
         """
+        from ..misc import lprint
         from .p_tools import abs_path
 
         _arg = self.path
@@ -97,11 +98,15 @@ class File(Path):
             _arg += ':{:d}'.format(line_n)
 
         # Try using sublime executable
-        _subl_exe = r'C:\Program Files\Sublime Text 3\subl.exe'
-        if os.path.exists(_subl_exe):
-            _cmds = [abs_path(_subl_exe, win=True), _arg]
-            system(_cmds, verbose=verbose)
-            return
+        for _subl_exe in [
+                'C:/Program Files/Sublime Text 3/subl.exe',
+                'C:/Program Files (x86)/Sublime Text 3/subl.exe',
+        ]:
+            if os.path.exists(_subl_exe):
+                _cmds = [abs_path(_subl_exe, win=True), _arg]
+                system(_cmds, verbose=verbose)
+                return
+            lprint('MISSING EXE', _subl_exe, verbose=verbose)
 
         # Try using psylaunch
         dprint('Using psylaunch sublime - it may be quicker to install it '

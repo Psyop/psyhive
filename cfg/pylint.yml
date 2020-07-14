@@ -24,8 +24,9 @@ ignore:
         hv_test/tools/melon_mocap_lib/ml_ui.py
         maya_psyhive/utils.py
         psyhive/qt/dialog/ui_dialog.py
-        psyhive/scripts/psyhive/qt/misc.py
+        psyhive/qt/misc.py
         psyhive/tools/err_catcher.py
+        psyhive/utils/py_file/file_.py
         sanity_check/checks/maya/general/scene.py
     c-extension-no-member:
         maya_psyhive/ui.py

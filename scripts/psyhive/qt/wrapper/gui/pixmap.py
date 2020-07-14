@@ -10,6 +10,8 @@ from psyhive.utils import File, lprint, test_path, abs_path
 from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
 from psyhive.qt.wrapper.gui.painter import HPainter
 
+TEST_IMG = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
+
 
 class HPixmap(QtGui.QPixmap):
     """Override for QPixmap object."""
@@ -517,9 +519,8 @@ class HPixmap(QtGui.QPixmap):
             self.save_as(file_, force=True)
             return file_
 
-        _tmp_file = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
-        self.save_as(_tmp_file, verbose=verbose, force=True)
-        _file = _tmp_file
+        self.save_as(TEST_IMG, verbose=verbose, force=True)
+        _file = TEST_IMG
 
         if timestamp:
             _timestamp_file = abs_path(time.strftime(

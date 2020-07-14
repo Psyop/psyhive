@@ -1,3 +1,25 @@
+#### v0.89.1 ####
+
+    Released: Tue 14th Jul 2020 09:39am
+
+    Tank support: 
+        cache tool shade geo for rigs bugfix error on no shade found (nnaut),
+        cache tool shade geo for rigs bugfix missing abc on no matching geo found (nnaut),
+    Brawlstars:
+        render TBM nodes bugfix error on render (kcassidy)
+    
+    maya_psyhive:
+        shows.brawlstarsbaked bugfix reference to outdated Seq.move,
+        tank_support.get_shade_mb_for_rig added,
+        tank_support use shade for rig error if no geo connected,
+        tank_support use shade for rig RuntimeError for no shade found,
+    psyhive:
+        qt.TEST_IMG added,
+        qt wrapper/gui updated to relative imports,
+        utils.File.edit added handling for x86 subl,
+        utils.PyFile.get_module catch all exceptions on import,
+
+
 #### v0.89.0 ####
 
     Released: Tue 7th Jul 2020 15:45pm

@@ -72,6 +72,32 @@ def _connect_visibility(src, trg, verbose=0):
     _tail.connect(trg.visibility)
 
 
+def get_shade_mb_for_rig(rig):
+    """Get path to shade mb file for the given rig.
+
+    Args:
+        rig (RigRef): rig to map to shade file
+
+    Returns:
+        (str): path to shade file
+    """
+    from psyhive import tk2
+
+    _rig_out = tk2.TTOutputName(rig.path)
+    print ' - RIG OUT', _rig_out.path
+    _shade_out = _rig_out.map_to(
+        Step='shade', output_type='shadegeo', Task='shade').find_latest()
+    if not _shade_out or not _shade_out.exists():
+        raise RuntimeError("Failed to find shade for rig "+_rig_out.path)
+    print ' - SHADE OUT', _shade_out.path
+    _shade_file = _shade_out.find_file(extn='mb', format_='maya', catch=True)
+    if not _shade_file:
+        raise RuntimeError('Missing shade mb '+_shade_out.path)
+
+    print ' - SHADE FILE', _shade_file
+    return _shade_file
+
+
 @reset_ns
 @track_usage
 def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
@@ -89,8 +115,6 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     Returns:
         (HFnMesh list): list of driven shade geo
     """
-    from psyhive import tk2
-
     print 'DRIVE SHADE GEO FROM RIG'
 
     # Get anim rig
@@ -104,21 +128,12 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     print ' - RIG PATH', _rig.path
 
     # Find/import tmp shade asset
-    _rig_out = tk2.TTOutputName(_rig.path)
-    print ' - RIG OUT', _rig_out.path
-    _shade_out = _rig_out.map_to(
-        Step='shade', output_type='shadegeo', Task='shade').find_latest()
-    if not _shade_out or not _shade_out.exists():
-        raise RuntimeError("Failed to find shade for rig "+_rig_out.path)
-    print ' - SHADE OUT', _shade_out.path
-    _shade_file = _shade_out.find_file(extn='mb', format_='maya')
-    print ' - SHADE FILE', _shade_file
+    _shade_file = get_shade_mb_for_rig(_rig)
     _shade = ref.create_ref(
         _shade_file.path, namespace='psyhive_tmp', force=True)
 
     # Duplicate geo and bind to rig
     _bake_geo = []
-    _cleanup = []
     set_namespace(':tmp_{}'.format(_rig.namespace), clean=True)
     for _shade_mesh in qt.progress_bar(
             _shade.find_nodes(type_='mesh'), 'Binding {:d} geo{}',
@@ -142,7 +157,6 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
         _clean_unused_uv_sets(_dup)
         _connect_visibility(_rig_tfm, _dup)
         _bake_geo.append(_dup)
-        _cleanup.append(_dup)
 
         # Bind to rig
         _blend = hom.CMDS.blendShape(_rig_tfm, _dup)
@@ -151,4 +165,8 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
 
     _shade.remove(force=True)
 
-    return _bake_geo, _cleanup
+    if not _bake_geo:
+        raise RuntimeError('No geo was attached - this means none of the '
+                           'shade geo matched the rig bakeSet geo.')
+
+    return _bake_geo, _bake_geo

@@ -1,5 +1,5 @@
 """Overrides for QtGui objects."""
 
-from psyhive.qt.wrapper.gui.color import HColor
-from psyhive.qt.wrapper.gui.painter import HPainter
-from psyhive.qt.wrapper.gui.pixmap import HPixmap
+from .color import HColor
+from .painter import HPainter
+from .pixmap import HPixmap, TEST_IMG
