@@ -111,7 +111,8 @@ def cast_result(func, verbose=0):
     return _casted_result_fn
 
 
-def find_nodes(filter_=None, class_=None, type_=None, long_=False):
+def find_nodes(filter_=None, class_=None, type_=None, long_=False,
+               selection=False):
     """Find nodes on the current scene (uses ls command).
 
     Args:
@@ -119,6 +120,7 @@ def find_nodes(filter_=None, class_=None, type_=None, long_=False):
         class_ (class): override node class (default is HFnDepdendencyNode)
         type_ (str): ls type flag
         long_ (bool): ls long flag
+        selection (bool): seach only selected nodes
 
     Returns:
         (HFnDepdendencyNode list): nodes
@@ -127,10 +129,19 @@ def find_nodes(filter_=None, class_=None, type_=None, long_=False):
 
     _class = class_ or hom.HFnDependencyNode
     _args = [filter_] if filter_ else []
-    _kwargs = {'long': long_}
+
+    _kwargs = {'long': long_, 'selection': selection}
     if type_:
         _kwargs['type'] = type_
-    return [_class(_node) for _node in cmds.ls(*_args, **_kwargs)]
+
+    _results = []
+    for _node in cmds.ls(*_args, **_kwargs):
+        try:
+            _result = _class(_node)
+        except RuntimeError:
+            continue
+        _results.append(_result)
+    return _results
 
 
 def get_col(col):
@@ -237,12 +248,13 @@ def read_connections(obj, incoming=True, outgoing=True, class_=None):
     return _conns
 
 
-def read_incoming(obj, class_=None):
+def read_incoming(obj, class_=None, type_=None):
     """Read incoming connections to the given plug/node.
 
     Args:
         obj (str): object to read
         class_ (class): override plug class (eg. str)
+        type_ (str): filter by type
 
     Returns:
         (HPlug tuple list): list of plug pairs
@@ -250,20 +262,24 @@ def read_incoming(obj, class_=None):
     from .. import open_maya as hom
     _class = class_ or hom.HPlug
     _conns = []
+    _kwargs = {}
+    if type_:
+        _kwargs['type'] = type_
     _data = cmds.listConnections(
-        obj, destination=False, plugs=True, connections=True)
+        obj, destination=False, plugs=True, connections=True, **_kwargs)
     while _data:
         _src, _trg = _class(_data.pop()), _class(_data.pop())
         _conns.append((_src, _trg))
     return _conns
 
 
-def read_outgoing(obj, class_=None):
+def read_outgoing(obj, class_=None, type_=None):
     """Read outgoing connections from the given plug/node.
 
     Args:
         obj (str): object to read
         class_ (class): override plug class (eg. str)
+        type_ (str): filter by type
 
     Returns:
         (HPlug tuple list): list of plug pairs
@@ -271,8 +287,11 @@ def read_outgoing(obj, class_=None):
     from .. import open_maya as hom
     _class = class_ or hom.HPlug
     _conns = []
+    _kwargs = {}
+    if type_:
+        _kwargs['type'] = type_
     _data = cmds.listConnections(
-        obj, source=False, plugs=True, connections=True)
+        obj, source=False, plugs=True, connections=True, **_kwargs)
     while _data:
         _trg, _src = _class(_data.pop()), _class(_data.pop())
         _conns.append((_src, _trg))

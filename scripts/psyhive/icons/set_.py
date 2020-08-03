@@ -61,6 +61,7 @@ class _EmojiIndexParser(HTMLParser):
         for _find, _replace in [
                 (u'\u201c', '"'),
                 (u'\u201d', '"'),
+                (u'\u2019', "'"),
                 (u'\xc5', ''),
         ]:
             _title = _title.replace(_find, _replace)

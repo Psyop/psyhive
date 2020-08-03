@@ -1,7 +1,7 @@
 """Tools for managing tank template representations."""
 
 from .tt_base import (
-    TTSequenceRoot, TTRoot, TTStepRoot, TTShot)
+    TTSequenceRoot, TTRoot, TTStepRoot, TTShot, TTAsset)
 from .tt_work import TTWorkArea, TTWork, TTIncrement
 from .tt_output import (
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,

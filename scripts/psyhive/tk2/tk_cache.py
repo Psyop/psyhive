@@ -2,13 +2,13 @@
 
 import collections
 
-from psyhive.utils import store_result_on_obj
+from psyhive.utils import store_result_on_obj, Seq
 
 from psyhive.tk2.tk_templates import (
     TTSequenceRoot, TTRoot, TTStepRoot, TTWorkArea, TTWork, TTIncrement,
     TTOutputType, TTOutputName, TTOutputVersion, TTOutput, TTOutputFile,
     TTOutputFileSeq, find_sequences, find_assets, get_work, TTShot,
-    cur_work)
+    TTAsset, cur_work)
 
 _CACHEABLES = collections.defaultdict(dict)
 
@@ -257,6 +257,8 @@ class _CTTOutputFile(TTOutputFile):
 class _CTTOutputFileSeq(TTOutputFileSeq):
     """Represents an output file seq with caching."""
 
+    move_to = Seq.move_to
+
 
 def _map_class_to_cacheable(class_):
     """Get cacheable version of the given TT class.
@@ -271,6 +273,7 @@ def _map_class_to_cacheable(class_):
         TTSequenceRoot: _CTTSequenceRoot,
         TTRoot: _CTTRoot,
         TTShot: _CTTRoot,
+        TTAsset: _CTTRoot,
         TTStepRoot: _CTTStepRoot,
 
         TTWorkArea: _CTTWorkArea,

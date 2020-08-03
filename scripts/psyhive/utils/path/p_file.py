@@ -47,12 +47,13 @@ class File(Path):
         assert not self.path == _file
         shutil.copy(self.path, _file)
 
-    def delete(self, force=False, wording='delete'):
+    def delete(self, force=False, wording='delete', catch=False):
         """Delete this file.
 
         Args:
             force (bool): delete with no confirmation
             wording (str): wording for confirmation dialog
+            catch (bool): no error on fail to delete
         """
         if not self.exists():
             return
@@ -65,7 +66,8 @@ class File(Path):
             os.remove(self.path)
         except WindowsError as _exc:
             print 'FAILED TO DELETE', self.path
-            raise _exc
+            if not catch:
+                return
 
     def diff(self, other, label=None, check_extn=True):
         """Show diffs between this and another text file.

@@ -22,7 +22,7 @@ ignore:
         hv_test/dev.py
         hv_test/diary/
         hv_test/tools/melon_mocap_lib/ml_ui.py
-        maya_psyhive/utils.py
+        maya_psyhive/utils/mu_dec.py
         psyhive/qt/dialog/ui_dialog.py
         psyhive/qt/misc.py
         psyhive/tools/err_catcher.py
@@ -44,6 +44,7 @@ ignore:
     expression-not-assigned:
         hv_test/diary/y19/d0613/curve_to_image_test.py
         hv_test/diary/y19/d1120/qt_threading_bug.py
+        maya_psyhive/utils/mu_tools.py
         psyhive/qt/dialog/ui_dialog.py
     global-statement: '*'
     inconsistent-return-statements:
@@ -131,7 +132,7 @@ ignore:
         psyhive/tk2/tk_templates/tt_work.py
         psyhive/tk2/tk_utils.py
     raising-bad-type:
-        maya_psyhive/utils.py
+        maya_psyhive/utils/mu_dec.py
     redefined-outer-name:
         hv_test/diary/
     reimported:
@@ -202,6 +203,7 @@ ignore:
     unexpected-keyword-arg:
         diary/y19/d0726/machi4.py
     unidiomatic-typecheck:
+        hv_test/dev.py
         hv_test/diary/y19/d1120/qt_threading_bug.py
         psyhive/qt/dialog/ui_dialog.py
     unreachable:

@@ -79,6 +79,7 @@ class TTWorkArea(TTDirBase):
             (dict): work area metadata
         """
         dprint("Reading metadata", self.path, verbose=verbose)
+        lprint(" - YAML", self.yaml, verbose=verbose)
         if not os.path.exists(self.yaml):
             return {}
         return read_yaml(self.yaml)
@@ -234,6 +235,25 @@ class TTWork(TTBase, File):
             task=self.task, version=self.version, filter_=filter_,
             output_type=output_type, output_name=output_name,
             verbose=verbose)
+
+    def find_output_file(self, extension=None, format_=None, catch=True,
+                         verbose=1):
+        """Find a specific output file generated from this work.
+
+        Args:
+            extension (str): match by extension
+            format_ (str): match by format
+            catch (bool): supress error on no match
+            verbose (int): print process data
+
+        Returns:
+            (TTOutputFileBase): matching output file
+        """
+        _files = self.find_output_files(
+            extension=extension, format_=format_)
+        if verbose and len(_files) > 1:
+            pprint.pprint(_files)
+        return get_single(_files, catch=catch, verbose=verbose-1)
 
     def find_output_files(self, output_type=None, extension=None,
                           format_=None, output_name=None, verbose=0):
@@ -439,26 +459,14 @@ class TTWork(TTBase, File):
 
         else:
 
-            # Get prev workfile
-            if _prev:
-                assert _prev.version == self.version - 1
-                _tk_workspace = _mod.get_workspace_from_path(
-                    app=_fileops, path=_prev.path)
-                _tk_workfile = _mod.WorkfileModel(
-                    workspace=_tk_workspace, template=_prev.tmpl,
-                    path=_prev.path)
-                _tk_workfile = _tk_workfile.get_next_version()
-            else:
+            _step_root = self.get_step_root()
+            if not _step_root.exists():
+                raise RuntimeError('Missing step root '+_step_root.path)
 
-                _step_root = self.get_step_root()
-                if not _step_root.exists():
-                    raise RuntimeError('Missing step root '+_step_root.path)
-
-                assert self.version == 1
-                _tk_workspace = _mod.get_workspace_from_path(
-                    app=_fileops, path=self.path)
-                _tk_workfile = _tk_workspace.get_workfile(
-                    name=self.task, version=1)
+            _tk_workspace = _mod.get_workspace_from_path(
+                app=_fileops, path=self.path)
+            _tk_workfile = _tk_workspace.get_workfile(
+                name=self.task, version=self.version)
 
             _tk_workfile.save()
 

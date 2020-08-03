@@ -1,6 +1,6 @@
 """Tools for managing executing host across multiple host applications."""
 
-from psyhive.utils import wrap_fn, abs_path, get_path
+from psyhive.utils import wrap_fn, abs_path, get_path, chain_fns
 
 NAME = None
 
@@ -33,7 +33,8 @@ except ImportError:
 else:
     from maya_psyhive import ref, ui
     from maya_psyhive.utils import (
-        get_fps, save_as, save_scene, open_scene as open_scene_)
+        get_fps, save_as, save_scene, open_scene as open_scene_,
+        set_start, set_end)
     NAME = 'maya'
     batch_mode = wrap_fn(cmds.about, batch=True)
     _get_cur_scene = wrap_fn(cmds.file, query=True, location=True)
@@ -45,8 +46,6 @@ else:
     t_start = wrap_fn(cmds.playbackOptions, query=True, minTime=True)
     t_end = wrap_fn(cmds.playbackOptions, query=True, maxTime=True)
     save = wrap_fn(cmds.file, save=True)
-    set_start = wrap_fn(cmds.playbackOptions, arg_to_kwarg='minTime')
-    set_end = wrap_fn(cmds.playbackOptions, arg_to_kwarg='maxTime')
     get_main_window_ptr = ui.get_main_window_ptr
 
 

@@ -11,7 +11,7 @@ from psyhive.qt import QtGui
 from psyhive.tools import track_usage
 from psyhive.utils import (
     dprint, wrap_fn, get_single, lprint, File, str_to_seed, PyFile,
-    to_nice, store_result, ValueRange)
+    to_nice, store_result, ValueRange, Dir)
 
 from maya_psyhive import ui, shows
 from maya_psyhive.tools import fkik_switcher
@@ -346,6 +346,8 @@ def _ph_add_show_toolkits(parent):
         _toolkits.append((_file, _file.basename))
     for _dir in _shows_dir.find(depth=1, type_='d'):
         _toolkit = PyFile('{}/toolkit.py'.format(_dir))
+        if Dir(_dir).filename.startswith('_'):
+            continue
         try:
             _mod = _toolkit.get_module()
         except ImportError:

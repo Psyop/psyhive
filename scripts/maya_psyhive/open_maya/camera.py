@@ -24,6 +24,8 @@ class HFnCamera(BaseTransform, om.MFnCamera):
         """
         self.tfm = tfm
         super(HFnCamera, self).__init__(self.tfm)
+        if not self.shp:
+            raise RuntimeError('Missing shape '+tfm)
         _dag_path = HDagPath(self.shp.node)
         om.MFnCamera.__init__(self, _dag_path)
 

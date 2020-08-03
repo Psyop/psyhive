@@ -1,8 +1,4 @@
-"""General utilties for maya."""
-
-import functools
-import os
-import traceback
+"""General tools."""
 
 from maya import cmds, mel
 from maya.app.general import createImageFormats
@@ -10,18 +6,10 @@ from maya.app.general import createImageFormats
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint, File, abs_path, dprint, get_path
+from psyhive.utils import get_single, lprint, File, dprint, get_path
 
-COLS = (
-    "deepblue", "black", "darkgrey", "grey", "darkred", "darkblue", "blue",
-    "darkgreen", "deepgrey", "magenta", "brown", "deepbrown", "redbrown",
-    "red", "green", "fadedblue", "white", "yellow", "lightblue", "lightgreen",
-    "pink", "orange", "lightyellow", "fadedgreen", "darktan", "tanyellow",
-    "olivegreen", "woodgreen", "cyan", "greyblue", "purple", "crimson")
-
-DEFAULT_NODES = (
-    'initialParticleSE', 'initialShadingGroup', 'persp', 'top',
-    'front', 'side', 'lambert1')
+from .mu_const import COLS
+from .mu_dec import restore_ns, get_ns_cleaner
 
 _FPS_LOOKUP = {
     23.97: "film",
@@ -33,102 +21,6 @@ _FPS_LOOKUP = {
     48.0: "show",
     50.0: "palf",
     60.0: "ntscf"}
-
-
-def restore_frame(func):
-    """Decorator to execute a function, restoring the original frame.
-
-    Args:
-        func (fn): function to decorate
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _restore_frame_fn(*args, **kwargs):
-        _frame = cmds.currentTime(query=True)
-        _result = func(*args, **kwargs)
-        cmds.currentTime(_frame)
-        return _result
-
-    return _restore_frame_fn
-
-
-def restore_ns(func):
-    """Decorator to execute a function, restoring the original namespace.
-
-    Args:
-        func (fn): function to decorate
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _restore_ns_fn(*args, **kwargs):
-        _ns = ':'+cmds.namespaceInfo(currentNamespace=True)
-        _result = func(*args, **kwargs)
-        if cmds.namespace(exists=_ns):
-            cmds.namespace(set=_ns)
-        return _result
-
-    return _restore_ns_fn
-
-
-def reset_ns(func):
-    """Decorator to execute a function, restoring the original namespace.
-
-    Args:
-        func (fn): function to decorate
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _reset_ns_fn(*args, **kwargs):
-        _result = func(*args, **kwargs)
-        cmds.namespace(set=':')
-        return _result
-
-    return _reset_ns_fn
-
-
-def add_node(input1, input2, output=None, name='add', force=False):
-    """Create an add node.
-
-    Args:
-        input1 (str|HPlug): first input
-        input2 (str|HPlug|float): second input or value
-        output (str|HPlug): output
-        name (str): node name
-        force (bool): force replace any existing connection on output
-
-    Returns:
-        (str): add node name
-    """
-    from maya_psyhive import open_maya as hom
-
-    # Create node
-    _add = cmds.createNode('plusMinusAverage', name=name)
-
-    # Connect input 1
-    cmds.connectAttr(input1, _add+'.input1D[0]')
-
-    # Connect/set input 2
-    _connect_types = tuple(list(six.string_types)+[hom.HPlug])
-    if isinstance(input2, _connect_types):
-        cmds.connectAttr(input2, _add+'.input1D[1]')
-    else:
-        cmds.setAttr(_add+'.input1D[1]', input2)
-
-    # Connect output
-    _output = _add+'.output1D'
-    if output:
-        cmds.connectAttr(_output, output, force=force)
-
-    return _output
 
 
 @restore_ns
@@ -361,48 +253,6 @@ def del_namespace(namespace, force=True):
     cmds.namespace(removeNamespace=namespace)
 
 
-def divide_node(input1, input2, output=None, force=False, name='divide'):
-    """Create a divide node and use it to perform attr maths.
-
-    Args:
-        input1 (str): first input
-        input2 (str|float): second input (or divide value)
-        output (str): output node
-        force (bool): force connect output (avoid already
-            connected error)
-        name (str): override node name
-
-    Returns:
-        (str): output attr
-    """
-    from maya_psyhive import open_maya as hom
-
-    # Create node
-    _div = cmds.createNode('multiplyDivide', name=name)
-    for _axis in 'YZ':
-        for _input in [1, 2]:
-            _attr = '{}.input{:d}{}'.format(_div, _input, _axis)
-            cmds.setAttr(_attr, keyable=False)
-    cmds.setAttr(_div+'.operation', 2)
-
-    # Connect input 1
-    cmds.connectAttr(input1, _div+'.input1X')
-
-    # Connect/set input 2
-    _connect_types = tuple(list(six.string_types)+[hom.HPlug])
-    if isinstance(input2, _connect_types):
-        cmds.connectAttr(input2, _div+'.input2X')
-    else:
-        cmds.setAttr(_div+'.input2X', input2)
-
-    # Connect output
-    _output = _div+'.outputX'
-    if output:
-        cmds.connectAttr(_output, output, force=force)
-
-    return _output
-
-
 def find_cams(orthographic=False):
     """List cameras in the scene.
 
@@ -418,53 +268,6 @@ def find_cams(orthographic=False):
         get_single(cmds.listRelatives(_cam, parent=True))
         for _cam in cmds.ls(type='camera')
         if orthographic or not cmds.getAttr(_cam+'.orthographic')]
-
-
-def freeze_viewports_on_exec(func, verbose=0):
-    """Decorator to freeze viewports on execute.
-
-    Viewports are frozen before execute and then unfrozen on completion.
-    If an error occurs, it's caught, the viewports are unfrozen, and the
-    the exception is raised.
-
-    Args:
-        func (fn): function to decorate
-        verbose (int): print process data
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _freeze_viewport_fn(*arg, **kwargs):
-        if (
-                os.environ.get('PSYHIVE_DISABLE_FREEZE_VIEWPORTS') or
-                cmds.about(batch=True)):
-            return func(*arg, **kwargs)
-
-        # Freeze panels
-        _panels = cmds.getPanel(type='modelPanel') or []
-        for _panel in _panels:
-            cmds.isolateSelect(_panel, state=True)
-
-        # Run the function
-        _exc = None
-        try:
-            _result = func(*arg, **kwargs)
-        except Exception as _exc:
-            _traceback = traceback.format_exc().strip()
-            lprint('TRACEBACK', _traceback, verbose=verbose)
-
-        # Unfreeze panels
-        for _panel in _panels:
-            cmds.isolateSelect(_panel, state=False)
-
-        if _exc:
-            raise _exc
-
-        return _result
-
-    return _freeze_viewport_fn
 
 
 def get_fps():
@@ -487,33 +290,6 @@ def get_fps():
         pass
 
     raise RuntimeError("Unknown maya time unit: "+_unit)
-
-
-def get_ns_cleaner(namespace):
-    """Build a decorator that executes a function in a cleaned namespace.
-
-    This will empty the given namespace before executing the function,
-    and then revert to the root namespace after execution.
-
-    Args:
-        namespace (str): namespace to use during execution
-
-    Returns:
-        (fn): decorator
-    """
-
-    def _ns_cleaner(func):
-
-        @functools.wraps(func)
-        def _ns_clean_fn(*args, **kwargs):
-            set_namespace(namespace, clean=True)
-            _result = func(*args, **kwargs)
-            set_namespace(":")
-            return _result
-
-        return _ns_clean_fn
-
-    return _ns_cleaner
 
 
 def get_parent(node):
@@ -686,48 +462,6 @@ def mel_(cmd, verbose=1):
     return mel.eval(cmd)
 
 
-def multiply_node(input1, input2, output, force=False, name='multiply'):
-    """Create a multiply node and use it to perform attr maths.
-
-    Args:
-        input1 (str): first input
-        input2 (str|float): second input (or divide value)
-        output (str): output node
-        force (bool): force connect output (avoid already
-            connected error)
-        name (str): override attribute name
-
-    Returns:
-        (str): output attr
-    """
-    _out = divide_node(
-        input1=input1, input2=input2, output=output, force=force,
-        name=name)
-    _out_node = _out.split('.')[0]
-    cmds.setAttr(_out_node+'.operation', 1)
-    return _out
-
-
-def open_scene(file_, force=False, prompt=False, lazy=False):
-    """Open the given scene.
-
-    Args:
-        file_ (str): file to open
-        force (bool): lose unsaved changes without confirmation
-        prompt (bool): show missing reference dialogs
-        lazy (bool): abandon load if scene is already open
-    """
-    from psyhive import host
-    _file = get_path(file_)
-    if lazy and host.cur_scene() == _file:
-        return
-    if not force:
-        host.handle_unsaved_changes()
-    if File(_file).extn == 'fbx':
-        load_plugin('fbxmaya')
-    cmds.file(_file, open=True, force=True, prompt=prompt, ignoreVersion=True)
-
-
 def pause_viewports(pause=True):
     """Pause viewports.
 
@@ -750,26 +484,6 @@ def pause_viewports(pause=True):
         else:
             print 'UNPAUSING VIEWPORTS'
             cmds.ogs(pause=True)
-
-
-def pause_viewports_on_exec(func):
-    """Pause viewports on execute function and the unpause.
-
-    Args:
-        func (fn): function to decorate
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _pause_viewport_func(*args, **kwargs):
-        pause_viewports(True)
-        _result = func(*args, **kwargs)
-        pause_viewports(False)
-        return _result
-
-    return _pause_viewport_func
 
 
 def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
@@ -818,67 +532,6 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
     assert _file.exists()
 
 
-def restore_sel(func):
-    """Decorator which restores current selection after exection.
-
-    Args:
-        func (fn): function to decorate
-    """
-
-    @functools.wraps(func)
-    def _restore_sel_fn(*args, **kwargs):
-        _sel = cmds.ls(selection=True)
-        _result = func(*args, **kwargs)
-        _sel = [_node for _node in _sel if cmds.objExists(_node)]
-        if _sel:
-            cmds.select(_sel)
-        return _result
-
-    return _restore_sel_fn
-
-
-def save_as(file_, revert_filename=True, export_selection=False, force=False,
-            verbose=0):
-    """Save the current scene at the given path without changing cur filename.
-
-    Args:
-        file_ (str): path to save file to
-        revert_filename (bool): disable revert filename
-        export_selection (bool): export selected nodes
-        force (bool): overwrite with no confirmation
-        verbose (int): print process data
-    """
-    _cur_filename = cmds.file(query=True, location=True)
-
-    # Test file paths
-    _file = File(abs_path(file_))
-    _file.delete(wording='replace existing', force=force)
-
-    # Execute save
-    _file.test_dir()
-    cmds.file(rename=_file.path)
-    _kwargs = {
-        'save' if not export_selection else 'exportSelected': True,
-        'type': {'ma': 'mayaAscii', 'mb': 'mayaBinary'}[_file.extn]}
-    cmds.file(options="v=0;", **_kwargs)
-    dprint('SAVED SCENE', _file.nice_size(), _file.path, verbose=verbose)
-    lprint(' - KWARGS', _kwargs, verbose=verbose > 1)
-
-    if revert_filename:
-        cmds.file(rename=_cur_filename)
-
-
-def save_scene(file_=None, force=False):
-    """Save current scene.
-
-    Args:
-        file_ (str): path to save as
-        force (bool): force overwrite existing
-    """
-    _file = file_ or cmds.file(query=True, location=True)
-    save_as(_file, revert_filename=False, force=force)
-
-
 def set_col(node, col):
     """Set viewport colour of the given node.
 
@@ -891,6 +544,15 @@ def set_col(node, col):
             "Col {} not in colour list: {}".format(col, COLS))
     cmds.setAttr(node+'.overrideEnabled', 1)
     cmds.setAttr(node+'.overrideColor', COLS.index(col))
+
+
+def set_end(frame):
+    """Set timeline end frame.
+
+    Args:
+        frame (float): end time
+    """
+    cmds.playbackOptions(maxTime=frame, animationEndTime=frame),
 
 
 def set_namespace(namespace, clean=False, verbose=0):
@@ -938,6 +600,15 @@ def set_res(res):
     cmds.setAttr('defaultResolution.height', _height)
 
 
+def set_start(frame):
+    """Set timeline start frame.
+
+    Args:
+        frame (float): start frame
+    """
+    cmds.playbackOptions(minTime=frame, animationStartTime=frame),
+
+
 def set_val(attr, val, verbose=0):
     """Set value of the given attribute.
 
@@ -960,26 +631,6 @@ def set_val(attr, val, verbose=0):
 
     lprint('APPLYING VAL', attr, _args, _kwargs, verbose=verbose)
     cmds.setAttr(attr, *_args, **_kwargs)
-
-
-def single_undo(func):
-    """Decorator to make a function only occuy one place in the undo list.
-
-    Args:
-        func (fn): function to decorate
-
-    Returns:
-        (fn): decorated function
-    """
-
-    @functools.wraps(func)
-    def _single_undo_fn(*args, **kwargs):
-        cmds.undoInfo(openChunk=True)
-        _result = func(*args, **kwargs)
-        cmds.undoInfo(closeChunk=True)
-        return _result
-
-    return _single_undo_fn
 
 
 def use_tmp_ns(func):

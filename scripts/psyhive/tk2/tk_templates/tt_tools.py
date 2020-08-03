@@ -3,7 +3,7 @@
 from psyhive import pipe, host
 from psyhive.utils import find, get_single, passes_filter
 
-from .tt_base import TTSequenceRoot, TTRoot, TTStepRoot, TTShot
+from .tt_base import TTSequenceRoot, TTStepRoot, TTShot, TTAsset
 from .tt_work import TTWork
 from .tt_output import TTOutput
 
@@ -46,19 +46,26 @@ def find_asset(filter_):
         filter_ (str): filter by path
 
     Returns:
-        (TTRoot): matching asset root
+        (TTAsset): matching asset root
     """
     return get_single([_asset for _asset in find_assets()
                        if passes_filter(_asset.path, filter_)], verbose=1)
 
 
-def find_assets():
-    """Read asset roots."""
+def find_assets(filter_=None):
+    """Read asset roots.
+
+    Args:
+        filter_ (str): filter by file path
+
+    Returns:
+        (TTAsset list): list of assets in this show
+    """
     _root = pipe.cur_project().path+'/assets'
     _roots = []
-    for _dir in find(_root, depth=3, type_='d'):
+    for _dir in find(_root, depth=3, type_='d', filter_=filter_):
         try:
-            _asset = TTRoot(_dir)
+            _asset = TTAsset(_dir)
         except ValueError:
             continue
         _roots.append(_asset)
@@ -80,17 +87,18 @@ def find_sequences():
     return _seqs
 
 
-def find_shot(name):
+def find_shot(name, catch=False):
     """Find shot matching the given name.
 
     Args:
         name (str): name to search for
+        catch (bool): no error if fail to match
 
     Returns:
         (TTRoot): matching shot
     """
-    return get_single([
-        _shot for _shot in find_shots() if _shot.name == name])
+    _shots = [_shot for _shot in find_shots() if _shot.name == name]
+    return get_single(_shots, catch=catch)
 
 
 def find_shots(class_=None, filter_=None, sequence=None):

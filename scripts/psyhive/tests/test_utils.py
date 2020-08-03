@@ -187,6 +187,12 @@ class TestPath(unittest.TestCase):
         assert get_single(find(_test_dir)) == _test_file
         assert get_single(find(_test_dir, full_path=False)) == 'test.txt'
 
+    def test_delete(self):
+
+        _tmp = File('{}/test.file'.format(tempfile.gettempdir()))
+        _tmp.touch()
+        _tmp.delete(catch=True, force=True)
+
     def test_get_owner(self):
 
         _path = '{}/psyhive/testing/owner_test.txt'.format(

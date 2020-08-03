@@ -194,10 +194,54 @@ def get_mod_sort(order):
     return _mod_sort
 
 
+def _reload_mod(mod, mod_name, execute, delete, catch, sort, verbose):
+    """Reload the given module.
+
+    Args:
+        mod (module): module to reload
+        mod_name (str): module name
+        execute (bool): execute the reload
+        delete (bool): delete and reimport module on reload
+        catch (bool): no error on fail to reload
+        sort (func): module reload sort function
+        verbose (int): print process data
+    """
+
+    # Try to reload
+    _dur = 0.0
+    if execute:
+        _start = time.time()
+        try:
+            reload(mod)
+        except ImportError as _exc:
+            Traceback().pprint()
+            if not catch:
+                qt.ok_cancel(
+                    'Failed to reload "{}".\n\nRemove from '
+                    'sys.path?'.format(mod_name),
+                    verbose=0)
+                del sys.modules[mod_name]
+            return
+        _dur = time.time() - _start
+
+    # Apply delete once reload works
+    if delete:
+        del sys.modules[mod_name]
+        __import__(mod_name, fromlist=mod_name.split('.'))
+
+    # Print status
+    if len(mod_name) > 53:
+        mod_name = mod_name[:50]+' ...'
+    lprint(
+        '{:<7.02f} {:<55} {:5.02f}s    {}'.format(
+            sort(mod_name), mod_name, _dur, abs_path(mod.__file__)),
+        verbose=verbose > 1)
+
+
 def reload_libs(
         mod_names=None, sort=None, execute=True, filter_=None,
         close_interfaces=True, catch=False, check_root=None,
-        verbose=1):
+        delete=False, verbose=1):
     """Reload libraries.
 
     Args:
@@ -210,6 +254,7 @@ def reload_libs(
         catch (bool): no error on fail to reload
         check_root (str): compare module locations to this root - this
             is used to check if a location has been successfully changed
+        delete (bool): delete and reimport modules on reload (to flush vars)
         verbose (int): print process data
 
     Returns:
@@ -239,33 +284,11 @@ def reload_libs(
         if not _mod:
             continue
 
-        # Try to reload
-        if execute:
-            _start = time.time()
-            try:
-                reload(_mod)
-            except ImportError as _exc:
-                Traceback().pprint()
-                if not catch:
-                    qt.ok_cancel(
-                        'Failed to reload "{}".\n\nRemove from '
-                        'sys.path?'.format(_mod_name),
-                        verbose=0)
-                    del sys.modules[_mod_name]
-                continue
-            _dur = time.time() - _start
+        _reload_mod(mod=_mod, mod_name=_mod_name, execute=execute, sort=_sort,
+                    delete=delete, verbose=verbose, catch=catch)
 
         _count += 1
-        _file = _mod.__file__
-        _name = _mod_name
-        if len(_name) > 53:
-            _name = _name[:50]+' ...'
-        lprint(
-            '{:<7.02f} {:<55} {:5.02f}s    {}'.format(
-                _sort(_mod_name), _name, _dur, abs_path(_file)),
-            verbose=verbose > 1)
-
-        if check_root and not abs_path(_file).startswith(
+        if check_root and not abs_path(_mod.__file__).startswith(
                 abs_path(check_root)):
             _fails += 1
 

@@ -5,6 +5,7 @@ import functools
 import inspect
 import operator
 import os
+import shutil
 import tempfile
 import time
 
@@ -18,31 +19,51 @@ class Cacheable(object):
     """Base class for any cacheable object."""
     cache_fmt = None
 
-    def cache_read(self, tag):
+    def cache_read(self, tag, verbose=0):
         """Read cached data from the given tag.
 
         Args:
             tag (str): data tag to read
+            verbose (int): print process data
 
         Returns:
             (any): cached data
         """
         _file = self.cache_fmt.format(tag)
+        lprint('READ CACHE FILE', _file, verbose=verbose)
         try:
             return obj_read(file_=_file)
         except OSError:
             return None
 
-    def cache_write(self, tag, data, verbose=0):
+    def cache_write(self, tag, data, bkp=False, verbose=0):
         """Write data to the given cache.
 
         Args:
             tag (str): tag to store data to
             data (any): data to store
+            bkp (bool): save timestamped backup file on save (if data changed)
             verbose (int): print process data
         """
-        _file = self.cache_fmt.format(tag)
-        obj_write(file_=_file, obj=data, verbose=verbose)
+        from psyhive.utils import File
+
+        _file = File(self.cache_fmt.format(tag))
+        lprint('WRITE CACHE FILE', _file.path, verbose=verbose)
+
+        if bkp and _file.exists():
+            _data = self.cache_read(tag)
+            if _data == data:
+                lprint(' - DATA UNCHANGED, NO BKP REQUIRED')
+            else:
+                lprint(' - STORE BKP', _data)
+
+                _bkp = '{}/_bkp_{}_{}.{}'.format(
+                    _file.dir, _file.basename,
+                    time.strftime('%y%m%d_%H%M%S'), _file.extn)
+                lprint(' - BKP', _bkp)
+                shutil.copy(_file.path, _bkp)
+
+        obj_write(file_=_file.path, obj=data)
 
 
 class CacheMissing(OSError):

@@ -109,19 +109,28 @@ class TTOutputName(TTDirBase):
             return None
         return _vers[-1]
 
-    def find_versions(self, class_=None, version=None):
+    def find_versions(self, class_=None, version=None, filter_=None):
         """Find versions of this output name.
 
         Args:
             class_ (class): override output version class
             version (int): filter by version
+            filter_ (str): filter file path
 
         Returns:
             (TTOutputVersion list): list of versions
         """
         _vers = self._read_versions(class_=class_)
-        if version is not None:
+
+        # Apply version filter
+        if version == 'latest' and _vers:
+            _vers = [_vers[-1]]
+        elif version is not None:
             _vers = [_ver for _ver in _vers if _ver.version == version]
+
+        if filter_:
+            _vers = apply_filter(_vers, filter_,
+                                 key=operator.attrgetter('path'))
         return _vers
 
     def _read_versions(self, class_=None):
@@ -391,11 +400,21 @@ class _TTOutputFileBase(TTBase):
         """
         return self.find_latest() == self
 
-    def register_in_shotgun(self, complete=False, **kwargs):
+    def move_to(self, trg, force=False):
+        """Needs to be implemented in subclass.
+
+        Args:
+            trg (str): new location
+            force (bool): replace any existing file without confirmation
+        """
+        raise NotImplementedError
+
+    def register_in_shotgun(self, complete=False, verbose=0, **kwargs):
         """Register this output in shotgun.
 
         Args:
             complete (bool): complete status
+            verbose (int): print process data
         """
         from psyhive import tk2
 
@@ -410,10 +429,13 @@ class _TTOutputFileBase(TTBase):
 
         # Create workspace
         _work = self.map_to(tk2.TTWork, dcc='maya', extension='ma')
+        lprint(' - WORK', _work, verbose=verbose)
         _fo_workspace = _workspace_fo.get_workspace_from_path(
             app=_fileops, path=_work.path)  # To access context
+        lprint(' - FILEOPS WORKSPACE', _fo_workspace, verbose=verbose)
         _sg_workspace = _workspace_sg.workspace_from_context(
             _fo_workspace.context)
+        lprint(' - SG WORKSPACE', _sg_workspace, verbose=verbose)
 
         # Register
         _path = self.path.replace(".%04d.", ".####.")
@@ -425,6 +447,7 @@ class TTOutputFile(_TTOutputFileBase, File):
     """Represents an output file."""
 
     hint_fmt = '{area}_output_file'
+    move_to = File.move_to
 
     def __init__(self, file_, verbose=0):
         """Constructor.
@@ -450,6 +473,7 @@ class TTOutputFileSeq(_TTOutputFileBase, Seq):
     hint_fmt = '{area}_output_file_seq'
 
     exists = Seq.exists
+    move_to = Seq.move_to
 
     def __init__(self, path, verbose=0):
         """Constructor.

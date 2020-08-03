@@ -188,6 +188,17 @@ class TestTankSupport(unittest.TestCase):
                  'test_sphere_main_v036.mb')
         tank_support.build_shader_outputs(_path, force=True)
 
+    def test_read_mesh_data(self):
+        for _name in ['bakeSet', 'testSphere']:
+            if cmds.objExists(_name):
+                cmds.delete(_name)
+        _sphere = hom.CMDS.polySphere(name='testSphere')
+        _sphere.add_to_set('bakeSet')
+        _data = tank_support.read_mesh_data()
+        assert _data['testSphere'] == {
+            'uv_sets': ['map1'], 'poly_count': 400, 'vtx_count': 382}
+        print _data
+
     @use_tmp_ns
     def test_write_image_plane(self):
         """Write image plane settings to output abc dir."""

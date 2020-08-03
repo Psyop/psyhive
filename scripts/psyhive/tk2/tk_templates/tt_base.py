@@ -296,6 +296,10 @@ class TTRoot(TTDirBase):
         return self.find(depth=1, type_='d', class_=_class)
 
 
+class TTAsset(TTRoot):
+    """Represents an asset folder."""
+
+
 class TTShot(TTRoot):
     """Represents a shot folder."""
 
@@ -395,6 +399,7 @@ class TTStepRoot(TTDirBase):
         _area = get_area(_path)
         _hint = self.hint_fmt.format(area=_area)
         super(TTStepRoot, self).__init__(path, hint=_hint)
+        self.name = self.step
 
     def find_output_types(self, output_type=None):
         """Find output types in this step root.
@@ -447,6 +452,30 @@ class TTStepRoot(TTDirBase):
                 verbose=verbose)
         return _names
 
+    def find_output_versions(
+            self, filter_=None, task=None, version=None,
+            output_type=None, output_name=None, verbose=0):
+        """Find outputs within this step root.
+
+        Args:
+            filter_ (str): file path filter
+            task (str): filter by task
+            version (str): filter by version (eg. v003 or latest)
+            output_type (str): filter by version type
+            output_name (str): filter by output name
+            verbose (int): print process data
+
+        Returns:
+            (TTOutput list): list of outputs
+        """
+        _vers = []
+        for _name in self.find_output_names(
+                task=task, output_type=output_type,
+                output_name=output_name):
+            lprint('TESTING NAME', _name, verbose=verbose)
+            _vers += _name.find_versions(filter_=filter_, version=version)
+        return _vers
+
     def find_outputs(self, filter_=None, task=None, version=None,
                      output_type=None, output_name=None, verbose=0):
         """Find outputs within this step root.
@@ -454,7 +483,7 @@ class TTStepRoot(TTDirBase):
         Args:
             filter_ (str): file path filter
             task (str): filter by task
-            version (str): filter by version
+            version (str): filter by version (eg. v003 or latest)
             output_type (str): filter by version type
             output_name (str): filter by output name
             verbose (int): print process data
@@ -463,14 +492,43 @@ class TTStepRoot(TTDirBase):
             (TTOutput list): list of outputs
         """
         _outs = []
-        for _name in self.find_output_names(
+        for _ver in self.find_output_versions(
                 task=task, output_type=output_type,
-                output_name=output_name):
-            lprint('TESTING NAME', _name, verbose=verbose)
-            for _ver in _name.find_versions(version=version):
-                lprint('TESTING VER', _ver, verbose=verbose)
-                _outs += _ver.find_outputs(filter_=filter_)
+                output_name=output_name, version=version):
+            lprint('TESTING VER', _ver, verbose=verbose)
+            _outs += _ver.find_outputs(filter_=filter_)
         return _outs
+
+    def find_output_file(self, format_=None, extn=None, version=None):
+        """Find a specific output file in this step root.
+
+        Args:
+            format_ (str): filter by format (eg. maya)
+            extn (str): filter by extension (eg. mb)
+            version (str): filter by version (eg. v003 or latest)
+
+        Returns:
+            (TTOutputFileBase): matching output file
+        """
+        return get_single(self.find_output_files(
+            format_=format_, extn=extn, version=version))
+
+    def find_output_files(self, format_=None, extn=None, version=None):
+        """Find output files in this step root.
+
+        Args:
+            format_ (str): filter by format (eg. maya)
+            extn (str): filter by extension (eg. mb)
+            version (str): filter by version (eg. v003 or latest)
+
+        Returns:
+            (TTOutputFileBase list): matching output files
+        """
+        _files = []
+        for _out in self.find_outputs(version=version):
+            _files += _out.find_files(
+                format_=format_, extn=extn)
+        return _files
 
     def find_renders(self):
         """Find renders in this step root.
@@ -494,6 +552,14 @@ class TTStepRoot(TTDirBase):
         """
         return self.get_work_area(dcc=dcc).find_work(
             class_=class_, task=task)
+
+    def find_tasks(self):
+        """Find tasks in this step.
+
+        Returns:
+            (str list): tasks
+        """
+        return sorted(set([_work.task for _work in self.find_work()]))
 
     def get_work_area(self, dcc):
         """Get work area in this step for the given dcc.

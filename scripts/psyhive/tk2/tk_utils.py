@@ -9,7 +9,7 @@ import time
 import six
 import tank
 
-from psyhive import qt, icons, refresh
+from psyhive import qt, icons, refresh, host
 from psyhive.utils import (
     lprint, store_result, get_single, dprint, abs_path, get_path)
 
@@ -182,6 +182,49 @@ def get_current_engine():
     _ctx = _tk.context_from_path(_project_path)
     _shell = tank.platform.start_engine('tk-shell', _tk, _ctx)
     return _shell
+
+
+def publish_scene(comment, force=False):
+    """Publish the current scene.
+
+    Args:
+        comment (str): publish comment
+        force (bool): force save over without confirmation
+    """
+    from .. import tk2
+
+    _publish = find_tank_app('publish')
+    _ass_man = find_tank_app('assetmanager')
+
+    # Create publish type
+    _mod = find_tank_mod(
+        'tk_multi_publish.publish_types.scene.scene_publish')
+    _type = _mod.ScenePublishType(app=_publish)
+
+    # Create publish item
+    _mod = find_tank_mod(
+        'tk_multi_publish.publish_types.scene.scene_publish')
+    _scn_pub = _mod.ScenePublish(app=_publish)
+
+    # Create publish
+    _mod = find_tank_mod('tk_multi_publish.publish')
+    _pub = _mod.Publish(app=_publish, publish_type=_type)
+    _pub._model._mode = 1
+    _pub._model._publish_item = _scn_pub
+
+    # Execute publish
+    _start = time.time()
+    host.save_scene(force=force)
+    _pub._model.publish()
+    _dur = time.time() - _start
+    tk2.cur_work().set_comment(comment)
+    print ' - PUBLISHED ASSET IN {:.02f}s'.format(_dur)
+
+    # Update asset manager
+    _start = time.time()
+    _ass_man.init_app()
+    _dur = time.time() - _start
+    print ' - UPDATED ASSET MANAGER IN {:.02f}s'.format(_dur)
 
 
 def reference_publish(file_, verbose=0):

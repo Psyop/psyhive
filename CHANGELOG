@@ -1,3 +1,34 @@
+#### v0.90.0 ####
+
+    Released: Mon 3rd Aug 2020 16:28pm
+
+    Tank support: added function for reading publish mesh data [TOOLS-57],
+    
+    maya_psyhive:
+        open_maya.BaseNode added find_anim/endswith,
+        open_maya HFnCamera/HFnMesh reject missing shp,
+        open_maya.HFnMesh check shp is mesh,
+        open_maya.find_nodes added selection arg + catch init error,
+        open_maya read_incoming/read_outgoing added type_ arg,
+        ref.FileRef.find_nodes catch class_ init fail,
+        startup ignore show toolkits with leading _,
+        tank_support.read_mesh_data added,
+    psyhive:
+        host maya set_start/set_end apply to animation start/end times,
+        refresh.reload_libs added delete arg,
+        tk2 added publish_scene/TTAsset,
+        tk2.TTStepRoot name/find_output_versions/find_output_file/find_output_files/find_tasks added,
+        tk2.TTOutputName.find_versions added,
+        tk2.find_assets added filter_ arg,
+        tk2.find_shot added catch arg,
+        tk2.TTWork.find_output_file added,
+        tk2.TTWork.save allow save arbitrary versions,
+        tk2.publish_scene added,
+        utils.Cacheable.cache_write added bkp arg,
+        utils.File.delete added catch arg,
+        utils.find added catch_missing arg,
+
+
 #### v0.89.1 ####
 
     Released: Tue 14th Jul 2020 09:39am

@@ -142,7 +142,8 @@ def _find_cast_results_by_class(results, class_):
 
 def find(
         dir_=None, type_=None, extn=None, filter_=None, base=None, depth=-1,
-        name=None, full_path=True, class_=None, verbose=0):
+        name=None, full_path=True, class_=None, catch_missing=False,
+        verbose=0):
     """Find files/dirs in a given path.
 
     Args:
@@ -155,6 +156,7 @@ def find(
         name (str): match exact file/dir name
         full_path (bool): return full path to file
         class_ (type): cast results to this type
+        catch_missing (bool): allow the parent dir to be missing
         verbose (int): print process data
 
     Returns:
@@ -173,6 +175,8 @@ def find(
         raise ValueError("Extn should not start with period - "+extn)
 
     # Get a list of files in dir
+    if catch_missing and not os.path.exists(_dir):
+        raise OSError("Missing dir "+_dir)
     try:
         _files = os.listdir(_dir)
     except WindowsError:

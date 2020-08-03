@@ -63,8 +63,15 @@ class FileRef(object):
         _class = class_ or hom.HFnDependencyNode
         if type_:
             _kwargs['type'] = type_
-        return [_class(_node)
-                for _node in cmds.ls(_namespace+":*", **_kwargs)]
+
+        _nodes = []
+        for _node in cmds.ls(_namespace+":*", **_kwargs):
+            try:
+                _node = _class(_node)
+            except RuntimeError:
+                continue
+            _nodes.append(_node)
+        return _nodes
 
     def find_top_node(self, class_=None, verbose=0):
         """Find top node of this reference.
