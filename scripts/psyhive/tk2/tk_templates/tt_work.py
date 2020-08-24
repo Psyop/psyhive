@@ -237,20 +237,21 @@ class TTWork(TTBase, File):
             verbose=verbose)
 
     def find_output_file(self, extension=None, format_=None, catch=True,
-                         verbose=1):
+                         output_type=None, verbose=1):
         """Find a specific output file generated from this work.
 
         Args:
             extension (str): match by extension
             format_ (str): match by format
             catch (bool): supress error on no match
+            output_type (str): filter by output type
             verbose (int): print process data
 
         Returns:
             (TTOutputFileBase): matching output file
         """
         _files = self.find_output_files(
-            extension=extension, format_=format_)
+            extension=extension, format_=format_, output_type=output_type)
         if verbose and len(_files) > 1:
             pprint.pprint(_files)
         return get_single(_files, catch=catch, verbose=verbose-1)
@@ -443,11 +444,13 @@ class TTWork(TTBase, File):
         _fileops = find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
-    def save(self, comment):
+    def save(self, comment, safe=True):
         """Save this version.
 
         Args:
             comment (str): comment for version
+            safe (bool): error if we are saving over an existing scene file
+                without incrementing
         """
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
@@ -455,7 +458,7 @@ class TTWork(TTBase, File):
 
         if self.exists():
 
-            self.save_inc(comment=comment)
+            self.save_inc(comment=comment, safe=safe)
 
         else:
 
@@ -475,17 +478,24 @@ class TTWork(TTBase, File):
         self.set_comment(comment)
         self.add_to_recent()
 
-    def save_inc(self, comment):
+    def save_inc(self, comment, safe=True):
         """Save increment file.
 
         Args:
             comment (str): comment
+            safe (bool): error if we are saving over an existing scene file
+                without incrementing
         """
-        if not host.cur_scene() == self.path:
-            print 'CUR', host.cur_scene()
-            print 'TRG', self.path
-            raise ValueError
         _fileops = find_tank_app('psy-multi-fileops')
+
+        if not host.cur_scene() == self.path:
+            if safe:
+                print 'CUR', host.cur_scene()
+                print 'TRG', self.path
+                raise ValueError
+            host.save_as(self.path, revert_filename=False)
+            _fileops.init_app()
+
         _fileops.save_increment_file(comment=comment)
 
     def set_comment(self, comment):
@@ -503,6 +513,15 @@ class TTWork(TTBase, File):
             name=self.task, version=self.version)
         _tk_workfile.metadata.comment = comment
         _tk_workfile.metadata.save()
+
+    @property
+    def ver_n(self):
+        """Get version as integer.
+
+        Returns:
+            (int): version number
+        """
+        return int(self.version)
 
 
 class TTIncrement(TTBase, File):

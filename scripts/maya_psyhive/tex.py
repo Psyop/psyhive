@@ -51,16 +51,17 @@ class _BaseShader(object):
 
         return _file
 
-    def assign_to(self, geo):
+    def assign_to(self, geo, verbose=1):
         """Assign this shader to the given geo transform.
 
         Args:
             geo (str): geo transform
+            verbose (int): print process data
         """
         _se = self.get_se()
         if not _se:
             _se = self.create_se()
-        print "SE", _se
+            lprint("CREATED SE", _se, verbose=verbose)
         for _shp in cmds.listRelatives(geo, shapes=True):
             cmds.sets(_shp, edit=True, forceElement=_se)
 

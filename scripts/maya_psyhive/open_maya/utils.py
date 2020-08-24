@@ -111,8 +111,22 @@ def cast_result(func, verbose=0):
     return _casted_result_fn
 
 
+def find_anim(filter_=None):
+    """Find anim curves in this scene.
+
+    Args:
+        filter_ (str): filter to pass to ls comment
+
+    Returns:
+        (HFnAnimCurve list): anim curves
+    """
+    from maya_psyhive import open_maya as hom
+    return find_nodes(
+        type_='animCurve', class_=hom.HFnAnimCurve, filter_=filter_)
+
+
 def find_nodes(filter_=None, class_=None, type_=None, long_=False,
-               selection=False):
+               selection=False, namespace=None):
     """Find nodes on the current scene (uses ls command).
 
     Args:
@@ -121,6 +135,7 @@ def find_nodes(filter_=None, class_=None, type_=None, long_=False,
         type_ (str): ls type flag
         long_ (bool): ls long flag
         selection (bool): seach only selected nodes
+        namespace (str): filter by namespace
 
     Returns:
         (HFnDepdendencyNode list): nodes
@@ -139,6 +154,8 @@ def find_nodes(filter_=None, class_=None, type_=None, long_=False,
         try:
             _result = _class(_node)
         except RuntimeError:
+            continue
+        if namespace is not None and not _result.namespace == namespace:
             continue
         _results.append(_result)
     return _results

@@ -1,12 +1,15 @@
 """General tools."""
 
+import tempfile
+
 from maya import cmds, mel
 from maya.app.general import createImageFormats
 
 import six
 
 from psyhive import qt
-from psyhive.utils import get_single, lprint, File, dprint, get_path
+from psyhive.utils import (
+    get_single, lprint, File, dprint, get_path, Movie, Seq)
 
 from .mu_const import COLS
 from .mu_dec import restore_ns, get_ns_cleaner
@@ -142,6 +145,30 @@ def blast(seq, range_=None, res=None, force=False, cam=None, view=False,
         seq.view()
 
 
+def blast_to_mov(mov, range_=None, res=None, force=False, cam=None, view=False,
+                 verbose=0):
+    """Playblast current scene to mov.
+
+    Args:
+        mov (str): path to mov file
+        range_ (tuple): start/end frame
+        res (tuple): override image resolution
+        force (bool): overwrite existing file without confirmation
+        cam (str): override camera
+        view (bool): view blast on complete
+        verbose (int): print process data
+    """
+    _mov = Movie(mov)
+    _mov.delete(force=force)
+    _tmp_seq = Seq('{}/blast_tmp.%04d.jpg'.format(tempfile.gettempdir()))
+    blast(_tmp_seq, range_=range_, res=res, force=True, cam=cam, view=False,
+          verbose=verbose)
+    _tmp_seq.to_mov(_mov)
+    if view:
+        _mov.view()
+    _tmp_seq.delete(force=True)
+
+
 def break_conns(attr):
     """Break connections on the given attribute.
 
@@ -250,7 +277,7 @@ def del_namespace(namespace, force=True):
                 namespace))
     set_namespace(namespace, clean=True)
     set_namespace(":")
-    cmds.namespace(removeNamespace=namespace)
+    cmds.namespace(removeNamespace=namespace, deleteNamespaceContent=True)
 
 
 def find_cams(orthographic=False):
@@ -360,6 +387,8 @@ def get_val(attr, type_=None, class_=None, verbose=0):
                    'double3', 'time', 'byte', 'bool', 'int', 'doubleAngle',
                    'enum']:
         pass
+    elif _type == 'message':
+        return get_single(cmds.listConnections(attr, destination=False))
     else:
         raise ValueError('Unhandled type {} on attr {}'.format(_type, attr))
 
@@ -487,7 +516,7 @@ def pause_viewports(pause=True):
 
 
 def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
-           force=False):
+           force=False, verbose=0):
     """Render the current scene.
 
     Args:
@@ -496,6 +525,7 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
         layer (str): layer to render
         col_mgt (bool): apply colour management
         force (bool): replace existing without confirmation
+        verbose (int): print process data
     """
     from maya_psyhive import open_maya as hom
     cmds.loadPlugin('mtoa', quiet=True)
@@ -530,6 +560,7 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
         assert _tmp_file.exists()
         _tmp_file.move_to(_file)
     assert _file.exists()
+    lprint('RENDERED IMAGE', _file.path, verbose=verbose)
 
 
 def set_col(node, col):
@@ -552,7 +583,16 @@ def set_end(frame):
     Args:
         frame (float): end time
     """
-    cmds.playbackOptions(maxTime=frame, animationEndTime=frame),
+    cmds.playbackOptions(maxTime=frame, animationEndTime=frame)
+
+
+def set_fps(fps):
+    """Set current frame rate.
+
+    Args:
+        fps (float): fps to apply
+    """
+    cmds.currentUnit(time={24: 'film', 30: 'ntsc'}[fps])
 
 
 def set_namespace(namespace, clean=False, verbose=0):
@@ -563,7 +603,7 @@ def set_namespace(namespace, clean=False, verbose=0):
         clean (bool): delete all nodes in this namespace
         verbose (int): print process data
     """
-    assert namespace.startswith(':')
+    # assert namespace.startswith(':')
 
     if clean and cmds.namespace(exists=namespace):
 
@@ -620,17 +660,25 @@ def set_val(attr, val, verbose=0):
         val (any): value to apply
         verbose (int): print process data
     """
+    from maya_psyhive import open_maya as hom
+
     _args = [val]
     _kwargs = {}
     if isinstance(val, qt.HColor):
         _args = val.to_tuple(mode='float')
+    elif isinstance(val, hom.BaseArray3):
+        _args = val.to_tuple()
     elif isinstance(val, six.string_types):
         _kwargs['type'] = 'string'
     elif isinstance(val, (list, tuple)):
         _args = val
 
     lprint('APPLYING VAL', attr, _args, _kwargs, verbose=verbose)
-    cmds.setAttr(attr, *_args, **_kwargs)
+    try:
+        cmds.setAttr(attr, *_args, **_kwargs)
+    except RuntimeError:
+        print 'ARGS/KWARGS', _args, _kwargs
+        raise RuntimeError('Failed to setAttr {}'.format(attr))
 
 
 def use_tmp_ns(func):

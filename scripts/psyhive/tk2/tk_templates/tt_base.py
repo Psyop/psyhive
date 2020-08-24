@@ -346,6 +346,8 @@ class TTShot(TTRoot):
                 ["code", "is", self.name],
             ],
             fields=_fields)
+        if not _sg_data:
+            return (None, None)
         return tuple([_sg_data[_field] for _field in _fields])
 
     def set_frame_range(self, rng, use_cut=True):
@@ -499,33 +501,41 @@ class TTStepRoot(TTDirBase):
             _outs += _ver.find_outputs(filter_=filter_)
         return _outs
 
-    def find_output_file(self, format_=None, extn=None, version=None):
+    def find_output_file(
+            self, format_=None, extn=None, version=None, task=None,
+            catch=False, verbose=0):
         """Find a specific output file in this step root.
 
         Args:
             format_ (str): filter by format (eg. maya)
             extn (str): filter by extension (eg. mb)
             version (str): filter by version (eg. v003 or latest)
+            task (str): filter by task
+            catch (bool): no error on fail
+            verbose (int): print process data
 
         Returns:
             (TTOutputFileBase): matching output file
         """
-        return get_single(self.find_output_files(
-            format_=format_, extn=extn, version=version))
+        _files = self.find_output_files(
+            format_=format_, extn=extn, version=version, task=task)
+        return get_single(_files, catch=catch, verbose=verbose)
 
-    def find_output_files(self, format_=None, extn=None, version=None):
+    def find_output_files(
+            self, format_=None, extn=None, version=None, task=None):
         """Find output files in this step root.
 
         Args:
             format_ (str): filter by format (eg. maya)
             extn (str): filter by extension (eg. mb)
             version (str): filter by version (eg. v003 or latest)
+            task (str): filter by task
 
         Returns:
             (TTOutputFileBase list): matching output files
         """
         _files = []
-        for _out in self.find_outputs(version=version):
+        for _out in self.find_outputs(version=version, task=task):
             _files += _out.find_files(
                 format_=format_, extn=extn)
         return _files

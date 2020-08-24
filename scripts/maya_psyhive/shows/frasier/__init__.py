@@ -1,5 +1,7 @@
 """Tools for frasier project."""
 
+import tank  # Prevent non-psyop import
+
 from .fr_tools import KEALEYE_TOOLS_ROOT
 from .fr_vendor_ma import FrasierVendorMa, MOBURN_ROOT
 from .fr_work import (

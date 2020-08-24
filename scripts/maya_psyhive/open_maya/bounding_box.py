@@ -174,7 +174,8 @@ def get_bbox(obj, ignore_points=False, verbose=0):
         _pt = hom.HPoint(obj)
         return HBoundingBox(_pt, _pt)
     elif isinstance(obj, (
-            six.string_types, hom.HFnDependencyNode, hom.HFnTransform)):
+            six.string_types, hom.HFnDependencyNode, hom.HFnTransform,
+            hom.HFnMesh)):
         _result = cmds.exactWorldBoundingBox(
             obj, calculateExactly=True, ignoreInvisible=True)
         lprint('BBOX RESULT', _result, verbose=verbose)

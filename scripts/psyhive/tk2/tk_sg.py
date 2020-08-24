@@ -59,7 +59,7 @@ def get_project_sg_data(project=None):
     """
     _project = project or pipe.cur_project()
     _data = tank.platform.current_engine().shotgun.find(
-        "Project", filters=[["name", "is", _project.name]])
+        "Project", filters=[["sg_code", "is", _project.name]])
     _id = get_single(_data)['id']
     return {'type': 'Project', 'id': _id, 'name': _project.name}
 

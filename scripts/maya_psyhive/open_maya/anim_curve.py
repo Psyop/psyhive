@@ -23,14 +23,15 @@ class HFnAnimCurve(BaseNode, oma.MFnAnimCurve):
         _obj = _tmp_list.getDependNode(0)
         oma.MFnAnimCurve.__init__(self, _obj)
 
-    def connect(self, plug, force=False):
+    def connect(self, plug, force=False, catch=False):
         """Connect this anim curve to the given plug.
 
         Args:
             plug (HPlug): plug to connect to
             force (bool): replace any existing connection
+            catch (bool): no error on fail
         """
-        self.output.connect(plug, force=force)
+        self.output.connect(plug, force=force, catch=catch)
 
     def get_key_frames(self):
         """Get a list of frames that are keyed in this curve.
@@ -121,3 +122,11 @@ class HFnAnimCurve(BaseNode, oma.MFnAnimCurve):
             type_ (str): tangent type
         """
         cmds.keyTangent(self, inTangentType=type_, outTangentType=type_)
+
+    def t_shift(self, offset):
+        """Apply time shift.
+
+        Args:
+            offset (float): offset in frames
+        """
+        cmds.keyframe(self, timeChange=offset, relative=True)

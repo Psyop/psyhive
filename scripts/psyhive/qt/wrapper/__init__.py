@@ -6,5 +6,5 @@ from .widgets import (
     HLabel, HTreeWidgetItem, HListWidgetItem, HProgressBar, HPushButton,
     HCheckBox, HListWidget, HComboBox, HMenu, HTreeWidget, HTabWidget,
     HTextBrowser)
-from .gui import HPixmap, HColor, HPainter, TEST_IMG
+from .gui import HPixmap, HColor, HPainter, TEST_IMG, TEST_JPG, TEST_PNG
 from .core import HPoint

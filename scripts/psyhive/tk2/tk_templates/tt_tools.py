@@ -39,17 +39,24 @@ def cur_work(class_=None):
         return None
 
 
-def find_asset(filter_):
+def find_asset(filter_=None, asset=None, catch=False):
     """Find asset matching given filter.
 
     Args:
         filter_ (str): filter by path
+        asset (str): filter by asset name
+        catch (bool): no error on fail
 
     Returns:
         (TTAsset): matching asset root
     """
-    return get_single([_asset for _asset in find_assets()
-                       if passes_filter(_asset.path, filter_)], verbose=1)
+    _assets = find_assets()
+    if filter_:
+        _assets = [_asset for _asset in _assets
+                   if passes_filter(_asset.path, filter_)]
+    if asset:
+        _assets = [_asset for _asset in _assets if _asset.asset == asset]
+    return get_single(_assets, catch=catch, verbose=1)
 
 
 def find_assets(filter_=None):
@@ -120,6 +127,24 @@ def find_shots(class_=None, filter_=None, sequence=None):
         for _seq in _seqs], [])
 
 
+def get_asset(path):
+    """Get an asset object from the given path.
+
+    Args:
+        path (str): path to test
+
+    Returns:
+        (TTAsset|None): shot root (if any)
+    """
+    try:
+        _asset = TTAsset(path)
+    except ValueError:
+        return None
+    if not _asset.asset:
+        return None
+    return _asset
+
+
 def get_output(path):
     """Get output from the given path.
 
@@ -142,7 +167,7 @@ def get_shot(path):
         path (str): path to test
 
     Returns:
-        (TTRoot|None): shot root (if any)
+        (TTShot|None): shot root (if any)
     """
     try:
         _root = TTShot(path)

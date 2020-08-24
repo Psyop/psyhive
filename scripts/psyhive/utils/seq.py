@@ -435,6 +435,7 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
     _start, _end = seq.find_range(force=True)
     _mov = Movie(get_path(mov))
     assert not _mov.exists()
+    assert _mov.extn.lower() in ['mov', 'mp4']
     _mov.test_dir()
 
     # Use ffmpeg through psylaunch

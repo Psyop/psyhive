@@ -3,7 +3,7 @@
 from maya import cmds
 
 from psyhive.utils import get_single, lprint
-from maya_psyhive.utils import add_to_grp, set_col
+from maya_psyhive.utils import add_to_grp, set_col, get_shp
 
 from .base_node import BaseNode
 from .plug import HPlug
@@ -128,6 +128,15 @@ class BaseTransform(BaseNode):
         from maya_psyhive import open_maya as hom
         return hom.get_p(self)
 
+    def get_shp(self):
+        """Find this node's shape.
+
+        Returns:
+            (HFnDependencyNode): shape
+        """
+        from maya_psyhive import open_maya as hom
+        return hom.HFnDependencyNode(get_shp(self))
+
     def orient_constraint(self, *args, **kwargs):
         """Orient constrain a node to this node.
 
@@ -176,6 +185,14 @@ class BaseTransform(BaseNode):
         """
         set_col(str(self), col)
 
+    def set_p(self, pos):
+        """Set position of this node.
+
+        Args:
+            pos (HPoint): position to apply
+        """
+        cmds.xform(self, translation=(pos[0], pos[1], pos[2]), worldSpace=True)
+
     def set_pivot(self, pos=None, scale=True, rotate=True):
         """Set this node's scale/rotate pivot.
 
@@ -195,10 +212,15 @@ class BaseTransform(BaseNode):
         """Set keyframe on this node."""
         cmds.setKeyframe(self)
 
+    def show(self):
+        """Hide this node."""
+        self.visibility.set_val(True)
+
     def u_scale(self, scale):
         """Apply a uniform scale to this node.
 
         Args:
             scale (float): scale value
         """
+        assert isinstance(scale, (int, float))
         self.scale.set_val([scale, scale, scale])

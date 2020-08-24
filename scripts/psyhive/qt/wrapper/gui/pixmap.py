@@ -10,7 +10,9 @@ from psyhive.utils import File, lprint, test_path, abs_path
 from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
 from psyhive.qt.wrapper.gui.painter import HPainter
 
-TEST_IMG = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
+TEST_JPG = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
+TEST_PNG = abs_path('{}/test.png'.format(tempfile.gettempdir()))
+TEST_IMG = TEST_JPG
 
 
 class HPixmap(QtGui.QPixmap):
@@ -456,12 +458,13 @@ class HPixmap(QtGui.QPixmap):
         _tfm.rotate(degrees)
         return HPixmap(self.transformed(_tfm))
 
-    def resize(self, width, height=None):
+    def resize(self, width=None, height=None, use_img=True):
         """Return a resized version of this pixmap.
 
         Args:
             width (int): width in pixels
             height (int): height in pixels
+            use_img (bool): use QImage.scaled (cleaner result)
         """
         if isinstance(width, (int, float)):
             _width = width
@@ -469,11 +472,23 @@ class HPixmap(QtGui.QPixmap):
         elif isinstance(width, QtCore.QSize):
             _width = width.width()
             _height = width.height()
+        elif width is None:
+            assert height
+            _height = height
+            _width = _height*self.get_aspect()
         else:
             raise ValueError(width)
-        _pix = QtGui.QPixmap.scaled(
-            self, _width, _height,
-            transformMode=Qt.SmoothTransformation)
+
+        if not use_img:  # Probably faster bad result
+            _pix = QtGui.QPixmap.scaled(
+                self, _width, _height,
+                transformMode=Qt.SmoothTransformation)
+        else:  # Smoother image
+            _img = self.toImage()
+            _img = _img.scaled(
+                _width, _height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+            _pix = QtGui.QPixmap.fromImage(_img)
+
         return HPixmap(_pix)
 
     def save_as(self, path, force=False, verbose=0):
@@ -503,13 +518,14 @@ class HPixmap(QtGui.QPixmap):
         self.save(abs_path(path, win=True), format=_fmt, quality=100)
         assert _file.exists()
 
-    def save_test(self, file_=None, timestamp=True, verbose=1):
+    def save_test(self, file_=None, timestamp=True, extn='jpg', verbose=1):
         """Save test image and copy it to pictures dir.
 
         Args:
             file_ (str): override save file path - this can be used
                 to switch this method with a regular save
             timestamp (bool): write timestamped file
+            extn (str): test file extension
             verbose (int): print process data
 
         Returns:
@@ -519,12 +535,13 @@ class HPixmap(QtGui.QPixmap):
             self.save_as(file_, force=True)
             return file_
 
-        self.save_as(TEST_IMG, verbose=verbose, force=True)
-        _file = TEST_IMG
+        _test_img = File(TEST_IMG).apply_extn(extn).path
+        self.save_as(_test_img, verbose=verbose, force=True)
+        _file = _test_img
 
         if timestamp:
             _timestamp_file = abs_path(time.strftime(
-                '~/Documents/My Pictures/tests/%y%m%d_%H%M.jpg'))
+                '~/Documents/My Pictures/tests/%y%m%d_%H%M.{}'.format(extn)))
             self.save_as(_timestamp_file, verbose=verbose, force=True)
             _file = _timestamp_file
 

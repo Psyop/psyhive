@@ -81,14 +81,17 @@ def _get_widget_label(widget):
 class HUiDialog3(QtWidgets.QDialog, BaseDialog):
     """Dialog based on a ui file."""
 
+    timer = None
+
     def __init__(self, ui_file, catch_errors_=True, save_settings=True,
-                 parent=None):
+                 load_settings=True, parent=None):
         """Constructor.
 
         Args:
             ui_file (str): path to ui file
             catch_errors_ (bool): apply error catcher to callbacks
             save_settings (bool): load/save settings on open/close
+            load_settings (bool): load settings on init
             parent (QWidget): override parent widget
         """
         from psyhive import host
@@ -103,7 +106,8 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
         self.init_ui()
         self.disable_save_settings = not save_settings
-        self.load_settings()
+        if load_settings:
+            self.load_settings()
 
         self.show()
 
@@ -168,10 +172,12 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
             # Connect callback
             _callback = getattr(self, '_callback__'+_name, None)
+            lprint(' - CALLBACK', _callback, verbose=verbose > 1)
             if _callback:
                 _connect_callback(
                     widget=_widget, callback=_callback, verbose=verbose,
                     catch_errors_=catch_errors_)
+                lprint(' - CONNECTED CALLBACK', verbose=verbose > 1)
 
             # Connect context
             _context = getattr(self, '_context__'+_name, None)
@@ -297,10 +303,11 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
             _load_setting_list_widget(value=_value, widget=widget)
 
         elif isinstance(widget, QtWidgets.QTabWidget):
+            _value = int(_value)
             try:
                 widget.setCurrentIndex(_value)
             except TypeError:
-                print ' - FAILED TO APPLY TAB', _value
+                print ' - FAILED TO APPLY TAB', _value, type(_value)
 
         elif isinstance(widget, QtWidgets.QSplitter):
             _value = [int(_item) for _item in _value]
@@ -317,7 +324,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
             pass
 
         else:
-            print 'WIDGET', widget.objectName(), widget
+            print 'WIDGET', widget.objectName(), widget, _value
             raise ValueError(
                 'Error reading settings '+self.settings.fileName())
 
@@ -387,6 +394,9 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
     def delete(self):
         """Delete this interface."""
+        if self.timer:
+            self.killTimer(self.timer)
+        self.save_settings()
         try:
             self.deleteLater()
         except RuntimeError:
@@ -442,6 +452,8 @@ def _connect_callback(widget, callback, catch_errors_, verbose):
         _signal = widget.itemSelectionChanged
     elif isinstance(widget, QtWidgets.QComboBox):
         _signal = widget.currentIndexChanged
+    elif isinstance(widget, QtWidgets.QCheckBox):
+        _signal = widget.stateChanged
     elif isinstance(widget, QtWidgets.QLineEdit):
         _signal = widget.textChanged
     elif isinstance(widget, QtWidgets.QPushButton):
@@ -450,6 +462,8 @@ def _connect_callback(widget, callback, catch_errors_, verbose):
         _signal = widget.currentChanged
     elif isinstance(widget, QtWidgets.QSlider):
         _signal = widget.valueChanged
+    else:
+        raise NotImplementedError(widget)
 
     if _signal:
         _signal.connect(_callback)

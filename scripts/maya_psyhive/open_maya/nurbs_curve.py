@@ -26,6 +26,8 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         """
         self.tfm = tfm
         super(HFnNurbsCurve, self).__init__(self.tfm)
+        if not self.shp:
+            raise RuntimeError
         _dag_path = HDagPath(self.shp.node)
         om.MFnNurbsCurve.__init__(self, _dag_path)
         self.world_space = self.shp.plug('worldSpace')

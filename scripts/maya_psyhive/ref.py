@@ -22,6 +22,7 @@ class FileRef(object):
         self.ref_node = ref_node
         if not self.path:
             raise ValueError
+        self.extn = File(self.path).extn
 
     @property
     def _file(self):
@@ -59,19 +60,32 @@ class FileRef(object):
         """
         from maya_psyhive import open_maya as hom
         _namespace = namespace or self.namespace
-        _kwargs = {'referencedNodes': True}
         _class = class_ or hom.HFnDependencyNode
+
+        _kwargs = {}
         if type_:
             _kwargs['type'] = type_
 
         _nodes = []
-        for _node in cmds.ls(_namespace+":*", **_kwargs):
+        for _node in cmds.ls(_namespace+":*", referencedNodes=True, **_kwargs):
             try:
                 _node = _class(_node)
             except RuntimeError:
                 continue
             _nodes.append(_node)
         return _nodes
+
+    def find_tfms(self, type_=None):
+        """Find transforms in this reference.
+
+        Args:
+            type_ (str): pass type flag to ls command
+
+        Returns:
+            (HFnTransform list): matching transforms
+        """
+        from maya_psyhive import open_maya as hom
+        return self.find_nodes(type_=type_, class_=hom.HFnTransform)
 
     def find_top_node(self, class_=None, verbose=0):
         """Find top node of this reference.
@@ -343,7 +357,7 @@ def create_ref(file_, namespace, class_=None, force=False):
 
 
 def find_ref(namespace=None, filter_=None, catch=False, class_=None,
-             prefix=None, verbose=0):
+             prefix=None, extn=None, verbose=0):
     """Find reference with given namespace.
 
     Args:
@@ -353,19 +367,20 @@ def find_ref(namespace=None, filter_=None, catch=False, class_=None,
         class_ (FileRef): override FileRef class
         prefix (str): match reference by prefix (prefix references don't
             use namespaces)
+        extn (str): filter by extension
         verbose (int): print process data
 
     Returns:
         (FileRef): matching ref
     """
     _refs = find_refs(namespace=namespace, filter_=filter_, class_=class_,
-                      prefix=prefix)
+                      prefix=prefix, extn=extn)
     lprint('Found {:d} refs'.format(len(_refs)), _refs, verbose=verbose)
     return get_single(_refs, catch=catch, name='ref')
 
 
 def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
-              unloaded=True, nested=False):
+              unloaded=True, nested=False, extn=None):
     """Find reference with given namespace.
 
     Args:
@@ -376,13 +391,17 @@ def find_refs(namespace=None, filter_=None, class_=None, prefix=None,
             use namespaces)
         unloaded (bool): return unloaded refs (default is True)
         nested (bool): include nested references in results
+        extn (str): filter by extension
 
     Returns:
         (FileRef list): scene refs
     """
     _refs = _read_refs(class_=class_)
+
     if namespace:
         _refs = [_ref for _ref in _refs if _ref.namespace == namespace]
+    if extn:
+        _refs = [_ref for _ref in _refs if _ref.extn == extn]
     if prefix:
         _refs = [_ref for _ref in _refs if _ref.prefix == prefix]
     if filter_:

@@ -1,3 +1,50 @@
+#### v0.91.0 ####
+
+    Released: Mon 24th Aug 2020 11:37am
+
+    tank support: cache tool update sg range catch error on shot missing from sg (cbach),
+    
+    maya_psyhive:
+        open_maya.find_anim added,
+        open_maya.HFnAnimCurve.connect added catch arg,
+        open_maya.HFnAnimCurve.t_shift added,
+        open_maya.BaseNode exists/startswith added,
+        open_maya.BaseTransform get_shp/set_p/show added,
+        open_maya.get_bbox added HFnMesh handling,
+        open_maya.HFnNurbsCurve error on no shape,
+        open_maya.find_nodes added namespace arg,
+        ref.FileRef extn/find_tfms added,
+        ref find_ref/find_refs added extn arg,
+        tex._BaseShader.assign_to added verbose arg,
+        ui.get_active_cam added,
+        utils blast_to_mov/set_fps added,
+        utils.save_scene added export_selection arg,
+        utils.del_namespace fix error on namespace not empty,
+        utils.get_val added message attr handling,
+        utils.set_val added handling for val as hom.BaseArray3 + better error on fail,
+    psyhive:
+        qt TEST_PNG/TEST_JPG added,
+        qt.HUiDialog3.timer added attr,
+        qt.HUiDialog3._load_setting bugfix apply tab setting,
+        qt.HUiDialog3.delete kill timer + save settings,
+        qt.HUiDialog3 added handling for QCheckBox callback + error on fail to connect,
+        qt.get_pixmap added File handling,
+        qt.HPixmap.resize use QImage for better quality + allow width based on height,
+        qt.HPixmap.save_test added extn arg,
+        tk2 capture_scene/get_asset added,
+        tk2.TTShot.get_frame_range catch unable to find shot in sg,
+        tk2.TTShot find_output_file/find_output_files added task filter,
+        tk2.find_asset added asset filter,
+        tk2.TTWork.find_output_file added output_type filter,
+        tk2.TTWork save/save_inc added safe arg,
+        tk2.TTWork.ver_n added,
+        tk2.publish_scene catch fileops/publish not initiated,
+        utils.Cacheable allow cache extn as yml,
+        utils.build_cache_fmt added extn arg,
+        utils.Dir.get_file added,
+        utils.File.copy_to do nothing if files match,
+
+
 #### v0.90.0 ####
 
     Released: Mon 3rd Aug 2020 16:28pm

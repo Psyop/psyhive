@@ -99,6 +99,12 @@ def cache_scene(namespaces=None, farm=False, verbose=0):
         _app.cache_controller.model.cache(resolver=_resolver)
 
 
+def capture_scene():
+    """Capture current scene."""
+    _app = find_tank_app('capture')
+    _app.capture(view=False)
+
+
 def find_tank_app(name, catch=True, verbose=0):
     """Find tank app for the given name.
 
@@ -194,7 +200,11 @@ def publish_scene(comment, force=False):
     from .. import tk2
 
     _publish = find_tank_app('publish')
+    _fileops = find_tank_app('fileops')
     _ass_man = find_tank_app('assetmanager')
+
+    _fileops.init_app()
+    _publish.init_app()
 
     # Create publish type
     _mod = find_tank_mod(

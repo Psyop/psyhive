@@ -65,12 +65,14 @@ def save_as(file_, revert_filename=True, export_selection=False, force=False,
         cmds.file(rename=_cur_filename)
 
 
-def save_scene(file_=None, force=False):
+def save_scene(file_=None, export_selection=False, force=False):
     """Save current scene.
 
     Args:
         file_ (str): path to save as
-        force (bool): force overwrite existing
+        export_selection (bool): export selected nodes
+        force (bool): overwrite with no confirmation
     """
     _file = file_ or cmds.file(query=True, location=True)
-    save_as(_file, revert_filename=False, force=force)
+    save_as(_file, revert_filename=False, force=force,
+            export_selection=export_selection)

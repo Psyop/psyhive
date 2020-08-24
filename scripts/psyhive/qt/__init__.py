@@ -10,7 +10,8 @@ from .wrapper import (
     HListWidget, HComboBox, HTreeWidget, HTabWidget, HTextBrowser,
 
     # QtCore/QtGui overrides
-    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN, TEST_IMG)
+    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN,
+    TEST_IMG, TEST_PNG, TEST_JPG)
 
 from .maya_palette import set_maya_palette
 from .misc import (

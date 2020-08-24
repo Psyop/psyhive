@@ -7,7 +7,7 @@ import traceback
 
 import six
 
-from psyhive.utils import get_result_storer
+from psyhive.utils import get_result_storer, File
 
 from .wrapper.mgr import QtWidgets, QtCore, QtGui, QtUiTools
 
@@ -143,6 +143,8 @@ def get_pixmap(pix):
         if os.path.exists(pix):
             return qt.HPixmap(pix)
         return qt.HPixmap(icons.EMOJI.find(pix))
+    elif isinstance(pix, File):
+        return qt.HPixmap(pix.path)
     raise ValueError(pix)
 
 

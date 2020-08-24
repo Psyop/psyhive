@@ -115,16 +115,6 @@ class BaseNode(object):
         _node = cmds.duplicate(self, name=_name, **kwargs)[0]
         return self.__class__(_node)
 
-    def find_anim(self):
-        """Find anim attached to this node.
-
-        Returns:
-            (HFnAnimCurve list): anim curves
-        """
-        from maya_psyhive import open_maya as hom
-        return [hom.HFnAnimCurve(_crv)
-                for _crv in self.list_connections(type='animCurve')]
-
     def endswith(self, string):
         """Apply str.endswith to this node's name.
 
@@ -135,6 +125,24 @@ class BaseNode(object):
             (bool): whether name ends with string
         """
         return str(self).endswith(string)
+
+    def exists(self):
+        """Check if this node still exists.
+
+        Returns:
+            (bool): whether exists
+        """
+        return cmds.objExists(self)
+
+    def find_anim(self):
+        """Find anim attached to this node.
+
+        Returns:
+            (HFnAnimCurve list): anim curves
+        """
+        from maya_psyhive import open_maya as hom
+        return [hom.HFnAnimCurve(_crv)
+                for _crv in self.list_connections(type='animCurve')]
 
     def find_attrs(self, filter_=None):
         """Find attributes on this node.
@@ -533,6 +541,17 @@ class BaseNode(object):
             (str list): split string
         """
         return str(self).split(splitter)
+
+    def startswith(self, string):
+        """Apply str.startswith to this node's name.
+
+        Args:
+            string (str): string to match
+
+        Returns:
+            (bool): whether name ends with string
+        """
+        return str(self).startswith(string)
 
     def __add__(self, other):
         return str(self)+other

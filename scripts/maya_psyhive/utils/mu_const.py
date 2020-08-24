@@ -8,5 +8,6 @@ COLS = (
     "olivegreen", "woodgreen", "cyan", "greyblue", "purple", "crimson")
 
 DEFAULT_NODES = (
-    'initialParticleSE', 'initialShadingGroup', 'persp', 'top',
-    'front', 'side', 'lambert1')
+    'initialParticleSE', 'initialShadingGroup',
+    'persp', 'top', 'front', 'side', 'bottom',
+    'lambert1')

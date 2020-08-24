@@ -207,6 +207,15 @@ def clear_script_editor():
     cmds.cmdScrollFieldReporter(_reporter, edit=True, clear=True)
 
 
+def get_active_cam():
+    """Get camera from active viewport.
+
+    Returns:
+        (str): camera
+    """
+    return cmds.modelPanel(get_active_model_panel(), query=True, camera=True)
+
+
 def get_active_model_panel(as_editor=False, catch=False):
     """Get current active model panel.
 

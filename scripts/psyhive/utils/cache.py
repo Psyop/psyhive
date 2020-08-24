@@ -29,12 +29,21 @@ class Cacheable(object):
         Returns:
             (any): cached data
         """
-        _file = self.cache_fmt.format(tag)
-        lprint('READ CACHE FILE', _file, verbose=verbose)
-        try:
-            return obj_read(file_=_file)
-        except OSError:
-            return None
+        from psyhive.utils import read_yaml, File
+
+        _file = File(self.cache_fmt.format(tag))
+        lprint('READ CACHE FILE', _file.path, verbose=verbose)
+
+        if _file.extn == 'yml':
+            try:
+                return read_yaml(_file.path)
+            except OSError:
+                return None
+        else:
+            try:
+                return obj_read(file_=_file.path)
+            except OSError:
+                return None
 
     def cache_write(self, tag, data, bkp=False, verbose=0):
         """Write data to the given cache.
@@ -44,8 +53,11 @@ class Cacheable(object):
             data (any): data to store
             bkp (bool): save timestamped backup file on save (if data changed)
             verbose (int): print process data
+
+        Returns:
+            (str): path to cache file
         """
-        from psyhive.utils import File
+        from psyhive.utils import File, write_yaml
 
         _file = File(self.cache_fmt.format(tag))
         lprint('WRITE CACHE FILE', _file.path, verbose=verbose)
@@ -63,7 +75,12 @@ class Cacheable(object):
                 lprint(' - BKP', _bkp)
                 shutil.copy(_file.path, _bkp)
 
-        obj_write(file_=_file.path, obj=data)
+        if _file.extn == 'yml':
+            write_yaml(file_=_file, data=data)
+        else:
+            obj_write(file_=_file.path, obj=data)
+
+        return _file.path
 
 
 class CacheMissing(OSError):
@@ -78,7 +95,8 @@ class WriteError(RuntimeError):
     """Raised on fail to write cached object."""
 
 
-def build_cache_fmt(path, namespace='psyhive', root=None, level='tmp'):
+def build_cache_fmt(
+        path, namespace='psyhive', root=None, level='tmp', extn='cache'):
     """Build cache format string for the given namespace.
 
     This maps the path to a location in tmp dir.
@@ -90,6 +108,7 @@ def build_cache_fmt(path, namespace='psyhive', root=None, level='tmp'):
         level (str): cache level
             tmp - use temp drive
             project - cache to project
+        extn (str): cache extension
 
     Returns:
         (str): cache format path
@@ -107,11 +126,9 @@ def build_cache_fmt(path, namespace='psyhive', root=None, level='tmp'):
     else:
         raise ValueError(level)
 
-    return abs_path('{root}/{namespace}/cache/{dir}/{base}_{{}}.cache'.format(
-        root=_root,
-        dir=_path.dir.replace(':', ''),
-        base=_path.basename,
-        namespace=namespace))
+    return abs_path('{root}/{namespace}/cache/{dir}/{base}_{{}}.{extn}'.format(
+        root=_root, dir=_path.dir.replace(':', ''), base=_path.basename,
+        extn=extn, namespace=namespace))
 
 
 def _depend_path_makes_cache_outdated(

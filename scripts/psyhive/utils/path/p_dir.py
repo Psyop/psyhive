@@ -39,6 +39,18 @@ class Dir(Path):
         from .p_tools import find
         return find(self.path, **kwargs)
 
+    def get_file(self, filename):
+        """Get child file of this directory.
+
+        Args:
+            filename (str): name of file (eg. text.txt)
+
+        Returns:
+            (File): file object
+        """
+        from .p_file import File
+        return File(self.path+'/'+filename)
+
     @restore_cwd
     def launch_browser(self):
         """Launch browser set to this dir."""

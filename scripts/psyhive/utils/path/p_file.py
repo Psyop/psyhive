@@ -38,12 +38,20 @@ class File(Path):
         _file = get_path(file_)
         test_path(os.path.dirname(_file))
         if os.path.exists(_file):
+
+            if self.matches(_file):
+                print 'MATCH'
+                return
+            print 'NO MATCH'
+
             if diff_:
                 self.diff(_file)
+
             if not force:
                 _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
                 if _result == 'No':
                     return
+
         assert not self.path == _file
         shutil.copy(self.path, _file)
 
