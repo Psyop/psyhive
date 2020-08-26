@@ -104,6 +104,53 @@
         </widget>
        </item>
        <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="info_2">
+           <property name="text">
+            <string>Resolution</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="resolution">
+           <item>
+            <property name="text">
+             <string>Full</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1/2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1/4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1/8</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1/16</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QPushButton" name="submit">
          <property name="text">
           <string>Submit to qube</string>

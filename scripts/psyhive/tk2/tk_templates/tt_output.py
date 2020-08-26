@@ -175,17 +175,18 @@ class TTOutputVersion(TTDirBase):
         _files = self.find_files(extn=extn, format_=format_)
         return get_single(_files, verbose=1, catch=catch)
 
-    def find_files(self, extn=None, format_=None):
+    def find_files(self, extn=None, format_=None, class_=None):
         """Find output files within this version dir.
 
         Args:
             extn (str): filter by extension
             format_ (str): filter by format
+            class_ (class): filter by class
 
         Returns:
             (TTOutputFile|TTOutputFileSeq list): matching output files
         """
-        return sum([_out.find_files(extn=extn, format_=format_)
+        return sum([_out.find_files(extn=extn, format_=format_, class_=class_)
                     for _out in self.find_outputs()], [])
 
     def find_latest(self):
@@ -269,12 +270,13 @@ class TTOutput(TTDirBase):
         """
         return get_single(self.find_files(extn=extn))
 
-    def find_files(self, extn=None, format_=None, verbose=0):
+    def find_files(self, extn=None, format_=None, class_=None, verbose=0):
         """Find output files/seqs within this output dir.
 
         Args:
             extn (str): filter by extension
             format_ (str): filter by format
+            class_ (str): filter by class
             verbose (int): print process data
 
         Returns:
@@ -285,6 +287,8 @@ class TTOutput(TTDirBase):
             _files = [_file for _file in _files if _file.extn == extn]
         if format_ is not None:
             _files = [_file for _file in _files if _file.format == format_]
+        if class_:
+            _files = [_file for _file in _files if isinstance(_file, class_)]
         return _files
 
     def find_latest(self):

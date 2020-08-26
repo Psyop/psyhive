@@ -90,9 +90,11 @@ class _BatchRerenderUi(qt.HUiDialog):
     @qt.list_redrawer
     def _redraw__renders(self, widget):
         _tasks = self.ui.tasks.selected_text()
-        _renders = [_render for _render in self._all_renders
-                    if _render.task in _tasks and
-                    _render.find_latest().find_work_file()]
+        _renders = [
+            _render for _render in self._all_renders
+            if _render.task in _tasks and
+            _render.find_latest().map_to(
+                tk2.TTWork, dcc='maya', extension='ma').exists()]
         _render_names = sorted(set([
             _render.output_name for _render in _renders]))
         widget.addItems(sorted(_render_names))
@@ -112,7 +114,8 @@ class _BatchRerenderUi(qt.HUiDialog):
         self._work_files = {}
         for _render in self._renders:
             _latest_render = _render.find_latest()
-            _work = _latest_render.find_work_file()
+            _work = _latest_render.map_to(
+                tk2.TTWork, extension='ma', dcc='maya')
             _latest_work = _work.find_latest()
             if _work:
                 if _work not in self._work_files:
@@ -134,8 +137,10 @@ class _BatchRerenderUi(qt.HUiDialog):
     def _callback__submit(self):
         _work_files = sorted(self._work_files)
         _ranges = self._read_frame_ranges(_work_files)
+        _size = self.ui.resolution.currentText()
         _rerender_work_files(
-            work_files=_work_files, ranges=_ranges, passes=self._passes)
+            work_files=_work_files, ranges=_ranges, passes=self._passes,
+            size=_size)
 
     def _read_frame_ranges(self, work_files, verbose=0):
         """Read frame range for each work file.
@@ -151,12 +156,13 @@ class _BatchRerenderUi(qt.HUiDialog):
             (tuple list): list of start/end frames
         """
         _ranges = []
-        for _work_file in qt.ProgressBar(
-                work_files, 'Reading {:d} frame ranges'):
+        for _work_file in qt.progress_bar(
+                work_files, 'Reading {:d} frame range{}'):
             dprint('READING', _work_file)
             _start, _end = None, None
             for _render in self._work_files[_work_file]:
-                for _seq in _render.find_outputs():
+                lprint(' - TESTING RENDER', _render, verbose=verbose)
+                for _seq in _render.find_files(class_=tk2.TTOutputFileSeq):
                     _sstart, _send = _seq.find_range()
                     _start = (_sstart if _start is None
                               else min(_start, _sstart))
@@ -177,13 +183,14 @@ class _BatchRerenderUi(qt.HUiDialog):
         self.ui.close()
 
 
-def _rerender_work_files(work_files, ranges, passes):
+def _rerender_work_files(work_files, ranges, passes, size='Full'):
     """Rerender the given work files on qube.
 
     Args:
         work_files (TTWorkFileBase list): work file list
         ranges (tuple list): list of start/end frames
         passes (str list): list of passes to rerender
+        size (str): size name (eg. Full, 1/2)
     """
     _job = farm.MayaPyJob('Submit {:d} render{}'.format(
         len(work_files), get_plural(work_files)))
@@ -196,11 +203,13 @@ def _rerender_work_files(work_files, ranges, passes):
             '_path = "{work.path}"',
             '_range = {range}',
             '_passes = {passes}',
+            '_size = "{size}"',
             '_work = tk2.TTWork(_path)',
             'm_batch_rerender.rerender_work_file(',
-            '    range_=_range, work_file=_work, passes=_passes)',
+            '    range_=_range, work_file=_work, passes=_passes,',
+            '    size=_size)',
         ]).format(work=_work_file, passes=passes, range=_range,
-                  user=os.environ['USERNAME'])
+                  user=os.environ['USERNAME'], size=size)
         _task = farm.MayaPyTask(
             _py, label='Rerender {}'.format(_work_file.basename))
         _job.tasks.append(_task)

@@ -142,7 +142,23 @@ def _get_latest_abc(abc):
         return get_single(_output.find_latest().find(extn=File(abc).extn))
 
 
-def _submit_render(file_=None, layers=None, range_=None, force=False):
+def _map_size_to_pxy(size):
+    """Map size to proxy value.
+
+    Args:
+        size (str): size name (eg. Full, 1/2)
+
+    Returns:
+        (int): proxy setting
+    """
+    for _size, _val in render_settings.PROXY_RESOLUTIONS:
+        if _size == size:
+            return _val
+    raise ValueError(size)
+
+
+def _submit_render(
+        file_=None, layers=None, range_=None, size='Full', force=False):
     """Submit render.
 
     This doesn't handle opening the scene and updating the assets.
@@ -151,6 +167,7 @@ def _submit_render(file_=None, layers=None, range_=None, force=False):
         file_ (str): path to scene to submit
         layers (list): layers to submit
         range_ (int tuple): start/end frames
+        size (str): size name (eg. Full, 1/2)
         force (bool): submit with no confirmation
     """
     _file = file_ or host.cur_scene()
@@ -166,6 +183,8 @@ def _submit_render(file_=None, layers=None, range_=None, force=False):
     _settings.range_start = _start
     _settings.range_end = _end
     _settings.frame_source = render_job.FrameSource.FRAME_RANGE
+    _settings.proxy = _map_size_to_pxy(size)
+    print ' - PROXY', _settings.proxy
 
     # Build submittable
     _render_job = render_job.MayaRenderJob(

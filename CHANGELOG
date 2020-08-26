@@ -1,3 +1,17 @@
+#### v0.93.0 ####
+
+    Released: Wed 26th Aug 2020 15:22pm
+
+    Batch rerender: add option to override resolution (iirvin)
+    
+    maya_psyhive:
+        tools.m_batch_rerender added resolution override handling,
+    psyhive:
+        tk2 TTOutputVersion/TTOutput find_files added class_ arg,
+        tools.m_batch_rerender added resolution override option,
+        tools.m_batch_rerender bugfix error on map renders to work,
+
+
 #### v0.92.0 ####
 
     Released: Wed 26th Aug 2020 14:10pm
