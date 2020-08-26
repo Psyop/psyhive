@@ -3,7 +3,7 @@
 import os
 import pprint
 
-from psyhive import tk, qt, icons, farm
+from psyhive import tk2, qt, icons, farm
 from psyhive.utils import (
     abs_path, get_plural, chain_fns, wrap_fn, dprint, lprint, safe_zip)
 
@@ -48,7 +48,7 @@ class _BatchRerenderUi(qt.HUiDialog):
 
     @qt.list_redrawer
     def _redraw__sequences(self, widget):
-        for _seq in tk.find_sequences():
+        for _seq in tk2.find_sequences():
             _item = qt.HListWidgetItem(_seq.name)
             _item.set_data(_seq)
             widget.addItem(_item)
@@ -57,7 +57,7 @@ class _BatchRerenderUi(qt.HUiDialog):
     def _redraw__shots(self, widget):
         for _seq in self.ui.sequences.selected_data():
             for _shot in _seq.find_shots():
-                _shot = tk.obtain_cacheable(_shot)
+                _shot = tk2.obtain_cacheable(_shot)
                 _item = qt.HListWidgetItem(_shot.name)
                 _item.set_data(_shot)
                 widget.addItem(_item)
@@ -191,12 +191,12 @@ def _rerender_work_files(work_files, ranges, passes):
         _py = '\n'.join([
             'import os',
             'os.environ["USERNAME"] = "{user}"  # For fileops/submit',
-            'from psyhive import tk',
+            'from psyhive import tk2',
             'from maya_psyhive.tools import m_batch_rerender',
             '_path = "{work.path}"',
             '_range = {range}',
             '_passes = {passes}',
-            '_work = tk.get_work(_path)',
+            '_work = tk2.TTWork(_path)',
             'm_batch_rerender.rerender_work_file(',
             '    range_=_range, work_file=_work, passes=_passes)',
         ]).format(work=_work_file, passes=passes, range=_range,

@@ -394,10 +394,11 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
     def delete(self):
         """Delete this interface."""
-        if self.timer:
-            self.killTimer(self.timer)
-        self.save_settings()
+
         try:
+            if self.timer:
+                self.killTimer(self.timer)
+            self.save_settings()
             self.deleteLater()
         except RuntimeError:
             pass

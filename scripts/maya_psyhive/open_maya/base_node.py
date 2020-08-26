@@ -403,6 +403,14 @@ class BaseNode(object):
         if file_ != _tmp_path:
             os.remove(_tmp_path)
 
+    def lower(self):
+        """Apply str.lower to this node's name.
+
+        Returns:
+            (str): name in lowercase
+        """
+        return str(self).lower()
+
     def object_type(self):
         """Wrapper for cmds.objectType command.
 

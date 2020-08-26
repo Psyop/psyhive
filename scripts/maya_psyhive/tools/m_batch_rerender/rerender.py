@@ -6,8 +6,8 @@ from maya import cmds
 
 from psyq.jobs.maya import render_settings, hooks, render_job
 
-from psyhive import tk, qt, host
-from psyhive.utils import get_plural, get_single
+from psyhive import tk2, qt, host
+from psyhive.utils import get_plural, get_single, File
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 
@@ -81,8 +81,9 @@ def _update_outputs_to_latest(refs=None):
     for _ref in refs or ref.find_refs():
 
         # Find asset
-        _asset = tk.get_output(_ref.path)
-        if not _asset:
+        try:
+            _asset = tk2.TTOutputFile(_ref.path)
+        except ValueError:
             continue
 
         print 'CHECKING ASSET', _ref
@@ -103,16 +104,45 @@ def _update_outputs_to_latest(refs=None):
             print ' - EXO', _exo
             _abc = _exo.plug('fileName').get_val()
             print ' - CURRENT ABC', _abc
-            _output = tk.get_output(_abc)
-            if _output and not _output.is_latest():
-                _latest = _output.find_latest()
-                print ' - UPDATING TO LATEST', _latest
-                _exo.plug('fileName').set_val(_latest.path)
+
+            _latest = _get_latest_abc(_abc)
+            if _latest and _abc == _latest:
+                _exo.plug('fileName').set_val(_latest)
             else:
                 print ' - IS LATEST'
 
 
-def _submit_render(file_, layers, range_, force=False):
+def _get_latest_abc(abc):
+    """Get latest path for an abc.
+
+    This is the latest version of any output file with a special case added
+    to handle to off-pipeline rest cache abcs.
+
+    Args:
+        abc (str): path to abc
+
+    Returns:
+        (str): path to latest version
+    """
+
+    # Handle regular output file
+    try:
+        _out_file = tk2.TTOutputFile(abc)
+    except ValueError:
+        pass
+    else:
+        return _out_file.find_latest().path
+
+    # Special handling for rest cache
+    try:
+        _output = tk2.TTOutput(abc)
+    except ValueError:
+        pass
+    else:
+        return get_single(_output.find_latest().find(extn=File(abc).extn))
+
+
+def _submit_render(file_=None, layers=None, range_=None, force=False):
     """Submit render.
 
     This doesn't handle opening the scene and updating the assets.
@@ -123,24 +153,39 @@ def _submit_render(file_, layers, range_, force=False):
         range_ (int tuple): start/end frames
         force (bool): submit with no confirmation
     """
-    _start, _end = range_
+    _file = file_ or host.cur_scene()
+    _layers = layers or cmds.ls(type='renderLayer')
+    _rng = range_ or host.t_range()
+    print 'SUBMIT RENDER', _file
+
+    # Build settings
+    _start, _end = _rng
     _settings = render_settings.RenderSubmitSettings()
-    _settings.render_layers = layers
+    _settings.render_layers = _layers
     _settings.render_layer_mode = render_job.RenderLayerMode.CUSTOM
     _settings.range_start = _start
     _settings.range_end = _end
     _settings.frame_source = render_job.FrameSource.FRAME_RANGE
 
+    # Build submittable
     _render_job = render_job.MayaRenderJob(
-        settings=_settings, scene_path=file_)
-
-    print 'RENDER JOB', _render_job
-    print 'LAYERS', _render_job.render_layers
-    print 'SCENE PATH', _render_job.scene_path
-    print 'FRAMES', _render_job.frames
+        settings=_settings, scene_path=_file)
+    print ' - RENDER JOB', _render_job
+    print ' - LAYERS', _render_job.render_layers
+    print ' - SCENE PATH', _render_job.scene_path
+    print ' - FRAMES', _render_job.frames
     _submittable = hooks.default_get_render_submittable_hook(_render_job)
-    print 'SUBMITTABLE', _submittable
+    print ' - SUBMITTABLE', _submittable
 
+    # Add publishes to make sure appears in output manager
+    _maya_impl = tk2.find_tank_mod(
+        'hosts.maya_impl', app='psy_multi_psyqwrapper')
+    _helper = _maya_impl.MayaPipelineRenderSubmitHelper(_submittable)
+    _helper.ensure_can_register_publishes()
+    _submittable.publishes = _helper.register_publishes()
+    print ' - PUBLISHES', _submittable.publishes
+
+    # Submit
     if not force:
         qt.ok_cancel('Submit?')
     _submitted = hooks.QubeSubmitter().submit(_submittable)

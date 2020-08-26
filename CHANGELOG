@@ -1,3 +1,24 @@
+#### v0.92.0 ####
+
+    Released: Wed 26th Aug 2020 14:10pm
+
+    Batch rerender: bugfix renders not being published (iirvin) [WHD-17556]
+    
+    maya_psyhive:
+        open_maya.find_node added,
+        open_maya.BaseNode.lower added,
+        ref.find_node added,
+        tools.m_batch_rerender updated to tk2,
+        tools.m_batch_rerender bugfix renders not being published,
+        utils.add_to_grp bugfix error on already in grp,
+    psyhive:
+        pipe.PROJECTS_ROOT added,
+        qt.HUiDialog3.delete killTimer/save_settings in catch,
+        tk2.TTOutput.find_file added,
+        tk2._TTOutputFileBase.ver_n added,
+        tools.batch_rerender updated to tk2,
+
+
 #### v0.91.0 ####
 
     Released: Mon 24th Aug 2020 11:37am

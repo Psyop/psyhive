@@ -31,11 +31,22 @@ class TestTools(unittest.TestCase):
         _dialog.close()
 
     def test_batch_rerender(self):
+
         _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/'
                  'babyDragon/shade/output/shadegeo/shade_main/v019/maya/'
                  'babyDragon_shade_main_v019.mb')
         _ref = ref.obtain_ref(file_=_path, namespace='dragon')
         rerender._update_outputs_to_latest(refs=[_ref])
+
+        # Test map abc to latest including rest cache
+        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                 'tracking/output/camcache/imagePlaneTest_renderCam/v053/'
+                 'alembic/dev0000_imagePlaneTest_renderCam_v053.abc')
+        assert rerender._get_latest_abc(_path)
+        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/'
+                 'babyDragon/shade/output/shadegeo/shade_main/v019/maya/'
+                 'babyDragon_shade_main_v019_restcache.abc')
+        assert rerender._get_latest_abc(_path)
 
     def test_fkik_switcher(self):
 

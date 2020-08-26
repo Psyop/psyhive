@@ -258,6 +258,17 @@ class TTOutput(TTDirBase):
         _hint = self.hint_fmt.format(area=_area)
         super(TTOutput, self).__init__(path, hint=_hint)
 
+    def find_file(self, extn=None):
+        """Find single matching file within this output.
+
+        Args:
+            extn (str): filter by extension
+
+        Returns:
+            (TTOutputFileBase): matching file
+        """
+        return get_single(self.find_files(extn=extn))
+
     def find_files(self, extn=None, format_=None, verbose=0):
         """Find output files/seqs within this output dir.
 
@@ -375,6 +386,7 @@ class _TTOutputFileBase(TTBase):
 
     channel = None
     extension = None
+    version = None
 
     def find_latest(self):
         """Find latest version of this output.
@@ -441,6 +453,15 @@ class _TTOutputFileBase(TTBase):
         _path = self.path.replace(".%04d.", ".####.")
         _framework_sg.register_publish(
             _path, complete=complete, workspace=_sg_workspace, **kwargs)
+
+    @property
+    def ver_n(self):
+        """Get this output's version number as an integer.
+
+        Returns:
+            (int): version
+        """
+        return int(self.version)
 
 
 class TTOutputFile(_TTOutputFileBase, File):

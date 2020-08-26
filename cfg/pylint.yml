@@ -146,6 +146,7 @@ ignore:
         maya_psyhive/open_maya/base_node.py
         maya_psyhive/open_maya/base_transform.py
         maya_psyhive/open_maya/plug.py
+        maya_psyhive/ref.py
         psyhive/qt/wrapper/gui/pixmap.py
         psyhive/tk2/tk_templates/tt_work.py
     too-many-ancestors:

@@ -54,7 +54,8 @@ def add_to_grp(obj, grp):
     if not cmds.objExists(grp):
         cmds.namespace(set=':')
         cmds.group(name=grp, empty=True)
-    cmds.parent(obj, grp)
+    if not get_parent(obj) == grp:
+        cmds.parent(obj, grp)
     return grp
 
 

@@ -47,6 +47,18 @@ class FileRef(object):
             _meshes.append(_mesh)
         return _meshes
 
+    def find_node(self, type_=None, class_=None):
+        """Find exactly one node within this reference.
+
+        Args:
+            type_ (str): match by type name
+            class_ (class): cast node to given class
+
+        Returns:
+            (HFnDependencyNode): matching node
+        """
+        return get_single(self.find_nodes(type_=type_, class_=class_))
+
     def find_nodes(self, type_=None, class_=None, namespace=None):
         """Find nodes within this reference.
 

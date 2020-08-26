@@ -125,6 +125,19 @@ def find_anim(filter_=None):
         type_='animCurve', class_=hom.HFnAnimCurve, filter_=filter_)
 
 
+def find_node(type_=None, namespace=None):
+    """Find single matching node in current scene.
+
+    Args:
+        type_ (str): filter by type
+        namespace (str): filter by namespace
+
+    Returns:
+        (HFnDependencyNode): matching node
+    """
+    return get_single(find_nodes(type_=type_, namespace=namespace))
+
+
 def find_nodes(filter_=None, class_=None, type_=None, long_=False,
                selection=False, namespace=None):
     """Find nodes on the current scene (uses ls command).

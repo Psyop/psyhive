@@ -4,7 +4,8 @@ import os
 
 from .misc import read_ver_n
 from .project import (
-    find_projects, find_project, Project, cur_project, get_project)
+    find_projects, find_project, Project, cur_project, get_project,
+    PROJECTS_ROOT)
 from .shot import Shot
 from .work_file import WorkFile, WorkFileInc
 from .asset import AssetFile
