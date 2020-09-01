@@ -1,12 +1,14 @@
 """Tools for managing sequences of files."""
 
+import collections
 import os
 import shutil
 import time
 
 from .cache import store_result_on_obj
 from .misc import dprint, lprint, get_plural, bytes_to_str
-from .path import File, abs_path, find, test_path, Dir, nice_size, get_path
+from .path import (
+    File, abs_path, find, test_path, Dir, nice_size, get_path, Path)
 from .range_ import ints_to_str
 
 
@@ -473,6 +475,55 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
 
     if not _mov.exists():
         raise RuntimeError("Failed to generate "+_mov.path)
+
+
+def find_seqs(dir_, verbose=0):
+    """Find sequences in the given path and subdirs.
+
+    Args:
+        dir_ (str): path to dir to search
+        verbose (int): print process data
+
+    Returns:
+        (Seq list): list of seqs
+    """
+    _dir = Dir(abs_path(dir_))
+
+    _this_seqs = collections.defaultdict(set)
+    _seqs = []
+    for _path in _dir.find(depth=1, class_=Path):
+
+        if _path.is_file():
+
+            # Ignore files already matched in seq
+            _already_matched = False
+            for _seq in _this_seqs:
+                if _seq.contains(_path):
+                    _already_matched = True
+                    _frame = _seq.get_frame(_path)
+                    _this_seqs[_seq].add(_frame)
+                    lprint(' - EXISTING SEQ', _path, verbose=verbose > 2)
+                    break
+            if _already_matched:
+                continue
+
+            # Match seq
+            _seq = seq_from_frame(_path, catch=True)
+            if _seq:
+                _frame = _seq.get_frame(_path)
+                _this_seqs[_seq].add(_frame)
+
+        elif _path.is_dir():
+            _seqs += find_seqs(_path)
+
+        else:
+            raise ValueError(_path)
+
+    # Apply frames cache
+    for _seq, _frames in _this_seqs.items():
+        _seq.set_frames(sorted(_frames))
+
+    return sorted(_seqs+_this_seqs.keys())
 
 
 def seq_from_frame(file_, catch=False):

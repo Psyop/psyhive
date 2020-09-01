@@ -1,6 +1,7 @@
 """Tools for refresh code within a python session."""
 
 import copy
+import os
 import sys
 import time
 
@@ -9,7 +10,8 @@ from psyhive.tools.err_catcher import Traceback
 from psyhive.utils import (
     abs_path, lprint, passes_filter, apply_filter, dprint)
 
-CODE_ROOT = 'P:/global/code/pipeline/bootstrap'
+CODE_ROOT = abs_path(os.environ.get(
+    'PSYOP_PIPELINE_RELEASE_PATH', 'P:/global/code/pipeline/bootstrap'))
 
 _RELOAD_ORDER = [
     'psyhive.utils.misc',

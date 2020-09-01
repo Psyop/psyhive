@@ -1,3 +1,19 @@
+#### v0.94.0 ####
+
+    Released: Tue 1st Sep 2020 15:18pm
+
+    Linux rollout: use $PSYOP_ROOT for hardcoded paths (ccesareo)
+    
+    psyhive:
+        icons.EMOJI use $PSYOP_ROOT for path,
+        pipe.PROJECTS_ROOT use $PSYOP_ROOT for path,
+        py_gui.BasePyGui.add_execute made virtual,
+        py_gui.get_exec_fn save settings before execute,
+        refresh.CODE_ROOT use $PSYOP_ROOT for path,
+        utils find_seqs/Dir.find_seqs added,
+        utils.set_dev_mode force PSYHIVE_ICONS_EMOJI on apply,
+
+
 #### v0.93.0 ####
 
     Released: Wed 26th Aug 2020 15:22pm

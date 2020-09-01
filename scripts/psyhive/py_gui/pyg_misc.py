@@ -71,8 +71,8 @@ def get_exec_fn(
             _fn = catch_error(_fn)
         if track_usage_:
             _fn = track_usage(_fn)
-        _fn(**_kwargs)
         interface.save_settings()
+        _fn(**_kwargs)
         _dur = time.time() - _start
         dprint('############ Complete {} ({}) ############'.format(
             def_.name, nice_age(_dur)))

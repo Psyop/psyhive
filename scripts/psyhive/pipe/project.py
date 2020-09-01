@@ -7,7 +7,8 @@ from psyhive.utils import (
     find, store_result, Dir, get_single, lprint, passes_filter,
     apply_filter, read_yaml, File, abs_path, Cacheable)
 
-PROJECTS_ROOT = 'P:/projects'
+PROJECTS_ROOT = abs_path(
+    os.environ.get('PSYOP_PROJECTS_ROOT', 'P:/projects'))
 _PSYLAUNCH_CFG_FMT = r'{}\code\primary\config\psylaunch\settings.yml'
 
 

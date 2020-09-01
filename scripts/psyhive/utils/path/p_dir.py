@@ -39,6 +39,15 @@ class Dir(Path):
         from .p_tools import find
         return find(self.path, **kwargs)
 
+    def find_seqs(self, **kwargs):
+        """Find file sequences within this dir.
+
+        Returns:
+            (Seq list): sequences
+        """
+        from ..seq import find_seqs
+        return find_seqs(self.path, **kwargs)
+
     def get_file(self, filename):
         """Get child file of this directory.
 

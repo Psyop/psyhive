@@ -249,6 +249,7 @@ class BasePyGui(object):
             label (str): override label from exec button
             col (str): colour for button
         """
+        raise NotImplementedError
 
     def add_separator(self):
         """Add a separator to the inteface."""
