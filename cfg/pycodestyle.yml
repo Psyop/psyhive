@@ -19,6 +19,7 @@ ignore:
         hv_test/tools/colour_bro/cb_ui.py
         maya_psyhive/shows/frasier/toolkit.py
         psyhive/host.py
+        psyhive/tk2/tk_sg.py
         /tests/
     E722:  # Bare except
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py

@@ -6,7 +6,7 @@ from .tk_utils import (
     capture_scene)
 from .tk_sg import (
     get_project_sg_data, get_shot_sg_data, get_root_sg_data,
-    get_asset_sg_data)
+    get_asset_sg_data, get_sg_data, create_workspaces)
 
 from .tk_templates import (
     TTSequenceRoot, TTRoot, TTStepRoot, TTWorkArea, TTWork, TTIncrement,

@@ -28,6 +28,7 @@ class Seq(object):
         self.dir = _file.dir
         self.extn = _file.extn
         self.frame_expr = '%04d'
+        self.filename = _file.filename
         if safe:
             if not _file.filename.count('.%04d.') == 1:
                 raise ValueError(path)
@@ -477,21 +478,25 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
         raise RuntimeError("Failed to generate "+_mov.path)
 
 
-def find_seqs(dir_, verbose=0):
+def find_seqs(dir_, class_=None, verbose=0):
     """Find sequences in the given path and subdirs.
 
     Args:
         dir_ (str): path to dir to search
+        class_ (class): override seq class
         verbose (int): print process data
 
     Returns:
         (Seq list): list of seqs
     """
     _dir = Dir(abs_path(dir_))
+    _class = class_ or Seq
 
     _this_seqs = collections.defaultdict(set)
     _seqs = []
     for _path in _dir.find(depth=1, class_=Path):
+
+        lprint(' - TESTING FILE', _path, verbose=verbose > 2)
 
         if _path.is_file():
 
@@ -508,13 +513,14 @@ def find_seqs(dir_, verbose=0):
                 continue
 
             # Match seq
-            _seq = seq_from_frame(_path, catch=True)
+            _seq = seq_from_frame(_path, catch=True, class_=_class)
             if _seq:
+                lprint(' - CREATED SEQ', _seq, verbose=verbose)
                 _frame = _seq.get_frame(_path)
                 _this_seqs[_seq].add(_frame)
 
         elif _path.is_dir():
-            _seqs += find_seqs(_path)
+            _seqs += find_seqs(_path, class_=class_, verbose=verbose)
 
         else:
             raise ValueError(_path)
@@ -526,31 +532,36 @@ def find_seqs(dir_, verbose=0):
     return sorted(_seqs+_this_seqs.keys())
 
 
-def seq_from_frame(file_, catch=False):
+def seq_from_frame(file_, catch=False, class_=None):
     """Get a sequence object from the given file path.
 
     Args:
         file_ (str): path to frame of a sequence
         catch (bool): no error on fail to find seq
+        class_ (str): override seq class
 
     Returns:
         (Seq): file's sequence
     """
     _file = File(file_)
+    _class = class_ or Seq
+
     _tokens = _file.basename.split('.')
     if not len(_tokens) >= 2:
         if catch:
             return None
         raise ValueError(file_)
+
     _frame = _tokens[-1]
     if not _frame.isdigit():
         if catch:
             return False
         raise ValueError(file_)
+
     _base = '.'.join(_tokens[:-1])
     _path = '{}/{}.%0{:d}d.{}'.format(
         _file.dir, _base, len(_frame), _file.extn)
     try:
-        return Seq(_path)
+        return _class(_path)
     except ValueError:
         return None

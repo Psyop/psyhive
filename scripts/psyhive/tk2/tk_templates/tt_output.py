@@ -1,15 +1,17 @@
 """Tools for managing tank template output representations."""
 
 import operator
+import pprint
 
 import tank
 
+from psyhive import pipe
 from psyhive.utils import (
     File, abs_path, lprint, apply_filter, Seq, seq_from_frame,
     get_single, Movie)
 
-from psyhive.tk2.tk_templates.tt_base import TTDirBase, TTBase
-from psyhive.tk2.tk_templates.tt_utils import get_area, get_template
+from .tt_base import TTDirBase, TTBase
+from .tt_utils import get_area, get_template
 
 
 class TTOutputType(TTDirBase):
@@ -415,6 +417,34 @@ class _TTOutputFileBase(TTBase):
             (bool): latest status
         """
         return self.find_latest() == self
+
+    def get_sg_data(self, verbose=0):
+        """Find shotgun data for this publish.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (dict): shoutgun data
+        """
+        from psyhive import tk2
+        _proj = tk2.get_project_sg_data(pipe.Project(self.path))
+        _root = tk2.TTRoot(self.path)
+        _task = tk2.get_sg_data(
+            'Task',
+            content='celAnimation',
+            project=_proj,
+            entity=_root.get_sg_data(),
+        )
+        _data = tk2.get_sg_data(
+            'PublishedFile', version_number=self.ver_n, sg_format=self.extn,
+            project=_proj, task=_task,
+            limit=2, fields=['task'])
+        if verbose:
+            pprint.pprint(_data)
+        if len(_data) > 1:
+            raise RuntimeError(self.path)
+        return get_single(_data, catch=True)
 
     def move_to(self, trg, force=False):
         """Needs to be implemented in subclass.

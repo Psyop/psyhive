@@ -1,3 +1,20 @@
+#### v0.95.0 ####
+
+    Released: Wed 9th Sep 2020 16:56pm
+
+    ingestion: added command line tool for image seq ingestion ingest_vendor_seqs (kcassidy)
+    
+    psyhive:
+        tk2 get_sg_data/create_workspaces added,
+        tk2.TTRoot.create_workspaces added,
+        tk2.TTOutputFileBase.get_sg_data added,
+        tools.ingest added,
+        utils.Seq.filename added,
+        utils.find_seqs added class_ arg,
+    bin/
+        ingest_vendor_seqs added,
+
+
 #### v0.94.0 ####
 
     Released: Tue 1st Sep 2020 15:18pm

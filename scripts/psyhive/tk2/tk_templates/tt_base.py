@@ -245,6 +245,11 @@ class TTRoot(TTDirBase):
         else:
             self.name = self.asset
 
+    def create_workspaces(self):
+        """Create workspaces on disk for this asset/shot."""
+        from psyhive import tk2
+        tk2.create_workspaces(self)
+
     def find_step_root(self, step, catch=False):
         """Find step root matching the given name.
 

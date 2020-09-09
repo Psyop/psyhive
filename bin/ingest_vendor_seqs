@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+"""Command line tool for ingesting image sequences.
+
+This searches the current directory from the current directory for image
+sequences matching the outsource vendor naming convention and then ingests
+them into the psyop pipeline.
+"""
+
+import optparse
+import os
+
+from psyhive.tools import ingest
+from psyhive.utils import abs_path
+
+_EXAMPLE_PATH = (
+    'P:/projects/absolutourspirit_40231P/production/vendor_in/leCube/'
+    'game_shots/2020-09-07_001')
+_USAGE = '''
+
+{}
+Example:
+
+>>> cd "{}"
+>>> ingest_vendor_seqs
+
+If there's not a "vendor_in" folder in the path, you'll need to tell the tool
+manully what the vendor is. This is needed for the publish comment in
+shotgun.
+
+>>> ingest_vendor_seqs --vendor leCube'''.format(__doc__, _EXAMPLE_PATH)
+
+
+def _get_opts():
+    """Read command line options.
+
+    Returns:
+        (tuple): options/args
+    """
+    _parser = optparse.OptionParser(_USAGE)
+    _parser.add_option(
+        "--vendor", dest="vendor", action="store",
+        help="Which vendor these images are from")
+    return _parser.parse_args()
+
+
+def _ingest_vendor_seqs():
+    """Ingest vendor image sequences in the current directory."""
+    _opts, _ = _get_opts()
+    _dir = abs_path(os.getcwd())
+
+    # Get vendor
+    if not _opts.vendor:
+        _opts.vendor = ingest.vendor_from_path(_dir)
+    if not _opts.vendor:
+        raise RuntimeError(
+            'Unable to read vendor from pwd - please use --vendor flag')
+
+    print 'INGEST VENDOR SEQS', _dir
+    ingest.ingest_seqs(_dir, vendor=_opts.vendor)
+
+
+if __name__ == '__main__':
+    _ingest_vendor_seqs()
