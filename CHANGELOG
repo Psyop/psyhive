@@ -1,3 +1,13 @@
+#### v0.95.1 ####
+
+    Released: Wed 9th Sep 2020 17:26pm
+
+    ingestion: bugfix cyclical import error
+    
+    psyhive:
+        tools.ingest_seqs removed,
+
+
 #### v0.95.0 ####
 
     Released: Wed 9th Sep 2020 16:56pm
