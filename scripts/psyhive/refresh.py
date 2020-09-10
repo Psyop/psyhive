@@ -174,6 +174,8 @@ def get_mod_sort(order):
             _val -= 0.01
         if 'tools' in name:
             _val += 0.01
+        if name.endswith('_ui'):
+            _val += 0.02
         if 'tests' in name:
             _val += 0.03
         _val -= name.count('.')*0.1

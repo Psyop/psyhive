@@ -2,7 +2,7 @@
 
 from maya import cmds
 
-from psyhive import tk, qt
+from psyhive import tk2, qt
 from psyhive.utils import get_single, lprint
 
 from maya_psyhive import ref
@@ -54,6 +54,7 @@ def apply_caches_to_sel_asset(caches):
     Args:
         caches (TTOutputFileSeqBase list): caches to apply
     """
+    print 'APPLY CACHES', caches
 
     # Get asset
     _ref = ref.get_selected(catch=True)
@@ -109,32 +110,28 @@ def find_yeti_caches(root, verbose=0):
     Returns:
         (TTOutputNameBase list): caches
     """
-    tk.clear_caches()
+    tk2.clear_caches()
+    _root = tk2.obtain_cacheable(root)
 
     # Find fxcache names
-    _steps = root.find_step_roots()
+    _steps = _root.find_step_roots()
     _fx_caches = []
     for _step in _steps:
         lprint('CHECKING STEP', _step, verbose=verbose)
-        _fx_caches += [tk.obtain_cacheable(_name)
-                       for _name in _step.find_output_names(verbose=0)
-                       if _name.output_type == 'fxcache' and
-                       'Yeti' in _name.output_name]
+        _fx_caches += [
+            _name for _name in _step.find_output_names(output_type='fxcache')
+            if 'Yeti' in _name.output_name]
     lprint('FOUND {:d} FX CACHES'.format(len(_fx_caches)), verbose=verbose)
 
     # Find vers with yeti caches
     _yeti_vers = []
     for _fx_cache in _fx_caches:
-        _vers = _fx_cache.find_vers()
+        _vers = _fx_cache.find_versions()
         if not _vers:
             continue
         for _ver in _vers:
-            _out = get_single(_ver.find(
-                depth=1, type_='d', class_=_ver.output_type_), catch=True)
-            if not _out:
-                continue
-            if _out.format != 'yeti':
-                continue
-            _yeti_vers.append(_ver)
+            _out = get_single(_ver.find_files(format_='yeti'), catch=True)
+            if _out:
+                _yeti_vers.append(_ver)
 
     return _yeti_vers

@@ -11,8 +11,8 @@ from .filter_ import passes_filter, apply_filter
 from .misc import (
     lprint, system, dprint, wrap_fn, chain_fns, get_cfg, to_nice, get_single,
     get_plural, last, str_to_seed, get_ord, copy_text, bytes_to_str,
-    to_camel, val_map, get_time_t, clamp, read_url, safe_zip,
-    nice_age, get_time_f)
+    to_camel, val_map, get_time_t, clamp, read_url, safe_zip, is_pascal,
+    nice_age, get_time_f, to_pascal)
 from .path import (
     File, Path, Dir, abs_path, read_file, find, TMP, write_file, replace_file,
     search_files_for_text, test_path, touch, restore_cwd, rel_path, FileError,

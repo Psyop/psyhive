@@ -11,7 +11,8 @@ import tempfile
 
 import six
 
-from psyhive.utils import abs_path, lprint, File, touch, dprint, dev_mode
+from psyhive.utils import (
+    abs_path, lprint, File, touch, dprint, dev_mode, is_pascal)
 
 from ..wrapper import QtCore, QtWidgets, Qt
 from .ui_dialog import SETTINGS_DIR
@@ -82,6 +83,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
     """Dialog based on a ui file."""
 
     timer = None
+    disable_save_settings = False
 
     def __init__(self, ui_file, catch_errors_=True, save_settings=True,
                  load_settings=True, parent=None):
@@ -160,7 +162,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
         # Get list of widgets
         _widgets = self.findChildren(QtWidgets.QWidget)
         _widgets = [_widget for _widget in _widgets
-                    if _is_pascal(_widget.objectName())]
+                    if is_pascal(_widget.objectName())]
         _widgets.sort(key=operator.methodcaller('objectName'))
 
         for _widget in _widgets:
@@ -235,7 +237,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
         """
         _widgets = self.findChildren(QtWidgets.QWidget)
         _widgets = [_widget for _widget in _widgets
-                    if _is_pascal(_widget.objectName())]
+                    if is_pascal(_widget.objectName())]
         _widgets.sort(key=operator.methodcaller('objectName'))
         return _widgets
 
@@ -439,12 +441,12 @@ def _connect_callback(widget, callback, catch_errors_, verbose):
         catch_errors_ (bool): apply error catcher to callbacks
         verbose (int): print process data
     """
-    from psyhive.tools import err_catcher
+    from psyhive.tools import get_error_catcher
 
     # Preare callback
     _callback = callback
     if catch_errors_:
-        _err_catcher = err_catcher.get_error_catcher(remove_args=True)
+        _err_catcher = get_error_catcher(remove_args=True)
         _callback = _err_catcher(_callback)
 
     # Get single
@@ -469,25 +471,6 @@ def _connect_callback(widget, callback, catch_errors_, verbose):
     if _signal:
         _signal.connect(_callback)
         lprint(' - CONNECTING CALLBACK', _callback, verbose=verbose)
-
-
-def _is_pascal(string):
-    """Test if a string is pascal case (eg. ThisIsPascal).
-
-    Args:
-        string (str): string to text
-
-    Returns:
-        (str): whether string is pascal
-    """
-    if not string:
-        return False
-    if not string[0].isupper():
-        return False
-    for _chr in ' _':
-        if _chr in string:
-            return False
-    return True
 
 
 def _load_setting_list_widget(widget, value):

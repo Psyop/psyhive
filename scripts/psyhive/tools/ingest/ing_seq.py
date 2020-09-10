@@ -99,19 +99,22 @@ class VendorSeq(Seq):
             vendor (str): source vendor
         """
         _out = self.to_psy_file_seq()
+        print ' - OUT', _out.path
 
         # Check asset/shot + step exists
         _root = tk2.TTRoot(_out.path)
         if not _root.exists():
-            _root.create_workspaces()
+            _root.create_workspaces(force=True)
         _step = tk2.TTStepRoot(_out.path)
         assert _step.exists()
+        print ' - STEP EXISTS', _step.path
 
         # Copy images
         self.copy_to(_out)
         _out.cache_write('vendor_source', self.path)
+        print ' - COMPIED IMAGES'
 
         # Publish in shotgun
         _comment = 'From {} {}'.format(vendor, time.strftime('%m/%d/%y'))
-        print _comment
+        print ' - COMMENT', _comment
         _out.register_in_shotgun(comment=_comment, complete=True)

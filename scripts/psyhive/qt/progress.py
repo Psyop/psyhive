@@ -214,4 +214,5 @@ def progress_bar(items, *args, **kwargs):
     if host.batch_mode():
         print 'DISABLE PROGRESS BAR IN BATCH MODE'
         return items
+    get_application()
     return ProgressBar(items, *args, **kwargs)

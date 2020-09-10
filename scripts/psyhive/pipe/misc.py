@@ -1,5 +1,11 @@
 """General utilities for the pipe module."""
 
+import tempfile
+
+from psyhive.utils import abs_path
+
+TMP = abs_path(tempfile.gettempdir())
+
 
 def read_ver_n(ver):
     """Get version number from a version token.

@@ -21,12 +21,13 @@ def ingest_seqs(dir_, vendor):
 
     _dir = Dir(abs_path(dir_))
     print 'READING', _dir.path
+    print ' - VENDOR', vendor
     _seqs = _dir.find_seqs()
-    print 'FOUND {:d} SEQS\n'.format(len(_seqs))
+    print ' - FOUND {:d} SEQS\n'.format(len(_seqs))
 
     _statuses = {}
     _to_ingest = []
-    for _seq in _seqs:
+    for _seq in qt.progress_bar(_seqs, 'Checking {:d} seq{}'):
 
         print 'PATH', _seq.path
         _status = None
@@ -60,19 +61,15 @@ def ingest_seqs(dir_, vendor):
 
     print
 
-    _f_just = max([len(_seq.filename) for _seq in _statuses])
-    _s_just = max([len(_status) for _seq in _statuses.values()])
-    for _seq in _statuses:
-        # dev.inspect(_seq)
-        print ' - '.join([
-            _seq.filename.ljust(_f_just),
-            _statuses[_seq].ljust(_s_just),
-            _seq.path])
-
+    # Execute ingestion
     if not _to_ingest:
         return
-    qt.ok_cancel('Ingest {:d} seq{}?'.format(
-        len(_to_ingest), get_plural(_to_ingest)))
-    for _seq in qt.progress_bar(_to_ingest):
-        print _seq
+    qt.ok_cancel(
+        'Ingest {:d} seq{}?'.format(len(_to_ingest), get_plural(_to_ingest)),
+        verbose=0)
+    for _idx, _seq in qt.progress_bar(
+            enumerate(_to_ingest), 'Ingesting {:d} seq{}',
+            stack_key='IngestSeqs'):
+        print '({:d}/{:d}) [INGESTING] {}'.format(
+            _idx+1, len(_to_ingest), _seq.path)
         _seq.ingest(vendor=vendor)

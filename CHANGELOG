@@ -1,3 +1,28 @@
+#### v0.96.0 ####
+
+    Released: Thu 10th Sep 2020 14:49pm
+
+    Yeti tools: (nnaut)
+        bugfix help buttons not working,
+        added confirmation on finished caching,
+    Ingest tools: (kcassidy)
+        bugfix confirmation on each shot + progress bars closing each other
+    
+    maya_psyhive:
+        tools.yeti updated ui to HUiDialog3,
+        tools.yeti updated to use tk2,
+        tools.yeti added confirmation on cache,
+    psyhive:
+        pipe.TMP added,
+        qt.HUiDialog3.disable_save_settings added at class level,
+        qt.help_ added parent arg,
+        qt.progress_bar bugfix error on no QApplication,
+        refresh sort _ui suffix last,
+        tk2.create_workspaces added force arg,
+        tools.ingest_seqs bugfix progress bar clash + confirm each create workspaces,
+        utils is_pascal/to_pascal added,
+
+
 #### v0.95.1 ####
 
     Released: Wed 9th Sep 2020 17:26pm

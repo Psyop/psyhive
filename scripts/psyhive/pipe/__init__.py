@@ -2,7 +2,7 @@
 
 import os
 
-from .misc import read_ver_n
+from .misc import read_ver_n, TMP
 from .project import (
     find_projects, find_project, Project, cur_project, get_project,
     PROJECTS_ROOT)

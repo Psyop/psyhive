@@ -6,6 +6,7 @@ import functools
 import os
 import pprint
 import random
+import re
 import subprocess
 import tempfile
 import time
@@ -247,6 +248,25 @@ def get_time_t(val):
     raise ValueError(val)
 
 
+def is_pascal(text):
+    """Test if a string is pascal case (eg. ThisIsPascal).
+
+    Args:
+        text (str): string to text
+
+    Returns:
+        (str): whether string is pascal
+    """
+    if not text:
+        return False
+    if not text[0].isupper():
+        return False
+    for _chr in ' _':
+        if _chr in text:
+            return False
+    return True
+
+
 def last(items):
     """Mark the last item of a list.
 
@@ -458,6 +478,21 @@ def to_nice(text):
     """
     _text = text.strip('_')
     return _text[0].capitalize() + _text[1:].replace('_', ' ')
+
+
+def to_pascal(text):
+    """Covert the given text to pascal case.
+
+    eg. some_text -> SomeText
+
+    Args:
+        text (str): text to convert
+
+    Returns:
+        (str): pascal case text
+    """
+    return ''.join([
+        _token[0].upper()+_token[1:] for _token in re.split('[ _]', text)])
 
 
 def val_map(val, in_min=0.0, in_max=1.0, out_min=0.0, out_max=1.0):

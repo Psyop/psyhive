@@ -11,7 +11,7 @@ from psyhive.utils import (
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
     text_to_py_file, touch, get_single, find, Dir, File, get_time_t,
     get_owner, Cacheable, get_result_storer, Seq, store_result_on_obj,
-    get_result_to_file_storer)
+    get_result_to_file_storer, to_pascal)
 
 _TEST_DIR = '{}/psyhive/testing'.format(tempfile.gettempdir())
 
@@ -289,6 +289,10 @@ class TestUtils(unittest.TestCase):
     def test_to_nice(self):
 
         assert to_nice('_get_flex_opts') == 'Get flex opts'
+
+    def test_to_pascal(self):
+        assert to_pascal('this is a test') == 'ThisIsATest'
+        assert to_pascal('this_is_a_tEst') == 'ThisIsATEst'
 
     def test_wrap_fn(self):
 

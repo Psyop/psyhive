@@ -44,7 +44,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="apply_on_complete">
+      <widget class="QCheckBox" name="ApplyOnComplete">
        <property name="text">
         <string>Apply cache to yeti nodes on completion</string>
        </property>
@@ -56,14 +56,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="cache_write_assets">
+        <widget class="QPushButton" name="CacheWriteAssets">
          <property name="text">
           <string>Cache selected assets</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cache_write_assets_help">
+        <widget class="QPushButton" name="CacheWriteAssetsHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -102,14 +102,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="cache_write_node">
+        <widget class="QPushButton" name="CacheWriteNode">
          <property name="text">
           <string>Cache selected yeti nodes</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cache_write_node_help">
+        <widget class="QPushButton" name="CacheWriteNodeHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -148,14 +148,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="cache_write_all_nodes">
+        <widget class="QPushButton" name="CacheWriteAllNodes">
          <property name="text">
           <string>Cache all yeti nodes</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cache_write_all_nodes_help">
+        <widget class="QPushButton" name="CacheWriteAllNodesHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -253,7 +253,7 @@
         </widget>
        </item>
        <item>
-        <widget class="HComboBox" name="step"/>
+        <widget class="HComboBox" name="Step"/>
        </item>
       </layout>
      </item>
@@ -279,7 +279,7 @@
         </widget>
        </item>
        <item>
-        <widget class="HComboBox" name="name"/>
+        <widget class="HComboBox" name="Name"/>
        </item>
       </layout>
      </item>
@@ -305,12 +305,12 @@
         </widget>
        </item>
        <item>
-        <widget class="HComboBox" name="version"/>
+        <widget class="HComboBox" name="Version"/>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="version_label">
+      <widget class="QLabel" name="VersionLabel">
        <property name="text">
         <string>No cache found</string>
        </property>
@@ -325,14 +325,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="HPushButton" name="cache_read_asset">
+        <widget class="HPushButton" name="CacheReadAsset">
          <property name="text">
           <string>Apply cache to select asset</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="HPushButton" name="cache_read_asset_help">
+        <widget class="HPushButton" name="CacheReadAssetHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -371,14 +371,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="HPushButton" name="cache_read_root">
+        <widget class="HPushButton" name="CacheReadRoot">
          <property name="text">
           <string>Apply cache to root namespace</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="HPushButton" name="cache_read_root_help">
+        <widget class="HPushButton" name="CacheReadRootHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -460,14 +460,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="HPushButton" name="apply_viewport_updates">
+        <widget class="HPushButton" name="ApplyViewportUpdates">
          <property name="text">
           <string>Set up viewport updates</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="HPushButton" name="apply_viewport_updates_help">
+        <widget class="HPushButton" name="ApplyViewportUpdatesHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -506,14 +506,14 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="HPushButton" name="disable_viewport_updates">
+        <widget class="HPushButton" name="DisableViewportUpdates">
          <property name="text">
           <string>Disable viewport updates</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="HPushButton" name="disable_viewport_updates_help">
+        <widget class="HPushButton" name="DisableViewportUpdatesHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>
