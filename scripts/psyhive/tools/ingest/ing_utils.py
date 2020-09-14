@@ -1,7 +1,10 @@
 """General utilities to aid ingestion."""
 
-from psyhive import tk2, pipe
+from psyhive import tk2, pipe, icons
 from psyhive.utils import abs_path, get_single
+
+ICON = icons.EMOJI.find("Fork and Knife With Plate")
+INGESTED_TOKEN = 'ingested 11/09/20'
 
 
 def map_tag_to_shot(tag):

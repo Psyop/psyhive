@@ -1,12 +1,14 @@
 """Tools for managing sequences of files."""
 
 import collections
+import operator
 import os
 import shutil
 import time
 
 from .cache import store_result_on_obj
 from .misc import dprint, lprint, get_plural, bytes_to_str
+from .filter_ import passes_filter
 from .path import (
     File, abs_path, find, test_path, Dir, nice_size, get_path, Path)
 from .range_ import ints_to_str
@@ -478,12 +480,13 @@ def _seq_to_mov_ffmpeg(seq, mov, fps):
         raise RuntimeError("Failed to generate "+_mov.path)
 
 
-def find_seqs(dir_, class_=None, verbose=0):
+def find_seqs(dir_, class_=None, filter_=None, verbose=0):
     """Find sequences in the given path and subdirs.
 
     Args:
         dir_ (str): path to dir to search
         class_ (class): override seq class
+        filter_ (str): apply path filter
         verbose (int): print process data
 
     Returns:
@@ -499,6 +502,9 @@ def find_seqs(dir_, class_=None, verbose=0):
         lprint(' - TESTING FILE', _path, verbose=verbose > 2)
 
         if _path.is_file():
+
+            if filter_ and not passes_filter(_path.path, filter_):
+                continue
 
             # Ignore files already matched in seq
             _already_matched = False
@@ -520,7 +526,8 @@ def find_seqs(dir_, class_=None, verbose=0):
                 _this_seqs[_seq].add(_frame)
 
         elif _path.is_dir():
-            _seqs += find_seqs(_path, class_=class_, verbose=verbose)
+            _seqs += find_seqs(
+                _path, class_=class_, verbose=verbose, filter_=filter_)
 
         else:
             raise ValueError(_path)
@@ -529,7 +536,7 @@ def find_seqs(dir_, class_=None, verbose=0):
     for _seq, _frames in _this_seqs.items():
         _seq.set_frames(sorted(_frames))
 
-    return sorted(_seqs+_this_seqs.keys())
+    return sorted(_seqs+_this_seqs.keys(), key=operator.attrgetter('path'))
 
 
 def seq_from_frame(file_, catch=False, class_=None):

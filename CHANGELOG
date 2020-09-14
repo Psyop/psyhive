@@ -1,3 +1,22 @@
+#### v0.97.0 ####
+
+    Released: Mon 14th Sep 2020 10:21am
+
+    ingest_vendor_seqs: check ingested seqs have shotgun versions (kcassidy)
+    
+    bin/
+        ingest_vendor_seqs added filter/force/resubmit_transgen opts,
+        ingest_vendor_seqs fixed icon/parenting,
+    psyhive:
+        tk2.create_workspaces better verbosity,
+        tk2.TTBase.get_shot added,
+        tk2.TTOutputFileBase.get_sg_data added code filter + bugfix task search,
+        tools.ingest.ingest_seqs test/submit transgen,
+        tools.ingest.ingest_seqs bugfix missing step in existing shot,
+        tools.ingest.ICON added,
+        utils.find_seqs added filter arg,
+
+
 #### v0.96.0 ####
 
     Released: Thu 10th Sep 2020 14:49pm

@@ -392,6 +392,7 @@ class _TTOutputFileBase(TTBase):
 
     channel = None
     extension = None
+    task = None
     version = None
 
     def find_latest(self):
@@ -431,15 +432,13 @@ class _TTOutputFileBase(TTBase):
         _proj = tk2.get_project_sg_data(pipe.Project(self.path))
         _root = tk2.TTRoot(self.path)
         _task = tk2.get_sg_data(
-            'Task',
-            content='celAnimation',
-            project=_proj,
-            entity=_root.get_sg_data(),
-        )
+            'Task', content=self.task, project=_proj,
+            entity=_root.get_sg_data())
         _data = tk2.get_sg_data(
             'PublishedFile', version_number=self.ver_n, sg_format=self.extn,
-            project=_proj, task=_task,
-            limit=2, fields=['task'])
+            project=_proj, task=_task, limit=2,
+            code=self.filename.replace('%04d', '####'),
+            fields=['task', 'code', 'short_name'])
         if verbose:
             pprint.pprint(_data)
         if len(_data) > 1:

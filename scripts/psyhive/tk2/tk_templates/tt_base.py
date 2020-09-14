@@ -103,6 +103,16 @@ class TTBase(Path):
         _file = self.cache_fmt.format(tag)
         obj_write(file_=_file, obj=data)
 
+    def get_shot(self):
+        """Get shot object for this path.
+
+        Returns:
+            (TTShot|None): shot (if any)
+        """
+        if not self.shot:
+            return None
+        return TTShot(self.path)
+
     def map_to(self, class_=None, hint=None, verbose=0, **kwargs):
         """Map this template's values to a different template.
 

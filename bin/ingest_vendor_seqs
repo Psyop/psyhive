@@ -7,9 +7,12 @@ sequences matching the outsource vendor naming convention and then ingests
 them into the psyop pipeline.
 """
 
+import ctypes
 import optparse
 import os
 
+from psyhive import qt
+from psyhive.qt import QtGui
 from psyhive.tools import ingest
 from psyhive.utils import abs_path
 
@@ -41,23 +44,53 @@ def _get_opts():
     _parser.add_option(
         "--vendor", dest="vendor", action="store",
         help="Which vendor these images are from")
+    _parser.add_option(
+        "--filter", dest="filter", action="store",
+        help="Filter the list of image sequences")
+    _parser.add_option(
+        "--force", dest="force", action="store_true",
+        help="Ingest all sequences without confirmation")
+    _parser.add_option(
+        "--resubmit_transgens", dest="resubmit_transgens", action="store_true",
+        help="Force resubmit any transgens")
     return _parser.parse_args()
+
+
+def _setup_standalone():
+    """Setup standalone app palette/icon."""
+    _app = qt.get_application()
+
+    # Mimic maya's colours outside maya
+    qt.set_maya_palette()
+
+    # Send icon to taskbar
+    _icon = QtGui.QIcon(ingest.ICON)
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+        'Ingest seqs')
+    _app.setWindowIcon(_icon)
 
 
 def _ingest_vendor_seqs():
     """Ingest vendor image sequences in the current directory."""
+    _app = qt.get_application()
+
     _opts, _ = _get_opts()
     _dir = abs_path(os.getcwd())
 
     # Get vendor
     if not _opts.vendor:
+        print 'READING VENDOR FROM PATH', _dir
         _opts.vendor = ingest.vendor_from_path(_dir)
     if not _opts.vendor:
         raise RuntimeError(
             'Unable to read vendor from pwd - please use --vendor flag')
 
     print 'INGEST VENDOR SEQS', _dir
-    ingest.ingest_seqs(_dir, vendor=_opts.vendor)
+    _setup_standalone()
+    ingest.ingest_seqs(
+        _dir, vendor=_opts.vendor, filter_=_opts.filter,
+        force=_opts.force, resubmit_transgens=_opts.resubmit_transgens)
+    _app.exit()
 
 
 if __name__ == '__main__':

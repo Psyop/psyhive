@@ -2,6 +2,8 @@
 
 import collections
 import pprint
+import time
+
 import tank
 
 from psyhive import pipe, qt
@@ -170,7 +172,7 @@ def create_workspaces(root, force=False, verbose=0):
         if _entity_type not in ('Asset', 'Shot', 'Sequence'):
             continue
         _entity_id_list = [_task['id'] for _task in _tasks]
-        lprint('CREATE WORKSPACES', _entity_type, _entity_id, _entity_name,
+        lprint(' - CREATE WORKSPACES', _entity_type, _entity_id, _entity_name,
                _entity_id_list, verbose=verbose)
         _to_create.append((
             _entity_type, _entity_id, _entity_name, _entity_id_list))
@@ -184,7 +186,11 @@ def create_workspaces(root, force=False, verbose=0):
         _key = (_entity_type, _entity_id)
         if _key in _done:
             continue
+        _start = time.time()
+        print ' - CREATE WORKSPACES {}'.format(
+            '/'.join([_ctx.project['name'], _entity_type, _entity_name]))
         _tk.create_filesystem_structure('Task', _entity_id_list)
-        print '...created workspace for %s/%s/%s' % (
-            _ctx.project['name'], _entity_type, _entity_name)
+        print ' - CREATED WORKSPACES FOR {} ({:.01f}s)'.format(
+            '/'.join([_ctx.project['name'], _entity_type, _entity_name]),
+            time.time() - _start)
         _done.append(_key)

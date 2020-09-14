@@ -47,7 +47,7 @@ class _RemoveRigsUi(qt.HUiDialog3):
 
     def _callback__Remove(self):
         _to_remove = self.ui.List.selected_data()
-        for _rig in qt.ProgressBar(
+        for _rig in qt.progress_bar(
                 _to_remove, "Removing {:d} rig{}", col='IndianRed'):
             _rig.remove(force=True)
         cmds.refresh()
