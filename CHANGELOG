@@ -1,3 +1,13 @@
+#### v0.98.1 ####
+
+    Released: Mon 21st Sep 2020 12:30pm
+
+    ingest_vendor_seqs: bugfix error on launch,
+    
+    psyhive:
+        ingest bugfix imports,
+
+
 #### v0.98.0 ####
 
     Released: Mon 21st Sep 2020 11:56am
