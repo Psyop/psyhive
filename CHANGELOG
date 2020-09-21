@@ -1,3 +1,15 @@
+#### v0.98.3 ####
+
+    Released: Mon 21st Sep 2020 14:13pm
+
+    ingest_vendor_seqs: moved cache to job (kcassidy) [TOOLS-241]
+    
+    psyhive:
+        tools.catch_error bugfix show dialog outside app,
+        tools.ingest_seqs warning dialog on already ingested + continue,
+        tools.ingest_seqs bugfix verbosity out of sync,
+
+
 #### v0.98.2 ####
 
     Released: Mon 21st Sep 2020 13:13pm

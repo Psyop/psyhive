@@ -220,6 +220,8 @@ def _handle_exception(exc, verbose=0):
     _dialog = _ErrDialog(
         traceback_=_traceback, message=exc.message,
         type_=type(exc).__name__)
+    if not host.NAME:
+        _app.exec_()
 
 
 def catch_error(func):

@@ -116,9 +116,8 @@ class VendorSeq(Seq):
         # Check current source matches
         _src = _out.cache_read('vendor_source')
         if _src and not _src == self.path:
-            print ' - SRC', _src
-            raise NotImplementedError(
-                'Already ingested from a different source {}'.format(_src))
+            print ' - ORIGINAL SOURCE', _src
+            return 'Already ingested from a different source', False
         elif not _src:
             print ' - APPLYING VENDOR SOURCE'
             _out.cache_write('vendor_source', self.path)

@@ -38,6 +38,8 @@ def ingest_seqs(dir_, vendor, filter_=None, force=False,
     for _idx, _seq in qt.progress_bar(
             enumerate(_seqs), 'Checking {:d} seq{}'):
 
+        print '[{:d}/{:d}] PATH {}'.format(_idx+1, len(_seqs), _seq.path)
+
         # Check ingestion status
         _status = _ingestable = None
         try:
@@ -48,6 +50,7 @@ def ingest_seqs(dir_, vendor, filter_=None, force=False,
             assert isinstance(_seq, VendorSeq)
             _status, _ingestable = _seq.get_ingest_status(
                 resubmit_transgens=resubmit_transgens)
+        print ' - STATUS', _status
 
         assert _status
         assert _ingestable is not None
@@ -55,16 +58,24 @@ def ingest_seqs(dir_, vendor, filter_=None, force=False,
             _to_ingest.append(_seq)
         _statuses[_seq] = _status
 
-        print '[{:d}/{:d}] PATH {}'.format(_idx+1, len(_seqs), _seq.path)
-        print ' - STATUS', _status
-
-    print
-    print 'SUMMARY:'
+    # Print summary
+    print '\nSUMMARY:'
     print '\n'.join([
         '    {} - {:d}'.format(_status, _statuses.values().count(_status))
         for _status in sorted(set(_statuses.values()))])
     print 'FOUND {:d} SEQ{} TO INGEST'.format(
         len(_to_ingest), get_plural(_to_ingest).upper())
+
+    # Show different source warning
+    _diff_src = [
+        _ for _, _status in _statuses.items()
+        if _status == 'Already ingested from a different source']
+    if _diff_src:
+        qt.notify_warning(
+            '{:d} of the sequences could not be ingested because they have '
+            'already been ingested from a different delivery. This happens '
+            'when a vendor provides an update without versioning up.\n\n'
+            'See the terminal for details.'.format(len(_diff_src)))
 
     # Execute ingestion
     if not _to_ingest:
