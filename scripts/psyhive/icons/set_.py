@@ -82,27 +82,33 @@ class EmojiSet(Seq):
         self.index = '{}/index.html'.format(self.dir)
 
     @store_result
-    def find(self, match, verbose=0):
+    def find(self, match, catch=False, verbose=0):
         """Find an emoji matching the given name.
 
         Args:
             match (str): name/filter to match
+            catch (bool): no error if unable to find icon
+                (to facilitate missing icons)
             verbose (int): print process data
 
         Returns:
             (str): path to emoji image file
         """
         global _FOUND_EMOJIS
-        _match = self.find_emoji(match, verbose=verbose)
+        _match = self.find_emoji(match, catch=catch, verbose=verbose)
+        if not _match:
+            return None
         _FOUND_EMOJIS.add(_match.name)
         lprint('EMOJI', _match, verbose=verbose)
         return _match.path
 
-    def find_emoji(self, match, verbose=0):
+    def find_emoji(self, match, catch=False, verbose=0):
         """Find an emoji object matching the given name.
 
         Args:
             match (str): name/filter to match
+            catch (bool): no error if unable to find icon
+                (to facilitate missing icons)
             verbose (int): print process data
 
         Returns:
@@ -110,7 +116,12 @@ class EmojiSet(Seq):
         """
 
         # Try index match
-        _idx_matches = self.find_emojis(index=match)
+        try:
+            _idx_matches = self.find_emojis(index=match)
+        except OSError as _exc:
+            if catch:
+                return None
+            raise _exc
         lprint(
             'FOUND {:d} INDEX MATCHES'.format(len(_idx_matches)),
             verbose=verbose)

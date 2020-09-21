@@ -5,44 +5,10 @@ import time
 from transgen import helper
 
 from psyhive import tk2
-from psyhive.utils import get_single, Seq, get_time_f, abs_path
+from psyhive.utils import Seq, get_time_f, abs_path
 
-from .ing_utils import INGESTED_TOKEN, map_tag_to_shot
-
-
-def _is_ver(token):
-    """Test if the given token is a valid verison (eg. v001).
-
-    Args:
-        token (str): token to test
-
-    Returns:
-        (bool): whether token is version
-    """
-    return len(token) == 4 and token[0] == 'v' and token[1:].isdigit()
-
-
-def _parse_seq_basename(basename):
-    """Parse basename of the given image sequence.
-
-    Sequence basenames must follow one of these 3 conventions:
-
-        - <tag>_<step>_<version>
-        - <tag>_<step>_<layer>_<version>
-        - <tag>_<step>_<layer>_<version>_<aov>
-
-    Args:
-        basename (str): basename to parse
-
-    Returns:
-        (str tuple): tag/step/layer/version/aov data
-    """
-    _tokens = basename.split('_')
-    _tag, _step = _tokens[:2]
-    _ver = get_single([_token for _token in _tokens if _is_ver(_token)])
-    _layer = '_'.join(_tokens[2: _tokens.index(_ver)]) or None
-    _aov = '_'.join(_tokens[_tokens.index(_ver)+1:]) or None
-    return _tag, _step, _layer, _ver, _aov
+from .ing_utils import INGESTED_TOKEN, parse_seq_basename
+from .ing_utils_psy import map_tag_to_shot
 
 
 class VendorSeq(Seq):
@@ -55,7 +21,7 @@ class VendorSeq(Seq):
             path (str): path to image sequence
         """
         super(VendorSeq, self).__init__(path)
-        _data = _parse_seq_basename(self.basename)
+        _data = parse_seq_basename(self.basename)
         self.tag, self.step, self.layer, self.version, self.aov = _data
         self.ver_n = int(self.version[1:])
 
@@ -129,6 +95,7 @@ class VendorSeq(Seq):
         except ValueError as _exc:
             return _exc.message, False
 
+        print ' - RANGE {:d}-{:d}'.format(*self.find_range())
         print ' - OUTPUT', _out.path
 
         if _out.cache_read(INGESTED_TOKEN):
@@ -140,10 +107,11 @@ class VendorSeq(Seq):
         # Check current source matches
         _src = _out.cache_read('vendor_source')
         if _src and not _src == self.path:
-            print 'SRC', _src
+            print ' - SRC', _src
             raise NotImplementedError
         elif not _src:
-            raise NotImplementedError
+            print ' - APPLYING VENDOR SOURCE'
+            _out.cache_write('vendor_source', self.path)
 
         # Check for sg published file
         if not _out.get_sg_data():
@@ -193,7 +161,7 @@ class VendorSeq(Seq):
 
         # Transgen
         if not self.has_sg_version():
-            _start, _end = _out.find_range()
+            _start, _end = self.find_range()
             helper.process_submission_preset(
                 _out.path, _start, _end, 'dailies-scene-referred',
                 submit_to_farm=True)

@@ -13,6 +13,9 @@ LABEL = "Clash Short"
 BUTTON_LABEL = 'clash\nshort'
 
 
+py_gui.set_section('HUD', collapse=False)
+
+
 def _get_scene_name():
     """Get current scene name hud text.
 
@@ -58,9 +61,6 @@ def _get_hud_data():
         ('PsyHudFocal', (9, 0), _get_cam_focal, {
             'attachToRefresh': True}),
     ]
-
-
-py_gui.set_section('HUD', collapse=False)
 
 
 @py_gui.install_gui()

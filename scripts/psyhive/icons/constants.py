@@ -12,14 +12,17 @@ _EMOJI_PATH = os.environ.get('PSYHIVE_ICONS_EMOJI', _EMOJI_PATH_DEFAULT)
 EMOJI = EmojiSet(_EMOJI_PATH, frames=str_to_ints('0-2775'))
 
 # Named icons
-COPY = EMOJI.find('Spiral Notepad')
-DELETE = EMOJI.find('Wastebasket')
-BROWSER = EMOJI.find('Card Index Dividers')
-EDIT = EMOJI.find('Pencil')
-FILTER = EMOJI.find('Potable Water')
-OPEN = EMOJI.find('Open File Folder')
-REFRESH = EMOJI.find('Counterclockwise Arrows Button')
-SAVE = EMOJI.find('Floppy Disk')
+try:
+    COPY = EMOJI.find('Spiral Notepad')
+    DELETE = EMOJI.find('Wastebasket')
+    BROWSER = EMOJI.find('Card Index Dividers')
+    EDIT = EMOJI.find('Pencil')
+    FILTER = EMOJI.find('Potable Water')
+    OPEN = EMOJI.find('Open File Folder')
+    REFRESH = EMOJI.find('Counterclockwise Arrows Button')
+    SAVE = EMOJI.find('Floppy Disk')
+except OSError:
+    pass
 
 # Collections
 ANIMALS = Collection([

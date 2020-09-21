@@ -99,15 +99,16 @@ class FileRef(object):
         from maya_psyhive import open_maya as hom
         return self.find_nodes(type_=type_, class_=hom.HFnTransform)
 
-    def find_top_node(self, class_=None, verbose=0):
+    def find_top_node(self, class_=None, catch=False, verbose=0):
         """Find top node of this reference.
 
         Args:
             class_ (class): override class for top node
+            catch (bool): no error if no top node found
             verbose (int): print process data
 
         Returns:
-            (str): top node
+            (str|None): top node (if any)
         """
         from maya_psyhive import open_maya as hom
         _nodes = cmds.ls(
@@ -118,7 +119,10 @@ class FileRef(object):
         _top_nodes = sorted(set([
             _node for _node in _nodes if _node.count('|') == _min_pipes]))
         lprint(' - TOP NODES', _top_nodes, verbose=verbose)
-        _top_node = get_single(_top_nodes, verbose=1).split('|')[-1]
+        _top_node = get_single(_top_nodes, catch=catch, verbose=1)
+        if not _top_node:
+            return None
+        _top_node = _top_node.split('|')[-1]
         _class = class_ or hom.HFnTransform
         _top_node = _class(_top_node)
         return _top_node

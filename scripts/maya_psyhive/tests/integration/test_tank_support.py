@@ -21,6 +21,8 @@ _SHADE_PATH = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
 
 class TestTankSupport(unittest.TestCase):
 
+    EXEC_SORT = 0.5
+
     @revert_dev_mode
     def test_aistandin(self):
 

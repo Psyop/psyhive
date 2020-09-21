@@ -6,6 +6,8 @@ from psyhive.utils import dev_mode, revert_dev_mode, set_dev_mode
 
 class TestDeprecate(unittest.TestCase):
 
+    EXEC_SORT = 0.2
+
     @revert_dev_mode
     def test(self):
 

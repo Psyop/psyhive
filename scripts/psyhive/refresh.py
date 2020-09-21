@@ -103,6 +103,8 @@ _RELOAD_ORDER = [
     'hv_test.diary.entry',
     'hv_test.diary',
     'hv_test.tools',
+    'hv_test.release.rel_repo',
+    'hv_test.release',
     'hv_test',
 ]
 

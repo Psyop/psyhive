@@ -5,7 +5,7 @@ from psyhive.tools import catch_error
 from psyhive.utils import get_plural, Dir, abs_path
 
 from .ing_utils import vendor_from_path
-from .ing_seq import VendorSeq
+from .ing_vendor_seq import VendorSeq
 
 
 @catch_error
@@ -35,9 +35,8 @@ def ingest_seqs(dir_, vendor, filter_=None, force=False,
     # Check images
     _statuses = {}
     _to_ingest = []
-    for _seq in qt.progress_bar(_seqs, 'Checking {:d} seq{}'):
-
-        print 'PATH', _seq.path
+    for _idx, _seq in qt.progress_bar(
+            enumerate(_seqs), 'Checking {:d} seq{}'):
 
         # Check ingestion status
         _status = _ingestable = None
@@ -56,11 +55,13 @@ def ingest_seqs(dir_, vendor, filter_=None, force=False,
             _to_ingest.append(_seq)
         _statuses[_seq] = _status
 
+        print '[{:d}/{:d}] PATH {}'.format(_idx+1, len(_seqs), _seq.path)
         print ' - STATUS', _status
 
     print
-    print 'SUMMARY:', ', '.join([
-        '{} - {:d}'.format(_status, _statuses.values().count(_status))
+    print 'SUMMARY:'
+    print '\n'.join([
+        '    {} - {:d}'.format(_status, _statuses.values().count(_status))
         for _status in sorted(set(_statuses.values()))])
     print 'FOUND {:d} SEQ{} TO INGEST'.format(
         len(_to_ingest), get_plural(_to_ingest).upper())

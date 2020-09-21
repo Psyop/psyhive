@@ -200,6 +200,9 @@ def _handle_exception(exc, verbose=0):
     elif isinstance(exc, qt.DialogCancelled):
         print '[DialogCancelled]'
         return
+    elif isinstance(exc, SystemExit) or exc is SystemExit:
+        print '[SystemExit]'
+        return
     elif isinstance(exc, HandledError):
         qt.notify_warning(msg=exc.message, icon=exc.icon, title=exc.title)
         return

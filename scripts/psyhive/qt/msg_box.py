@@ -171,7 +171,7 @@ def ok_cancel(
 
 def notify(
         msg, title='Notification', icon=None, icon_size=None, pos=None,
-        parent=None):
+        parent=None, verbose=1):
     """Raise a notification dialog.
 
     Args:
@@ -181,14 +181,15 @@ def notify(
         icon_size (int): icon size in pixels
         pos (QPoint): dialog position
         parent (QDialog): parent dialog
+        verbose (int): print process data
     """
+    _icon = icon or icons.EMOJI.find('Slightly Smiling Face', catch=True)
     raise_dialog(
         msg=msg, title=title, buttons=['Ok'], icon_size=icon_size,
-        icon=icon or icons.EMOJI.find('Slightly Smiling Face'),
-        pos=pos, parent=parent)
+        icon=_icon, pos=pos, parent=parent, verbose=verbose)
 
 
-def notify_warning(msg, title='Warning', icon=None, parent=None):
+def notify_warning(msg, title='Warning', icon=None, parent=None, verbose=1):
     """Raise a warning notification dialog.
 
     Args:
@@ -196,10 +197,11 @@ def notify_warning(msg, title='Warning', icon=None, parent=None):
         title (str): dialog title
         icon (str): path to dialog icon
         parent (QDialog): parent dialog
+        verbose (int): print process data
     """
+    _icon = icon or icons.EMOJI.find('Cold Face', catch=True)
     notify(
-        msg=msg, title=title, parent=parent,
-        icon=icon or icons.EMOJI.find('Cold Face'))
+        msg=msg, title=title, parent=parent, verbose=verbose, icon=_icon)
 
 
 def raise_dialog(

@@ -5,6 +5,8 @@ from psyhive import pipe
 
 class TestPipe(unittest.TestCase):
 
+    EXEC_SORT = 0.1
+
     def test(self):
 
         # Shade asset

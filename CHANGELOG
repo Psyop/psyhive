@@ -1,3 +1,25 @@
+#### v0.98.0 ####
+
+    Released: Mon 21st Sep 2020 11:56am
+
+    Ingestion: build tools for outsource vendors to check scenes (mherman) [TOOLS-242]
+    
+    maya_psyhive:
+        ref.FileRef.find_top_node added catch,
+        tools.m_ingest added,
+        utils.DEFAULT_NODES added defaultLayer/defaultRenderLayer,
+    psyhive:
+        icons catch error on missing icons index.html,
+        icons.EmojiSet find/find_emoji add catch arg,
+        qt notify/notify_warning added verbose arg + catch on find icon,
+        tools.err_catcher no traceback on sys.exit,
+        ingest.tools allow remote import,
+        ingest.tools added parse_basename/is_vendor_file/VendorFile/is_psy_asset/PsyAsset,
+        ingest.ingest_seq improved verbosity,
+        utils.PyFile.find_child bugfix recursive,
+    moved unit tests -> tests/unit,
+
+
 #### v0.97.0 ####
 
     Released: Mon 14th Sep 2020 10:21am

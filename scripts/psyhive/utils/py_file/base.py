@@ -84,11 +84,9 @@ class PyBase(object):
             return _filtered
 
         # Try match as exact name match
+        _children = self.find_children(recursive=recursive, type_=type_)
         _exact_match = get_single(
-            [
-                _child for _child in self.find_children(
-                    recursive=recursive, type_=type_)
-                if _child.name == match],
+            [_child for _child in _children if _child.name == match],
             fail_message='Failed to find {} in {}'.format(
                 match, self.py_file.path),
             catch=catch)
@@ -198,7 +196,7 @@ class PyBase(object):
         Returns:
             (str): python code
         """
-        _this = self.py_file.find_def(self.name, recursive=True)
+        _this = self.py_file.find_child(self.name, recursive=True)
         _children = [
             _child for _child in self.py_file.find_children(recursive=True)
             if not _child.name.startswith(_this.name+'.')]

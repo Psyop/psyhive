@@ -197,7 +197,7 @@ ignore:
         psyhive/utils/range_.py
     too-many-return-statements:
         _machi/card.py
-        psyhive/tools/ingest/ing_seq.py
+        psyhive/tools/ingest/ing_vendor_seq.py
     unbalanced-tuple-unpacking:
         _ham_qt.py
         maya_psyhive/open_maya/camera.py
