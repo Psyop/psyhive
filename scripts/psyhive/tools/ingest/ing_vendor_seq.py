@@ -5,7 +5,7 @@ import time
 from transgen import helper
 
 from psyhive import tk2
-from psyhive.utils import Seq, get_time_f, abs_path
+from psyhive.utils import Seq, get_time_f, abs_path, build_cache_fmt
 
 from .ing_utils import INGESTED_TOKEN, parse_seq_basename
 from .ing_utils_psy import map_tag_to_shot
@@ -24,6 +24,15 @@ class VendorSeq(Seq):
         _data = parse_seq_basename(self.basename)
         self.tag, self.step, self.layer, self.version, self.aov = _data
         self.ver_n = int(self.version[1:])
+
+    @property
+    def cache_fmt(self):
+        """Get cache path format str.
+
+        Returns:
+            (str): cache path
+        """
+        return build_cache_fmt(self.path.replace('%04d.', ''), level='project')
 
     @property
     def mtime(self):
@@ -108,7 +117,8 @@ class VendorSeq(Seq):
         _src = _out.cache_read('vendor_source')
         if _src and not _src == self.path:
             print ' - SRC', _src
-            raise NotImplementedError
+            raise NotImplementedError(
+                'Already ingested from a different source {}'.format(_src))
         elif not _src:
             print ' - APPLYING VENDOR SOURCE'
             _out.cache_write('vendor_source', self.path)

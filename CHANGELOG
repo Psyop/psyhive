@@ -1,3 +1,14 @@
+#### v0.98.2 ####
+
+    Released: Mon 21st Sep 2020 13:13pm
+
+    ingest_vendor_seqs: moved cache to job (kcassidy),
+    
+    psyhive:
+        ingest.ingest_seqs moved cache to job,
+        ingest.ingest_seqs better error on already ingested,
+
+
 #### v0.98.1 ####
 
     Released: Mon 21st Sep 2020 12:30pm
