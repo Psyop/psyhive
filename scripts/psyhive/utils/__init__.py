@@ -14,7 +14,7 @@ from .misc import (
     to_camel, val_map, get_time_t, clamp, read_url, safe_zip, is_pascal,
     nice_age, get_time_f, to_pascal)
 from .path import (
-    File, Path, Dir, abs_path, read_file, find, TMP, write_file, replace_file,
+    File, Path, Dir, abs_path, read_file, find, write_file, replace_file,
     search_files_for_text, test_path, touch, restore_cwd, rel_path, FileError,
     diff, write_yaml, read_yaml, nice_size, get_copy_path_fn, get_owner,
     launch_browser, get_path)
