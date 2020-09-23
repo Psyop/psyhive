@@ -7,7 +7,7 @@ from psyhive.utils import get_single, lprint
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_parent, set_namespace, load_plugin
+from maya_psyhive.utils import set_namespace, load_plugin
 
 
 def apply_cache(cache, yeti=None, ref_=None):
@@ -24,18 +24,20 @@ def apply_cache(cache, yeti=None, ref_=None):
     if yeti:
         _yeti = yeti
     else:
-        _cache_ns = cache.output_name
+        assert cache.output_name.count('Yeti_') == 1
+        _cache_ns, _tfm_name = cache.output_name.split('Yeti_')
+        _yeti_name = _tfm_name+'Shape'
         _ref = ref_ or ref.find_ref(_cache_ns)
         print ' - REF', _ref
-        assert cache.channel.startswith(_cache_ns+'_')
-        _node_name = cache.channel[len(_cache_ns+'_'):]
-        _yeti = _ref.get_node(_node_name, catch=True)
+        _yeti = _ref.get_node(_yeti_name, catch=True)
         if not _yeti:
             _top_node = _ref.find_top_node()
             set_namespace(':'+_ref.namespace)
-            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_node_name)
+            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_yeti_name)
+            if not _yeti.get_parent() == _ref.get_node(_tfm_name):
+                _yeti.get_parent().rename(_tfm_name)
             set_namespace(':')
-            cmds.parent(get_parent(_yeti), _top_node)
+            cmds.parent(_yeti.get_parent(), _top_node)
     print ' - YETI', _yeti
 
     # Apply cache
@@ -52,7 +54,7 @@ def apply_caches_to_sel_asset(caches):
     If the asset doesn't have a matching yeti node, it will be created.
 
     Args:
-        caches (TTOutputFileSeqBase list): caches to apply
+        caches (TTOutputFileSeq list): caches to apply
     """
     print 'APPLY CACHES', caches
 
@@ -76,23 +78,29 @@ def apply_caches_in_root_namespace(caches):
     Yeti nodes which don't currently exist will be created with no namespace.
 
     Args:
-        caches (TTOutputFileSeqBase list): caches to apply
+        caches (TTOutputFileSeq list): caches to apply
     """
     for _cache in caches:
 
-        # Get node name
-        _cache_ns = _cache.output_name
-        assert _cache.channel.startswith(_cache_ns+'_')
-        _node_name = _cache.channel[len(_cache_ns+'_'):]
-        print 'NODE NAME', _node_name
+        print 'READ CACHE', _cache
+
+        assert _cache.output_name.count('Yeti_') == 1
+        _, _tfm_name = _cache.output_name.split('Yeti_')
+        _yeti_name = _tfm_name+'Shape'
+        print ' - NODE NAME', _tfm_name, _yeti_name
 
         # Get yeti node
         load_plugin('pgYetiMaya')
-        if cmds.objExists(_node_name):
-            _yeti = hom.HFnDependencyNode(_node_name)
+        if cmds.objExists(_yeti_name):
+            _yeti = hom.HFnDependencyNode(_yeti_name)
         else:
-            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_node_name)
-        print 'YETI', _yeti
+            _yeti = hom.CMDS.createNode('pgYetiMaya', name=_yeti_name)
+            print ' - CREATED YETI', _yeti
+            if not _yeti.get_parent() == _tfm_name:
+                cmds.rename(_yeti.get_parent(), _tfm_name)
+                print ' - RENAMED PARENT', _yeti.get_parent()
+
+        print ' - YETI', _yeti
 
         apply_cache(_cache, yeti=_yeti)
 
@@ -104,7 +112,7 @@ def find_yeti_caches(root, verbose=0):
     the given asset/shot root.
 
     Args:
-        root (TTRootBase): root to search
+        root (TTRoot): root to search
         verbose (int): print process data
 
     Returns:

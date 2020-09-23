@@ -111,6 +111,8 @@ class _ErrDialog(qt.HUiDialog3):
             'HOST: {}'.format(host.NAME),
             'PROJECT: {}'.format(pipe.cur_project().name),
             'SCENE: {}'.format(host.cur_scene()),
+            'PWD: {}'.format(abs_path(os.getcwd())),
+            'PLATFORM: {}'.format(sys.platform),
             '',
             'TRACEBACK:',
             '```',

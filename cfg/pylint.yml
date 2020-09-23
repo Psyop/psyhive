@@ -284,6 +284,7 @@ no_member_libs:
     cv2
     email
     sgtk
+    OpenImageIO
 
     // Maya
     maya.cmds

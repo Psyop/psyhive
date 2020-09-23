@@ -169,7 +169,7 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
 
     def _callback__CacheReadAsset(self):
         _ver = self.ui.Version.selected_data()
-        _outs = _ver.find_outputs(output_type='yeti', format_='fur')
+        _outs = _ver.find_files(format_='yeti')
         apply_caches_to_sel_asset(caches=_outs)
 
     def _callback__CacheReadAssetHelp(self):
@@ -178,8 +178,11 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
         qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
 
     def _callback__CacheReadRoot(self):
+        print 'APPLY CACHES IN ROOT'
         _ver = self.ui.Version.selected_data()
-        _outs = _ver.find_outputs(output_type='yeti', format_='fur')
+        print ' - VER', _ver
+        _outs = _ver.find_files(format_='yeti')
+        print ' - OUTS', _outs
         apply_caches_in_root_namespace(caches=_outs)
 
     def _callback__CacheReadRootHelp(self):

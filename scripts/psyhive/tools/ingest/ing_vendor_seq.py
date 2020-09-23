@@ -2,6 +2,8 @@
 
 import time
 
+import OpenImageIO as oiio
+
 from transgen import helper
 
 from psyhive import tk2
@@ -166,7 +168,15 @@ class VendorSeq(Seq):
         if not _out.get_sg_data():
             _comment = 'From {} {}'.format(vendor, time.strftime('%m/%d/%y'))
             print ' - COMMENT', _comment
-            _out.register_in_shotgun(comment=_comment, complete=True)
+            _start, _end = self.find_range()
+            _img = oiio.ImageBuf(self[_start])
+            _data = {
+                'width': _img.spec().width,
+                'height': _img.spec().height,
+                'start_frame': _start,
+                'end_frame': _end}
+            _out.register_in_shotgun(
+                comment=_comment, complete=True, metadata=_data)
 
         # Transgen
         if not self.has_sg_version():

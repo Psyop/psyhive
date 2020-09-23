@@ -1,3 +1,19 @@
+#### v0.100.0 ####
+
+    Released: Wed 23rd Sep 2020 14:47pm
+
+    yeti tools: bugfix apply cache in scene (nnaut),
+    ingest seq tools: bugfix seq missing metadata in output manager (kcassidy) [TOOLS-241],
+    
+    maya_psyhive:
+        tools.yeti bugfix parse namespace/yeti from cache path,
+        tools.yeti bugfix rename yeti node transform,
+        tools.yeti bugfix find caches in version,
+    psyhive:
+        tools.err_catcher added PWD/PLATFORM to body,
+        tools.ingest_vendor_seqs add img res + seq range to sg metadata,
+
+
 #### v0.99.0 ####
 
     Released: Tue 22nd Sep 2020 09:52am
