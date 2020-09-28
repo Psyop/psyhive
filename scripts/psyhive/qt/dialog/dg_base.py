@@ -15,8 +15,7 @@ class BaseDialog(object):
         """
         from psyhive import qt, host
 
-        _pix = qt.get_pixmap(icon)
-        _icon = qt.get_icon(_pix)
+        _icon = qt.get_icon(icon)
         self.setWindowIcon(_icon)
 
         if not host.NAME:

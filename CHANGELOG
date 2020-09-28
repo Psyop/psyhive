@@ -1,3 +1,35 @@
+#### v0.101.0 ####
+
+    Released: Mon 28th Sep 2020 11:50am
+
+    Ingestion tools: added remote vendor scene check tool [TOOLS-242],
+    Tank support: ignore non-mesh bakeSet items,
+    
+    maya_psyhive:
+        open_maya.MFnMesh better error on non-mesh,
+        ref.FileRef.find_top_nodes added,
+        ref.FileRef.find_top_node uses find_top_nodes,
+        tank_support.read_mesh_data ignore non-meshes in bakeSet,
+        m_ingest added VendorScene/ingest_vendor_anim,
+        m_ingest.check_current_scene added previz,
+        m_ingest.check_current_scene better error on multiple top nodes,
+        m_ingest.check_current_scene ignore referenced layers,
+        m_ingest added fix_namespaces/fix_groups,
+    psyhive:
+        qt.BaseDialog.set_icon use get_icon,
+        qt.HUiDialog3 added dialog_stack_key/settings_name args,
+        qt.HUiDialog3 added HTreeWidget handling,
+        qt.get_icon added QIcon handling,
+        qt.HListWidget.select_data added catch,
+        qt.HListWidget.select_text catch on by default,
+        tools.catch_error disabled save settings,
+        tools.HiveBro fixed switch task dialog parenting,
+        ingest added map_tag_to_shot/ICON/map_ref_to_psy_asset/INGESTED_TOKEN,
+        ingest.is_ver allow capital V,
+        ingest.parse_seq_basename allow previz as PREVIS,
+        ingest.VendorSeq.cache_fmt cache on project not user temp,
+
+
 #### v0.100.0 ####
 
     Released: Wed 23rd Sep 2020 14:47pm

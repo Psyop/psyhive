@@ -177,20 +177,25 @@ class HListWidget(QtWidgets.QListWidget, HWidgetBase):
         """
         return [str(_item.text()) for _item in self.all_items()]
 
-    def select_data(self, items, verbose=0):
+    def select_data(self, items, catch=True, verbose=0):
         """The items with text matching the given list.
 
         Args:
             items (str list): list of text of items to select
+            catch (bool): no error on fail to select data
             verbose (int): print process data
         """
+        _selected = False
         lprint("SELECTING", self, items, verbose=verbose)
         for _item in self.all_items():
             _data = _item.get_data()
             lprint(" - TESTING", _data, _data in items, verbose=verbose)
             _item.setSelected(_data in items)
+            _selected = True
+        if not _selected and not catch:
+            raise RuntimeError('Failed to select data')
 
-    def select_text(self, items, catch=False, verbose=0):
+    def select_text(self, items, catch=True, verbose=0):
         """The items with text matching the given list.
 
         Args:

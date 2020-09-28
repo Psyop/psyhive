@@ -110,22 +110,38 @@ class FileRef(object):
         Returns:
             (str|None): top node (if any)
         """
+        _top_nodes = self.find_top_nodes(class_=class_, verbose=verbose)
+        _top_node = get_single(_top_nodes, catch=catch, verbose=1)
+        return _top_node
+
+    def find_top_nodes(self, class_=None, verbose=0):
+        """Find top node of this reference.
+
+        Args:
+            class_ (class): override class for top node
+            verbose (int): print process data
+
+        Returns:
+            (str|None): top node (if any)
+        """
         from maya_psyhive import open_maya as hom
         _nodes = cmds.ls(
             self.namespace+":*", long=True, dagObjects=True,
             type='transform')
+        if not _nodes:
+            return None
         _min_pipes = min([_node.count('|') for _node in _nodes])
         lprint('MIN PIPES', _min_pipes, verbose=verbose)
-        _top_nodes = sorted(set([
-            _node for _node in _nodes if _node.count('|') == _min_pipes]))
-        lprint(' - TOP NODES', _top_nodes, verbose=verbose)
-        _top_node = get_single(_top_nodes, catch=catch, verbose=1)
-        if not _top_node:
-            return None
-        _top_node = _top_node.split('|')[-1]
         _class = class_ or hom.HFnTransform
-        _top_node = _class(_top_node)
-        return _top_node
+        _top_nodes = []
+        for _node in _nodes:
+            if _node.count('|') != _min_pipes:
+                continue
+            _top_node = _get_shortest_path(_node, class_=_class)
+            _top_nodes.append(_top_node)
+        _top_nodes = sorted(_top_nodes)
+        lprint(' - TOP NODES', _top_nodes, verbose=verbose)
+        return _top_nodes
 
     def get_attr(self, attr):
         """Get an attribute on this rig.
@@ -313,6 +329,31 @@ class FileRef(object):
             _name = self.prefix
         return '<{}{}:{}>'.format(
             type(self).__name__.strip('_'), _tag, _name)
+
+
+def _get_shortest_path(node, class_, verbose=0):
+    """Get shortest path to the given long node path.
+
+    If the node has a unique name then this should return just
+    the name with all the underscores and parents removed.
+
+    Args:
+        node (str): long node name
+        class_ (HFnDependencyNode): class to cast to
+        verbose (int): print process data
+
+    Returns:
+        (HFnDependencyNode): node object
+    """
+    _tokens = node.split('|')
+    for _idx in range(len(_tokens)-1):
+        _path = ('|'.join(_tokens[-_idx:])).lstrip('|')
+        lprint(_path, verbose=verbose)
+        try:
+            return class_(_path)
+        except ValueError:
+            pass
+    return class_(node)
 
 
 @restore_ns

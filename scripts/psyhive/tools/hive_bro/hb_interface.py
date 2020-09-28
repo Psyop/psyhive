@@ -364,7 +364,7 @@ class _HiveBro(qt.HUiDialog3):
                     'Are you sure you want to switch to a different task?'
                     '\n\nCurrent:\n{}\n\nNew:\n{}'.format(
                         _cur_work.path, _next_work.path),
-                    title='Switch task', icon=_icon)
+                    title='Switch task', icon=_icon, parent=self)
 
         # Save
         self.ui.WorkSaveAs.setEnabled(False)
@@ -465,8 +465,8 @@ class _HiveBro(qt.HUiDialog3):
             self.ui.Step.select_text([_step.step])
 
         if _work:
-            self.ui.Task.select_text([_work.task])
-            self.ui.Work.select_data([_work])
+            self.ui.Task.select_text([_work.task], catch=True)
+            self.ui.Work.select_data([_work], catch=True)
 
 
 def launch(path=None):

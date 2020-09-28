@@ -2,10 +2,12 @@
 
 from maya import cmds
 
+from psyhive.tools import catch_error
 from psyhive.utils import lprint
 from maya_psyhive import open_maya as hom
 
 
+@catch_error
 def read_mesh_data(verbose=0):
     """Read mesh data from current scene.
 
@@ -18,9 +20,12 @@ def read_mesh_data(verbose=0):
 
     # Get list of meshes
     if cmds.objExists('bakeSet'):
-        _meshes = [
-            hom.HFnMesh(_mesh)
-            for _mesh in cmds.sets('bakeSet', query=True)]
+        _meshes = []
+        for _node in cmds.sets('bakeSet', query=True):
+            try:
+                _meshes.append(hom.HFnMesh(_node))
+            except RuntimeError:
+                continue
     else:
         _meshes = hom.find_nodes(class_=hom.HFnMesh)
 

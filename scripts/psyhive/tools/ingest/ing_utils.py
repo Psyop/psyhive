@@ -18,7 +18,10 @@ def _is_ver(token):
     Returns:
         (bool): whether token is version
     """
-    return len(token) == 4 and token[0] == 'v' and token[1:].isdigit()
+    return (
+        len(token) == 4 and
+        token[0].lower() == 'v'
+        and token[1:].isdigit())
 
 
 def parse_basename(basename):
@@ -62,6 +65,7 @@ def parse_seq_basename(basename):
     _ver = get_single([_token for _token in _tokens if _is_ver(_token)])
     _layer = '_'.join(_tokens[2: _tokens.index(_ver)]) or None
     _aov = '_'.join(_tokens[_tokens.index(_ver)+1:]) or None
+    _step = {'PREVIS': 'previz'}.get(_step, _step)
     return _tag, _step, _layer, _ver, _aov
 
 

@@ -51,7 +51,7 @@ class _ErrDialog(qt.HUiDialog3):
         self.type_ = type_
 
         super(_ErrDialog, self).__init__(
-            ui_file=_UI_FILE, catch_errors_=False)
+            ui_file=_UI_FILE, catch_errors_=False, save_settings=False)
 
         self.setWindowTitle('Error')
 

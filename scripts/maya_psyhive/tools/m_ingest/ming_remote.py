@@ -6,15 +6,19 @@ check their deliveries before sending them to psyop.
 
 from maya import cmds
 
-from psyhive import host, qt
+from psyhive import host, qt, py_gui
 from psyhive.tools import ingest
-from psyhive.utils import File, get_plural
+from psyhive.utils import File, get_plural, check_heart, lprint
 
 from maya_psyhive import ref
 from maya_psyhive.utils import DEFAULT_NODES
 
-_STEPS = ['model', 'rig', 'shade', 'animation', 'lighting']
+_STEPS = ['model', 'rig', 'shade', 'previz', 'animation', 'lighting']
 _GROUPS = ['CHAR', 'PROPS', 'SET', 'CAMERA', 'JUNK']
+PYGUI_TITLE = 'Psyop remote ingest tools'
+
+
+py_gui.set_section('Check', collapse=False)
 
 
 def _find_scene_name_issues(file_):
@@ -38,12 +42,14 @@ def _find_scene_name_issues(file_):
     if _step not in _STEPS:
         _issues.append('Step {} not in: {}'.format(
             _step, ', '.join(_STEPS)))
-    elif _step in ['model', 'rig', 'shade'] and file_.extn != 'mb':
-        _issues.append('File extension for {} should be mb'.format(_step))
-    elif _step in ['animation', 'lighting'] and file_.extn != 'ma':
-        _issues.append('File extension for {} should be ma'.format(_step))
+    elif _step in ['model', 'rig', 'shade']:
+        if file_.extn != 'mb':
+            _issues.append('File extension for {} should be mb'.format(_step))
+    elif _step in ['previz', 'animation', 'lighting']:
+        if file_.extn != 'ma':
+            _issues.append('File extension for {} should be ma'.format(_step))
     else:
-        raise ValueError
+        raise ValueError(_step)
 
     return _issues
 
@@ -77,6 +83,49 @@ def _find_ref_namespace_issues(ref_):
     return _issues
 
 
+def _find_ref_top_node_issues(ref_):
+    """Find issues with ref top node - eg. bad grouping, no top node.
+
+    Args:
+        ref_ (FileRef): ref to check
+
+    Returns:
+        (list, bool): issues, junk
+    """
+    _issues = []
+    _junk = False
+    _top_node = ref_.find_top_node(catch=True)
+
+    if not _top_node:
+        if ref_.find_top_nodes():
+            _issues.append(
+                "Reference {} has multiple top nodes".format(
+                    ref_.namespace))
+        else:
+            _issues.append(
+                "Reference {} has no top node".format(
+                    ref_.namespace))
+
+    else:
+
+        # Check parenting
+        _parent = _top_node.get_parent()
+        if not _parent:
+            _issues.append(
+                "Reference {} is not in a standard group ({})".format(
+                    ref_.namespace, ', '.join(_GROUPS)))
+        elif _parent not in _GROUPS:
+            _issues.append(
+                'Reference {} is in {}, not a standard group ({})'.format(
+                    ref_.namespace, _parent, ', '.join(_GROUPS)))
+
+        if _parent == 'JUNK':
+            print '   - JUNK'
+            _junk = True
+
+    return _issues, _junk
+
+
 def _find_ref_issues(ref_):
     """Find any issues with the given reference.
 
@@ -96,23 +145,9 @@ def _find_ref_issues(ref_):
         return _issues
 
     # Check top node
-    _top_node = ref_.find_top_node(catch=True)
-    if not _top_node:
-        _issues.append("Reference {} has no top node".format(ref_.namespace))
-        return _issues
-
-    # Check parenting
-    _parent = _top_node.get_parent()
-    if not _parent:
-        _issues.append(
-            "Reference {} is not in a standard group ({})".format(
-                ref_.namespace, ', '.join(_GROUPS)))
-    elif _parent not in _GROUPS:
-        _issues.append(
-            'Reference {} is in {}, not a standard group ({})'.format(
-                ref_.namespace, _parent, ', '.join(_GROUPS)))
-    if _parent == 'JUNK':
-        print '   - JUNK'
+    _top_node_issues, _junk = _find_ref_top_node_issues(ref_)
+    _issues += _top_node_issues
+    if _junk:
         return _issues
 
     # Check ref file path
@@ -140,19 +175,21 @@ def _find_ref_issues(ref_):
     return _issues
 
 
-def check_current_scene(show_dialog=True):
+@py_gui.install_gui(hide=['verbose'])
+def check_current_scene(show_dialog=True, verbose=1):
     """Check current scene for ingestion issues.
 
     Args:
         show_dialog (bool): show status dialog on completion
+        verbose (int): print process data
 
     Returns:
         (str list): list of issues with current file
     """
     _file = File(host.cur_scene())
     _issues = []
-    print 'FILE', _file
-    print ' - BASENAME', _file.basename
+    lprint('FILE', _file, verbose=verbose)
+    lprint(' - BASENAME', _file.basename, verbose=verbose)
 
     # Check current scene filename
     _issues += _find_scene_name_issues(_file)
@@ -165,23 +202,26 @@ def check_current_scene(show_dialog=True):
     # Check for unwanted layers
     for _type in ['displayLayer', 'renderLayer']:
         _lyrs = [_lyr for _lyr in cmds.ls(type=_type)
-                 if _lyr not in DEFAULT_NODES]
+                 if _lyr not in DEFAULT_NODES
+                 if not cmds.referenceQuery(_lyr, isNodeReferenced=True)]
         if _lyrs:
             _issues.append('Scene has {} layers: {}'.format(
                 _type.replace("Layer", ""), ', '.join(_lyrs)))
 
     # Check references
-    _refs = ref.find_refs()
-    print 'CHECKING {:d} REFS'.format(len(_refs))
+    _refs = ref.find_refs(unloaded=False)
+    lprint('CHECKING {:d} REFS'.format(len(_refs)), verbose=verbose)
     for _ref in _refs:
-        print ' - CHECKING', _ref
+        lprint(' - CHECKING', _ref, verbose=verbose)
         _issues += _find_ref_issues(_ref)
 
     # Print summary
-    print '\nSUMMARY: FOUND {:d} ISSUES'.format(len(_issues))
-    for _idx, _issue in enumerate(_issues):
-        print ' {:5} {}'.format('[{:d}]'.format(_idx+1), _issue)
-    print
+    if verbose:
+        print '\nSUMMARY: FOUND {:d} ISSUE{}'.format(
+            len(_issues), get_plural(_issues).upper())
+        for _idx, _issue in enumerate(_issues):
+            print ' {:5} {}'.format('[{:d}]'.format(_idx+1), _issue)
+        print
     if not show_dialog:
         pass
     elif not _issues:
@@ -195,3 +235,66 @@ def check_current_scene(show_dialog=True):
             verbose=0)
 
     return _issues
+
+
+py_gui.set_section('Fix', collapse=False)
+
+
+def fix_namespaces():
+    """Fix namespaces to follow psyop naming."""
+    _used = []
+    _to_rename = []
+    for _ref in ref.find_refs(unloaded=False):
+        if not _find_ref_namespace_issues(_ref):
+            continue
+        _base = _ref.namespace.split('_')[0]
+        _name = _base
+        _idx = 1
+        while not cmds.namespace(exists=_name) and _name in _used:
+            check_heart()
+            _name = '{}_{:d}'.format(_base, _idx)
+            _idx += 1
+        print _ref, _name
+        _used.append(_name)
+        _to_rename.append((_ref, _name))
+
+    if not _to_rename:
+        print 'NOTHING TO FIX'
+        return
+    qt.ok_cancel('Rename {:d} ref{}?'.format(
+        len(_to_rename), get_plural(_to_rename)))
+    for _ref, _name in qt.progress_bar(_to_rename):
+        _ref.rename(_name)
+
+
+def fix_groups():
+    """Fix groups to follow psyop scene organisation."""
+    _to_fix = []
+    for _ref in ref.find_refs(unloaded=False):
+        _top_node = _ref.find_top_node(catch=True)
+        if not _top_node:
+            continue
+        _parent = _top_node.get_parent()
+        if _parent in _GROUPS:
+            continue
+        if '/layout/' in _ref.path:
+            _grp = 'JUNK'
+        elif '/camera/' in _ref.path:
+            _grp = 'CAMERA'
+        elif '/prop/' in _ref.path:
+            _grp = 'PROPS'
+        elif '/character/' in _ref.path:
+            _grp = 'CHAR'
+        else:
+            print 'FAILED', _ref.path
+            continue
+        print _ref, _parent, _grp
+        _to_fix.append((_top_node, _grp))
+
+    if not _to_fix:
+        print 'NOTHING TO FIX'
+        return
+    qt.ok_cancel('Group {:d} ref{}?'.format(
+        len(_to_fix), get_plural(_to_fix)))
+    for _top_node, _grp in qt.progress_bar(_to_fix):
+        _top_node.add_to_grp(_grp)

@@ -26,15 +26,8 @@ class VendorSeq(Seq):
         _data = parse_seq_basename(self.basename)
         self.tag, self.step, self.layer, self.version, self.aov = _data
         self.ver_n = int(self.version[1:])
-
-    @property
-    def cache_fmt(self):
-        """Get cache path format str.
-
-        Returns:
-            (str): cache path
-        """
-        return build_cache_fmt(self.path.replace('%04d.', ''), level='project')
+        self.cache_fmt = build_cache_fmt(
+            self.path.replace('%04d.', ''), level='project')
 
     @property
     def mtime(self):
@@ -98,7 +91,7 @@ class VendorSeq(Seq):
                 already submitted
 
         Returns:
-            (str): ingest status
+            (str, bool): ingest status, ingestable
         """
 
         try:

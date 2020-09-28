@@ -30,7 +30,8 @@ class HFnMesh(BaseTransform, om.MFnMesh):
         _dag_path = HDagPath(self.shp.node)
         om.MFnMesh.__init__(self, _dag_path)
         if not self.shp.typeName == 'mesh':
-            raise RuntimeError(tfm)
+            raise RuntimeError('Shape is {} not a mesh - {}'.format(
+                self.shp.typeName, self.shp))
 
         self.vtx = IndexedAttrGetter(node=self, attr='vtx')
         self.edge = IndexedAttrGetter(node=self, attr='e')

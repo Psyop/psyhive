@@ -86,7 +86,8 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
     disable_save_settings = False
 
     def __init__(self, ui_file, catch_errors_=True, save_settings=True,
-                 load_settings=True, parent=None):
+                 load_settings=True, parent=None, dialog_stack_key=None,
+                 settings_name=None):
         """Constructor.
 
         Args:
@@ -95,9 +96,13 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
             save_settings (bool): load/save settings on open/close
             load_settings (bool): load settings on init
             parent (QWidget): override parent widget
+            dialog_stack_key (str): override dialog stack key
+            settings_name (str): override QSettings filename
         """
         from psyhive import host
+
         self.ui_file = ui_file
+        self._dialog_stack_key = dialog_stack_key or self.ui_file
         self._register_in_dialog_stack()
 
         super(HUiDialog3, self).__init__(
@@ -107,6 +112,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
         self._connect_elements(catch_errors_=catch_errors_)
 
         self.init_ui()
+        self._settings_name = settings_name or File(self.ui_file).basename
         self.disable_save_settings = not save_settings
         if load_settings:
             self.load_settings()
@@ -126,10 +132,10 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
         """
 
         # Clean existing uis
-        if self.ui_file in sys.QT_DIALOG_STACK:
-            sys.QT_DIALOG_STACK[self.ui_file].delete()
+        if self._dialog_stack_key in sys.QT_DIALOG_STACK:
+            sys.QT_DIALOG_STACK[self._dialog_stack_key].delete()
 
-        sys.QT_DIALOG_STACK[self.ui_file] = self
+        sys.QT_DIALOG_STACK[self._dialog_stack_key] = self
 
     def _load_ui(self, fix_icon_paths=True):
         """Load ui file.
@@ -249,7 +255,7 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
             (QSettings): settings
         """
         _settings_file = abs_path('{}/{}.ini'.format(
-            SETTINGS_DIR, File(self.ui_file).basename))
+            SETTINGS_DIR, self._settings_name))
         touch(_settings_file)  # Check settings writable
         return QtCore.QSettings(
             _settings_file, QtCore.QSettings.IniFormat)
@@ -463,6 +469,8 @@ def _connect_callback(widget, callback, catch_errors_, verbose):
         _signal = widget.clicked
     elif isinstance(widget, QtWidgets.QTabWidget):
         _signal = widget.currentChanged
+    elif isinstance(widget, QtWidgets.QTreeWidget):
+        _signal = widget.clicked
     elif isinstance(widget, QtWidgets.QSlider):
         _signal = widget.valueChanged
     else:

@@ -70,6 +70,8 @@ def get_icon(icon):
         return QtGui.QIcon(icon)
     elif isinstance(icon, six.string_types):
         return QtGui.QIcon(icon)
+    elif isinstance(icon, QtGui.QIcon):
+        return icon
     raise ValueError(icon)
 
 
