@@ -1,3 +1,16 @@
+#### v0.101.1 ####
+
+    Released: Mon 28th Sep 2020 13:05pm
+
+    Python gui: added handling for missing icons [TOOLS-242],
+    
+    psyhive:
+        icons catch missing emojis + allow FRUIT/COPY/REFRESH as None,
+        py_gui.BasePyGui.icon_set allow as None,
+        py_gui catch on default icons,
+        qt.ok_cancel catch missing default icon,
+
+
 #### v0.101.0 ####
 
     Released: Mon 28th Sep 2020 11:50am

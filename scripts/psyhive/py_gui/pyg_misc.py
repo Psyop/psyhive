@@ -33,6 +33,8 @@ def get_def_icon(name, set_):
         name (str): def name to use as seed
         set_ (Collection): icon set to use
     """
+    if not set_:
+        return None
     _rand = str_to_seed(name)
     return _rand.choice(set_.get_paths())
 

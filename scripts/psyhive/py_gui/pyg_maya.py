@@ -222,7 +222,7 @@ class MayaPyGui(pyg_base.BasePyGui):
             label (str): override label from exec button
             col (str): colour for button
         """
-        _help_icon = icons.EMOJI.find('Information')
+        _help_icon = icons.EMOJI.find('Information', catch=True)
 
         _btn_width = 10
         cmds.rowLayout(
@@ -254,7 +254,7 @@ class MayaPyGui(pyg_base.BasePyGui):
             command=wrap_fn(copy_text, _cmd))
         cmds.menuItem(
             'Lock button', parent=_menu,
-            image=icons.EMOJI.find('Locked'),
+            image=icons.EMOJI.find('Locked', catch=True),
             command=wrap_fn(cmds.button, _btn, edit=True, enable=False))
         cmds.menuItem(
             'Refresh and execute (gui safe)', parent=_menu,
@@ -269,14 +269,14 @@ class MayaPyGui(pyg_base.BasePyGui):
             command=chain_fns(refresh.reload_libs, exec_fn))
         cmds.menuItem(
             'Reset settings', parent=_menu,
-            image=icons.EMOJI.find('Shower'),
+            image=icons.EMOJI.find('Shower', catch=True),
             command=wrap_fn(self.reset_settings, def_=def_))
 
         # Add right-click options (code icon)
         _menu = cmds.popupMenu(parent=_icon)
         cmds.menuItem(
             'Unlock button', parent=_menu,
-            image=icons.EMOJI.find('Unlocked'),
+            image=icons.EMOJI.find('Unlocked', catch=True),
             command=wrap_fn(cmds.button, _btn, edit=True, enable=True))
 
     def add_separator(self):

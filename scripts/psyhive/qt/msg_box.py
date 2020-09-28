@@ -163,7 +163,7 @@ def ok_cancel(
     Raises:
         (DialogCancelled): if cancel is pressed
     """
-    _icon = icon or icons.EMOJI.find('Thinking')
+    _icon = icon or icons.EMOJI.find('Thinking', catch=True)
     raise_dialog(
         msg=msg, title=title, icon=_icon, pos=pos, verbose=verbose,
         parent=parent)

@@ -67,7 +67,8 @@ class BasePyGui(object):
         self.base_col = base_col or getattr(
             _mod, 'PYGUI_COL', str_to_seed(self.mod_name).choice(NICE_COLS))
         self.section_col = qt.HColor(self.base_col).blacken(0.5)
-        assert isinstance(self.icon_set, Collection)
+        if self.icon_set:
+            assert isinstance(self.icon_set, Collection)
 
         # Build defs into ui
         self.read_settings_fns = copy.deepcopy(_EMPTY_SETTINGS)
@@ -99,18 +100,22 @@ class BasePyGui(object):
         # Add menu bar
         _interface = self.add_menu('Interface')
         self.add_menu_item(
-            _interface, label='Collapse all', image=icons.EMOJI.find('Sponge'),
+            _interface, label='Collapse all',
+            image=icons.EMOJI.find('Sponge', catch=True),
             command=self.collapse_all)
         self.add_menu_item(
-            _interface, label='Rebuild', image=icons.EMOJI.find('Hammer'),
+            _interface, label='Rebuild',
+            image=icons.EMOJI.find('Hammer', catch=True),
             command=rebuild_fn or self.rebuild)
 
         _settings = self.add_menu('Settings')
         self.add_menu_item(
-            _settings, label='Save', image=icons.EMOJI.find('Floppy disk'),
+            _settings, label='Save',
+            image=icons.EMOJI.find('Floppy disk', catch=True),
             command=self.save_settings)
         self.add_menu_item(
-            _settings, label='Reset', image=icons.EMOJI.find('Shower'),
+            _settings, label='Reset',
+            image=icons.EMOJI.find('Shower', catch=True),
             command=wrap_fn(self.reset_settings))  # Wrap to discard args
         self._save_on_close = self.add_menu_item(
             _settings, label='Save on close', checkbox=False)
