@@ -163,14 +163,17 @@ def _install_psyhive_elements():
             tooltip=_data['label'])
 
     # Catch fail to install tools for offsite (eg. LittleZoo)
-    for _idx, _grp in enumerate((
-            [_ph_add_batch_cache,
-             _ph_add_batch_rerender,
-             _ph_add_yeti_tools,
-             _ph_add_oculus_quest_toolkit,
-             _ph_add_shader_bro],
-            [_ph_add_anim_toolkit,
-             _ph_add_tech_anim_toolkit])):
+    _tool_fns = [
+        _ph_add_batch_cache,
+        _ph_add_batch_rerender,
+        _ph_add_yeti_tools,
+        _ph_add_oculus_quest_toolkit,
+        _ph_add_shader_bro]
+    _toolkit_fns = [
+        _ph_add_toolkit_anim,
+        _ph_add_toolkit_tech_anim,
+        _ph_add_toolkit_ingest]
+    for _idx, _grp in enumerate((_tool_fns, _toolkit_fns)):
         for _func in _grp:
             try:
                 _func(menu=_menu)
@@ -279,52 +282,6 @@ def _ph_add_oculus_quest_toolkit(menu):
         tooltip='Oculus Quest toolkit')
 
 
-def _ph_add_toolkit(menu, toolkit, label):
-    """Add PsyHive toolkit option.
-
-    Args:
-        menu (str): menu to add to
-        toolkit (mod): toolkit module to add
-        label (str): label for toolkit
-    """
-    _name = getattr(
-        toolkit, 'PYGUI_TITLE',
-        to_nice(toolkit.__name__.split('.')[-1])+' tools')
-    _cmd = '\n'.join([
-        'import {} as toolkit',
-        'import {} as py_gui',
-        'py_gui.MayaPyGui(toolkit.__file__)']).format(
-            toolkit.__name__, py_gui.__name__)
-    cmds.menuItem(
-        parent=menu, command=_cmd, image=toolkit.ICON, label=_name)
-
-    _btn = _add_psyhive_btn(label=label, cmd=None, icon=toolkit.ICON,
-                            tooltip=_name)
-    py_gui.MayaPyShelfButton(
-        mod=toolkit, parent='PsyHive', image=toolkit.ICON,
-        label=_name, button=_btn)
-
-
-def _ph_add_anim_toolkit(menu):
-    """Add PsyHive Anim toolkit option.
-
-    Args:
-        menu (str): menu to add to
-    """
-    from maya_psyhive.toolkits import anim
-    _ph_add_toolkit(menu=menu, toolkit=anim, label='anim\ntools')
-
-
-def _ph_add_tech_anim_toolkit(menu):
-    """Add PsyHive TechAnim toolkit option.
-
-    Args:
-        menu (str): menu to add to
-    """
-    from maya_psyhive.toolkits import tech_anim
-    _ph_add_toolkit(menu=menu, toolkit=tech_anim, label='tech\nanim')
-
-
 def _ph_add_show_toolkits(parent):
     """Add show toolkits options.
 
@@ -393,6 +350,62 @@ def _ph_add_shader_bro(menu):
         label='Shader Bro')
     _add_psyhive_btn(label='shader\nbro', cmd=_cmd, icon=shader_bro.ICON,
                      tooltip='Launch shader browser interface')
+
+
+def _ph_add_toolkit(menu, toolkit, label):
+    """Add PsyHive toolkit option.
+
+    Args:
+        menu (str): menu to add to
+        toolkit (mod): toolkit module to add
+        label (str): label for toolkit
+    """
+    _name = getattr(
+        toolkit, 'PYGUI_TITLE',
+        to_nice(toolkit.__name__.split('.')[-1])+' tools')
+    _cmd = '\n'.join([
+        'import {} as toolkit',
+        'import {} as py_gui',
+        'py_gui.MayaPyGui(toolkit.__file__)']).format(
+            toolkit.__name__, py_gui.__name__)
+    cmds.menuItem(
+        parent=menu, command=_cmd, image=toolkit.ICON, label=_name)
+
+    _btn = _add_psyhive_btn(label=label, cmd=None, icon=toolkit.ICON,
+                            tooltip=_name)
+    py_gui.MayaPyShelfButton(
+        mod=toolkit, parent='PsyHive', image=toolkit.ICON,
+        label=_name, button=_btn)
+
+
+def _ph_add_toolkit_anim(menu):
+    """Add PsyHive Anim toolkit option.
+
+    Args:
+        menu (str): menu to add to
+    """
+    from maya_psyhive.toolkits import anim
+    _ph_add_toolkit(menu=menu, toolkit=anim, label='anim\ntools')
+
+
+def _ph_add_toolkit_tech_anim(menu):
+    """Add PsyHive TechAnim toolkit option.
+
+    Args:
+        menu (str): menu to add to
+    """
+    from maya_psyhive.toolkits import tech_anim
+    _ph_add_toolkit(menu=menu, toolkit=tech_anim, label='tech\nanim')
+
+
+def _ph_add_toolkit_ingest(menu):
+    """Add PsyHive Ingest toolkit option.
+
+    Args:
+        menu (str): menu to add to
+    """
+    from maya_psyhive.tools.m_ingest import ming_tools
+    _ph_add_toolkit(menu=menu, toolkit=ming_tools, label='ingest\ntools')
 
 
 @track_usage

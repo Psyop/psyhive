@@ -1,3 +1,14 @@
+#### v0.103.0 ####
+
+    Released: Thu 1st Oct 2020 11:08am
+
+    Ingest tools: added ingest anim tool to psyhive menu (iirvin) [TOOLS-246],
+    
+    maya_psyhive:
+        startup added ingest tools,
+        tools.m_ingest.ming_tools added toolkit options,
+
+
 #### v0.102.0 ####
 
     Released: Thu 1st Oct 2020 09:56am

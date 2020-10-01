@@ -1,10 +1,19 @@
 """Top level tools for maya ingestion."""
 
-from psyhive import qt, host
+from psyhive import qt, host, py_gui, pipe, icons
 from psyhive.tools.ingest import vendor_from_path
 from psyhive.utils import Dir, abs_path, File, get_plural
 
 from .ming_vendor_scene import VendorScene
+
+ICON = icons.EMOJI.find('Fork and Knife With Plate')
+PYGUI_TITLE = 'Ingestion tools'
+PYGUI_COL = 'Green'
+
+_VENDOR_IN = r'{}\production\vendor_in'.format(pipe.cur_project().path)
+
+
+py_gui.set_section('Ingest anim', collapse=False)
 
 
 def _get_ingestable_scenes(dir_, filter_):
@@ -45,7 +54,6 @@ def _get_ingestable_scenes(dir_, filter_):
         else:
             _status, _ingestable = _scene.get_ingest_status()
         print ' - STATUS', _status
-        # print ' - CAM', _scene.scene_get_cam()
 
         assert _status
         assert _ingestable is not None
@@ -72,6 +80,9 @@ def _get_ingestable_scenes(dir_, filter_):
     return _to_ingest, _statuses
 
 
+@py_gui.install_gui(
+    label_width=85, hide=['ignore_extn', 'force'],
+    browser={'dir_': py_gui.BrowserLauncher(default_dir=_VENDOR_IN)})
 def ingest_vendor_anim(
         dir_, vendor=None, force=False, filter_=None, ignore_extn=False,
         ignore_dlayers=False, ignore_rlayers=False,
@@ -148,4 +159,3 @@ def ingest_vendor_anim(
         for _status in sorted(set(_statuses.values()))])
     print '\nFOUND {:d} SCENE{} TO INGEST'.format(
         len(_to_ingest), get_plural(_to_ingest).upper())
-
