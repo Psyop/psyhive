@@ -150,7 +150,7 @@ def create_workspaces(root, force=False, verbose=0):
     _filters = [
         ['project', 'is', _ctx.project],
         ['step', 'is_not', None],
-        ['entity', 'is', get_shot_sg_data(root)],
+        ['entity', 'is', root.get_sg_data()],
     ]
 
     # Find tasks

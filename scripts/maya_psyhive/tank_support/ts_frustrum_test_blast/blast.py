@@ -5,35 +5,18 @@ import copy
 from maya import cmds
 
 from psyhive import qt
-from psyhive.tools import track_usage
+from psyhive.tools import track_usage, catch_error
 from psyhive.utils import lprint, passes_filter, ints_to_str
 
-from maya_psyhive import ref
+from maya_psyhive import ref, m_pipe
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import cycle_check, is_visible
 
 from . import remove_rigs
 
 
-class _Rig(ref.FileRef):
+class _BlastRigRef(m_pipe.RigRef):
     """Represents a rig referenced into a scene."""
-
-    def __init__(self, ref_node):
-        """Constructor.
-
-        Args:
-            ref_node (str): reference node
-        """
-        from psyhive import tk
-        super(_Rig, self).__init__(ref_node)
-        self.asset = tk.TTAssetOutputFile(self.path)
-        if self.asset.sg_asset_type == 'camera':
-            raise ValueError('Camera is not rig')
-        for _node in ['bakeSet']:
-            try:
-                self.get_node(_node)
-            except RuntimeError:
-                raise ValueError("Missing node "+_node)
 
     def get_geos(self):
         """Get a list of geos to test.
@@ -144,6 +127,7 @@ def _rig_in_cam(cam, rig, create_geo=False, verbose=0):
     return False
 
 
+@catch_error
 @track_usage
 def blast_with_frustrum_check(kwargs, sample_freq=5):
     """Blast and check rigs in frustrum.
@@ -156,7 +140,8 @@ def blast_with_frustrum_check(kwargs, sample_freq=5):
     cycle_check()
 
     _cam = hom.get_active_cam()
-    _rigs = ref.find_refs(class_=_Rig)
+    _rigs = [_rig for _rig in ref.find_refs(class_=_BlastRigRef)
+             if _rig.output.sg_asset_type != 'camera']
     _off_cam_rigs = _blast_and_find_rigs_outside_frustrum(
         _cam, _rigs, kwargs, sample_freq=sample_freq)
     print '{}/{} RIGS ARE OFF CAMERA {}'.format(

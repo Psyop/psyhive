@@ -83,12 +83,16 @@ def get_shade_mb_for_rig(rig):
     """
     from psyhive import tk2
 
-    _rig_out = tk2.TTOutputName(rig.path)
-    print ' - RIG OUT', _rig_out.path
-    _shade_out = _rig_out.map_to(
-        Step='shade', output_type='shadegeo', Task='shade').find_latest()
+    _rig_name = tk2.TTOutputName(rig.path)
+    print ' - RIG NAME', _rig_name.path
+    _task = {'rig': 'shade'}.get(_rig_name.task, _rig_name.task)
+    print ' - TASK', _task
+    _shade_name = _rig_name.map_to(
+        Step='shade', output_type='shadegeo', Task=_task)
+    print ' - SHADE NAME', _shade_name, _shade_name.data
+    _shade_out = _shade_name.find_latest()
     if not _shade_out or not _shade_out.exists():
-        raise RuntimeError("Failed to find shade for rig "+_rig_out.path)
+        raise RuntimeError("Failed to find shade for rig "+_rig_name.path)
     print ' - SHADE OUT', _shade_out.path
     _shade_file = _shade_out.find_file(extn='mb', format_='maya', catch=True)
     if not _shade_file:

@@ -65,7 +65,7 @@ def parse_seq_basename(basename):
     _ver = get_single([_token for _token in _tokens if _is_ver(_token)])
     _layer = '_'.join(_tokens[2: _tokens.index(_ver)]) or None
     _aov = '_'.join(_tokens[_tokens.index(_ver)+1:]) or None
-    _step = {'PREVIS': 'previz'}.get(_step, _step)
+    _step = {'previs': 'previz'}.get(_step.lower(), _step)
     return _tag, _step, _layer, _ver, _aov
 
 

@@ -46,47 +46,36 @@ def map_tag_to_shot(tag):
     return None
 
 
-def map_ref_to_psy_asset(file_, query=True):
+def map_file_to_psy_asset(file_, step='rig'):
     """Map off pipeline reference path to a psyop file.
 
     Args:
         file_ (str): file to map
-        query (bool): ask user to assign unmatched tags
+        step (str): asset step
 
     Returns:
-        (str): path to psyop file
+        (TTOutputFile): psyop asset file
     """
+    from .. import ingest
+
     _file = File(abs_path(file_))
-
-    print 'FILE', _file.path
     if _file.extn == 'mb' and _file.basename.startswith('camera_rig_main'):
+        _name = 'camera'
+    elif ingest.is_vendor_file(file_):
+        _file = ingest.VendorFile(file_)
+        _name = _file.tag
+    elif ingest.is_psy_asset(file_):
+        _file = ingest.PsyAsset(file_)
+        _name = _file.asset
+    else:
+        return None
 
-        return tk2.find_asset('camera').find_step_root('rig').find_output_file(
-            version='latest', format_='maya')
-    assert query
-    raise NotImplementedError
-    # from . import _ing_vendor_file
+    _asset = tk2.find_asset(asset=_name)
+    _step = _asset.find_step_root(step)
+    try:
+        _file = _step.find_output_file(
+            version='latest', format_='maya', task=step)
+    except ValueError:
+        raise ValueError('failed to find output file - '+_step.path)
 
-    # if File(_file).extn not in ['ma', 'mb']:
-    #     return
-
-    # # Check for custom mapping
-    # _proj = pipe.cur_project()
-    # _mapping = _proj.cache_read('[INGEST] custom mapping') or {}
-    # if _file in _mapping:
-    #     _asset = tk2.TTAsset(_mapping[_file])
-    #     _step = _asset.find_step_root('rig')
-    #     return _step.find_output_file(
-    #         extn='mb', format_='maya', version='latest',
-    #         task='rig').path
-
-    # try:
-    #     _ref_file = _ing_vendor_file.VendorFile(file_)
-    # except ValueError:
-    #     return None
-
-    # _out = _ref_file.to_psy_output_file(step='rig', query=query)
-    # if not _out:
-    #     return None
-
-    # return _out.path
+    return _file

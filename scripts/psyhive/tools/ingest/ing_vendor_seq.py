@@ -7,13 +7,14 @@ import OpenImageIO as oiio
 from transgen import helper
 
 from psyhive import tk2
-from psyhive.utils import Seq, get_time_f, abs_path, build_cache_fmt
+from psyhive.utils import Seq, abs_path, build_cache_fmt
 
+from .ing_ingestible import Ingestible
 from .ing_utils import INGESTED_TOKEN, parse_seq_basename
 from .ing_utils_psy import map_tag_to_shot
 
 
-class VendorSeq(Seq):
+class VendorSeq(Seq, Ingestible):
     """Base class for a vendor image sequence."""
 
     def __init__(self, path):
@@ -28,24 +29,6 @@ class VendorSeq(Seq):
         self.ver_n = int(self.version[1:])
         self.cache_fmt = build_cache_fmt(
             self.path.replace('%04d.', ''), level='project')
-
-    @property
-    def mtime(self):
-        """Retrieve delivery date from source file path.
-
-        Returns:
-            (float): delivery date
-        """
-        for _token in reversed(self.path.split('/')):
-            _date_str = _token.split('_')[0]
-            for _t_fmt in ['%Y-%m-%d']:
-                try:
-                    _mtime = time.strptime(_date_str, _t_fmt)
-                except ValueError:
-                    pass
-                else:
-                    return get_time_f(_mtime)
-        raise ValueError('Failed to read delivery date {}'.format(self.path))
 
     def has_sg_version(self):
         """Test if there is a shotgun version for this seq.
@@ -91,7 +74,7 @@ class VendorSeq(Seq):
                 already submitted
 
         Returns:
-            (str, bool): ingest status, ingestable
+            (str, bool): ingest status, ingestible
         """
 
         try:

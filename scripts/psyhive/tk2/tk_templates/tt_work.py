@@ -444,13 +444,14 @@ class TTWork(TTBase, File):
         _fileops = find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
-    def save(self, comment, safe=True):
+    def save(self, comment, safe=True, force=False):
         """Save this version.
 
         Args:
             comment (str): comment for version
             safe (bool): error if we are saving over an existing scene file
                 without incrementing
+            force (bool): create missing workspaces without confirmation
         """
         _fileops = find_tank_app('psy-multi-fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
@@ -464,7 +465,8 @@ class TTWork(TTBase, File):
 
             _step_root = self.get_step_root()
             if not _step_root.exists():
-                raise RuntimeError('Missing step root '+_step_root.path)
+                TTRoot(_step_root).create_workspaces(force=force)
+                assert _step_root.exists()
 
             _tk_workspace = _mod.get_workspace_from_path(
                 app=_fileops, path=self.path)

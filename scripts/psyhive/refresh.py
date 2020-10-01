@@ -70,6 +70,7 @@ _RELOAD_ORDER = [
     'maya_psyhive.open_maya.mesh',
     'maya_psyhive.open_maya.cpnt_mesh',
     'maya_psyhive.open_maya',
+    'maya_psyhive.m_pipe',
     'maya_psyhive.tools.batch_cache.tmpl_cache',
     'maya_psyhive.tools.batch_cache.disk_handler',
     'maya_psyhive.tools.batch_cache.sg_handler',

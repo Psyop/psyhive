@@ -300,7 +300,9 @@ class TTRoot(TTDirBase):
         from psyhive import tk2
         if self.shot:
             return tk2.get_shot_sg_data(self)
-        raise NotImplementedError
+        if self.asset:
+            return tk2.get_asset_sg_data(self)
+        raise RuntimeError
 
     def _read_step_roots(self, class_=None):
         """Find steps in this shot.
@@ -378,11 +380,12 @@ class TTShot(TTRoot):
         """
         _start, _end = rng
         _fields = _get_rng_fields(use_cut)
+        _data = {_fields[0]: _start, _fields[1]: _end}
         _sg = tank.platform.current_engine().shotgun
         _sg.update(
             entity_type='Shot',
             entity_id=self.get_sg_data()['id'],
-            data={'sg_cut_in': _start, 'sg_cut_out': _end})
+            data=_data)
 
 
 def _get_rng_fields(use_cut):

@@ -23,14 +23,18 @@ class _RemoveRigsUi(qt.HUiDialog3):
         _ui_file = abs_path('remove_rigs.ui', root=os.path.dirname(__file__))
 
         super(_RemoveRigsUi, self).__init__(_ui_file, save_settings=False)
+        self._redraw__List()
 
     def _redraw__List(self):
 
+        print 'DRAWING LIST', self.rigs
         self.ui.List.clear()
         for _rig in self.rigs:
             _item = qt.HListWidgetItem(_rig.namespace)
             _item.set_data(_rig)
+            print ' - ADDING ITEM', _item, _rig
             self.ui.List.addItem(_item)
+            _item.setSelected(True)
 
     def _redraw__Remove(self):
         _to_remove = self.ui.List.selected_data()
@@ -44,6 +48,9 @@ class _RemoveRigsUi(qt.HUiDialog3):
 
     def _callback__Continue(self):
         self.close()
+
+    def _callback__List(self):
+        self._redraw__Remove()
 
     def _callback__Remove(self):
         _to_remove = self.ui.List.selected_data()

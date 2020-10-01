@@ -4,19 +4,21 @@ import time
 
 from maya import cmds
 
-from psyhive import tk2, host, pipe
+from psyhive import tk2, host, pipe, qt
 from psyhive.tools import ingest
 from psyhive.utils import (
     File, lprint, store_result_to_file, get_result_to_file_storer,
-    build_cache_fmt, get_single, get_time_t)
+    build_cache_fmt, get_single, get_time_t, dev_mode)
 
-from maya_psyhive import ref, open_maya as hom
+from maya_psyhive import ref, open_maya as hom, ui
 from maya_psyhive.utils import DEFAULT_NODES
 
 from .ming_remote import check_current_scene
 
+_WAITING_ON_FARM_CACHE_TOKEN = 'waiting on farm cache 30/09/20'
 
-class VendorScene(File):
+
+class VendorScene(File, ingest.Ingestible):
     """Represents a scene file from an outsource vendor."""
 
     def __init__(self, file_):
@@ -31,20 +33,23 @@ class VendorScene(File):
         self.ver_n = int(self.version[1:])
         self.cache_fmt = build_cache_fmt(self.path, level='project')
 
-    @property
-    def mtime(self):
-        """Get delivery time.
+    def check_workspace(self, force=False):
+        """Check workspace for this shot has been created.
 
-        Returns:
-            (float): delivery time
+        Args:
+            force (bool): create workspace without confirmation
         """
-        raise NotImplementedError
+        _work = self.to_psy_work()
+        _step = tk2.TTStepRoot(_work)
+        if _step.exists():
+            return
+        tk2.TTRoot(_work).create_workspaces(force=force)
 
     def get_ingest_status(self):
         """Get ingestion status for this sequence.
 
         Returns:
-            (str, bool): ingest status, ingestable
+            (str, bool): ingest status, ingestible
         """
         try:
             _work = self.to_psy_work()
@@ -55,30 +60,64 @@ class VendorScene(File):
         if _work.cache_read(ingest.INGESTED_TOKEN):
             return 'Already ingested', False
 
-        _issues = self.scene_get_ingest_issues()
-        if _issues:
-            return 'Ingestion issues', False
-
         if not _work.exists():
             return 'Ready to ingest', True
-
-        if self.step in ['animation', 'previs']:
-            raise NotImplementedError('check blast/cached')
-
-        # Check current source matches
         _src = _work.cache_read('vendor_source')
-        if _src and not _src == self.path:
+        if _src and not _src == self.path:  # Check current source matches
             print ' - ORIGINAL SOURCE', _src
             return 'Already ingested from a different source', False
         elif not _src:
             print ' - APPLYING VENDOR SOURCE'
             _work.cache_write('vendor_source', self.path)
 
+        if self.step in ['animation', 'previs']:
+            print ' - CHECKING CAPTURE/CACHE'
+            if not self.has_capture():
+                return 'Needs capture', True
+            if not self.has_cache():
+                return 'Needs cache', True
+            print ' - CHECKED CAPTURE/CACHE'
+
         _work.cache_write(ingest.INGESTED_TOKEN, True)
         return 'Already ingested', False
 
+    def get_ingest_issues(
+            self, ignore_extn=False, ignore_dlayers=False,
+            ignore_rlayers=False, ignore_multi_top_nodes=False,
+            ignore_unknown=True):
+        """Get ingest issues with this scene.
+
+        Args:
+            ignore_extn (bool): ignore file extension issues
+            ignore_dlayers (bool): ignore display layer issues
+            ignore_rlayers (bool): ignore render layer issues
+            ignore_multi_top_nodes (bool): ignore issues with
+                multiple top nodes
+            ignore_unknown (bool): ignore unknown node issues
+
+        Returns:
+            (str list): list of problems with this scene
+        """
+        _issues = self._scene_read_ingest_issues()
+        if ignore_extn:
+            _issues = [_issue for _issue in _issues if not _issue.startswith(
+                'File extension for animation should be ')]
+        if ignore_multi_top_nodes:
+            _issues = [_issue for _issue in _issues if not _issue.endswith(
+                ' has multiple top nodes')]
+        if ignore_dlayers:
+            _issues = [_issue for _issue in _issues if not _issue.startswith(
+                'Scene has display layers: ')]
+        if ignore_rlayers:
+            _issues = [_issue for _issue in _issues if not _issue.startswith(
+                'Scene has render layers: ')]
+        if ignore_unknown:
+            _issues = [_issue for _issue in _issues if not _issue.startswith(
+                'Scene has unknown nodes: ')]
+        return _issues
+
     @get_result_to_file_storer(min_mtime=1601080442)
-    def scene_get_ingest_issues(self, force=False, verbose=0):
+    def _scene_read_ingest_issues(self, force=False, verbose=0):
         """Get a list of sanity check issues for this file.
 
         An empty list means that no issues were found.
@@ -92,8 +131,9 @@ class VendorScene(File):
         """
         lprint('CHECKING ISSUES', self.path, verbose=verbose)
         host.open_scene(self.path, lazy=True, force=True)
-        _issues = []
+        self.scene_get_frame_range()
 
+        _issues = []
         _issues += check_current_scene(show_dialog=False, verbose=0)
 
         # Check for work
@@ -112,7 +152,7 @@ class VendorScene(File):
             if not self.scene_meshes_match_model():
                 _issues.append('meshes do not match model')
 
-        elif self.step in ['animation', 'previs']:
+        elif self.step in ['animation', 'previz']:
 
             if not self.scene_get_cam():
                 _issues.append('no cam found')
@@ -149,7 +189,7 @@ class VendorScene(File):
                 continue
 
             print ' - REF', _ref.path
-            _psy_file = ingest.map_ref_to_psy_asset(_ref.path)
+            _psy_file = ingest.map_file_to_psy_asset(_ref.path)
             print ' - PSY FILE', _psy_file
             if _psy_file:
                 _ref.swap_to(_psy_file)
@@ -205,31 +245,203 @@ class VendorScene(File):
         """Check if this scene's meshes match the model meshes."""
         raise NotImplementedError
 
-    def ingest(self, force=False, publish=True, capture=True, cache=True):
+    @get_result_to_file_storer(min_mtime=1601407139)
+    def scene_get_frame_range(self):
+        """Check if this scene's meshes match the model meshes."""
+        host.open_scene(self.path, lazy=True, force=True)
+        return host.t_range(int)
+
+    def ingest(self, vendor=None, force=False, publish=True, capture=True,
+               cache=True):
         """Ingest this file into psyop pipeline.
 
         Args:
+            vendor (str): override vendor
             force (bool): lose unsaved changes without confirmation
             publish (bool): whether publish required
             capture (bool): whether capture required
             cache (bool): whether cache required
         """
+        _comment = self.get_comment(vendor=vendor)
+        self._ingest_check_work(force=force, comment=_comment)
+        self._ingest_check_sg_range()
+
+        if self.step in ['rig']:
+            if publish:
+                self._ingest_check_publish(force=force)
+        elif self.step in ['animation', 'previz']:
+            if capture:
+                self._ingest_check_capture(force=force)
+            if cache:
+                self._ingest_check_cache(force=force)
+        else:
+            raise ValueError(self.step)
+
+    def _ingest_check_publish(self, force=False):
+        """Check this scene has been published.
+
+        Args:
+            force (bool): lose unsaved changes without confirmation
+        """
         raise NotImplementedError
-        # assert not self.scene_get_ingest_issues()
-        # self._check_work(force=force)
 
-        # if self.step in ['rig']:
-        #     if publish:
-        #         self._check_publish(force=force)
-        # elif self.step in ['animation']:
-        #     if capture:
-        #         self._check_capture(force=force)
-        #     if cache:
-        #         self._check_cache(force=force)
-        # else:
-        #     raise ValueError
+    def _ingest_check_work(self, comment, force=False):
+        """Check this file has a corresponding psyop work file.
 
-    def to_psy_work(self, verbose=1):
+        Args:
+            comment (str): save comment
+            force (bool): lose unsaved changes without confirmation
+        """
+        _work = self.to_psy_work()
+        _src = _work.cache_read('vendor_source_file')
+        if _work.exists() and _src:
+            print 'THIS', self.path
+            print 'SRC', _src
+            if _src != self:
+                raise RuntimeError('Source does not match')
+            return
+
+        print ' - INGEST WORK', _work.path
+
+        print '   - COMMENT', comment
+        if not force:
+            qt.ok_cancel('Copy {} to pipeline?\n\n{}\n\n{}'.format(
+                _work.step, self.path, _work.path))
+
+        host.open_scene(self, force=force, lazy=True)
+
+        # Update refs
+        for _ref in qt.progress_bar(
+                ref.find_refs(), 'Updating {:d} ref{}',
+                stack_key='UpdateRefs'):
+
+            print 'CHECKING REF', _ref
+            print ' - PATH', _ref.path
+            if File(_ref.path).exists():
+                _out = tk2.TTOutputFile(_ref.path)
+                if _out.is_latest():
+                    print ' - IS LATEST'
+                    continue
+                _file = _out.find_latest()
+
+            else:
+
+                _psy_file = ingest.map_file_to_psy_asset(_ref.path)
+                _dlv_file = File('{}/{}'.format(
+                    self.dir, File(_ref.path).filename))
+                _file = _psy_file or _dlv_file
+
+            if not _file or not File(_file).exists():
+                print ' - MISSING', _file
+                raise RuntimeError('Missing file {}'.format(_file))
+            print ' - UPDATING TO', _file
+            assert File(_file).exists()
+            _ref.swap_to(_file)
+
+        # Save to disk
+        _work.save(comment=comment, safe=False, force=force)
+        _work.cache_write(tag='vendor_source_file', data=self.path)
+
+    def _ingest_check_sg_range(self, force=True):
+        """Check shotgun range matching this scene file.
+
+        Args:
+            force (bool): update sg range without confirmation
+        """
+        _work = self.to_psy_work()
+        if not _work.shot:
+            return
+        _shot = _work.get_shot()
+        print 'CHECKING SG RANGE', _shot
+        _work.load(lazy=True)
+
+        _scn_rng = host.t_range(int)
+        _shot_rng = _shot.get_frame_range(use_cut=False)
+        print ' - RANGE scene={} shot={}'.format(_scn_rng, _shot_rng)
+        if _scn_rng == _shot_rng:
+            return
+
+        if not force:
+            qt.ok_cancel(
+                'Update shotgun {} frame range to {:d}-{:d}?'.format(
+                    _shot.name, int(_scn_rng[0]), int(_scn_rng[1])),
+                title='Update shotgun range')
+        _shot.set_frame_range(_scn_rng, use_cut=False)
+        print _shot.get_frame_range(use_cut=False)
+        assert _shot.get_frame_range(use_cut=False) == _scn_rng
+
+    def _ingest_check_capture(self, force=False):
+        """Make sure this file has a corresponding psyop capture.
+
+        Args:
+            force (bool): lose unsaved changes without confirmation
+        """
+        if self.has_capture():
+            return
+
+        _work = self.to_psy_work()
+        print 'CAPTURING', _work.path
+        _work.load(lazy=True)
+
+        _cam = self.scene_get_cam()
+        print ' - CAM', _cam
+        assert _cam
+
+        cmds.modelPanel(ui.get_active_model_panel(), edit=True, camera=_cam)
+
+        tk2.capture_scene(force=True)
+
+    def _ingest_check_cache(self, force=False, farm=False):
+        """Check this file has been cached, executing cache if necessary.
+
+        Args:
+            force (bool): lose unsaved changes without confirmation
+            farm (bool): cache on farm
+        """
+        if self.has_cache():
+            return
+
+        _work = self.to_psy_work()
+        print 'CACHING', _work.path
+
+        print ' - CACHE FMT', _work.cache_fmt
+        if dev_mode():
+            assert not farm
+        assert not _work.cache_read(_WAITING_ON_FARM_CACHE_TOKEN)
+
+        _work.load(lazy=True, force=force)
+
+        assert not ref.find_refs(extn='abc')
+        tk2.cache_scene(force=True, farm=farm)
+        if farm:
+            _work.cache_write(_WAITING_ON_FARM_CACHE_TOKEN, True)
+
+    def has_capture(self, verbose=0):
+        """Check if this file has a corresponding psyop capture.
+
+        Args:
+            verbose (int): print process data
+
+        Returns:
+            (bool): whether capture found
+        """
+        _work = self.to_psy_work()
+        _cap = _work.find_output_file(
+            output_type='capture', extension='jpg', format_='jpg')
+        lprint(' - CHECKED HAS CAPTURE', verbose=verbose)
+        return bool(_cap)
+
+    def has_cache(self):
+        """Check if this file has been cached.
+
+        Returns:
+            (bool): whether cache found
+        """
+        _work = self.to_psy_work()
+        return bool(_work.find_output_files(
+            extension='abc', output_type='animcache'))
+
+    def to_psy_work(self, verbose=0):
         """Get psyop work file for this scene.
 
         Args:
@@ -250,7 +462,7 @@ class VendorScene(File):
                 tk2.TTWork, dcc='maya', Step=self.step,
                 Task=self.step, extension='mb', version=self.ver_n)
 
-        elif self.step in ['animation', 'previs']:
+        elif self.step in ['animation', 'previz']:
 
             lprint(' - TAG', self.tag, verbose=verbose)
             _shot = ingest.map_tag_to_shot(self.tag)
@@ -270,11 +482,13 @@ class VendorScene(File):
         if _work.exists():
             _src = _work.cache_read('vendor_source_file')
             if _src:
-                if not _src == self.path:
+                if not _src == self.path and not self.matches(_src):
+                    print 'PREV FILE', _src
+                    print 'MATCH', self.matches(_src)
                     _prev = VendorScene(_src)
                     _t_stamp = time.strftime(
                         '%m/%d/%y', get_time_t(_prev.mtime))
                     raise RuntimeError(
-                        'already ingested from a different file '+_t_stamp)
+                        'already ingested from a different file '+_src)
 
         return _work

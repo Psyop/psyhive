@@ -15,6 +15,8 @@ ignore:
         hv_test/diary/y20/d0314/_mc_interface.py
         _machi/deck.py
         psyhive/tk2/tk_cache.py
+    assignment-from-no-return:
+        maya_psyhive/tools/m_ingest/ming_vendor_scene.py
     bare-except:
         hv_test/diary/y19/d0709/mixin_liorbenohrin.py
     broad-except:
@@ -199,6 +201,7 @@ ignore:
     too-many-return-statements:
         _machi/card.py
         psyhive/tools/ingest/ing_vendor_seq.py
+        maya_psyhive/tools/m_ingest/ming_vendor_scene.py
     unbalanced-tuple-unpacking:
         _ham_qt.py
         maya_psyhive/open_maya/camera.py

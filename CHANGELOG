@@ -1,3 +1,29 @@
+#### v0.102.0 ####
+
+    Released: Thu 1st Oct 2020 09:56am
+
+    Tank support: 
+        shade geo for rig match task for non-main assets (lgriffin)
+        frustum test blast bugfix remove rigs ui not populating,
+    
+    maya_psyhive:
+        m_pipe.OutputRef raise ValueError on no valid output,
+        tank_support.get_shade_mb_for_rig match task,
+        tank_support.frustrum_test_blast bugfix ignore cameras,
+        tank_support.frustrum_test_blast bugfix remove rigs ui not populating,
+        m_ingest.check_current_scene catch unknown nodes,
+        m_ingest.ingest_vendor_anim working release,
+    psyhive:
+        tk2.create_workspaces bugfix asset root,
+        tk2.TTRoot.get_sg_data bugfix asset root,
+        tk2.TTOutputName.task added,
+        tk2.TTWork.save added force flag + create workspaces on demand,
+        tk2 cache_scene/capture_scene added force flag,
+        tools.ingest renamed map_ref_to_psy_asset -> map_file_to_psy_asset,
+        tools.ingest.Ingestible added,
+        tools.ingest.parse_seq_basename bugfix map previs -> previz,
+
+
 #### v0.101.1 ####
 
     Released: Mon 28th Sep 2020 13:05pm

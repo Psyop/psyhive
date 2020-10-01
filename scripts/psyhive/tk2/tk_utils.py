@@ -50,12 +50,13 @@ class _FakeConflict(object):
         return '<Conflict:{}>'.format(self.id_)
 
 
-def cache_scene(namespaces=None, farm=False, verbose=0):
+def cache_scene(namespaces=None, farm=False, force=False, verbose=0):
     """Cache the current scene.
 
     Args:
         namespaces (str list): limit namespaces which are cached
         farm (bool): cache using farm
+        force (bool): force cache with no dialogs or confirmations
         verbose (int): print process data
     """
     _app = find_tank_app('cache')
@@ -94,15 +95,21 @@ def cache_scene(namespaces=None, farm=False, verbose=0):
 
     # Execute cache
     if farm:
-        _app.cache_controller.model.cache_on_farm(resolver=_resolver)
+        _app.cache_controller.model.cache_on_farm(
+            force=force, resolver=_resolver)
     else:
-        _app.cache_controller.model.cache(resolver=_resolver)
+        _app.cache_controller.model.cache(
+            force=force, resolver=_resolver)
 
 
-def capture_scene():
-    """Capture current scene."""
+def capture_scene(force=False):
+    """Capture current scene.
+
+    Args:
+        force (bool): force capture scene with no popups
+    """
     _app = find_tank_app('capture')
-    _app.capture(view=False)
+    _app.capture(view=False, force=force)
 
 
 def find_tank_app(name, catch=True, verbose=0):

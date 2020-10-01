@@ -199,7 +199,7 @@ def check_current_scene(show_dialog=True, verbose=1):
     if _ver != 2018:
         _issues.append('Bad maya version {:d}'.format(_ver))
 
-    # Check for unwanted layers
+    # Check for unwanted node types
     for _type in ['displayLayer', 'renderLayer']:
         _lyrs = [_lyr for _lyr in cmds.ls(type=_type)
                  if _lyr not in DEFAULT_NODES
@@ -207,6 +207,13 @@ def check_current_scene(show_dialog=True, verbose=1):
         if _lyrs:
             _issues.append('Scene has {} layers: {}'.format(
                 _type.replace("Layer", ""), ', '.join(_lyrs)))
+    for _type in ['unknown']:
+        _nodes = [_node for _node in cmds.ls(type=_type)
+                  if _node not in DEFAULT_NODES
+                  if not cmds.referenceQuery(_node, isNodeReferenced=True)]
+        if _nodes:
+            _issues.append('Scene has {} nodes: {}'.format(
+                _type, ', '.join(_nodes)))
 
     # Check references
     _refs = ref.find_refs(unloaded=False)

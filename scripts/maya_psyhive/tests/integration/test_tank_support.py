@@ -72,8 +72,8 @@ class TestTankSupport(unittest.TestCase):
 
         # Test frustrum test
         _ref = ref.obtain_ref(namespace='archer_TMP', file_=_RIG_PATH,
-                              class_=blast._Rig)
-        assert isinstance(_ref, blast._Rig)
+                              class_=blast._BlastRigRef)
+        assert isinstance(_ref, blast._BlastRigRef)
         _cam = hom.HFnCamera('persp')
         _pos = hom.HMatrix([
             0.95, 0.00, 0.31, 0.00, 0.08, 0.96, -0.26, 0.00, -0.29, 0.27,
@@ -88,6 +88,8 @@ class TestTankSupport(unittest.TestCase):
 
         # Test remove rigs ui
         _dialog = remove_rigs.launch([_ref], exec_=False)
+        assert len(_dialog.ui.List.all_items()) == 1
+        assert len(_dialog.ui.List.selectedItems()) == 1
         _dialog.close()
 
     @use_tmp_ns

@@ -88,6 +88,7 @@ class TTOutputName(TTDirBase):
     """Represents an output name dir on disk."""
 
     hint_fmt = '{area}_output_name'
+    task = None
 
     def __init__(self, path):
         """Constructor.
