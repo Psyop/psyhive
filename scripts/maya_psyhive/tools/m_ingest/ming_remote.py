@@ -175,7 +175,7 @@ def _find_ref_issues(ref_):
     return _issues
 
 
-@py_gui.install_gui(hide=['verbose'])
+@py_gui.install_gui(hide=['verbose', 'show_dialog'])
 def check_current_scene(show_dialog=True, verbose=1):
     """Check current scene for ingestion issues.
 

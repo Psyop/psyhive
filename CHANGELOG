@@ -1,3 +1,16 @@
+#### v0.105.0 ####
+
+    Released: Mon 5th Oct 2020 14:43pm
+
+    Little Zoo: added toolkit,
+    
+    maya_psyhive:
+        shows.littlezoo added,
+        startup catch missing icons + unable to import toolkits,
+        tools.fkik_switcher catch missing icon,
+        ui._get_separator_icon catch missing icon,
+
+
 #### v0.104.1 ####
 
     Released: Mon 5th Oct 2020 11:43am

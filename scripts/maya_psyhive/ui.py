@@ -212,7 +212,9 @@ def _get_separator_icon(icon='Fleur-de-lis'):
     _pix = qt.HPixmap(70, 100)
     _pix.fill(qt.BLANK)
 
-    _over = icons.EMOJI.find(icon)
+    _over = icons.EMOJI.find(icon, catch=True)
+    if not _over:
+        return None
 
     _pix.add_overlay(_over, pos=_pix.center(), resize=30, anchor='C')
     _pix.save_as(_file, force=True)

@@ -91,11 +91,9 @@ def _add_psyhive_btn(label, icon, cmd, tooltip, add_dots=True, verbose=0):
                 _pix.add_dot(pos=_pos, radius=_rad, col=_col)
 
     # Add icon
-    _pix.add_overlay(
-        icon, pos=qt.get_p(15, 2), resize=12, anchor='T')
-    # _icon = qt.HPixmap(icon)
-    # _icon = _icon.whiten(0.7)
-    # _pix.add_overlay(_icon, pos=_pix.center(), resize=20, anchor='C')
+    if icon:
+        _pix.add_overlay(
+            icon, pos=qt.get_p(15, 2), resize=12, anchor='T')
 
     # Add text
     _lines = label.split('\n')
@@ -146,8 +144,15 @@ def _add_elements_to_psyop_menu(verbose=0):
                 label=_data['label'])
 
 
-def _install_psyhive_elements():
-    """Install tools to PsyHive menu and shelf."""
+def _install_psyhive_elements(verbose=0):
+    """Install tools to PsyHive menu and shelf.
+
+    Args:
+        verbose (int): print process data
+
+    Returns:
+        (str): psyhive menu ui element name
+    """
     global _BUTTON_IDX
 
     _BUTTON_IDX = 0
@@ -184,16 +189,18 @@ def _install_psyhive_elements():
             name='PsyHive_GroupSeparator{:d}'.format(_idx), parent='PsyHive')
 
     # Add show toolkits
-    _ph_add_show_toolkits(_menu)
+    lprint('ADDING SHOW TOOLS', verbose=verbose)
+    _ph_add_show_toolkits(_menu, verbose=verbose)
 
     # Add reset settings
+    lprint('ADDING RESET/SETTING TOOLS', verbose=verbose)
     cmds.menuItem(divider=True, parent=_menu)
     ui.add_separator(name='PsyHive_SeparatorUtils', parent='PsyHive')
     _cmd = '\n'.join([
         'import {} as qt'.format(qt.__name__),
         'qt.reset_interface_settings()',
     ]).format()
-    _icon = icons.EMOJI.find('Shower')
+    _icon = icons.EMOJI.find('Shower', catch=True)
     _label = 'Reset interface settings'
     cmds.menuItem(label=_label, command=_cmd, image=_icon, parent=_menu)
     _add_psyhive_btn(label='reset\nuis', cmd=_cmd, icon=_icon, tooltip=_label)
@@ -206,7 +213,7 @@ def _install_psyhive_elements():
         'refresh.reload_libs(verbose=2)',
         'cmds.evalDeferred(startup.user_setup)',
     ]).format()
-    _icon = icons.EMOJI.find('Counterclockwise Arrows Button')
+    _icon = icons.EMOJI.find('Counterclockwise Arrows Button', catch=True)
     _label = 'Reload libs'
     cmds.menuItem(label=_label, command=_cmd, parent=_menu, image=_icon)
     _add_psyhive_btn(
@@ -282,15 +289,16 @@ def _ph_add_oculus_quest_toolkit(menu):
         tooltip='Oculus Quest toolkit')
 
 
-def _ph_add_show_toolkits(parent):
+def _ph_add_show_toolkits(parent, verbose=0):
     """Add show toolkits options.
 
     Args:
         parent (str): parent menu
+        verbose (int): print process data
     """
     _shows = cmds.menuItem(
         label='Shows', parent=parent, subMenu=True,
-        image=icons.EMOJI.find('Top Hat'))
+        image=icons.EMOJI.find('Top Hat', catch=True))
 
     _shows_dir = File(shows.__file__).parent()
 
@@ -300,21 +308,32 @@ def _ph_add_show_toolkits(parent):
         _file = PyFile(_py)
         if _file.basename.startswith('_'):
             continue
+        try:
+            _mod = _file.get_module(catch=True)
+        except ImportError:
+            continue
+        if not _mod:
+            continue
         _toolkits.append((_file, _file.basename))
     for _dir in _shows_dir.find(depth=1, type_='d'):
         _toolkit = PyFile('{}/toolkit.py'.format(_dir))
         if Dir(_dir).filename.startswith('_'):
             continue
+        lprint(' - ADDING DIR', _dir, verbose=verbose)
         try:
-            _mod = _toolkit.get_module()
+            _mod = _toolkit.get_module(catch=True)
         except ImportError:
+            continue
+        if not _mod:
             continue
         _name = _toolkit.parent().filename
         _toolkits.append((_toolkit, _name))
     _toolkits.sort(key=operator.itemgetter(1))
+    lprint('FOUND TOOLKITS', verbose=verbose)
 
     # Build show toolkit buttons
     for _toolkit, _name in _toolkits:
+        lprint(' - ADDING TOOLKIT', _name, verbose=verbose)
         _mod = _toolkit.get_module()
         _rand = str_to_seed(_name)
         _icon = getattr(_mod, 'ICON', _rand.choice(icons.ANIMALS))
@@ -409,14 +428,18 @@ def _ph_add_toolkit_ingest(menu):
 
 
 @track_usage
-def user_setup():
-    """User setup."""
+def user_setup(verbose=0):
+    """User setup.
+
+    Args:
+        verbose (int): print process data
+    """
     dprint('Executing PsyHive user setup')
 
     if cmds.about(batch=True):
         return
 
-    _install_psyhive_elements()
+    _install_psyhive_elements(verbose=verbose)
 
     # Fix logging level (pymel sets to debug)
     _fix_fn = wrap_fn(logging.getLogger().setLevel, logging.WARNING)

@@ -13,7 +13,7 @@ from maya_psyhive.utils import set_namespace
 from maya_psyhive.tools import fkik_switcher
 from maya_psyhive.tools.fkik_switcher import Side, Limb
 
-ICON = icons.EMOJI.find("Vampire: Medium-Light Skin Tone")
+ICON = icons.EMOJI.find("Vampire: Medium-Light Skin Tone", catch=True)
 LABEL = "Vampire Bloodline"
 BUTTON_LABEL = 'vamp\nblood'
 

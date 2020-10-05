@@ -12,7 +12,7 @@ from maya_psyhive.tools.fkik_switcher import system
 
 _DIALOG = None
 UI_FILE = abs_path('fkik_switcher.ui', root=os.path.dirname(__file__))
-ICON = icons.EMOJI.find('Left-Right Arrow')
+ICON = icons.EMOJI.find('Left-Right Arrow', catch=True)
 
 
 class _NoSystemSelected(HandledError):
@@ -38,7 +38,8 @@ class _FkIkSwitcherUi(qt.HUiDialog3):
         """
         self.system = system_
         super(_FkIkSwitcherUi, self).__init__(ui_file=UI_FILE)
-        self.set_icon(ICON)
+        if ICON:
+            self.set_icon(ICON)
 
     def _callback__FkToIk(self):
         print 'FK -> IK'
