@@ -9,8 +9,6 @@ from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import set_namespace, load_plugin
 
-from . import yeti_write
-
 
 def apply_cache(cache, yeti=None, ref_=None):
     """Apply a yeti cache.
@@ -153,6 +151,7 @@ def update_all(parent):
     Args:
         parent (QDialog): parent dialog
     """
+    from . import yeti_write
     print 'UPDATE ALL YETIS'
 
     # Check yetis to update

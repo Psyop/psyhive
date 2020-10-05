@@ -1,3 +1,13 @@
+#### v0.104.1 ####
+
+    Released: Mon 5th Oct 2020 11:43am
+
+    Yeti tools: bugfix error on open interface (csage/estalie)
+    
+    maya_psyhive:
+        tools.yeti bugfix cyclical import,
+
+
 #### v0.104.0 ####
 
     Released: Mon 5th Oct 2020 10:36am
