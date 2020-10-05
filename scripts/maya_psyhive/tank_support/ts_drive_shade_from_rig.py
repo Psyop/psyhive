@@ -13,7 +13,7 @@ from psyhive.utils import get_single, lprint
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
-from maya_psyhive.utils import get_parent, reset_ns, set_namespace
+from maya_psyhive.utils import get_parent, set_namespace, del_namespace
 
 
 def _clean_unused_uv_sets(mesh, verbose=0):
@@ -102,7 +102,6 @@ def get_shade_mb_for_rig(rig):
     return _shade_file
 
 
-@reset_ns
 @track_usage
 def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
     """Use a rig to drive tmp geo duplicated from its shade asset.
@@ -138,7 +137,8 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
 
     # Duplicate geo and bind to rig
     _bake_geo = []
-    set_namespace(':tmp_{}'.format(_rig.namespace), clean=True)
+    _tmp_ns = ':tmp_{}'.format(_rig.namespace)
+    set_namespace(_tmp_ns, clean=True)
     for _shade_mesh in qt.progress_bar(
             _shade.find_nodes(type_='mesh'), 'Binding {:d} geo{}',
             col='Tomato', show=progress):
@@ -168,8 +168,10 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
         _blend.plug('weight[0]').set_val(1.0)
 
     _shade.remove(force=True)
+    cmds.namespace(set=":")
 
     if not _bake_geo:
+        del_namespace(_tmp_ns)
         raise RuntimeError('No geo was attached - this means none of the '
                            'shade geo matched the rig bakeSet geo.')
 

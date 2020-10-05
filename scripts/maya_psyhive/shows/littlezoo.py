@@ -13,6 +13,7 @@ LABEL = "Little Zoo"
 BUTTON_LABEL = 'little\nzoo'
 ICON = None
 PYGUI_COL = 'GreenYellow'
+PYGUI_TITLE = 'Little Zoo tools'
 
 
 py_gui.set_section('HUD', collapse=False)

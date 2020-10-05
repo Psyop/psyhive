@@ -1,3 +1,14 @@
+#### v0.105.1 ####
+
+    Released: Mon 5th Oct 2020 15:38pm
+
+    Tank support: cache tool shade geo for rigs option bugfix left in bad namespace if no matching geo found (jbloch)
+    
+    maya_psyhive:
+        shows.littlezoo added title,
+        tank_support.drive_shade_geo_from_rig bugfix left in bad ns if no matching geo,
+
+
 #### v0.105.0 ####
 
     Released: Mon 5th Oct 2020 14:43pm
