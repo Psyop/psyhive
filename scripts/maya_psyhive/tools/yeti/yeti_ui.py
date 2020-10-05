@@ -190,6 +190,14 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
             apply_caches_in_root_namespace.__name__)
         qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
 
+    def _callback__CacheUpdateAll(self):
+        yeti_read.update_all(parent=self)
+
+    def _callback__CacheUpdateAllHelp(self):
+        _def = PyFile(yeti_read.__file__).find_def(
+            yeti_read.update_all.__name__)
+        qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
+
     def _callback__DisableViewportUpdates(self):
         disable_viewport_updates()
 

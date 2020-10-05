@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>282</width>
-    <height>497</height>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -379,6 +379,52 @@
        </item>
        <item>
         <widget class="HPushButton" name="CacheReadRootHelp">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</normaloff>P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/icon.2458.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="HPushButton" name="CacheUpdateAll">
+         <property name="text">
+          <string>Update all caches to latest</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="HPushButton" name="CacheUpdateAllHelp">
          <property name="minimumSize">
           <size>
            <width>0</width>

@@ -314,33 +314,48 @@ class VendorScene(File, ingest.Ingestible):
         for _ref in qt.progress_bar(
                 ref.find_refs(), 'Updating {:d} ref{}',
                 stack_key='UpdateRefs'):
-
-            print 'CHECKING REF', _ref
-            print ' - PATH', _ref.path
-            if File(_ref.path).exists():
-                _out = tk2.TTOutputFile(_ref.path)
-                if _out.is_latest():
-                    print ' - IS LATEST'
-                    continue
-                _file = _out.find_latest()
-
-            else:
-
-                _psy_file = ingest.map_file_to_psy_asset(_ref.path)
-                _dlv_file = File('{}/{}'.format(
-                    self.dir, File(_ref.path).filename))
-                _file = _psy_file or _dlv_file
-
-            if not _file or not File(_file).exists():
-                print ' - MISSING', _file
-                raise RuntimeError('Missing file {}'.format(_file))
-            print ' - UPDATING TO', _file
-            assert File(_file).exists()
-            _ref.swap_to(_file)
+            self._ingest_check_ref(_ref)
 
         # Save to disk
         _work.save(comment=comment, safe=False, force=force)
         _work.cache_write(tag='vendor_source_file', data=self.path)
+
+    def _ingest_check_ref(self, ref_):
+        """Check reference.
+
+        Args:
+            ref_ (FileRef): reference to check
+        """
+        print 'CHECKING REF', ref_
+        print ' - PATH', ref_.path
+        if File(ref_.path).exists():
+
+            try:
+                _file = tk2.TTOutputFile(ref_.path)
+            except ValueError:
+                print ' - OFF PIPELINE'
+                return
+
+            if _file.is_latest():
+                print ' - IS LATEST'
+                return
+
+            _file = _file.find_latest()
+
+        else:
+
+            _psy_file = ingest.map_file_to_psy_asset(ref_.path)
+            _dlv_file = File('{}/{}'.format(
+                self.dir, File(ref_.path).filename))
+            _file = _psy_file or _dlv_file
+
+        if not _file or not File(_file).exists():
+            print ' - MISSING', _file
+            raise RuntimeError('Missing file {}'.format(_file))
+
+        print ' - UPDATING TO', _file
+        assert File(_file).exists()
+        ref_.swap_to(_file)
 
     def _ingest_check_sg_range(self, force=True):
         """Check shotgun range matching this scene file.

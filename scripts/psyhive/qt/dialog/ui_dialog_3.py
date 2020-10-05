@@ -110,8 +110,8 @@ class HUiDialog3(QtWidgets.QDialog, BaseDialog):
 
         self._load_ui()
         self._connect_elements(catch_errors_=catch_errors_)
-
         self.init_ui()
+
         self._settings_name = settings_name or File(self.ui_file).basename
         self.disable_save_settings = not save_settings
         if load_settings:

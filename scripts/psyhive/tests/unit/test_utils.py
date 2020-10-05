@@ -41,10 +41,13 @@ class TestCache(unittest.TestCase):
 
         # Test max age
         class _Test(object):
+
             cache_fmt = '{}/test/{{}}.cache'.format(tempfile.gettempdir())
+
             @get_result_to_file_storer(max_age=1)
             def blah(self):
                 return random.random()
+
         _test = _Test()
         _val = _test.blah()
         assert _val == _test.blah()

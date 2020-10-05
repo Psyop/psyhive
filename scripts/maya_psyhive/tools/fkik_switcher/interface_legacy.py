@@ -1,7 +1,7 @@
 """Tools for managing the legacy (py_gui) interface for fk/ik switcher."""
 
-from psyhive import py_gui, icons, qt, refresh
-from psyhive.utils import TMP, store_result
+from psyhive import py_gui, icons, qt, refresh, pipe
+from psyhive.utils import store_result
 
 from maya_psyhive.utils import get_ns_cleaner, restore_sel
 from maya_psyhive.tools.fkik_switcher import system
@@ -25,7 +25,7 @@ def _get_flex_icon(arrow, arrow_size=80, bicep_size=110, verbose=0):
         bicep_size (int): size of bicep icon
         verbose (int): print process data
     """
-    _path = '{}/psyhive/icons/ik_fk_{}.png'.format(TMP, arrow)
+    _path = '{}/psyhive/icons/ik_fk_{}.png'.format(pipe.TMP, arrow)
 
     _bicep = icons.EMOJI.find('Flexed Biceps: Light Skin Tone')
     _arrow = icons.EMOJI.find(arrow)

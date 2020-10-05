@@ -482,9 +482,10 @@ def read_yaml(file_):
         _func = wrap_fn(yaml.load, _body)
 
     # Parse contents
+    _excs = (yaml.scanner.ScannerError, yaml.constructor.ConstructorError)
     try:
         return _func()
-    except yaml.scanner.ScannerError as _exc:
+    except _excs as _exc:
         print 'SCANNER ERROR:', _exc
         print ' - MESSAGE', _exc.message
         raise RuntimeError('Yaml scanner error '+_file.path)

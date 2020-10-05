@@ -29,6 +29,8 @@ class BaseNode(object):
         Args:
             node (str): node name
         """
+        if isinstance(node, BaseNode):
+            node = str(node)
         if not isinstance(node, six.string_types):
             raise ValueError('Non-string init {} ({})'.format(
                 node, type(node).__name__))

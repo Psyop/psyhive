@@ -282,6 +282,16 @@ allowed_names:
     uninitializePlugin
     postConstructor
 
+import_error_libs:
+    hou
+    maya
+    moviepy
+    mPipe
+    mTools
+    nuke
+    pymel
+    shiboken2
+
 no_member_libs:
 
     cv2

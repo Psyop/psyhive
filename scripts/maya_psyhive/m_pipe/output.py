@@ -9,9 +9,13 @@ from maya_psyhive import ref
 class OutputRef(ref.FileRef):
     """Represents a output file referenced into a scene."""
 
-    def __init__(self, *args, **kwargs):
-        """Constructor."""
-        super(OutputRef, self).__init__(*args, **kwargs)
+    def __init__(self, ref_node):
+        """Constructor.
+
+        Args:
+            ref_node (str): reference node
+        """
+        super(OutputRef, self).__init__(ref_node)
         self.output = tk2.TTOutputFile(self.path)
 
     def _get_latest_path(self):

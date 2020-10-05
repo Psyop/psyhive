@@ -11,6 +11,45 @@ from psyhive.qt import QtWidgets
 from psyhive.utils import lprint, store_result
 
 
+class OptionMenuGrp(object):
+    """Represents an option menu group."""
+
+    def __init__(self, name):
+        """Constructor.
+
+        Args:
+            name (str): element name
+        """
+        self.name = name
+
+    def items(self):
+        """List item labels.
+
+        Returns:
+            (str list): item list
+        """
+        _items = cmds.optionMenuGrp(
+            self.name, query=True, itemListShort=True)
+        return [str(cmds.menuItem(_item, query=True, label=True))
+                for _item in _items]
+
+    def select_item(self, label):
+        """Select the given item label.
+
+        Args:
+            label (str): item to select
+        """
+        cmds.optionMenuGrp(self.name, edit=True, value=label)
+
+    def selected_item(self):
+        """Get the selected item label.
+
+        Returns:
+            (str): selected item
+        """
+        return str(cmds.optionMenuGrp(self.name, query=True, value=True))
+
+
 class _ShelfButton(object):
     """Represents a shelf button."""
 

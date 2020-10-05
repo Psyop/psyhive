@@ -135,7 +135,8 @@ class BaseTransform(BaseNode):
             (HFnDependencyNode): shape
         """
         from maya_psyhive import open_maya as hom
-        return hom.HFnDependencyNode(get_shp(self))
+        _shp = get_shp(self)
+        return hom.HFnDependencyNode(_shp) if _shp else None
 
     def orient_constraint(self, *args, **kwargs):
         """Orient constrain a node to this node.

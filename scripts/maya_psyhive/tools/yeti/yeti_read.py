@@ -3,11 +3,13 @@
 from maya import cmds
 
 from psyhive import tk2, qt
-from psyhive.utils import get_single, lprint
+from psyhive.utils import get_single, lprint, get_plural
 
 from maya_psyhive import ref
 from maya_psyhive import open_maya as hom
 from maya_psyhive.utils import set_namespace, load_plugin
+
+from . import yeti_write
 
 
 def apply_cache(cache, yeti=None, ref_=None):
@@ -143,3 +145,48 @@ def find_yeti_caches(root, verbose=0):
                 _yeti_vers.append(_ver)
 
     return _yeti_vers
+
+
+def update_all(parent):
+    """Update all yeti nodes to use latest cache.
+
+    Args:
+        parent (QDialog): parent dialog
+    """
+    print 'UPDATE ALL YETIS'
+
+    # Check yetis to update
+    _to_update = []
+    for _yeti in hom.find_nodes(type_='pgYetiMaya'):
+
+        print _yeti
+        _file = _yeti.plug('cacheFileName').get_val()
+        if _file:
+            print ' - CUR', _file
+        _latest = yeti_write.yeti_to_output(_yeti).find_latest()
+        if not _latest:
+            print ' - NO CACHES FOUND'
+            continue
+
+        print ' - LATEST', _latest.path
+        if _file != _latest:
+            print ' - NEEDS UPDATE'
+            _to_update.append((_yeti, _latest))
+
+    # Confirm
+    print '{:d} CACHE{} NEED UPDATE'.format(
+        len(_to_update), get_plural(_to_update).upper())
+    if not _to_update:
+        qt.notify('All caches are up to date', title='Update caches',
+                  parent=parent)
+        return
+    qt.ok_cancel(
+        'Update {:d} cache{}?'.format(
+            len(_to_update), get_plural(_to_update)),
+        title='Update caches', parent=parent)
+
+    # Update
+    for _yeti, _latest in qt.progress_bar(
+            _to_update, 'Updating {:d} cache{}'):
+        print _yeti, _latest
+        apply_cache(yeti=_yeti, cache=_latest)

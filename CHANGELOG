@@ -1,3 +1,33 @@
+#### v0.104.0 ####
+
+    Released: Mon 5th Oct 2020 10:36am
+
+    Ingest tools: (iirvin) [TOOLS-246],
+        bugfix dir browser searching for file,
+        bugfix error on ingest,
+    Yeti tools: (bfranceschini) [TOOLS-196]
+        added option to update all yeti nodes to latest,
+    
+    maya_psyhive:
+        open_maya.BaseNode allow BaseNode init,
+        open_maya.BaseTransform.get_shp bugfix error on no shape,
+        ref.FileRef.setup_anim_offsets added,
+        ref.create_ref added fbx handling,
+        tank_support.frustrum_test_blast catch error on rig missing bakeSet,
+        tools.fkik_switcher bugfix outdated TMP reference in legacy interface,
+        tools.m_ingest.ingest_vendor_anim catch non-dir,
+        tools.m_ingest.ingest_vendor_anim no already ingested print if nothing ingested,
+        tools.m_ingest.ingest_vendor_anim bugfix dir browser not requesting dir,
+        tools.m_ingest.ingest_vendor_anim bugfix bad call to check workspace,
+        tools.m_ingest.ingest_vendor_anim ignore off pipeline refs,
+        tools.yeti added update all yeti nodes to latest,
+        ui.OptionMenuGrp added,
+        utils get_shp/get_shps fix error on no shape,
+    psyhive:
+        tk2.TTOutput.find_file added verbose,
+        utils.read_yaml catch constructor error,
+
+
 #### v0.103.0 ####
 
     Released: Thu 1st Oct 2020 11:08am

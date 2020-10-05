@@ -18,6 +18,15 @@ from . import remove_rigs
 class _BlastRigRef(m_pipe.RigRef):
     """Represents a rig referenced into a scene."""
 
+    def __init__(self, ref_node):
+        """Constructor.
+
+        Args:
+            ref_node (str): reference node
+        """
+        super(_BlastRigRef, self).__init__(ref_node)
+        self.bake_set = self.get_node('bakeSet')
+
     def get_geos(self):
         """Get a list of geos to test.
 
@@ -26,8 +35,7 @@ class _BlastRigRef(m_pipe.RigRef):
         Returns:
             (str list): visibile geos
         """
-        _bake_set = self.get_node('bakeSet')
-        _bake_geos = cmds.sets(_bake_set, query=True) or []
+        _bake_geos = cmds.sets(self.bake_set, query=True) or []
         return [
             _geo for _geo in _bake_geos
             if is_visible(_geo) and

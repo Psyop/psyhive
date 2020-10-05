@@ -84,6 +84,26 @@ def _cache_yetis(yetis, apply_on_complete=False, verbose=0):
     return _outs
 
 
+def yeti_to_output(yeti, work=None):
+    """Get output for the given yeti node.
+
+    Args:
+        yeti (HFnDependencyNode): yeti node to export
+        work (TTWork): work file
+
+    Returns:
+        (TTOutputFileSeq): export path
+    """
+    _work = work or tk2.cur_work()
+    _out = _work.map_to(
+        tk2.TTOutputFileSeq,
+        output_name='{}Yeti_{}'.format(
+            yeti.namespace, yeti.get_parent().clean_name),
+        format='yeti', output_type='fxcache', extension='fur',
+        Step=_work.step, Task=_work.task)
+    return _out
+
+
 def _prepare_yetis_and_outputs(yetis, work):
     """Make sure all yetis are yeti shapes nodes and warn on output overwrite.
 
@@ -108,13 +128,7 @@ def _prepare_yetis_and_outputs(yetis, work):
 
         # Map yeti node to output
         _namespaces.add(_yeti.namespace)
-        _ref = ref.find_ref(_yeti.namespace)
-        _out = work.map_to(
-            tk2.TTOutputFileSeq,
-            output_name='{}Yeti_{}'.format(
-                _ref.namespace, _yeti.get_parent().clean_name),
-            format='yeti', output_type='fxcache', extension='fur',
-            Step=work.step, Task=work.task)
+        _out = yeti_to_output(_yeti, work=work)
         _out.test_dir()
         _outs.append(_out)
         print ' - OUT', _out

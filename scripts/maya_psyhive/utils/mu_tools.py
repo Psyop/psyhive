@@ -345,7 +345,9 @@ def get_shp(node, verbose=0):
     """
     _shps = get_shps(node)
     lprint('SHAPES', _shps, verbose=verbose)
-    if not len(_shps) == 1:
+    if not _shps:
+        return None
+    if len(_shps) > 1:
         raise ValueError("Multiple shapes found on {} - {}".format(
             node, ', '.join(_shps)))
     return get_single(_shps)
@@ -360,7 +362,7 @@ def get_shps(node):
     Returns:
         (str list): shape nodes
     """
-    return cmds.listRelatives(node, shapes=True, noIntermediate=True)
+    return cmds.listRelatives(node, shapes=True, noIntermediate=True) or []
 
 
 def get_val(attr, type_=None, class_=None, verbose=0):

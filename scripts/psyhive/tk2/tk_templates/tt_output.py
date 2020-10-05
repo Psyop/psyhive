@@ -262,16 +262,17 @@ class TTOutput(TTDirBase):
         _hint = self.hint_fmt.format(area=_area)
         super(TTOutput, self).__init__(path, hint=_hint)
 
-    def find_file(self, extn=None):
+    def find_file(self, extn=None, verbose=1):
         """Find single matching file within this output.
 
         Args:
             extn (str): filter by extension
+            verbose (int): print process data
 
         Returns:
             (TTOutputFileBase): matching file
         """
-        return get_single(self.find_files(extn=extn))
+        return get_single(self.find_files(extn=extn), verbose=verbose)
 
     def find_files(self, extn=None, format_=None, class_=None, verbose=0):
         """Find output files/seqs within this output dir.

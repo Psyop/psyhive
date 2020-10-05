@@ -1,7 +1,7 @@
 """Top level tools for maya ingestion."""
 
 from psyhive import qt, host, py_gui, pipe, icons
-from psyhive.tools.ingest import vendor_from_path
+from psyhive.tools import ingest
 from psyhive.utils import Dir, abs_path, File, get_plural
 
 from .ming_vendor_scene import VendorScene
@@ -31,6 +31,7 @@ def _get_ingestable_scenes(dir_, filter_):
     _dir = Dir(abs_path(dir_))
     print 'READING', _dir.path
     assert _dir.exists()
+    assert _dir.is_dir()
     _scenes = [
         _file for _file in _dir.find(type_='f', class_=File, filter_=filter_)
         if _file.extn in ('ma', 'mb')]
@@ -40,7 +41,7 @@ def _get_ingestable_scenes(dir_, filter_):
     _statuses = {}
     _to_ingest = []
     for _idx, _scene in qt.progress_bar(
-            enumerate(_scenes), 'Checking {:d} scene{}'):
+            enumerate(_scenes), 'Checking {:d} scene{}', col=PYGUI_COL):
 
         print '[{:d}/{:d}] PATH {}'.format(_idx+1, len(_scenes), _scene.path)
 
@@ -63,14 +64,16 @@ def _get_ingestable_scenes(dir_, filter_):
             _to_ingest.append(_scene)
         _statuses[_scene] = _status
 
-    print '\nALREADY INGESTED: {}\n'.format(
-        sorted(set([
-            _scene.to_psy_work().get_shot().name
-            for _scene, _status in _statuses.items()
-            if _status == 'Already ingested'])))
+    # Print list of shots already ingested
+    _already_ingested = [_scene for _scene, _status in _statuses.items()
+                         if _status == 'Already ingested']
+    if _already_ingested:
+        print '\n[ALREADY INGESTED] {}\n'.format(
+            ', '.join(sorted(set([_scene.to_psy_work().get_shot().name
+                                  for _scene in _already_ingested]))))
 
     # Print summary
-    print '\n\n[SUMMARY]'
+    print '\n[SUMMARY]'
     print '\n'.join([
         '    {} - {:d}'.format(_status, _statuses.values().count(_status))
         for _status in sorted(set(_statuses.values()))])
@@ -81,8 +84,10 @@ def _get_ingestable_scenes(dir_, filter_):
 
 
 @py_gui.install_gui(
-    label_width=85, hide=['ignore_extn', 'force'],
-    browser={'dir_': py_gui.BrowserLauncher(default_dir=_VENDOR_IN)})
+    label_width=90, hide=['ignore_extn', 'force'],
+    icon=ingest.ICON,
+    browser={'dir_': py_gui.BrowserLauncher(
+        mode='SingleDirExisting', default_dir=_VENDOR_IN)})
 def ingest_vendor_anim(
         dir_, vendor=None, force=False, filter_=None, ignore_extn=False,
         ignore_dlayers=False, ignore_rlayers=False,
@@ -101,7 +106,7 @@ def ingest_vendor_anim(
     """
 
     # Set vendor
-    _vendor = vendor or vendor_from_path(dir_)
+    _vendor = vendor or ingest.vendor_from_path(dir_)
     assert _vendor
     print ' - VENDOR', _vendor
     print
@@ -114,7 +119,7 @@ def ingest_vendor_anim(
         qt.ok_cancel(
             'Ingest {:d} scene{}?'.format(
                 len(_to_ingest), get_plural(_to_ingest)),
-            verbose=0)
+            verbose=0, icon=ingest.ICON, title='Confirm ingestion')
         print 'HANDLE UNSAVED CHANGES'
         host.handle_unsaved_changes()
         print 'HANDLED UNSAVED CHANGES'
@@ -127,12 +132,12 @@ def ingest_vendor_anim(
         ignore_multi_top_nodes=ignore_multi_top_nodes,
         ignore_rlayers=ignore_rlayers)
     for _idx, _scene in qt.progress_bar(
-            enumerate(_to_ingest), 'Ingesting {:d} scene{}'):
+            enumerate(_to_ingest), 'Ingesting {:d} scene{}', col=PYGUI_COL):
 
         print '[{:d}/{:d}] PATH {}'.format(
             _idx+1, len(_to_ingest), _scene.path)
 
-        _scene.check_workspaces()
+        _scene.check_workspace(force=True)
 
         # Check ingestion status
         assert isinstance(_scene, VendorScene)
@@ -142,7 +147,7 @@ def ingest_vendor_anim(
         print ' - CAM', _scene.scene_get_cam()
 
         _scene.ingest(vendor=vendor, force=True)
-        _status, _ = _scene.get_ingest_status(**_ingest_kwargs)
+        _status, _ = _scene.get_ingest_status()
         _statuses[_scene] = _status
 
     if _issues:

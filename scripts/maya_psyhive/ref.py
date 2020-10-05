@@ -292,6 +292,30 @@ class FileRef(object):
             cmds.lockNode(_ref_node, lock=True)
             self.__init__(_ref_node)
 
+    def setup_anim_offsets(self, ctrl=None):
+        """Setup anim offset controls.
+
+        This sets up anim offset, multiply and time attributes and connects
+        any anim curves in the reference to have the input and the anim
+        time.
+
+        Args:
+            ctrl (HFnTransform): node to add attrs to
+        """
+        from maya_psyhive import open_maya as hom
+
+        _ctrl = ctrl or self.find_top_node()
+        _offs = _ctrl.create_attr('animOffset', 0.0)
+        _mult = _ctrl.create_attr('animMult', 1.0)
+        _t_anim = _ctrl.create_attr('animTime', 0.0)
+        _t_mult = hom.HPlug('time1.outTime').multiply_node(_mult)
+        _t_mult.add_node(_offs, output=_t_anim)
+
+        # Connect anim
+        for _crv in self.find_nodes(
+                class_=hom.HFnAnimCurve, type_='animCurve'):
+            _t_anim.connect(_crv.input)
+
     def swap_to(self, file_):
         """Swap this reference file path.
 
@@ -371,7 +395,6 @@ def create_ref(file_, namespace, class_=None, force=False):
     """
     from psyhive import qt
     from psyhive import host
-    from maya_psyhive.utils import load_plugin
 
     _file = File(abs_path(file_))
     if not _file.exists():
@@ -380,7 +403,9 @@ def create_ref(file_, namespace, class_=None, force=False):
     _rng = host.t_range()
 
     if _file.extn == 'abc':
-        load_plugin('AbcImport')
+        cmds.loadPlugin('AbcImport', quiet=True)
+    elif _file.extn.lower() == 'fbx':
+        cmds.loadPlugin('fbxmaya', quiet=True)
 
     # Test for existing
     cmds.namespace(set=":")
