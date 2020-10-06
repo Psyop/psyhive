@@ -465,7 +465,11 @@ def read_yaml(file_):
     Returns:
         (any): yaml data
     """
-    import yaml
+    try:
+        import yaml
+    except ImportError:
+        print '[WARNING] read failed - failed to import yaml module'
+        return {}
     from ..misc import wrap_fn
 
     # Read contents
@@ -653,7 +657,11 @@ def write_yaml(file_, data):
         file_ (str): path to yaml file
         data (dict): data to write to yaml
     """
-    import yaml
+    try:
+        import yaml
+    except ImportError:
+        print '[WARNING] write failed - failed to import yaml module'
+        return
     _file = File(get_path(file_))
     _file.test_dir()
     with open(_file.path, 'w') as _hook:
