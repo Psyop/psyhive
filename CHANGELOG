@@ -1,3 +1,14 @@
+#### v0.106.0 ####
+
+    Released: Wed 7th Oct 2020 09:44am
+
+    Yeti Tools: allow samples per frame override (csage),
+    
+    maya_psyhive:
+        ref.FileRef.setup_anim_offsets returns plugs,
+        tools.yeti added samples to ui,
+
+
 #### v0.105.2 ####
 
     Released: Tue 6th Oct 2020 10:35am

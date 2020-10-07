@@ -316,6 +316,8 @@ class FileRef(object):
                 class_=hom.HFnAnimCurve, type_='animCurve'):
             _t_anim.connect(_crv.input)
 
+        return _t_anim, _offs, _mult
+
     def swap_to(self, file_):
         """Swap this reference file path.
 

@@ -134,10 +134,10 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
         qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
 
     def _callback__CacheWriteAssets(self):
-
+        _samples = self.ui.Samples.value()
         _apply_on_complete = self.ui.ApplyOnComplete.isChecked()
         _outs = write_cache_from_sel_assets(
-            apply_on_complete=_apply_on_complete)
+            apply_on_complete=_apply_on_complete, samples=_samples)
         self._redraw__Step()
 
     def _callback__CacheWriteAssetsHelp(self):
@@ -146,9 +146,10 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
         qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
 
     def _callback__CacheWriteNode(self):
-
+        _samples = self.ui.Samples.value()
         _apply_on_complete = self.ui.ApplyOnComplete.isChecked()
-        write_cache_from_sel_yetis(apply_on_complete=_apply_on_complete)
+        write_cache_from_sel_yetis(
+            apply_on_complete=_apply_on_complete, samples=_samples)
         self._redraw__Step()
 
     def _callback__CacheWriteNodeHelp(self):
@@ -157,9 +158,10 @@ class _YetiCacheToolsUi(qt.HUiDialog3):
         qt.help_(_def.docs.split('Args:')[0].strip(), parent=self)
 
     def _callback__CacheWriteAllNodes(self):
-
+        _samples = self.ui.Samples.value()
         _apply_on_complete = self.ui.ApplyOnComplete.isChecked()
-        write_cache_from_all_yetis(apply_on_complete=_apply_on_complete)
+        write_cache_from_all_yetis(
+            apply_on_complete=_apply_on_complete, samples=_samples)
         self._redraw__Step()
 
     def _callback__CacheWriteAllNodesHelp(self):

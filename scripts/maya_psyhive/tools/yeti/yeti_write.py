@@ -19,12 +19,13 @@ from maya_psyhive.tools.yeti.yeti_read import apply_cache
 
 @restore_frame
 @restore_sel
-def _cache_yetis(yetis, apply_on_complete=False, verbose=0):
+def _cache_yetis(yetis, apply_on_complete=False, samples=3, verbose=0):
     """Cache a list of yeti nodes.
 
     Args:
         yetis (HFnDependencyNode list): nodes to cache
         apply_on_complete (bool): apply cache on completion
+        samples (int): samples per frame
         verbose (int): print process data
     """
     from . import yeti_ui
@@ -49,13 +50,14 @@ def _cache_yetis(yetis, apply_on_complete=False, verbose=0):
 
     # Generate caches
     dprint('GENERATING CACHES', _cache_path)
+    print ' - SAMPLES', samples
     for _yeti in _yetis:
         _yeti.plug('cacheFileName').set_val('')
         _yeti.plug('fileMode').set_val(0)
         _yeti.plug('overrideCacheWithInputs').set_val(False)
     cmds.select(_yetis)
     cmds.pgYetiCommand(
-        writeCache=_cache_path, range=host.t_range(), samples=3)
+        writeCache=_cache_path, range=host.t_range(), samples=samples)
     dprint('GENERATED CACHES', _cache_path)
 
     # Move tmp caches to outputs
@@ -160,7 +162,7 @@ def _prepare_yetis_and_outputs(yetis, work):
     return _yetis, _outs, _namespaces
 
 
-def write_cache_from_sel_assets(apply_on_complete=False):
+def write_cache_from_sel_assets(apply_on_complete=False, samples=3):
     """Cache selected asset.
 
     All yeti nodes in the selected asset are cached.
@@ -169,6 +171,7 @@ def write_cache_from_sel_assets(apply_on_complete=False):
 
     Args:
         apply_on_complete (bool): apply cache on completion
+        samples (int): samples per frame
 
     Returns:
         (TTOutputFileSeq list): caches generated
@@ -190,10 +193,11 @@ def write_cache_from_sel_assets(apply_on_complete=False):
                 _ref.namespace for _ref in _refs])))
         return None
 
-    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete)
+    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete,
+                        samples=samples)
 
 
-def write_cache_from_sel_yetis(apply_on_complete=False):
+def write_cache_from_sel_yetis(apply_on_complete=False, samples=3):
     """Write a yeti cache from selected yeti nodes.
 
     All selected pgYetiMaya nodes are cached.
@@ -203,6 +207,7 @@ def write_cache_from_sel_yetis(apply_on_complete=False):
 
     Args:
         apply_on_complete (bool): apply cache on completion
+        samples (int): samples per frame
 
     Returns:
         (TTOutputFileSeq list): caches generated
@@ -214,14 +219,16 @@ def write_cache_from_sel_yetis(apply_on_complete=False):
         qt.notify_warning("No yeti nodes selected.\n\nPlease select one or "
                           "more yeti nodes.", parent=yeti_ui.DIALOG)
         return None
-    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete)
+    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete,
+                        samples=samples)
 
 
-def write_cache_from_all_yetis(apply_on_complete=False):
+def write_cache_from_all_yetis(apply_on_complete=False, samples=3):
     """Write a yeti cache from all yeti nodes in the scene.
 
     Args:
         apply_on_complete (bool): apply cache on completion
+        samples (int): samples per frame
 
     Returns:
         (TTOutputFileSeq list): caches generated
@@ -233,4 +240,5 @@ def write_cache_from_all_yetis(apply_on_complete=False):
         qt.notify_warning("No yeti nodes in the scene.\n\nUnable to cache.",
                           parent=yeti_ui.DIALOG)
         return None
-    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete)
+    return _cache_yetis(_yetis, apply_on_complete=apply_on_complete,
+                        samples=samples)
