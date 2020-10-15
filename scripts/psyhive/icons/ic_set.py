@@ -82,13 +82,14 @@ class EmojiSet(Seq):
         self.index = '{}/index.html'.format(self.dir)
 
     @store_result
-    def find(self, match, catch=False, verbose=0):
+    def find(self, match, catch=False, force=False, verbose=0):
         """Find an emoji matching the given name.
 
         Args:
             match (str): name/filter to match
             catch (bool): no error if unable to find icon
                 (to facilitate missing icons)
+            force (bool): ignore cache
             verbose (int): print process data
 
         Returns:

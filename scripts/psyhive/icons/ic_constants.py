@@ -3,7 +3,7 @@
 import os
 
 from psyhive.utils import Collection, str_to_ints, abs_path
-from psyhive.icons.set_ import EmojiSet
+from .ic_set import EmojiSet
 
 _EMOJI_PATH_DEFAULT = abs_path(
     '{}/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/'

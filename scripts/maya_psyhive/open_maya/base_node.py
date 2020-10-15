@@ -178,7 +178,13 @@ class BaseNode(object):
         _children = self.list_relatives(
             allDescendents=all_descendents, **_kwargs)
         if class_:
-            _children = [class_(_child) for _child in _children]
+            _orig_children = _children
+            _children = []
+            for _child in _orig_children:
+                try:
+                    _children.append(class_(_child))
+                except RuntimeError:
+                    pass
         return _children
 
     def find_connected(self, type_=None, depth=1, filter_=None,

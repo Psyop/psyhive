@@ -429,7 +429,7 @@ class TTStepRoot(TTDirBase):
         """Find output types in this step root.
 
         Args:
-            output_type (str): filter by output_type name
+            output_type (str): match output_type
 
         Returns:
             (TTOutputType list): output types
@@ -444,8 +444,8 @@ class TTStepRoot(TTDirBase):
         """Find output name within this step root.
 
         Args:
-            output_name (str): filter by output name
-            task (str): filter by task
+            output_name (str): match output name
+            task (str): match task
 
         Returns:
             (TTOutputName): matching output name
@@ -459,9 +459,9 @@ class TTStepRoot(TTDirBase):
         """Find output names within this step root.
 
         Args:
-            output_name (str): filter by output name
-            output_type (str): filter by output type
-            task (str): filter by task
+            output_name (str): match output name
+            output_type (str): match output type
+            task (str): match task
             filter_ (str): apply filter to paths
             verbose (int): print process data
 
@@ -483,10 +483,10 @@ class TTStepRoot(TTDirBase):
 
         Args:
             filter_ (str): file path filter
-            task (str): filter by task
-            version (str): filter by version (eg. v003 or latest)
-            output_type (str): filter by version type
-            output_name (str): filter by output name
+            task (str): match task
+            version (str): match version (eg. v003 or latest)
+            output_type (str): match output type
+            output_name (str): match output name
             verbose (int): print process data
 
         Returns:
@@ -506,10 +506,10 @@ class TTStepRoot(TTDirBase):
 
         Args:
             filter_ (str): file path filter
-            task (str): filter by task
-            version (str): filter by version (eg. v003 or latest)
-            output_type (str): filter by version type
-            output_name (str): filter by output name
+            task (str): match task
+            version (str): match version (eg. v003 or latest)
+            output_type (str): match output type
+            output_name (str): match output name
             verbose (int): print process data
 
         Returns:
@@ -525,14 +525,15 @@ class TTStepRoot(TTDirBase):
 
     def find_output_file(
             self, format_=None, extn=None, version=None, task=None,
-            catch=False, verbose=0):
+            output_type=None, catch=False, verbose=0):
         """Find a specific output file in this step root.
 
         Args:
-            format_ (str): filter by format (eg. maya)
-            extn (str): filter by extension (eg. mb)
-            version (str): filter by version (eg. v003 or latest)
-            task (str): filter by task
+            format_ (str): match format (eg. maya)
+            extn (str): match extension (eg. mb)
+            version (str): match version (eg. v003 or latest)
+            task (str): match task
+            output_type (str): match output type
             catch (bool): no error on fail
             verbose (int): print process data
 
@@ -540,24 +541,28 @@ class TTStepRoot(TTDirBase):
             (TTOutputFileBase): matching output file
         """
         _files = self.find_output_files(
-            format_=format_, extn=extn, version=version, task=task)
+            format_=format_, extn=extn, version=version, task=task,
+            output_type=output_type)
         return get_single(_files, catch=catch, verbose=verbose)
 
     def find_output_files(
-            self, format_=None, extn=None, version=None, task=None):
+            self, format_=None, extn=None, version=None, task=None,
+            output_type=None):
         """Find output files in this step root.
 
         Args:
-            format_ (str): filter by format (eg. maya)
-            extn (str): filter by extension (eg. mb)
-            version (str): filter by version (eg. v003 or latest)
-            task (str): filter by task
+            format_ (str): match format (eg. maya)
+            extn (str): match extension (eg. mb)
+            version (str): match version (eg. v003 or latest)
+            task (str): match task
+            output_type (str): match output type
 
         Returns:
             (TTOutputFileBase list): matching output files
         """
         _files = []
-        for _out in self.find_outputs(version=version, task=task):
+        for _out in self.find_outputs(
+                version=version, task=task, output_type=output_type):
             _files += _out.find_files(
                 format_=format_, extn=extn)
         return _files
@@ -577,7 +582,7 @@ class TTStepRoot(TTDirBase):
         Args:
             dcc (str): dcc to find work for
             class_ (class): override work class
-            task (str): filter by task
+            task (str): match task
 
         Returns:
             (TTWork list): list of work files

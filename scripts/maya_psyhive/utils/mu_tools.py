@@ -382,6 +382,7 @@ def get_val(attr, type_=None, class_=None, verbose=0):
     """
     _node, _attr = attr.split('.')
     _type = type_ or cmds.attributeQuery(_attr, node=_node, attributeType=True)
+    lprint('TYPE:', _type, verbose=verbose)
 
     _kwargs = {}
     if _type in ('typed', 'string'):
@@ -551,6 +552,7 @@ def render(file_, camera=None, layer='defaultRenderLayer', col_mgt=True,
     cmds.setAttr('defaultArnoldDriver.aiTranslator', _extn, type='string')
     cmds.setAttr('defaultArnoldDriver.prefix',
                  "{}/{}".format(_file.dir, _file.basename), type='string')
+    cmds.setAttr("defaultRenderGlobals.animation", False)
 
     # Execute renders
     assert not _file.exists()

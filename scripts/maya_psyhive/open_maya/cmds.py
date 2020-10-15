@@ -48,7 +48,7 @@ def _get_result_mapper(
         func (fn): function to map
         list_idx (int): indicates the result is a list and this index
             item should be returned
-        as_list (bool): resturn results as list
+        as_list (bool): return results as list
         class_ (type): convert the result to this class
         maintain_type (bool): maintain current type (ie. list returns
             list otherwise single value is returned)
@@ -82,6 +82,8 @@ def _get_result_mapper(
             _result = _result[list_idx]
 
         if as_list or maintain_type and isinstance(_result, list):
+            if _result is None:
+                _result = []
             assert class_
             _result = [class_(_result) for _result in _result]
         elif class_:

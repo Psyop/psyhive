@@ -205,43 +205,52 @@ def get_selected(type_=None, class_=None, multi=False, verbose=1):
     Returns:
         (HFnDependencyNode): matching node
         (HFnDependencyNode list): matching nodes (if multi flag used)
+        (HFnPlug|HPlug list): if class_ is HPlug
     """
     from maya_psyhive import open_maya as hom
 
     # Build list of selected nodes
-    _nodes = []
+    _results = []
     for _node in hom.CMDS.ls(selection=True):
 
+        _result = _node
         _type = _node.object_type()
         lprint('TESTING', _node, verbose=verbose > 1)
 
         # Map transforms to HFnTransform
         if _type == 'transform':
-            _node = hom.HFnTransform(str(_node))
+            _result = hom.HFnTransform(str(_node))
 
         # Apply type filter
         if type_:
-            if type_ != 'transform' and _type == 'transform' and _node.shp:
-                _type = _node.shp.object_type()
+            if type_ != 'transform' and _type == 'transform' and _result.shp:
+                _type = _result.shp.object_type()
                 lprint(' - SHAPE TYPE', _type, verbose=verbose > 1)
             if not _type == type_:
                 lprint(' - REJECTED', type_, _type, verbose=verbose > 1)
                 continue
 
-        if class_:
+        if class_ is hom.HPlug:
+            for _attr in cmds.channelBox(
+                    'mainChannelBox', query=True,
+                    selectedMainAttributes=True) or []:
+                _plug = hom.HPlug('{}.{}'.format(_node, _attr))
+                _results.append(_plug)
+            continue
+        elif class_:
             try:
-                _node = class_(str(_node))
+                _result = class_(str(_node))
             except ValueError:
                 lprint(' - CLASS FAIL', class_, verbose=verbose > 1)
                 continue
 
         lprint(' - ADDED', verbose=verbose > 1)
-        _nodes.append(_node)
+        _results.append(_result)
 
     # Get result
     if multi:
-        return _nodes
-    return get_single(_nodes, name='selected object', verbose=verbose)
+        return _results
+    return get_single(_results, name='selected object', verbose=verbose)
 
 
 def lerp(fr_, pt1, pt2):

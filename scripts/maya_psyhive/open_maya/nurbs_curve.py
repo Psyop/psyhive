@@ -113,8 +113,8 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         return get_single(self.shp.find_connected(type_='makeNurbCircle'),
                           catch=True)
 
-    def motion_path(self, trg, add_u_length=False, follow_axis='y',
-                    up_axis='z'):
+    def motion_path(self, trg, add_u_length=False, follow_axis='z',
+                    up_axis='y'):
         """Attach the target mode this curve using a motion path.
 
         This uses the pathAnimation command, and deletes the default
@@ -130,6 +130,7 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
             (MFnDependencyNode): motion path node
         """
         from maya_psyhive import open_maya as hom
+        _trg = hom.HFnTransform(trg)
         _mpath = hom.CMDS.pathAnimation(
             trg, self, follow=True, fractionMode=True, followAxis=follow_axis,
             upAxis=up_axis)
@@ -142,12 +143,12 @@ class HFnNurbsCurve(BaseTransform, om.MFnNurbsCurve):
         elif add_u_length == 'driven':
             _ci = self.obtain_curve_info()
             _length = _ci.plug('arcLength')
-            _u_len = _mpath.create_attr('uLength', 0.0)
+            _u_len = _trg.create_attr('uLength', 0.0)
             multiply_node(_length, _u_val, _u_len)
-        elif add_u_length == 'driving':
+        elif add_u_length in [True, 'driving']:
             _ci = self.obtain_curve_info()
             _length = _ci.plug('arcLength')
-            _u_len = _mpath.create_attr('uLength', 0.0)
+            _u_len = _trg.create_attr('uLength', 0.0)
             divide_node(_u_len, _length, _u_val)
         else:
             raise ValueError(add_u_length)

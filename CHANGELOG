@@ -1,3 +1,31 @@
+#### v0.107.0 ####
+
+    Released: Thu 15th Oct 2020 15:24pm
+
+    Supercel Clashmas: added tool to batch update/submit shots (dbodenstein/iirvin)
+    
+    hou_psyhive:
+        shows.supercelclashmas added,
+        utils.save_scene added,
+    maya_psyhive:
+        open_maya.BaseNode.find_children catch runtime error on cast to class,
+        open_maya.CMDS bugfix cast result None to list,
+        open_maya.HFnNurbsCurve.motion_path default y up + z follow,
+        open_maya.HPlug.clean_name added,
+        open_maya.get_selected added handling for class as HPlug,
+        ref.FileRef.rename bugfix no name change (to fix ref node name),
+        utils.render bugfix adding frame suffix,
+    psyhive:
+        host.save_scene added for hou,
+        icons added ic_ prefix to submodules,
+        icons.find added,
+        qt.get_size added QPointF/QSizeF handling,
+        tk2.TTStepRoot find_output_file/find_output_files added output_type arg,
+        tools.hive_bro.ICON added,
+        utils added set_cfg + cfg moved to submodule,
+        utils.File read_yaml/write_yaml added,
+
+
 #### v0.106.0 ####
 
     Released: Wed 7th Oct 2020 09:44am

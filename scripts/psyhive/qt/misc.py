@@ -106,8 +106,12 @@ def get_size(*args):
         _size = args[0]
         if isinstance(_size, QtCore.QSize):
             _result = _size
+        elif isinstance(_size, QtCore.QSizeF):
+            _result = _size
         elif isinstance(_size, QtCore.QPoint):
             _result = QtCore.QSize(_size.x(), _size.y())
+        elif isinstance(_size, QtCore.QPointF):
+            _result = QtCore.QSizeF(_size.x(), _size.y())
         elif isinstance(_size, (tuple, list)):
             _result = QtCore.QSize(_size[0], _size[1])
         elif isinstance(_size, six.string_types):

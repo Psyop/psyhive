@@ -29,6 +29,16 @@ def save_as(file_, revert_filename=True, force=False, verbose=0):
         hou.hipFile.setName(_cur_filename)
 
 
+def save_scene(file_, force=False):
+    """Save current scene to the given path.
+
+    Args:
+        file_ (str): path to save file to
+        force (bool): overwrite without confirmation
+    """
+    save_as(file_, revert_filename=False)
+
+
 def set_end(frame):
     """Set timeline end frame.
 

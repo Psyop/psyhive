@@ -49,6 +49,8 @@ class HPlug(om.MPlug):
             raise ValueError(name)
         self.name = name
         self.node, self.attr = name.split('.')
+        self.clean_name = '{}.{}'.format(
+            self.node.split(":")[-1], self.attr)
 
         _tmp = om.MSelectionList()
         _tmp.add(self.node)
@@ -217,16 +219,17 @@ class HPlug(om.MPlug):
         """
         return self.attribute_query(attributeType=True)
 
-    def get_val(self, type_=None):
+    def get_val(self, type_=None, verbose=0):
         """Get the value of this attribute.
 
         Args:
             type_ (str): force attr type (eg. for enums)
+            verbose (int): print process data
 
         Returns:
             (any): attribute value
         """
-        return get_val(self.name, type_=type_)
+        return get_val(self.name, type_=type_, verbose=verbose)
 
     def hide(self):
         """Hide this attribute in the channel box."""

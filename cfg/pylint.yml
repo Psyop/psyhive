@@ -146,6 +146,7 @@ ignore:
         psyhive/utils/misc.py
     too-few-public-methods: '*'
     too-many-public-methods:
+        _cml_
         maya_psyhive/open_maya/base_node.py
         maya_psyhive/open_maya/base_transform.py
         maya_psyhive/open_maya/plug.py

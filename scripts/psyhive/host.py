@@ -55,7 +55,8 @@ if not NAME:
     except ImportError:
         pass
     else:
-        from hou_psyhive.utils import save_as, set_start, set_end
+        from hou_psyhive.utils import (
+            save_as, set_start, set_end, save_scene)
         NAME = 'hou'
         _force_open_scene = lambda file_: hou.hipFile.load(
             file_, suppress_save_prompt=True)

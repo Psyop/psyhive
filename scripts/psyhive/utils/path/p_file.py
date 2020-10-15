@@ -150,6 +150,11 @@ class File(Path):
         from .p_tools import read_file
         return read_file(self.path)
 
+    def read_yaml(self):
+        """Read the text contents of this file as yaml."""
+        from .p_tools import read_yaml
+        return read_yaml(self.path)
+
     def move_to(self, trg, force=False):
         """Move this file to somewhere else.
 
@@ -216,3 +221,12 @@ class File(Path):
             else:
                 raise ValueError(_result)
         write_file(file_=self.path, text=text, force=_force)
+
+    def write_yaml(self, data):
+        """Write yaml data to file.
+
+        Args:
+            data (dict): data to write
+        """
+        from .p_tools import write_yaml
+        write_yaml(file_=self.path, data=data)

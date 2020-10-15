@@ -282,9 +282,10 @@ class FileRef(object):
             namespace (str): namespace to update to
             update_ref_node (bool): update reference node name
         """
-        set_namespace(":")
-        del_namespace(':'+namespace)
-        cmds.file(self._file, edit=True, namespace=namespace)
+        if namespace != self.namespace:
+            set_namespace(":")
+            del_namespace(':'+namespace)
+            cmds.file(self._file, edit=True, namespace=namespace)
 
         if update_ref_node:
             cmds.lockNode(self.ref_node, lock=False)
