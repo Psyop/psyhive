@@ -1,3 +1,17 @@
+#### v0.108.0 ####
+
+    Released: Mon 19th Oct 2020 10:16am
+
+    Yeti tools: bugfix fail to update caches to latest (bfranceschini),
+    Ingestion tools: bugfix auto rename refs tool,
+    
+    maya_psyhive:
+        m_ingest.fix_namespaces bugfix bad rename on namespace exists,
+        tools.yeti.update_all bugfix failing to read current cache,
+    psyhive:
+        tk2.TTOutputFileBase.find_latest added verbose arg,
+
+
 #### v0.107.0 ####
 
     Released: Thu 15th Oct 2020 15:24pm

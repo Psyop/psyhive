@@ -151,7 +151,6 @@ def update_all(parent):
     Args:
         parent (QDialog): parent dialog
     """
-    from . import yeti_write
     print 'UPDATE ALL YETIS'
 
     # Check yetis to update
@@ -160,17 +159,30 @@ def update_all(parent):
 
         print _yeti
         _file = _yeti.plug('cacheFileName').get_val()
-        if _file:
-            print ' - CUR', _file
-        _latest = yeti_write.yeti_to_output(_yeti).find_latest()
+        if not _file:
+            print ' - NO FILE TO UPDATE'
+            continue
+        print ' - CUR', _file
+
+        try:
+            _out = tk2.TTOutputFileSeq(_file)
+        except ValueError:
+            print ' - OFF PIPELINE'
+            continue
+        _latest = _out.find_latest()
         if not _latest:
-            print ' - NO CACHES FOUND'
+            if not _out.exists():
+                print ' - CUR CACHE MISSING', _out.path
+            else:
+                print ' - NO CACHES FOUND'
             continue
 
         print ' - LATEST', _latest.path
         if _file != _latest:
             print ' - NEEDS UPDATE'
             _to_update.append((_yeti, _latest))
+        else:
+            print ' - NO UPDATE NEEDED'
 
     # Confirm
     print '{:d} CACHE{} NEED UPDATE'.format(

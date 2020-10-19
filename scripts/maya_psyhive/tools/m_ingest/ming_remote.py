@@ -257,8 +257,10 @@ def fix_namespaces():
         _base = _ref.namespace.split('_')[0]
         _name = _base
         _idx = 1
-        while not cmds.namespace(exists=_name) and _name in _used:
+        while True:
             check_heart()
+            if not cmds.namespace(exists=_name) and _name not in _used:
+                break
             _name = '{}_{:d}'.format(_base, _idx)
             _idx += 1
         print _ref, _name

@@ -397,15 +397,20 @@ class _TTOutputFileBase(TTBase):
     task = None
     version = None
 
-    def find_latest(self):
+    def find_latest(self, verbose=0):
         """Find latest version of this output.
+
+        Args:
+            verbose (int): print process data
 
         Returns:
             (TTOutputFileBase): latest version
         """
         _ver = TTOutputVersion(self.path)
         _name = TTOutputName(self.path)
-        for _o_ver in reversed(_name.find_versions()):
+        _vers = _name.find_versions()
+        lprint('FOUND {:d} VERS'.format(len(_vers)), verbose=verbose)
+        for _o_ver in reversed(_vers):
             if _o_ver == _ver:
                 return self
             _out = self.map_to(version=_o_ver.version)
