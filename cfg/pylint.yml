@@ -36,6 +36,7 @@ ignore:
         hv_test/tools/cod_bro/cb_interface.py
     eval-used:
         hv_test/diary/
+        hv_test/toolkits/pinterest_rip.py
         maya_psyhive/shows/clashroyaleholi.py
         maya_psyhive/tank_support/ts_aistandin.py
         maya_psyhive/tank_support/ts_shaders.py
@@ -177,7 +178,7 @@ ignore:
         hv_test/diary/
         hv_test/toolkits/_tank_app.py
         hv_test/toolkits/tank_tools.py
-        hv_test/tools/colour_bro/cb_ui.pyno-member
+        hv_test/tools/colour_bro/cb_ui.py
         hv_test/tools/melon_mocap_lib/ml_tile.py
         hv_test/tools/melon_mocap_lib/ml_ui.py
         maya_psyhive/shows/vampirebloodline.py

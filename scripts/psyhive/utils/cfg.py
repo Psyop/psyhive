@@ -61,6 +61,8 @@ def set_cfg(data, namespace, level='code', verbose=0):
         level (str): config level (eg. code/project)
         verbose (int): print process data
     """
+    from psyhive import pipe
+
     _yml = _get_cfg_yaml(level=level, namespace=namespace, verbose=verbose)
 
     _data = {}
@@ -69,11 +71,20 @@ def set_cfg(data, namespace, level='code', verbose=0):
     lprint('DATA:', _data)
 
     _existing_data = get_cfg(namespace=namespace, level=level, catch=True)
-    if _existing_data and not _existing_data == _data:
-        # _yml.bkp_file()
-        # Diff files
-        # Config
-        # Update existing data
+    if _existing_data == _data:
+        lprint('NO UPDATE NEEDED')
+        return
+    elif _existing_data:
+        lprint('EXISTING DATA:', _existing_data)
+        _updated_data = _existing_data
+        _updated_data.update(_data)
+        lprint('UPDATED DATA:', _updated_data)
+        _tmp = File('{}/tmp.yml'.format(pipe.TMP))
+        lprint('TMP FILE:', _tmp.path)
+        _tmp.write_yaml(_updated_data, force=True)
+        _tmp.copy_to(_yml, diff_=True)
         raise NotImplementedError
+    else:
+        lprint('NO EXISTING DATA')
 
     _yml.write_yaml(_data)

@@ -1,3 +1,25 @@
+#### v0.109.0 ####
+
+    Released: Wed 21st Oct 2020 12:48pm
+
+    Cloud machines: got unit tests running in linux (ccesareo)
+    
+    maya_psyhive:
+        ui.add_shelf_button force width/height for linux,
+        ui.find_shelf_buttons made public,
+    psyhive:
+        pipe.TMP use /var not /usr for linux,
+        qt.BaseDialog.set_icon patched for linux,
+        qt.HPixmap bugfix applying win style path for linux,
+        utils.set_cfg implement show diffs on changed,
+        utils get_cfg/set_cfg moved to submodule,
+        utils updated WindowsError -> OSError,
+        utils.system added linux handling,
+        utils.File.copy_to if files match post diff then supress dialog,
+        utils.File.edit added SUBLIME_EXE env override,
+        utils.write_yaml warn on overwrite,
+
+
 #### v0.108.0 ####
 
     Released: Mon 19th Oct 2020 10:16am

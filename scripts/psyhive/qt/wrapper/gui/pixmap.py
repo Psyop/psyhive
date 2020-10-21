@@ -515,7 +515,8 @@ class HPixmap(QtGui.QPixmap):
             os.remove(_file.path)
         test_path(_file.dir)
 
-        self.save(abs_path(path, win=True), format=_fmt, quality=100)
+        self.save(abs_path(path, win=os.name == 'nt'),
+                  format=_fmt, quality=100)
         assert _file.exists()
 
     def save_test(self, file_=None, timestamp=True, extn='jpg', verbose=1):

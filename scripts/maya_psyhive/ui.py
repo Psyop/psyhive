@@ -68,8 +68,11 @@ class _ShelfButton(object):
         """Delete this button."""
         cmds.deleteUI(self.name)
 
+    def __repr__(self):
+        return '<{}:{}>'.format(type(self).__name__.strip('_'), self.name)
 
-def _find_shelf_buttons():
+
+def find_shelf_buttons():
     """Find existing shelf buttons.
 
     Returns:
@@ -154,7 +157,7 @@ def _get_clean_cmd(cmd):
 
 
 def add_shelf_button(name, image, command, annotation=None, parent='Henry',
-                     width=None, force=True, enabled=True, verbose=0):
+                     width=35, height=35, force=True, enabled=True, verbose=0):
     """Add a shelf button.
 
     Args:
@@ -164,6 +167,7 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
         annotation (str): button annotation (tooltip)
         parent (str): parent shelf
         width (int): button width
+        height (int): button height
         force (bool): force replace any existing buttons
         enabled (bool): enabled state for button
         verbose (int): print process data
@@ -172,7 +176,7 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
     # Replace existing buttons with matching name or command/image
     if cmds.shelfButton(name, query=True, exists=True):
         cmds.deleteUI(name)
-    for _btn in _find_shelf_buttons():
+    for _btn in find_shelf_buttons():
         if _btn.image != image:
             continue
         lprint(' - CHECKING', _get_clean_cmd(_btn.command), verbose=verbose)
@@ -190,6 +194,7 @@ def add_shelf_button(name, image, command, annotation=None, parent='Henry',
             ('image', image),
             ('command', command),
             ('width', width),
+            ('height', height),
             ('enable', enabled),
     ]:
         if _val:

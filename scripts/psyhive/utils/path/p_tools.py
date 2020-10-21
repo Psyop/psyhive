@@ -175,7 +175,7 @@ def find(
         raise OSError("Missing dir "+_dir)
     try:
         _files = os.listdir(_dir)
-    except WindowsError:
+    except OSError:
         _files = []
 
     for _file in _files:
@@ -533,7 +533,7 @@ def rel_path(path, root):
     _path = abs_path(path)
     _root = abs_path(root)
     if not _path.startswith(_root):
-        raise ValueError
+        raise ValueError('Not in root {} - {}'.format(_root, _path))
     return _path[len(_root):].lstrip('/')
 
 
@@ -650,19 +650,28 @@ def write_file(file_, text, force=False):
     _file.close()
 
 
-def write_yaml(file_, data):
+def write_yaml(file_, data, force=False):
     """Write yaml data to file.
 
     Args:
         file_ (str): path to yaml file
         data (dict): data to write to yaml
+        force (bool): replace existing without confirmation
     """
     try:
         import yaml
     except ImportError:
         print '[WARNING] write failed - failed to import yaml module'
         return
+
     _file = File(get_path(file_))
+
+    if _file.exists():
+        if not force:
+            from psyhive import qt
+            qt.ok_cancel('Overwrite file?\n\n'+_file.path)
+        _file.delete(force=True)
+
     _file.test_dir()
     with open(_file.path, 'w') as _hook:
         yaml.dump(data, _hook, default_flow_style=False)

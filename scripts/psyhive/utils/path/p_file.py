@@ -46,6 +46,9 @@ class File(Path):
 
             if diff_:
                 self.diff(_file)
+                if self.matches(_file):
+                    print 'POST DIFF: MATCH'
+                    return
 
             if not force:
                 _result = qt.yes_no_cancel("Replace existing file?\n\n"+_file)
@@ -72,7 +75,7 @@ class File(Path):
 
         try:
             os.remove(self.path)
-        except WindowsError as _exc:
+        except OSError as _exc:
             print 'FAILED TO DELETE', self.path
             if not catch:
                 return
@@ -108,15 +111,21 @@ class File(Path):
             _arg += ':{:d}'.format(line_n)
 
         # Try using sublime executable
-        for _subl_exe in [
-                'C:/Program Files/Sublime Text 3/subl.exe',
-                'C:/Program Files (x86)/Sublime Text 3/subl.exe',
-        ]:
-            if os.path.exists(_subl_exe):
-                _cmds = [abs_path(_subl_exe, win=True), _arg]
-                system(_cmds, verbose=verbose)
-                return
-            lprint('MISSING EXE', _subl_exe, verbose=verbose)
+        _subl_exe = os.environ.get('SUBLIME_EXE')
+        if not _subl_exe:
+            for _exe in [
+                    'C:/Program Files/Sublime Text 3/subl.exe',
+                    'C:/Program Files (x86)/Sublime Text 3/subl.exe',
+            ]:
+                if os.path.exists(_exe):
+                    _subl_exe = abs_path(_exe, win=os.name == 'nt')
+                    break
+                lprint('MISSING EXE', _exe, verbose=verbose)
+        if _subl_exe:
+            lprint('EXE', _subl_exe, verbose=verbose)
+            _cmds = [_subl_exe, _arg]
+            system(_cmds, verbose=verbose, result=False)
+            return
 
         # Try using psylaunch
         dprint('Using psylaunch sublime - it may be quicker to install it '
@@ -222,11 +231,12 @@ class File(Path):
                 raise ValueError(_result)
         write_file(file_=self.path, text=text, force=_force)
 
-    def write_yaml(self, data):
+    def write_yaml(self, data, force=False):
         """Write yaml data to file.
 
         Args:
             data (dict): data to write
+            force (bool): replace existing without confirmation
         """
         from .p_tools import write_yaml
-        write_yaml(file_=self.path, data=data)
+        write_yaml(file_=self.path, data=data, force=force)

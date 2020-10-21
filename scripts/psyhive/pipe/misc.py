@@ -4,7 +4,7 @@ import tempfile
 
 from psyhive.utils import abs_path
 
-TMP = abs_path(tempfile.gettempdir())
+TMP = abs_path(tempfile.gettempdir().replace('/usr/tmp', '/var/tmp'))
 
 
 def read_ver_n(ver):

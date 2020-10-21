@@ -385,7 +385,12 @@ def get_result_to_file_storer(
                         cache_file=_cache_file, depend_path=_depend_path,
                         cache_file_exists=_cache_file_exists,
                         verbose=verbose):
-                    lprint(' - DEPEND PATH OUTDATED CACHE', verbose=verbose)
+                    if verbose:
+                        _depend_mtime = os.path.getmtime(_depend_path)
+                        _cache_mtime = os.path.getmtime(_cache_file)
+                        lprint(
+                            ' - DEPEND PATH OUTDATED CACHE BY {:.01f}s'.format(
+                                _depend_mtime - _cache_mtime))
                     _force = True
                 else:
                     lprint(

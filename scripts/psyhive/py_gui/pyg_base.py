@@ -411,7 +411,7 @@ class BasePyGui(object):
         if verbose > 1:
             pprint.pprint(_settings)
         dprint('Saved settings', self.settings_file, verbose=verbose)
-        write_yaml(file_=self.settings_file, data=_settings)
+        write_yaml(file_=self.settings_file, data=_settings, force=True)
 
     def set_section(self, section, verbose=0):
         """Set current section (implemented in subclass).

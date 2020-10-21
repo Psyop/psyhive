@@ -542,7 +542,7 @@ def build_shader_outputs(output, force=True, verbose=1):
             if _se not in DEFAULT_NODES]
     lprint(" - SHADING ENGINES", _ses, verbose=verbose)
     host.save_as(_shaders.path, force=force)
-    write_yaml(file_=_yml.path, data=_ses)
+    write_yaml(file_=_yml.path, data=_ses, force=True)
 
     return _standin.path
 

@@ -3,6 +3,7 @@
 import copy
 import httplib
 import functools
+import os
 import pprint
 import random
 import re
@@ -100,6 +101,24 @@ def copy_text(text, verbose=1):
 def dprint(*args, **kwargs):
     """Print text to terminal with a date prefix."""
     lprint(time.strftime('[%H:%M:%S]'), *args, **kwargs)
+
+
+def get_cfg(namespace, verbose=0):
+    """Read config from the given namespace.
+
+    Args:
+        namespace (str): namespace name to read from
+        verbose (int): print process data
+
+    Returns:
+        (dict): config yaml file contents
+    """
+    from psyhive.utils.path import abs_path, read_yaml
+    _yaml = abs_path(
+        '../../../cfg/{}.yml'.format(namespace),
+        root=os.path.dirname(__file__))
+    lprint('YAML', _yaml, verbose=verbose)
+    return read_yaml(_yaml)
 
 
 def get_single(
@@ -422,18 +441,27 @@ def system(cmd, result=True, verbose=0):
         _cmds = ["cmd", "/C"]+cmd.split()
     lprint(' '.join(_cmds), verbose=verbose)
 
-    _si = subprocess.STARTUPINFO()
-    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    if os.name == 'nt':
 
-    _pipe = subprocess.Popen(
-        _cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        startupinfo=_si)
+        _si = subprocess.STARTUPINFO()
+        _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-    if not result:
-        return None
-    return _pipe.communicate()[0]
+        _pipe = subprocess.Popen(
+            _cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            startupinfo=_si)
+        if not result:
+            return None
+        return _pipe.communicate()[0]
+
+    else:
+        _cmd = ' '.join(_cmds)
+        if not result:
+            os.system(_cmd)
+            return None
+        import commands
+        return commands.getoutput(_cmd)
 
 
 def to_camel(text):

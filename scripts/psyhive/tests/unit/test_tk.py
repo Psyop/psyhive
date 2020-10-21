@@ -1,48 +1,49 @@
 import unittest
 
-from psyhive import tk
+from psyhive import tk, pipe
 
 
 class TestTk(unittest.TestCase):
 
     def test(self):
 
-        _path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'output/animcache/animation_archer1/v013/alembic/'
             'dev0000_animation_archer1_v013.abc')
-        assert tk.TTShotOutputName(_path).path == (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        assert tk.TTShotOutputName(_path).path == pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'output/animcache/animation_archer1')
-        assert tk.TTShotOutputVersion(_path).path == (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        assert tk.TTShotOutputVersion(_path).path == pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'output/animcache/animation_archer1/v013')
-        _path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'work/maya/scenes/dev0000_fkikTest_v001.ma')
         _work = tk.TTMayaShotWork(_path)
         assert _work.path == _path
         assert _work == tk.get_work(_path)
-        _path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'work/maya/scenes/increments/dev0000_fkikTest_v001_001.ma')
         _inc = tk.TTMayaShotIncrement(_path)
         assert _inc.path == _path
         assert _inc.get_work() == tk.get_work(_path)
         assert _inc.get_work() == _work
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
-                 'rig/output/rig/rig_main/v003/maya/archer_rig_main_v003.mb')
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/assets/3D/character/archer/'
+            'rig/output/rig/rig_main/v003/maya/archer_rig_main_v003.mb')
         _out = tk.TTAssetOutputFile(_path)
         assert _out.version == 3
 
         # Check get metadata
-        _path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/ramon/rig/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/assets/3D/character/ramon/rig/'
             'work/maya/scenes/ramon_dynamic_v003.mb')
         _work = tk.TTMayaAssetWork(_path)
         print _work.get_metadata()
-        _path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/animation/'
             'work/maya/scenes/dev0000_aadvark_v034.ma')
         _work = tk.TTMayaShotWork(_path)
         assert _work.get_metadata()
@@ -51,24 +52,25 @@ class TestTk(unittest.TestCase):
 
         # Test create output
         for _path in [
-                ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ('/hvanderbeek_0001P/sequences/dev/dev0000/'
                  'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
                  'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
-                ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+                ('/hvanderbeek_0001P/assets/3D/character/archer/'
                  'rig/output/rig/rig_main/v016/assembly/'
                  'archer_rig_main_v016.mb'),
         ]:
-            assert tk.get_output(_path)
+            assert tk.get_output(pipe.PROJECTS_ROOT + _path)
 
         # Test output objects
         for _path in [
-                'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                '/hvanderbeek_0001P/sequences/dev/dev9999/'
                 'animation/output/animcache/test_archer/v004/alembic/'
                 'dev9999_test_archer_v004.abc',
-                'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+                '/hvanderbeek_0001P/sequences/dev/dev9999/'
                 'animation/output/render/test_masterLayer/v004/jpg/'
                 'dev9999_test_masterLayer_v004.%04d.jpg',
         ]:
+            _path = pipe.PROJECTS_ROOT + _path
             print _path
             _out = tk.get_output(_path)
             _latest = _out.find_latest()
@@ -89,15 +91,16 @@ class TestTk(unittest.TestCase):
 
     def test_obtain_cacheable(self):
 
-        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
-                 'animation/work/maya/scenes/dev0000_aadvark_v034.ma')
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/sequences/dev/dev0000/'
+            'animation/work/maya/scenes/dev0000_aadvark_v034.ma')
         _work = tk.get_work(_path, catch=False)
         assert isinstance(_work, tk.TTMayaShotWork)
         _cacheable = tk.obtain_cacheable(_work)
         assert type(_cacheable).__name__ == '_CTTMayaShotWork'
 
-        _path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+        _path = pipe.PROJECTS_ROOT + (
+            '/hvanderbeek_0001P/assets/3D/character/archer/'
             'rig/output/rig/rig_main/v016/assembly/archer_rig_main_v016.mb')
         _output = tk.TTAssetOutputFile(_path)
         assert isinstance(_output, tk.TTAssetOutputFile)

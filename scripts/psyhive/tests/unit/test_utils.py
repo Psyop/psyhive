@@ -6,6 +6,7 @@ import tempfile
 import time
 import unittest
 
+from psyhive import pipe
 from psyhive.utils import (
     passes_filter, apply_filter, abs_path, obj_write, obj_read, PyFile,
     store_result, restore_cwd, MissingDocs, rel_path, to_nice, wrap_fn,
@@ -159,13 +160,15 @@ class TestPath(unittest.TestCase):
     @restore_cwd
     def test_abs_path(self):
 
-        os.chdir('W:/Temp')
-        assert abs_path('test.txt') == 'W:/Temp/test.txt'
-        assert abs_path('./test.txt') == 'W:/Temp/test.txt'
+        os.chdir(pipe.TMP)
+        print abs_path('test.txt')
+        assert abs_path('test.txt') == pipe.TMP + '/test.txt'
+        assert abs_path('./test.txt') == pipe.TMP + '/test.txt'
         assert abs_path('./test.txt', root='K:/Temp') == 'K:/Temp/test.txt'
-        assert abs_path('~/test.txt') == 'Z:/test.txt'
-        assert abs_path('./test.txt', root='/a/b/c') == 'A:/b/c/test.txt'
-        assert abs_path('../test.txt', root='/a/b/c') == 'A:/b/test.txt'
+        if os.name == 'ny':
+            assert abs_path('~/test.txt') == 'Z:/test.txt'
+            assert abs_path('./test.txt', root='/a/b/c') == 'A:/b/c/test.txt'
+            assert abs_path('../test.txt', root='/a/b/c') == 'A:/b/test.txt'
 
         _root = r'Z:/dev/global/code/pipeline/bootstrap/hv-test/python'
         _path = (
@@ -174,11 +177,13 @@ class TestPath(unittest.TestCase):
         assert rel_path(_path, root=_root) == (
             'psyhive/diary/y19/d0401/rip_icons.py')
 
-        _path = 'file:///W:/Temp/icons/Emoji/icon.2469.png'
-        assert abs_path(_path) == 'W:/Temp/icons/Emoji/icon.2469.png'
-
-        _path = r"\\la1nas006\homedir\hvanderbeek\Downloads\SK_Tier1_Male.ma"
-        assert abs_path(_path) == 'Z:/Downloads/SK_Tier1_Male.ma'
+        if os.name == 'nt':
+            _path = 'file:///W:/Temp/icons/Emoji/icon.2469.png'
+            print 'A', abs_path(_path)
+            assert abs_path(_path) == 'W:/Temp/icons/Emoji/icon.2469.png'
+            _path = (
+                r"\\la1nas006\homedir\hvanderbeek\Downloads\SK_Tier1_Male.ma")
+            assert abs_path(_path) == 'Z:/Downloads/SK_Tier1_Male.ma'
 
     def test_find(self):
 
