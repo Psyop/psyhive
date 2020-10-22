@@ -4,7 +4,7 @@ import unittest
 from maya import cmds
 from pymel.core import nodetypes as nt
 
-from psyhive import tk
+from psyhive import tk, pipe
 from psyhive.utils import set_dev_mode, revert_dev_mode
 from maya_psyhive import ref, tex, open_maya as hom
 from maya_psyhive.utils import use_tmp_ns, del_namespace
@@ -14,8 +14,9 @@ from maya_psyhive.tools import (
 from maya_psyhive.tools.batch_cache.tmpl_cache import CTTShotRoot
 from maya_psyhive.tools.m_batch_rerender import rerender
 
+_DEV_PROJ = pipe.find_project('hvanderbeek_0001P')
 _RIG_PATH = (
-    'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
+    _DEV_PROJ.path + '/assets/3D/character/archer/rig/'
     'output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
 
 
@@ -23,7 +24,7 @@ class TestTools(unittest.TestCase):
 
     def test_batch_cache(self):
 
-        _path = 'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000'
+        _path = _DEV_PROJ.path + '/sequences/dev/dev0000'
         _shot = CTTShotRoot(_path)
         _shot.read_work_files(force=True)
 
@@ -32,18 +33,18 @@ class TestTools(unittest.TestCase):
 
     def test_batch_rerender(self):
 
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/'
+        _path = (_DEV_PROJ.path + '/assets/3D/character/'
                  'babyDragon/shade/output/shadegeo/shade_main/v019/maya/'
                  'babyDragon_shade_main_v019.mb')
         _ref = ref.obtain_ref(file_=_path, namespace='dragon')
         rerender._update_outputs_to_latest(refs=[_ref])
 
         # Test map abc to latest including rest cache
-        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+        _path = (_DEV_PROJ.path + '/sequences/dev/dev0000/'
                  'tracking/output/camcache/imagePlaneTest_renderCam/v053/'
                  'alembic/dev0000_imagePlaneTest_renderCam_v053.abc')
         assert rerender._get_latest_abc(_path)
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/'
+        _path = (_DEV_PROJ.path + '/assets/3D/character/'
                  'babyDragon/shade/output/shadegeo/shade_main/v019/maya/'
                  'babyDragon_shade_main_v019_restcache.abc')
         assert rerender._get_latest_abc(_path)
@@ -92,21 +93,21 @@ class TestTools(unittest.TestCase):
     def test_restore_image_plane(self):
         set_dev_mode(False)
         print 'TEST RESTORE IMAGE PLANE'
-        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+        _path = (_DEV_PROJ.path + '/sequences/dev/dev9999/'
                  'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
         _work = tk.get_work(_path)
         _ref = ref.obtain_ref(file_=_work.path, namespace='restoreTest')
         assert not cmds.ls(type='imagePlane')
         for _path, _time_ctrl in [
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_animCam/v053/'
                   'alembic/dev0000_imagePlaneTest_animCam_v053.abc'),
                  'animCam:AlembicTimeControl'),
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
                   'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
                  'renderCam:AlembicTimeControl'),
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
@@ -144,7 +145,7 @@ class TestTools(unittest.TestCase):
 
         set_dev_mode(False)
 
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+        _path = (_DEV_PROJ.path + '/assets/3D/character/archer/'
                  'rig/output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
         _ref = ref.obtain_ref(file_=_path, namespace='archer_test')
         _ref.get_node('placer_Ctrl', class_=hom.HFnTransform).tz.set_val(10)
@@ -167,7 +168,7 @@ class TestTools(unittest.TestCase):
         _img = (r"\\la1nas006\homedir\hvanderbeek\Desktop"
                 r"\tumblr_p3gzfbykSP1rv4b7io1_1280.png")
         _abc_path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+            _DEV_PROJ.path + '/sequences/dev/dev0000/tracking/'
             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
             'dev0000_imagePlaneTest_renderCam_v047.abc')
         _abc = tk.get_output(_abc_path).find_latest()

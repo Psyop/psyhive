@@ -105,6 +105,10 @@ def find_shot(name, catch=False):
         (TTRoot): matching shot
     """
     _shots = [_shot for _shot in find_shots() if _shot.name == name]
+    if not _shots:
+        raise ValueError('No {} shot found'.format(name))
+    if len(_shots) > 1:
+        raise ValueError('Multiple {} shots found'.format(name))
     return get_single(_shots, catch=catch)
 
 

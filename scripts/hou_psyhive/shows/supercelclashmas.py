@@ -1,5 +1,7 @@
 """Tools for Supercel Clashmas project."""
 
+import copy
+
 import hou
 
 from psyhive import icons, tk2, host, qt
@@ -98,6 +100,25 @@ def batch_submit_shots(step='previz', submitter='/out/submitter1'):
     _shots = qt.multi_select(
         _shots, title='Select shots',
         msg='Select shots to submit')
+
+    # Check shots
+    _missing_cam = []
+    for _shot in copy.copy(_shots):
+        _shot = tk2.find_shot(_shot)
+        print 'CHECKING', _shot
+        _step = _shot.find_step_root(step)
+        _cam_abc = _step.find_output_file(
+            output_type='camcache', extn='abc', verbose=1,
+            version='latest', catch=True)
+        if not _cam_abc:
+            _missing_cam.append(_shot.name)
+            _shots.remove(_shot.name)
+    if _missing_cam:
+        qt.ok_cancel(
+            'Shots with no {} camera:\n\n    {}\n\nThese shots will '
+            'be ignored.'.format(step, '\n    '.join(_missing_cam)))
+
+    # Submit shots
     for _shot in qt.progress_bar(_shots, 'Submitting {:d} shot{}'):
         print 'BUILD SCENE', _shot
         build_scene(shot=_shot, step=step, submitter=submitter)

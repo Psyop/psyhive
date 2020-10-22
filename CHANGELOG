@@ -1,3 +1,18 @@
+#### v0.110.0 ####
+
+    Released: Thu 22nd Oct 2020 10:52am
+
+    Supercel Clashmas: check shot has cam before submit (dbodenstein)
+    
+    hou_psyhive:
+        shows.supercelclashmas check shot has cam before submit,
+    maya_psyhive:
+        updated integration tests for linux,
+        tk2.find_shots better error on no/multiple shots,
+        tools.ingest dev mode report import errors + separate try/expect per submodule,
+        utils.set_dev_mode bugfix update PSYHIVE_ICONS_EMOJI for linux,
+
+
 #### v0.109.1 ####
 
     Released: Wed 21st Oct 2020 14:02pm

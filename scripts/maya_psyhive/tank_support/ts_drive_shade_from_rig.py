@@ -23,7 +23,7 @@ def _clean_unused_uv_sets(mesh, verbose=0):
         mesh (HFnMesh): mesh to clean
         verbose (int): print process data
     """
-    _all = cmds.polyUVSet(mesh, query=True, allUVSets=True)
+    _all = cmds.polyUVSet(mesh, query=True, allUVSets=True) or []
 
     if len(_all) <= 1:
         lprint('NO UV CLEAN REQUIRED', verbose=verbose)

@@ -4,7 +4,7 @@ import unittest
 from maya import cmds
 from pymel.core import nodetypes as nt
 
-from psyhive import tk2
+from psyhive import tk2, pipe
 from psyhive.utils import File, revert_dev_mode, set_dev_mode
 
 from maya_psyhive import ref, open_maya as hom
@@ -12,9 +12,10 @@ from maya_psyhive.utils import use_tmp_ns, del_namespace, set_namespace
 
 from maya_psyhive import tank_support
 
-_RIG_PATH = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/rig/'
+_DEV_PROJ = pipe.find_project('hvanderbeek')
+_RIG_PATH = (_DEV_PROJ.path + '/assets/3D/character/archer/rig/'
              'output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
-_SHADE_PATH = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+_SHADE_PATH = (_DEV_PROJ.path + '/assets/3D/character/archer/'
                'shade/output/shadegeo/shade_main/v092/maya/'
                'archer_shade_main_v092.mb')
 
@@ -30,11 +31,11 @@ class TestTankSupport(unittest.TestCase):
         set_dev_mode(False)
 
         _abc = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+            _DEV_PROJ.path + '/sequences/dev/dev9999/'
             'animation/output/animcache/test_archer/v004/alembic/'
             'dev9999_test_archer_v004.abc')
         _standin = File(
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+            _DEV_PROJ.path + '/assets/3D/character/archer/'
             'shade/output/shadegeo/shade_main/v092/aistandin/'
             'archer_shade_main_v092.ma')
 
@@ -52,7 +53,7 @@ class TestTankSupport(unittest.TestCase):
 
         # Test build standin from shade (for clash holiday)
         _shade_path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/shade/'
+            _DEV_PROJ.path + '/assets/3D/character/archer/shade/'
             'output/shadegeo/shade_main/v092/maya/archer_shade_main_v092.mb')
         _shade = ref.obtain_ref(namespace='archer_SHD', file_=_shade_path)
         _standin = tank_support.build_aistandin_from_shade(
@@ -60,7 +61,7 @@ class TestTankSupport(unittest.TestCase):
         assert _standin.shp.plug('dso').get_val() == _abc
 
         # Test read sg range
-        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+        _abc = (_DEV_PROJ.path + '/sequences/dev/dev0000/'
                 'animation/output/animcache/aadvark_archer1/v039/alembic/'
                 'dev0000_aadvark_archer1_v039.abc')
         assert ts_aistandin._get_abc_range_from_sg(_abc) == (1005, 1015)
@@ -96,21 +97,21 @@ class TestTankSupport(unittest.TestCase):
     def test_restore_image_plane(self):
 
         # Test restore via psyhive
-        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+        _path = (_DEV_PROJ.path + '/sequences/dev/dev9999/'
                  'animation/work/maya/scenes/dev9999_imagePlaneTest_v001.ma')
         _work = tk2.TTWork(_path)
         _ref = ref.obtain_ref(file_=_work.path, namespace='restoreTest')
         assert not cmds.ls(type='imagePlane')
         for _path, _time_ctrl in [
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_animCam/v053/'
                   'alembic/dev0000_imagePlaneTest_animCam_v053.abc'),
                  'animCam:AlembicTimeControl'),
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_renderCam/v045/'
                   'alembic/dev0000_imagePlaneTest_renderCam_v045.abc'),
                  'renderCam:AlembicTimeControl'),
-                (('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+                ((_DEV_PROJ.path + '/sequences/dev/dev0000/'
                   'tracking/output/camcache/imagePlaneTest_badCam/v053/'
                   'alembic/dev0000_imagePlaneTest_badCam_v053.abc'),
                  'badCam:AlembicTimeControl')]:
@@ -121,14 +122,14 @@ class TestTankSupport(unittest.TestCase):
 
         # Test restore via asset manager
         set_namespace(":")
-        _path = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+        _path = (_DEV_PROJ.path + '/sequences/dev/dev0000/'
                  'animation/output/camcache/fishTest_renderCam/v001/'
                  'alembic/dev0000_fishTest_renderCam_v001.abc')
         tk2.reference_publish(_path)
 
     def test_shade_geo_from_rig(self):
 
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+        _path = (_DEV_PROJ.path + '/assets/3D/character/archer/'
                  'rig/output/rig/rig_main/v016/maya/archer_rig_main_v016.mb')
         _ref = ref.obtain_ref(file_=_path, namespace='archer_test')
         _ref.get_node('placer_Ctrl', class_=hom.HFnTransform).tz.set_val(10)
@@ -136,7 +137,7 @@ class TestTankSupport(unittest.TestCase):
         _cache_set = nt.ObjectSet(_ref.get_node('bakeSet'))
         _n_refs = len(ref.find_refs())
         del_namespace(':tmp_archer_test')
-        tank_support.drive_shade_geo_from_rig(_cache_set)
+        tank_support.drive_shade_geo_from_rig(_cache_set, verbose=1)
         assert len(ref.find_refs()) == _n_refs
         _geo = hom.HFnMesh('tmp_archer_test:hairStrand_04_Geo')
         assert _geo.bbox().min == _bbox.min
@@ -147,11 +148,11 @@ class TestTankSupport(unittest.TestCase):
         from maya_psyhive.tank_support import ts_shaders
 
         _abc = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev9999/'
+            _DEV_PROJ.path + '/sequences/dev/dev9999/'
             'animation/output/animcache/test_archer/v004/alembic/'
             'dev9999_test_archer_v004.abc')
         _standin = tk2.TTOutputFile(
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/'
+            _DEV_PROJ.path + '/assets/3D/character/archer/'
             'shade/output/shadegeo/shade_main/v092/aistandin/'
             'archer_shade_main_v092.ma')
         _shaders = _standin.map_to(extension='mb', format='shaders')
@@ -173,7 +174,7 @@ class TestTankSupport(unittest.TestCase):
 
         # Test build standin from shade (for clash holiday)
         _shade_path = (
-            'P:/projects/hvanderbeek_0001P/assets/3D/character/archer/shade/'
+            _DEV_PROJ.path + '/assets/3D/character/archer/shade/'
             'output/shadegeo/shade_main/v092/maya/archer_shade_main_v092.mb')
         _shade = ref.obtain_ref(namespace='archer_SHD', file_=_shade_path)
         _standin = tank_support.build_aistandin_from_shade(
@@ -181,13 +182,13 @@ class TestTankSupport(unittest.TestCase):
         assert _standin.shp.plug('dso').get_val() == _abc
 
         # Test read sg range
-        _abc = ('P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/'
+        _abc = (_DEV_PROJ.path + '/sequences/dev/dev0000/'
                 'animation/output/animcache/aadvark_archer1/v039/alembic/'
                 'dev0000_aadvark_archer1_v039.abc')
         assert ts_shaders._get_abc_range_from_sg(_abc) == (1005, 1015)
 
     def test_build_shader_outputs(self):
-        _path = ('P:/projects/hvanderbeek_0001P/assets/3D/character/test/'
+        _path = (_DEV_PROJ.path + '/assets/3D/character/test/'
                  'shade/output/shadegeo/sphere_main/v036/shaders/'
                  'test_sphere_main_v036.mb')
         tank_support.build_shader_outputs(_path, force=True)
@@ -209,7 +210,7 @@ class TestTankSupport(unittest.TestCase):
         _img = (r"\\la1nas006\homedir\hvanderbeek\Desktop"
                 r"\tumblr_p3gzfbykSP1rv4b7io1_1280.png")
         _abc_path = (
-            'P:/projects/hvanderbeek_0001P/sequences/dev/dev0000/tracking/'
+            _DEV_PROJ.path + '/sequences/dev/dev0000/tracking/'
             'output/camcache/imagePlaneTest_renderCam/v047/alembic/'
             'dev0000_imagePlaneTest_renderCam_v047.abc')
         _abc = tk2.TTOutputFile(_abc_path).find_latest()

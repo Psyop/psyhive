@@ -58,6 +58,6 @@ def set_dev_mode(value, verbose=0):
     elif 'PSYHIVE_DEV' in os.environ:
         del os.environ['PSYHIVE_DEV']
     os.environ['PSYHIVE_ICONS_EMOJI'] = (
-        'P:/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/'
-        'icon.%04d.png')
+        '{}/global/code/pipeline/bootstrap/psycons/icon_packs/EMOJI/'
+        'icon.%04d.png'.format(os.environ['PSYOP_ROOT']))
     lprint('PSYHIVE_DEV', dev_mode(), verbose=verbose)

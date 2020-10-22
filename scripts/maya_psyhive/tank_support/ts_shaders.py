@@ -87,7 +87,7 @@ def _get_next_idx(plug, connected=True, value=True, limit=1000, verbose=0):
         lprint(' - NO CONNECTION OR VAL', verbose=verbose)
         return _plug
 
-    raise ValueError
+    raise ValueError("Overflow on {}".format(plug))
 
 
 def _build_aip_node(shd, merge, meshes, ai_attrs=None, name=None, verbose=0):
