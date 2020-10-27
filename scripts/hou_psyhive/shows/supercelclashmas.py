@@ -103,20 +103,46 @@ def batch_submit_shots(step='previz', submitter='/out/submitter1'):
 
     # Check shots
     _missing_cam = []
-    for _shot in copy.copy(_shots):
+    _missing_rng = []
+    for _shot in qt.progress_bar(
+            copy.copy(_shots), 'Checking {:d} shot{}'):
         _shot = tk2.find_shot(_shot)
         print 'CHECKING', _shot
-        _step = _shot.find_step_root(step)
+
+        # Check cam
+        _step = _shot.find_step_root(step, catch=True)
+        if not _step:
+            _missing_cam.append(_shot.name)
+            _shots.remove(_shot.name)
+            continue
         _cam_abc = _step.find_output_file(
             output_type='camcache', extn='abc', verbose=1,
             version='latest', catch=True)
         if not _cam_abc:
             _missing_cam.append(_shot.name)
             _shots.remove(_shot.name)
+            continue
+        print ' - CAM', _cam_abc.path
+
+        # Check frame range
+        _rng = _shot.get_frame_range()
+        print ' - RANGE', _rng
+        if not _rng or None in _rng:
+            _missing_rng.append(_shot.name)
+            _shots.remove(_shot.name)
+            continue
+
+    # Show warning
+    _msg = ''
     if _missing_cam:
-        qt.ok_cancel(
-            'Shots with no {} camera:\n\n    {}\n\nThese shots will '
-            'be ignored.'.format(step, '\n    '.join(_missing_cam)))
+        _msg += 'Shots with no {} camera:\n\n    {}\n\n'.format(
+            step, '\n    '.join(_missing_cam))
+    if _missing_rng:
+        _msg += 'Shots with no range in shotgun:\n\n    {}\n\n'.format(
+            '\n    '.join(_missing_rng))
+    if _msg:
+        _msg += 'These shots will be ignored.'
+        qt.ok_cancel(_msg, title='Warning')
 
     # Submit shots
     for _shot in qt.progress_bar(_shots, 'Submitting {:d} shot{}'):

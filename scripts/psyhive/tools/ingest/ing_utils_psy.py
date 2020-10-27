@@ -30,7 +30,7 @@ def map_tag_to_shot(tag):
     """
 
     # Try existing shot on disk
-    _shot = tk2.find_shot(tag, catch=True)
+    _shot = tk2.find_shot(tag, catch=True, mode='sg')
     if _shot:
         return _shot
 

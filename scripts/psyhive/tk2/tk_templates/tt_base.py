@@ -3,14 +3,13 @@
 import copy
 import operator
 import pprint
-import tempfile
 
 import tank
 
 from psyhive import pipe, host
 from psyhive.utils import (
     Path, abs_path, lprint, Dir, find, apply_filter, get_single,
-    passes_filter, obj_read, obj_write, File)
+    passes_filter, obj_read, obj_write, build_cache_fmt)
 
 from psyhive.tk2.tk_templates.tt_utils import get_area, get_dcc, get_template
 from psyhive.tk2.tk_utils import get_current_engine
@@ -74,9 +73,7 @@ class TTBase(Path):
         Returns:
             (str): cache format
         """
-        _rel_path = File(Dir(pipe.cur_project().path).rel_path(self.path))
-        return abs_path('{}/psyhive_cache/{}/{}_{{}}.{}'.format(
-            tempfile.gettempdir(), _rel_path.dir, self.basename, self.extn))
+        return build_cache_fmt(self.path, level='project')
 
     def cache_read(self, tag):
         """Read cached data from the given tag.
@@ -102,6 +99,14 @@ class TTBase(Path):
         """
         _file = self.cache_fmt.format(tag)
         obj_write(file_=_file, obj=data)
+
+    def get_root(self):
+        """Get root object for this path.
+
+        Returns:
+            (TTRoot): shot (if any)
+        """
+        return TTRoot(self.path)
 
     def get_shot(self):
         """Get shot object for this path.
@@ -347,13 +352,14 @@ class TTShot(TTRoot):
         """
         return int(self.idx_s)
 
-    def get_frame_range(self, use_cut=True):
+    def get_frame_range(self, use_cut=True, verbose=0):
         """Read shot frame range from shotgun.
 
         This uses head in/tail out data values.
 
         Args:
             use_cut (bool): use cut in/out data
+            verbose (int): print process data
 
         Returns:
             (tuple): start/end frames
@@ -361,6 +367,7 @@ class TTShot(TTRoot):
         from psyhive import tk2
         _shotgun = tank.platform.current_engine().shotgun
         _fields = _get_rng_fields(use_cut)
+        lprint('GET RANGE FIELDS:', _fields, verbose=verbose)
         _sg_data = _shotgun.find_one(
             "Shot", filters=[
                 ["project", "is", [tk2.get_project_sg_data(self.project)]],

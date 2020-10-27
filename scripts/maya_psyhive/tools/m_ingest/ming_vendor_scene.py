@@ -8,7 +8,7 @@ from psyhive import tk2, host, pipe, qt
 from psyhive.tools import ingest
 from psyhive.utils import (
     File, lprint, store_result_to_file, get_result_to_file_storer,
-    build_cache_fmt, get_single, get_time_t, dev_mode)
+    build_cache_fmt, get_single, get_time_t)
 
 from maya_psyhive import ref, open_maya as hom, ui
 from maya_psyhive.utils import DEFAULT_NODES
@@ -74,7 +74,13 @@ class VendorScene(File, ingest.Ingestible):
             print ' - CHECKING CAPTURE/CACHE'
             if not self.has_capture():
                 return 'Needs capture', True
+            if not self.has_capture_sg_version():
+                if self.waiting_on_capture_sg_version():
+                    return 'Waiting on capture version publish', False
+                return 'Needs capture version publish', True
             if not self.has_cache():
+                if self.waiting_on_cache():
+                    return 'Waiting on farm cache', False
                 return 'Needs cache', True
             print ' - CHECKED CAPTURE/CACHE'
 
@@ -252,7 +258,7 @@ class VendorScene(File, ingest.Ingestible):
         return host.t_range(int)
 
     def ingest(self, vendor=None, force=False, publish=True, capture=True,
-               cache=True):
+               cache=True, cache_on_farm=True):
         """Ingest this file into psyop pipeline.
 
         Args:
@@ -261,19 +267,20 @@ class VendorScene(File, ingest.Ingestible):
             publish (bool): whether publish required
             capture (bool): whether capture required
             cache (bool): whether cache required
+            cache_on_farm (bool): submit caches to qube
         """
         _comment = self.get_comment(vendor=vendor)
         self._ingest_check_work(force=force, comment=_comment)
-        self._ingest_check_sg_range()
 
         if self.step in ['rig']:
             if publish:
                 self._ingest_check_publish(force=force)
         elif self.step in ['animation', 'previz']:
+            self._ingest_check_sg_range()
             if capture:
                 self._ingest_check_capture(force=force)
             if cache:
-                self._ingest_check_cache(force=force)
+                self._ingest_check_cache(force=force, farm=cache_on_farm)
         else:
             raise ValueError(self.step)
 
@@ -363,14 +370,16 @@ class VendorScene(File, ingest.Ingestible):
         Args:
             force (bool): update sg range without confirmation
         """
+        _scn_rng = self.scene_get_frame_range()
+
         _work = self.to_psy_work()
-        if not _work.shot:
-            return
+        # if not _work.shot:
+        #     return
         _shot = _work.get_shot()
         print 'CHECKING SG RANGE', _shot
-        _work.load(lazy=True)
+        # _work.load(lazy=True)
 
-        _scn_rng = host.t_range(int)
+        # _scn_rng = host.t_range(int)
         _shot_rng = _shot.get_frame_range(use_cut=False)
         print ' - RANGE scene={} shot={}'.format(_scn_rng, _shot_rng)
         if _scn_rng == _shot_rng:
@@ -382,6 +391,7 @@ class VendorScene(File, ingest.Ingestible):
                     _shot.name, int(_scn_rng[0]), int(_scn_rng[1])),
                 title='Update shotgun range')
         _shot.set_frame_range(_scn_rng, use_cut=False)
+        _shot.set_frame_range(_scn_rng, use_cut=True)  # For isaac
         print _shot.get_frame_range(use_cut=False)
         assert _shot.get_frame_range(use_cut=False) == _scn_rng
 
@@ -391,22 +401,34 @@ class VendorScene(File, ingest.Ingestible):
         Args:
             force (bool): lose unsaved changes without confirmation
         """
-        if self.has_capture():
-            return
-
         _work = self.to_psy_work()
-        print 'CAPTURING', _work.path
-        _work.load(lazy=True)
 
-        _cam = self.scene_get_cam()
-        print ' - CAM', _cam
-        assert _cam
+        # Build capture
+        if not self.has_capture():
 
-        cmds.modelPanel(ui.get_active_model_panel(), edit=True, camera=_cam)
+            print 'CAPTURING', _work.path
+            _work.load(lazy=True)
 
-        tk2.capture_scene(force=True)
+            _cam = self.scene_get_cam()
+            print ' - CAM', _cam
+            assert _cam
 
-    def _ingest_check_cache(self, force=False, farm=False):
+            cmds.modelPanel(
+                ui.get_active_model_panel(), edit=True, camera=_cam)
+
+            tk2.capture_scene(force=True)
+
+        # Submit version
+        assert self.has_capture()
+        _cap = _work.find_output_file(
+            output_type='capture', extension='jpg', format_='jpg')
+        if (
+                not self.has_capture_sg_version() and
+                not _cap.cache_read('submitted transgen')):
+            _cap.submit_sg_version()
+            assert _cap.cache_read('submitted transgen')
+
+    def _ingest_check_cache(self, force=False, farm=True):
         """Check this file has been cached, executing cache if necessary.
 
         Args:
@@ -420,9 +442,9 @@ class VendorScene(File, ingest.Ingestible):
         print 'CACHING', _work.path
 
         print ' - CACHE FMT', _work.cache_fmt
-        if dev_mode():
-            assert not farm
-        assert not _work.cache_read(_WAITING_ON_FARM_CACHE_TOKEN)
+        if _work.cache_read(_WAITING_ON_FARM_CACHE_TOKEN):
+            print ' - CACHE ALREADY SUBMITTED'
+            return
 
         _work.load(lazy=True, force=force)
 
@@ -446,6 +468,32 @@ class VendorScene(File, ingest.Ingestible):
         lprint(' - CHECKED HAS CAPTURE', verbose=verbose)
         return bool(_cap)
 
+    def waiting_on_capture_sg_version(self):
+        """Test if we're waiting on a capture transgen.
+
+        ie. the capture transgen has been submitted to the farm.
+
+        Returns:
+            (bool): whether capture transgen has been submitted
+        """
+        if not self.has_capture():
+            return False
+        _work = self.to_psy_work()
+        _cap = _work.find_output_file(
+            output_type='capture', extension='jpg', format_='jpg')
+        return _cap.cache_read('submitted transgen')
+
+    def has_capture_sg_version(self):
+        """Check if the capture has a shotgun version.
+
+        Returns:
+            (bool): whether sg version exists
+        """
+        _work = self.to_psy_work()
+        _cap = _work.find_output_file(
+            output_type='capture', extension='jpg', format_='jpg')
+        return _cap.has_sg_version()
+
     def has_cache(self):
         """Check if this file has been cached.
 
@@ -455,6 +503,17 @@ class VendorScene(File, ingest.Ingestible):
         _work = self.to_psy_work()
         return bool(_work.find_output_files(
             extension='abc', output_type='animcache'))
+
+    def waiting_on_cache(self):
+        """Test if we're waiting on a farm cache.
+
+        Returns:
+            (bool): whether cache has been submitted
+        """
+        if self.has_cache():
+            return False
+        _work = self.to_psy_work()
+        return _work.cache_read(_WAITING_ON_FARM_CACHE_TOKEN)
 
     def to_psy_work(self, verbose=0):
         """Get psyop work file for this scene.

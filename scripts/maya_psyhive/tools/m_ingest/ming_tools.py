@@ -84,12 +84,12 @@ def _get_ingestable_scenes(dir_, filter_):
 
 
 @py_gui.install_gui(
-    label_width=90, hide=['ignore_extn', 'force'],
-    icon=ingest.ICON,
+    label_width=130, hide=['ignore_extn', 'force'], icon=ingest.ICON,
     browser={'dir_': py_gui.BrowserLauncher(
         mode='SingleDirExisting', default_dir=_VENDOR_IN)})
 def ingest_vendor_anim(
-        dir_, vendor=None, force=False, filter_=None, ignore_extn=False,
+        dir_, vendor=None, force=False, filter_=None,
+        cache_on_farm=True, ignore_extn=False,
         ignore_dlayers=False, ignore_rlayers=False,
         ignore_multi_top_nodes=False):
     """Ingest vendor animation files.
@@ -99,6 +99,7 @@ def ingest_vendor_anim(
         vendor (str): vendor name
         force (bool): lose current scene changes without confirmation
         filter_ (str): filter file list
+        cache_on_farm (bool): submit caches to qube
         ignore_extn (bool): ignore file extension issues
         ignore_dlayers (bool): ignore display layer issues
         ignore_rlayers (bool): ignore render layer issues
@@ -146,7 +147,7 @@ def ingest_vendor_anim(
             _issues.append((_scene, _scene_isses))
         print ' - CAM', _scene.scene_get_cam()
 
-        _scene.ingest(vendor=vendor, force=True)
+        _scene.ingest(vendor=vendor, force=True, cache_on_farm=cache_on_farm)
         _status, _ = _scene.get_ingest_status()
         _statuses[_scene] = _status
 

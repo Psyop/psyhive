@@ -1,3 +1,31 @@
+#### v0.111.0 ####
+
+    Released: Tue 27th Oct 2020 12:40pm
+
+    Supercel Clashmas: (dbodenstein)
+        check shot has sg range before submit,
+    Ingest Vendor Anim: (iirvin)
+        bugfix unable to find shots not currently on disk,
+        update shot cut in/out range on ingest,
+        added option to cache scene on farm,
+    
+    hou_psyhive:
+        shows.supercelclashmas check shot has sg range before submit,
+    maya_psyhive:
+        open_maya.BaseNode.save_preset better error on fail,
+        tank_support.export_img_plane no error on fail to catch farm error,
+        m_ingest.ingest_vendor_anim added cache on farm option,
+        m_ingest.ingest_vendor_anim apply cut in/out sg range on ingest,
+        m_ingest.ingest_vendor_anim submit sg version on capture,
+        m_ingest.ingest_vendor_anim added cache/transgen waiting status,
+    psyhive:
+        tk2.TTBase.cache_fmt use project not tmp,
+        tk2.TTBase.get_root added,
+        tk2.TTShot.get_frame_range added verbose,
+        tk2.TTFileOutputSeq added has_sg_version/submit_sg_version,
+        tk2 find_shot/find_shots added mode arg + sg search,
+
+
 #### v0.110.0 ####
 
     Released: Thu 22nd Oct 2020 10:52am

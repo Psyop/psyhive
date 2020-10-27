@@ -534,7 +534,8 @@ class BaseNode(object):
         else:
             cmds.nodePreset(save=(self, "tmp"))
         lprint("SAVED PRESET", _file, verbose=verbose)
-        assert os.path.exists(_file)
+        if not os.path.exists(_file):
+            raise RuntimeError('Failed to save preset: {}'.format(_file))
 
         if not file_:
             lprint("RETURNING ORIGINAL FILE", verbose=verbose)

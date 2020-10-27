@@ -4,11 +4,13 @@ import operator
 import pprint
 
 import tank
+from transgen import helper
 
 from psyhive import pipe
 from psyhive.utils import (
     File, abs_path, lprint, apply_filter, Seq, seq_from_frame,
     get_single, Movie)
+
 
 from .tt_base import TTDirBase, TTBase
 from .tt_utils import get_area, get_template
@@ -558,3 +560,32 @@ class TTOutputFileSeq(_TTOutputFileBase, Seq):
 
         super(TTOutputFileSeq, self).__init__(_path, hint=_hint)
         Seq.__init__(self, path)
+
+    def has_sg_version(self):
+        """Test if there is a shotgun version for this seq.
+
+        NOTE: there could be more than one if someone already published it
+        through Publish Files tool manually.
+
+        Returns:
+            (bool): whether version found in shotgun
+        """
+        from psyhive import tk2
+        _data = tk2.get_sg_data(
+            'Version', entity=self.get_root().get_sg_data(),
+            code=self.basename, fields=['sg_path_to_frames'])
+        if not _data or not _data[0]['sg_path_to_frames']:
+            return False
+        _path = abs_path(_data[0]['sg_path_to_frames']).replace('####', '%04d')
+        print ' - VER PATH', _path
+        assert _path == self.path
+        return True
+
+    def submit_sg_version(self):
+        """Submit shotgun version of this output."""
+        _start, _end = self.find_range()
+        assert not self.cache_read('submitted transgen')
+        helper.process_submission_preset(
+            self.path, _start, _end, 'dailies-scene-referred',
+            submit_to_farm=True)
+        self.cache_write('submitted transgen', True)

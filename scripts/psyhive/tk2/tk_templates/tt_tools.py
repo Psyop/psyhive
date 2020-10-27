@@ -94,17 +94,18 @@ def find_sequences():
     return _seqs
 
 
-def find_shot(name, catch=False):
+def find_shot(name, catch=False, mode='disk'):
     """Find shot matching the given name.
 
     Args:
         name (str): name to search for
         catch (bool): no error if fail to match
+        mode (str): where to search for shot (disk/sg)
 
     Returns:
         (TTRoot): matching shot
     """
-    _shots = [_shot for _shot in find_shots() if _shot.name == name]
+    _shots = [_shot for _shot in find_shots(mode=mode) if _shot.name == name]
     if not _shots:
         raise ValueError('No {} shot found'.format(name))
     if len(_shots) > 1:
@@ -112,23 +113,39 @@ def find_shot(name, catch=False):
     return get_single(_shots, catch=catch)
 
 
-def find_shots(class_=None, filter_=None, sequence=None):
+def find_shots(class_=None, filter_=None, sequence=None, mode='disk'):
     """Find shots in the current job.
 
     Args:
         class_ (class): override shot root class
         filter_ (str): filter by shot name
         sequence (str): filter by sequence name
+        mode (str): where to search for shot (disk/sg)
 
     Returns:
         (TTRoot): list of shots
     """
-    _seqs = find_sequences()
-    if sequence:
-        _seqs = [_seq for _seq in _seqs if _seq.name == sequence]
-    return sum([
-        _seq.find_shots(class_=class_, filter_=filter_)
-        for _seq in _seqs], [])
+    if mode == 'disk':
+        _seqs = find_sequences()
+        if sequence:
+            _seqs = [_seq for _seq in _seqs if _seq.name == sequence]
+        return sum([
+            _seq.find_shots(class_=class_, filter_=filter_)
+            for _seq in _seqs], [])
+    elif mode == 'sg':
+        from psyhive import tk2
+        _path_fmt = '{}/sequences/{}/{}'
+        _shots = []
+        for _seq in tk2.get_sg_data(
+                type_='Sequence', fields=['shots', 'code'], limit=0):
+            for _shot in _seq['shots']:
+                _shot_path = _path_fmt.format(
+                    pipe.cur_project().path, _seq['code'], _shot['name'])
+                _shot = tk2.TTShot(_shot_path)
+                _shots.append(_shot)
+        return _shots
+    else:
+        raise ValueError(mode)
 
 
 def get_asset(path):

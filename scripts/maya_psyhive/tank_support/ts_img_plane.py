@@ -36,7 +36,10 @@ def export_img_plane(camera, abc):
         _preset = '{}/{}.preset'.format(
             os.path.dirname(abc), _shp.object_type())
         lprint(' - SAVING', _preset)
-        _shp.save_preset(_preset)
+        try:
+            _shp.save_preset(_preset)
+        except RuntimeError:
+            lprint(' - FAILED TO SAVE')
 
 
 @track_usage
