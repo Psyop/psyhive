@@ -1,3 +1,15 @@
+#### v0.112.0 ####
+
+    Released: Wed 28th Oct 2020 11:02am
+
+    Ingest Vendor Anim: ignore any version already existing on disk (iirvin),
+    
+    maya_psyhive:
+        m_ingest.ingest_vendor_anim ignore any version already ingested,
+    psyhive:
+        tk2.TTBase.cache_fmt bugfix cache on image seq,
+
+
 #### v0.111.0 ####
 
     Released: Tue 27th Oct 2020 12:40pm

@@ -73,7 +73,8 @@ class TTBase(Path):
         Returns:
             (str): cache format
         """
-        return build_cache_fmt(self.path, level='project')
+        return build_cache_fmt(
+            self.path.replace(".%04d.", "."), level='project')
 
     def cache_read(self, tag):
         """Read cached data from the given tag.

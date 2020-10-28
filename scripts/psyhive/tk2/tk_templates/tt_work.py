@@ -453,7 +453,7 @@ class TTWork(TTBase, File):
                 without incrementing
             force (bool): create missing workspaces without confirmation
         """
-        _fileops = find_tank_app('psy-multi-fileops')
+        _fileops = find_tank_app('fileops')
         _mod = find_tank_mod('workspace', app='psy-multi-fileops')
         _prev = self.find_latest()
 

@@ -1,14 +1,12 @@
 """Tools for managing vendor scenes."""
 
-import time
-
 from maya import cmds
 
 from psyhive import tk2, host, pipe, qt
 from psyhive.tools import ingest
 from psyhive.utils import (
     File, lprint, store_result_to_file, get_result_to_file_storer,
-    build_cache_fmt, get_single, get_time_t)
+    build_cache_fmt, get_single)
 
 from maya_psyhive import ref, open_maya as hom, ui
 from maya_psyhive.utils import DEFAULT_NODES
@@ -324,6 +322,7 @@ class VendorScene(File, ingest.Ingestible):
             self._ingest_check_ref(_ref)
 
         # Save to disk
+        print ' - SAVING WORK', _work.path
         _work.save(comment=comment, safe=False, force=force)
         _work.cache_write(tag='vendor_source_file', data=self.path)
 
@@ -333,18 +332,18 @@ class VendorScene(File, ingest.Ingestible):
         Args:
             ref_ (FileRef): reference to check
         """
-        print 'CHECKING REF', ref_
-        print ' - PATH', ref_.path
+        print ' - CHECKING REF', ref_
+        print '   - PATH', ref_.path
         if File(ref_.path).exists():
 
             try:
                 _file = tk2.TTOutputFile(ref_.path)
             except ValueError:
-                print ' - OFF PIPELINE'
+                print '   - OFF PIPELINE'
                 return
 
             if _file.is_latest():
-                print ' - IS LATEST'
+                print '   - IS LATEST'
                 return
 
             _file = _file.find_latest()
@@ -357,10 +356,10 @@ class VendorScene(File, ingest.Ingestible):
             _file = _psy_file or _dlv_file
 
         if not _file or not File(_file).exists():
-            print ' - MISSING', _file
+            print '   - MISSING', _file
             raise RuntimeError('Missing file {}'.format(_file))
 
-        print ' - UPDATING TO', _file
+        print '   - UPDATING TO', _file
         assert File(_file).exists()
         ref_.swap_to(_file)
 
@@ -555,14 +554,11 @@ class VendorScene(File, ingest.Ingestible):
 
         if _work.exists():
             _src = _work.cache_read('vendor_source_file')
-            if _src:
-                if not _src == self.path and not self.matches(_src):
-                    print 'PREV FILE', _src
-                    print 'MATCH', self.matches(_src)
-                    _prev = VendorScene(_src)
-                    _t_stamp = time.strftime(
-                        '%m/%d/%y', get_time_t(_prev.mtime))
-                    raise RuntimeError(
-                        'already ingested from a different file '+_src)
+            if not _src:
+                print ' - ALREADY EXISTS ON DISK', _work.path
+                raise ValueError('Version already exist on disk')
+            elif not _src == self.path:
+                print ' - ALREADY INGESTED FROM DIFFERENT SOURCE', _src
+                raise ValueError('Already ingested from a different source')
 
         return _work

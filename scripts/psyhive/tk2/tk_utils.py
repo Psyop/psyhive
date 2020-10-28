@@ -131,6 +131,9 @@ def find_tank_app(name, catch=True, verbose=0):
 
     # Try exact match
     if name in _engine.apps:
+        if verbose:
+            print '_engine = tank.platform.current_engine()'
+            print '_app = _engine.apps["{}"]'.format(name)
         return _engine.apps[name]
 
     # Try suffix match
@@ -138,6 +141,9 @@ def find_tank_app(name, catch=True, verbose=0):
         _key for _key in _engine.apps.keys()
         if _key.split('-')[-1] == name], catch=True)
     if _suffix_match:
+        if verbose:
+            print '_engine = tank.platform.current_engine()'
+            print '_app = _engine.apps["{}"]'.format(_suffix_match)
         return _engine.apps[_suffix_match]
 
     if catch:
