@@ -1,3 +1,13 @@
+#### v0.112.1 ####
+
+    Released: Thu 29th Oct 2020 11:36am
+
+    Ingest Vendor Seqs: bugfix error on find shots (kcassidy),
+    
+    psyhive:
+        tk2.get_sg_data bugfix error on no current engine,
+
+
 #### v0.112.0 ####
 
     Released: Wed 28th Oct 2020 11:02am

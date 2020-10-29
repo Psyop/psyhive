@@ -22,7 +22,9 @@ def get_sg_data(type_, fields=None, limit=10, verbose=0, **kwargs):
     Returns:
         (dict): shotgun data
     """
-    _sg = tank.platform.current_engine().shotgun
+    from psyhive import tk2
+
+    _sg = tk2.get_current_engine().shotgun
     _fields = fields or _sg.schema_field_read(type_).keys()
 
     _filters = [(_key, 'is', _val) for _key, _val in kwargs.items()]
