@@ -33,7 +33,7 @@ def get_sg_data(type_, fields=None, limit=10, verbose=0, **kwargs):
         print 'FILTERS:'
         pprint.pprint(_filters)
 
-    _data = _sg.find(type_, filters=_filters, fields=_fields, limit=limit)
+    _data = _sg.find(type_, filters=_filters, fields=_fields, limit=limit or 0)
     return _data
 
 

@@ -484,11 +484,7 @@ class _TTOutputFileBase(TTBase):
         # Create workspace
         _work = self.map_to(tk2.TTWork, dcc='maya', extension='ma')
         lprint(' - WORK', _work, verbose=verbose)
-        _fo_workspace = _workspace_fo.get_workspace_from_path(
-            app=_fileops, path=_work.path)  # To access context
-        lprint(' - FILEOPS WORKSPACE', _fo_workspace, verbose=verbose)
-        _sg_workspace = _workspace_sg.workspace_from_context(
-            _fo_workspace.context)
+        _sg_workspace = _workspace_sg.workspace_from_path(_work.path)
         lprint(' - SG WORKSPACE', _sg_workspace, verbose=verbose)
 
         # Register

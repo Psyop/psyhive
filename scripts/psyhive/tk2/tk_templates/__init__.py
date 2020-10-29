@@ -9,5 +9,5 @@ from .tt_output import (
 from .tt_tools import (
     find_sequences, find_asset, find_assets, get_work, cur_work, get_shot,
     get_step_root, get_output, find_shots, find_shot, cur_shot,
-    get_asset)
+    get_asset, get_output_file)
 from .tt_utils import get_extn

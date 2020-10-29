@@ -5,7 +5,7 @@ from psyhive.utils import find, get_single, passes_filter
 
 from .tt_base import TTSequenceRoot, TTStepRoot, TTShot, TTAsset
 from .tt_work import TTWork
-from .tt_output import TTOutput
+from .tt_output import TTOutput, TTOutputFile, TTOutputFileSeq
 
 
 def cur_shot():
@@ -179,6 +179,20 @@ def get_output(path):
         return TTOutput(path)
     except ValueError:
         return None
+
+
+def get_output_file(path):
+    """Get output file or file seq from the given path.
+
+    Args:
+        path (str): path to convert
+
+    Returns:
+        (TTOutputFile|TTOutputFileSeq): output file or file seq
+    """
+    if '####' in path or '%04d' in path:
+        return TTOutputFileSeq(path.replace('.####.', '.%04d.'))
+    return TTOutputFile(path)
 
 
 def get_shot(path):

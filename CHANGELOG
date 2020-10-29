@@ -1,3 +1,15 @@
+#### v0.113.0 ####
+
+    Released: Thu 29th Oct 2020 13:22pm
+
+    Ingest Vendor Seqs: bugfix error on register seq in sg (kcassidy/mtruong),
+    
+    psyhive:
+        tk2.get_output_file added,
+        tk2.get_sg_data allow limit as None,
+        tk2.TTOutputFileSeq.register_in_sg avoid create intermediate fileops workspace object,
+
+
 #### v0.112.1 ####
 
     Released: Thu 29th Oct 2020 11:36am
