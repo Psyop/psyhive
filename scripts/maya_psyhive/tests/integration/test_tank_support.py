@@ -22,7 +22,7 @@ _SHADE_PATH = (_DEV_PROJ.path + '/assets/3D/character/archer/'
 
 class TestTankSupport(unittest.TestCase):
 
-    EXEC_SORT = 0.5
+    EXEC_SORT = 0.1
 
     @revert_dev_mode
     def test_aistandin(self):

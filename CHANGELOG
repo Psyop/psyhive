@@ -1,3 +1,26 @@
+#### v0.114.0 ####
+
+    Released: Mon 2nd Nov 2020 09:40am
+
+    Tanks Support:
+        generate shade aiStandIn output apply default overrides (csage),
+        write mesh data yaml bugfix error on empty bake set (iirvin),
+    
+    maya_psyhive:
+        tank_support.build_aistandin_output apply aiStandIn defaults,
+        tank_support.read_mesh_data catch empty bakeSet,
+    psyhive:
+        qt.HPixmapUi2 ui/init_ui added.
+        qt.HPixmapUi2 added redraw arg on init,
+        qt HPixmap/HPainter add_text added line_h arg,
+        qt.HPainter.set_render_hint added,
+        qt.HPixmap.add_overlay uses _get_rect to allow all anchors,
+        qt.HPixmap.add_polygon returns bounding rect,
+        qt.HPixmap.add_rounded_rect added render_hint arg,
+        qt.HPixmap._get_rect implemented BR anchor,
+        utils.read_yaml added catch arg,
+
+
 #### v0.113.0 ####
 
     Released: Thu 29th Oct 2020 13:22pm

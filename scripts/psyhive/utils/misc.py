@@ -519,6 +519,11 @@ def val_map(val, in_min=0.0, in_max=1.0, out_min=0.0, out_max=1.0):
     Returns:
         (float): mapped value
     """
+    assert isinstance(in_min, (int, float))
+    assert isinstance(in_max, (int, float))
+    assert isinstance(out_min, (int, float))
+    assert isinstance(out_max, (int, float))
+
     _in_span = in_max-in_min
     _out_span = out_max-out_min
     _val_scaled = float(val-in_min)/float(_in_span)

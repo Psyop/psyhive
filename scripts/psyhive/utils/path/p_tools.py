@@ -456,11 +456,12 @@ def read_file(file_):
     return _text
 
 
-def read_yaml(file_):
+def read_yaml(file_, catch=False):
     """Read contents of given yaml file.
 
     Args:
         file_ (str): path to read
+        catch (bool): on error return empty dict
 
     Returns:
         (any): yaml data
@@ -475,6 +476,8 @@ def read_yaml(file_):
     # Read contents
     _file = File(get_path(file_))
     if not _file.exists():
+        if catch:
+            return {}
         raise OSError('Missing file '+_file.path)
     _body = _file.read()
     assert isinstance(_body, six.string_types)

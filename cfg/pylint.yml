@@ -168,6 +168,7 @@ ignore:
         maya_psyhive/shows/frasier/fr_work.py
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/qt/dialog/ui_dialog.py
+        psyhive/qt/wrapper/gui/painter.py
         psyhive/tk/templates/base.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
@@ -237,7 +238,7 @@ ignore:
         psyhive/py_gui/pyg_base.py
         psyhive/py_gui/pyg_maya.py
         psyhive/qt/dialog/pixmap_ui_2.py
-        psyhive/qt/wrapper/gui.py
+        psyhive/qt/wrapper/gui/painter.py
         psyhive/qt/wrapper/gui/pixmap.py
         psyhive/utils/cache.py
         sanity_check/checks/

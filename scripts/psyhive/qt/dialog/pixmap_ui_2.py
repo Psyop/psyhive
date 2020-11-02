@@ -12,11 +12,15 @@ from .ui_dialog import SETTINGS_DIR
 from .dg_base import BaseDialog
 
 
+class _EmptyContainer(object):
+    """Empty container to for ui elements."""
+
+
 class HPixmapUi2(QtWidgets.QDialog, BaseDialog):
     """Base class for an interface with just an updating pixmap."""
 
     def __init__(self, size=(640, 640), base_col='red', fps=None, title=None,
-                 mouse_tracking=False, parent=None, show=True):
+                 mouse_tracking=False, parent=None, show=True, redraw=True):
         """Constructor.
 
         Args:
@@ -27,6 +31,7 @@ class HPixmapUi2(QtWidgets.QDialog, BaseDialog):
             mouse_tracking (bool): add mouse tracking (mouseMoveEvent)
             parent (QDialog): parent dialog
             show (bool): show interface on launch
+            redraw (bool): redraw interface on launch
         """
         from psyhive import host
 
@@ -67,10 +72,20 @@ class HPixmapUi2(QtWidgets.QDialog, BaseDialog):
             self.timer = self.startTimer(1000.0/fps)
         assert self.timerEvent.SAFE_TIMER
 
+        self.init_ui()
         self.load_settings()
-        self.redraw()
+
+        if redraw:
+            self.redraw()
         if show:
             self.show()
+
+    def init_ui(self):
+        """Init ui elements.
+
+        Any widgets should be creating in this method on the subclass.
+        """
+        self.ui = _EmptyContainer()
 
     def delete(self):
         """Delete this interface."""

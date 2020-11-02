@@ -156,28 +156,15 @@ class HPixmap(QtGui.QPixmap):
         _pos = qt.get_p(pos) if pos else QtCore.QPoint()
 
         # Set offset
-        if anchor == 'C':
-            _pos = _pos - qt.get_p([_pix.width()/2, _pix.height()/2])
-        elif anchor == 'BL':
-            _pos = _pos - qt.get_p([0, _pix.height()])
-        elif anchor == 'BR':
-            _pos = _pos - qt.get_p([_pix.width(), _pix.height()])
-        elif anchor == 'TL':
-            pass
-        elif anchor == 'TR':
-            _pos = _pos - qt.get_p([_pix.width(), 0])
-        elif anchor == 'T':
-            _pos = _pos - qt.get_p([_pix.width()/2, 0])
-        else:
-            raise ValueError(anchor)
+        _rect = _get_rect(pos=_pos, size=_pix.size(), anchor=anchor)
 
         _pnt = HPainter()
         _pnt.begin(self)
         _pnt.set_operation(operation)
-        _pnt.drawPixmap(_pos.x(), _pos.y(), _pix)
+        _pnt.drawPixmap(_rect.x(), _rect.y(), _pix)
         _pnt.end()
 
-        return QtCore.QRect(_pos, _pix.size())
+        return _rect
 
     def add_path(self, pts, col='black', thickness=None, pen=None):
         """Draw a path on this pixmap.
@@ -250,6 +237,8 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawPolygon(_poly)
         _pnt.end()
 
+        return _poly.boundingRect()
+
     def add_rect(self, pos, size, col='white', outline='black', operation=None,
                  anchor='TL', thickness=None):
         """Draw a rectangle on this pixmap.
@@ -289,7 +278,7 @@ class HPixmap(QtGui.QPixmap):
         return _rect
 
     def add_rounded_rect(self, pos, size, col='White', bevel=5, anchor='TL',
-                         pen=None, outline=True):
+                         pen=None, outline=True, render_hint=None):
         """Draw a rounded rectangle on this pixmap.
 
         Args:
@@ -300,6 +289,7 @@ class HPixmap(QtGui.QPixmap):
             anchor (str): position anchor point
             pen (QPen): override pen
             outline (bool): show outline
+            render_hint (str): force render hint
 
         Returns:
             (QRect): draw region
@@ -323,6 +313,7 @@ class HPixmap(QtGui.QPixmap):
 
         _pnt = qt.HPainter()
         _pnt.begin(self)
+        _pnt.set_render_hint(render_hint)
         if _pen:
             _pnt.setPen(_pen)
         _pnt.setBrush(_brush)
@@ -363,7 +354,7 @@ class HPixmap(QtGui.QPixmap):
 
     def add_text(
             self, text, pos=(0, 0), anchor='TL', col='black', font=None,
-            size=None):
+            size=None, line_h=None):
         """Add text to pixmap.
 
         Args:
@@ -373,6 +364,7 @@ class HPixmap(QtGui.QPixmap):
             col (str|QColor): text colour
             font (QFont): text font
             size (int): font size
+            line_h (int): override line height (draws each line separately)
         """
         _kwargs = locals()
         del _kwargs['self']
@@ -596,6 +588,8 @@ def _get_rect(anchor, pos, size):
         _root = _pos - qt.get_p(_size.width(), 0)
     elif anchor == 'BL':
         _root = _pos - qt.get_p(0, _size.height())
+    elif anchor == 'BR':
+        _root = _pos - qt.get_p(_size.width(), _size.height())
     else:
         raise ValueError(anchor)
 

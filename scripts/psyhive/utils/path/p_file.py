@@ -159,10 +159,17 @@ class File(Path):
         from .p_tools import read_file
         return read_file(self.path)
 
-    def read_yaml(self):
-        """Read the text contents of this file as yaml."""
+    def read_yaml(self, catch=False):
+        """Read the text contents of this file as yaml.
+
+        Args:
+            catch (bool): return empty dict on error
+
+        Returns:
+            (dict): yaml data
+        """
         from .p_tools import read_yaml
-        return read_yaml(self.path)
+        return read_yaml(self.path, catch=catch)
 
     def move_to(self, trg, force=False):
         """Move this file to somewhere else.

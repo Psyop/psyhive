@@ -437,6 +437,11 @@ def build_aistandin_from_shade(
     _standin = hom.CMDS.createNode('aiStandIn')
     _standin.plug('dso').set_val(archive)
     _standin.plug('useFrameExtension').set_val(animated)
+    _standin.plug('overrideReceiveShadows').set_val(True)
+    _standin.plug('overrideSelfShadows').set_val(True)
+    _standin.plug('overrideOpaque').set_val(True)
+    _standin.plug('overrideDoubleSided').set_val(True)
+    _standin.plug('overrideMatte').set_val(True)
 
     _merge = hom.CMDS.createNode(
         'aiMerge', name='{}_mergeOperators'.format(_name))

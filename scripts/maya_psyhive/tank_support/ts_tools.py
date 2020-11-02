@@ -21,7 +21,7 @@ def read_mesh_data(verbose=0):
     # Get list of meshes
     if cmds.objExists('bakeSet'):
         _meshes = []
-        for _node in cmds.sets('bakeSet', query=True):
+        for _node in (cmds.sets('bakeSet', query=True) or []):
             try:
                 _meshes.append(hom.HFnMesh(_node))
             except RuntimeError:
