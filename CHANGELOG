@@ -1,3 +1,13 @@
+#### v0.115.1 ####
+
+    Released: Mon 2nd Nov 2020 12:53pm
+
+    Ingest Tools: bugfix missing from maya ui (iirvin),
+    
+    maya_psyhive:
+        tools.m_ingest.ming_vendor_scene bugfix tab instead of spaces,
+
+
 #### v0.115.0 ####
 
     Released: Mon 2nd Nov 2020 12:11pm

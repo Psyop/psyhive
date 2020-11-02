@@ -160,12 +160,6 @@ class VendorScene(File, ingest.Ingestible):
             if not self.scene_get_cam():
                 _issues.append('no cam found')
 
-            # _refs = self.scene_get_refs(force=force)
-            # for _namespace, _file in _refs.items():
-            #     _issues += self._get_ref_issues(
-            #         namespace=_namespace, file_=_file, refs=_refs,
-            #         verbose=verbose)
-
         else:
             raise ValueError(self.step)
 
@@ -182,7 +176,7 @@ class VendorScene(File, ingest.Ingestible):
         host.open_scene(self.path, lazy=True, force=True)
         return _read_scene_render_cam()
 
-	@store_result_to_file
+    @store_result_to_file
     def scene_get_refs(self, force=False):
         """Find reference paths in this scene.
 
@@ -598,4 +592,4 @@ def _read_scene_render_cam():
         if get_single(_cams, catch=True):
             return str(get_single(_cams))
 
-    raise ValueError('Failed to find camera')
+    return None
