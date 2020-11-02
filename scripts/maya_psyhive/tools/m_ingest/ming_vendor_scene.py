@@ -9,7 +9,6 @@ from psyhive.utils import (
     build_cache_fmt, get_single)
 
 from maya_psyhive import ref, open_maya as hom, ui
-from maya_psyhive.utils import DEFAULT_NODES
 
 from .ming_remote import check_current_scene
 
@@ -181,39 +180,9 @@ class VendorScene(File, ingest.Ingestible):
         """
         print 'READING CAM', self.path
         host.open_scene(self.path, lazy=True, force=True)
+        return _read_scene_render_cam()
 
-        _cam_rig = None
-        for _ref in ref.find_refs():
-
-            if 'cam' not in _ref.path.lower():
-                continue
-
-            if _ref.is_loaded():
-                _cam_rig = _ref
-                continue
-
-            print ' - REF', _ref.path
-            _psy_file = ingest.map_file_to_psy_asset(_ref.path)
-            print ' - PSY FILE', _psy_file
-            if _psy_file:
-                _ref.swap_to(_psy_file)
-                assert not _cam_rig
-                _cam_rig = _ref
-
-        _cams = [
-            _cam for _cam in hom.find_nodes(class_=hom.HFnCamera)
-            if _cam not in DEFAULT_NODES]
-        print ' - CAMS', _cams
-
-        print ' - CAM RIG', _cam_rig
-        if not len(_cams) == 1 and _cam_rig:
-            _cam_rig_cam = _cam_rig.get_tfm('animCam')
-            return str(_cam_rig_cam)
-
-        _cam = get_single(_cams)
-        return str(_cam)
-
-    @store_result_to_file
+	@store_result_to_file
     def scene_get_refs(self, force=False):
         """Find reference paths in this scene.
 
@@ -562,3 +531,71 @@ class VendorScene(File, ingest.Ingestible):
                 raise ValueError('Already ingested from a different source')
 
         return _work
+
+
+def _is_cam_renderable(cam):
+    """Check if the given cam is renderable.
+
+    Args:
+        cam (HFnCamera): camera to check
+
+    Returns:
+        (bool): renderable
+    """
+    return cam.shp.plug('renderable').get_val()
+
+
+def _is_cam_referenced(cam):
+    """Check if the given camera is referenced.
+
+    Args:
+        cam (HFnCamera): camera to check
+
+    Returns:
+        (bool): referenced
+    """
+    return cam.shp.isFromReferencedFile
+
+
+def _match_clean_name(name):
+    """Get a function to match the given clean node name.
+
+    Args:
+        name (str): name to match
+
+    Returns:
+        (fn): name matching function
+    """
+    def _clean_name_is(cam):
+        return cam.clean_name == name
+    return _clean_name_is
+
+
+def _read_scene_render_cam():
+    """Read current scene render cam.
+
+    Returns:
+        (HFnCamera): render cam
+    """
+    _cams = hom.find_cams()
+    for _filter in [
+            None,
+            _is_cam_referenced,
+            _match_clean_name('animCam'),
+            _match_clean_name('renderCam'),
+            _is_cam_renderable,
+    ]:
+        if _filter:
+            _filtered_cams = filter(_filter, _cams)
+            lprint(' - APPLING FILTER', _filter, len(_filtered_cams),
+                   _filtered_cams)
+            if not _filtered_cams:
+                print ' - REJECTED FILTER'
+                continue
+            _cams = _filtered_cams
+
+        print 'CAMS', len(_cams), _cams
+        if get_single(_cams, catch=True):
+            return str(get_single(_cams))
+
+    raise ValueError('Failed to find camera')

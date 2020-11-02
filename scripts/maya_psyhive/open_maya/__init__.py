@@ -20,7 +20,7 @@ from .ray import HVRay
 from .utils import (
     build_loc, build_arrow, get_selected, lerp, sph_rand, get_col,
     read_connections, read_incoming, read_outgoing, find_nodes, find_node,
-    find_anim)
+    find_anim, find_tfms, find_cams)
 from .vector import HVector, X_AXIS, Y_AXIS, Z_AXIS
 from .cmds import CMDS
 

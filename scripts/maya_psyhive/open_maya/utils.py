@@ -125,6 +125,17 @@ def find_anim(filter_=None):
         type_='animCurve', class_=hom.HFnAnimCurve, filter_=filter_)
 
 
+def find_cams():
+    """Find scene cameras.
+
+    Returns:
+        (HFnCamera list): cameras
+    """
+    from maya_psyhive import open_maya as hom
+    return [hom.HFnCamera(_shp.get_parent())
+            for _shp in find_nodes(type_='camera')]
+
+
 def find_node(type_=None, namespace=None):
     """Find single matching node in current scene.
 
@@ -172,6 +183,20 @@ def find_nodes(filter_=None, class_=None, type_=None, long_=False,
             continue
         _results.append(_result)
     return _results
+
+
+def find_tfms(class_=None):
+    """Find scene transforms.
+
+    Args:
+        class_ (class): override node class (default is HFnTransform)
+
+    Returns:
+        (HFnTransform list): transforms
+    """
+    from maya_psyhive import open_maya as hom
+    _class = class_ or hom.HFnTransform
+    return find_nodes(type_='transform', class_=_class)
 
 
 def get_col(col):

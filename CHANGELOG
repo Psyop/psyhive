@@ -1,3 +1,14 @@
+#### v0.115.0 ####
+
+    Released: Mon 2nd Nov 2020 12:11pm
+
+    Ingest Vendor Anim tool: bugfix find scene render cam (iirvin),
+    
+    maya_psyhive:
+        open_maya find_cams/find_tfms added,
+        tools.m_ingest.ingest_vendor_anim bugfix find render cam,
+
+
 #### v0.114.0 ####
 
     Released: Mon 2nd Nov 2020 09:40am
