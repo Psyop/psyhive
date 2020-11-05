@@ -1,3 +1,13 @@
+#### v0.116.1 ####
+
+    Released: Thu 5th Nov 2020 08:47am
+
+    Usage tracker: disable track usage for render nodes;
+    
+    psyhive:
+        tools.track_usage disable for render user,
+
+
 #### v0.116.0 ####
 
     Released: Thu 5th Nov 2020 08:36am

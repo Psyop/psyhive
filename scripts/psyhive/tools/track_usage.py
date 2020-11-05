@@ -192,7 +192,9 @@ def get_usage_tracker(name=None, args=False, kibana=False, verbose=0):
 
         @functools.wraps(func)
         def _usage_tracked_fn(*args_, **kwargs):
-            if not os.environ.get('PSYHIVE_DISABLE_USAGE'):
+            if (
+                    not os.environ['USER'] == 'render' and
+                    not os.environ.get('PSYHIVE_DISABLE_USAGE')):
                 if kibana:
                     _write_usage_to_kibana(
                         name=name or func.__name__, verbose=verbose,
