@@ -1,7 +1,7 @@
 """Front end tools for ingestion."""
 
 from psyhive import qt
-from psyhive.tools import catch_error
+from psyhive.tools import catch_error, track_usage
 from psyhive.utils import get_plural, Dir, abs_path
 
 from .ing_utils import vendor_from_path
@@ -9,6 +9,7 @@ from .ing_vendor_seq import VendorSeq
 
 
 @catch_error
+@track_usage
 def ingest_seqs(dir_, vendor, filter_=None, force=False,
                 resubmit_transgens=False):
     """Ingest images sequences from the given directory.

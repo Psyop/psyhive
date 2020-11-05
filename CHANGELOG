@@ -1,3 +1,23 @@
+#### v0.116.0 ####
+
+    Released: Thu 5th Nov 2020 08:36am
+
+    Usage tracker: write usage to daily user yaml file;
+    
+    psyhive:
+        pipe.find_project added catch flag,
+        qt.RENDER_HINTS added,
+        qt.wrapper added qtw_ prefix to submodules,
+        qt updated internal refs to relative,
+        tools renamed usage -> track_usage,
+        tools.track_usage write usage to user day yml,
+        tools.ingest_seqs added track_usage,
+        utils added strftime/first_last,
+        utils.get_time_t allow time int,
+        utils.safe_zip added handling for 3+ lists,
+        utils.write_yaml added mode arg,
+
+
 #### v0.115.1 ####
 
     Released: Mon 2nd Nov 2020 12:53pm

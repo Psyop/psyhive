@@ -1,7 +1,10 @@
 """Override for QtGui.Painter."""
 
 from psyhive.utils import lprint
-from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
+from ..qtw_mgr import QtGui, QtCore, Qt
+
+RENDER_HINTS = [_item.name for _item in QtGui.QPainter.__dict__.values()
+                if isinstance(_item, QtGui.QPainter.RenderHint)]
 
 
 class HPainter(QtGui.QPainter):
@@ -37,10 +40,33 @@ class HPainter(QtGui.QPainter):
             return
 
         lprint("Adding text", text, verbose=verbose)
-        _window = self.window()
-        _pos = qt.get_p(pos)
-        _x, _y = _pos.x(), _pos.y()
-        _w, _h = _window.width(), _window.height()
+        _align, _rect = self._add_text_get_rect(
+            pos=qt.get_p(pos), anchor=anchor)
+
+        # Setup font
+        if font:
+            self.setFont(font)
+        elif size is not None:
+            _font = QtGui.QFont()
+            _font.setPointSize(size)
+            self.setFont(_font)
+
+        # Draw text
+        self.setPen(qt.get_col(col or 'white'))
+        self.drawText(_rect, _align, text)
+
+    def _add_text_get_rect(self, pos, anchor):
+        """Get rect/align for adding the given text.
+
+        Args:
+            pos (QPoint): text position
+            anchor (str): rectangle anchor
+
+        Returns:
+            (QRect, AlignmentFlag): rect, alignment
+        """
+        _x, _y = pos.x(), pos.y()
+        _w, _h = self.window().width(), self.window().height()
 
         if anchor == 'BL':
             _rect = QtCore.QRect(_x, 0, _w-_x, _y)
@@ -72,17 +98,7 @@ class HPainter(QtGui.QPainter):
         else:
             raise ValueError('Unhandled anchor: %s' % anchor)
 
-        # Setup font
-        if font:
-            self.setFont(font)
-        elif size is not None:
-            _font = QtGui.QFont()
-            _font.setPointSize(size)
-            self.setFont(_font)
-
-        # Draw text
-        self.setPen(qt.get_col(col or 'white'))
-        self.drawText(_rect, _align, text)
+        return _align, _rect
 
     def _add_text_lines(
             self, text, line_h, pos=(0, 0), anchor='TL', col='white',
@@ -167,7 +183,7 @@ class HPainter(QtGui.QPainter):
         elif hint == 'HighQualityAntialiasing':
             _hint = self.HighQualityAntialiasing
         elif hint == 'NonCosmeticDefaultPen':
-            _int = self.NonCosmeticDefaultPen
+            _hint = self.NonCosmeticDefaultPen
         elif hint == 'LosslessImageRendering':
             _hint = self.LosslessImageRendering
         else:

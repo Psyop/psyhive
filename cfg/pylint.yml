@@ -82,7 +82,7 @@ ignore:
         psyhive/qt/dialog/dg_base.py
         psyhive/qt/dialog/pixmap_ui.py
         psyhive/qt/dialog/pixmap_ui_2.py
-        psyhive/qt/wrapper/widgets.py
+        psyhive/qt/wrapper/qtw_widgets.py
         psyhive/tk/cache.py
         psyhive/utils/path/p_tools.py
         sanity_check/checks/maya/general/shotgun.py
@@ -104,7 +104,7 @@ ignore:
         maya_psyhive/tools/batch_rerender/
         maya_psyhive/tools/yeti/yeti_ui.py
         psyhive/py_gui/pyg_qt.py
-        psyhive/qt/wrapper/widgets.py
+        psyhive/qt/wrapper/qtw_widgets.py
         maya_psyhive/shows/frasier/fr_work.py
         psyhive/tk/templates/tt_base_work.py
         psyhive/tools/batch_rerender/interface.py
@@ -152,7 +152,7 @@ ignore:
         maya_psyhive/open_maya/base_transform.py
         maya_psyhive/open_maya/plug.py
         maya_psyhive/ref.py
-        psyhive/qt/wrapper/gui/pixmap.py
+        psyhive/qt/wrapper/qtw_gui/qtw_pixmap.py
         psyhive/tk2/tk_templates/tt_work.py
     too-many-ancestors:
         hv_test/diary/y19/d0516/batch_cache_test.py
@@ -168,7 +168,7 @@ ignore:
         maya_psyhive/shows/frasier/fr_work.py
         maya_psyhive/tools/fkik_switcher/system.py
         psyhive/qt/dialog/ui_dialog.py
-        psyhive/qt/wrapper/gui/painter.py
+        psyhive/qt/wrapper/qtw_gui/qtw_painter.py
         psyhive/tk/templates/base.py
         psyhive/utils/filter_.py
         psyhive/utils/cache.py
@@ -238,14 +238,14 @@ ignore:
         psyhive/py_gui/pyg_base.py
         psyhive/py_gui/pyg_maya.py
         psyhive/qt/dialog/pixmap_ui_2.py
-        psyhive/qt/wrapper/gui/painter.py
-        psyhive/qt/wrapper/gui/pixmap.py
+        psyhive/qt/wrapper/qtw_gui/qtw_painter.py
+        psyhive/qt/wrapper/qtw_gui/qtw_pixmap.py
         psyhive/utils/cache.py
         sanity_check/checks/
         tk_multi_publish/publish_types/scene/export_engines/maya_export/ui/fbx_ui.py
     unused-import:
         psyhive/host.py
-        psyhive/qt/wrapper/mgr.py
+        psyhive/qt/wrapper/qtw_mgr.py
     unused-variable:
         hv_test/diary/
         /tests/

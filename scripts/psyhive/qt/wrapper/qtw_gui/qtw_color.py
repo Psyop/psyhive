@@ -1,6 +1,6 @@
 """Override for QtGui.QColor."""
 
-from psyhive.qt.wrapper.mgr import QtGui
+from ..qtw_mgr import QtGui
 
 
 class HColor(QtGui.QColor):

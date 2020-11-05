@@ -5,8 +5,8 @@ import six
 from psyhive import icons
 from psyhive.utils import lprint
 
-from psyhive.qt.wrapper.mgr import QtWidgets, QtCore, QtGui
-from psyhive.qt.misc import get_application, get_p
+from .wrapper import QtWidgets, QtCore, QtGui
+from .misc import get_application, get_p
 
 
 class DialogCancelled(RuntimeError):

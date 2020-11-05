@@ -16,8 +16,7 @@ from psyhive.utils import (
     wrap_fn, lprint, dprint, abs_path, File, touch, find, dev_mode,
     read_file)
 
-from ..wrapper.mgr import QtWidgets, QtCore, Qt
-from ..wrapper.widgets import HMenu
+from ..wrapper import QtWidgets, QtCore, Qt, HMenu
 from ..misc import get_pixmap, get_icon, get_p, get_ui_loader
 
 if not hasattr(sys, 'QT_DIALOG_STACK'):

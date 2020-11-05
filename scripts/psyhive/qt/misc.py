@@ -9,7 +9,7 @@ import six
 
 from psyhive.utils import get_result_storer, File
 
-from .wrapper.mgr import QtWidgets, QtCore, QtGui, QtUiTools
+from .wrapper import QtWidgets, QtCore, QtGui, QtUiTools
 
 
 @get_result_storer(ignore_args=True)

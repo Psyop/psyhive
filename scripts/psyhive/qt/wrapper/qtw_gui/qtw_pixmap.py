@@ -7,8 +7,9 @@ import time
 import six
 
 from psyhive.utils import File, lprint, test_path, abs_path
-from psyhive.qt.wrapper.mgr import QtGui, QtCore, Qt
-from psyhive.qt.wrapper.gui.painter import HPainter
+from ..qtw_mgr import QtGui, QtCore, Qt
+from ..qtw_utils import get_rect
+from .qtw_painter import HPainter
 
 TEST_JPG = abs_path('{}/test.jpg'.format(tempfile.gettempdir()))
 TEST_PNG = abs_path('{}/test.png'.format(tempfile.gettempdir()))
@@ -156,7 +157,7 @@ class HPixmap(QtGui.QPixmap):
         _pos = qt.get_p(pos) if pos else QtCore.QPoint()
 
         # Set offset
-        _rect = _get_rect(pos=_pos, size=_pix.size(), anchor=anchor)
+        _rect = get_rect(pos=_pos, size=_pix.size(), anchor=anchor)
 
         _pnt = HPainter()
         _pnt.begin(self)
@@ -203,7 +204,9 @@ class HPixmap(QtGui.QPixmap):
         _pnt.drawPath(_path)
         _pnt.end()
 
-    def add_polygon(self, pts, col, outline='black', thickness=1.0):
+    def add_polygon(
+            self, pts, col='white', outline='black', thickness=1.0,
+            render_hint=None):
         """Draw a polygon on this pixmap.
 
         Args:
@@ -211,6 +214,7 @@ class HPixmap(QtGui.QPixmap):
             col (QColor): fill colour
             outline (str|None): outline colour (if any)
             thickness (float): line thickness
+            render_hint (str): force render hint
         """
         from psyhive import qt
 
@@ -231,6 +235,7 @@ class HPixmap(QtGui.QPixmap):
             _poly.append(_pt)
 
         _pnt = HPainter()
+        _pnt.set_render_hint(render_hint)
         _pnt.begin(self)
         _pnt.setBrush(_brush)
         _pnt.setPen(_pen)
@@ -256,7 +261,7 @@ class HPixmap(QtGui.QPixmap):
 
         _col = qt.get_col(col)
         _brush = QtGui.QBrush(_col)
-        _rect = _get_rect(pos=pos, size=size, anchor=anchor)
+        _rect = get_rect(pos=pos, size=size, anchor=anchor)
 
         # Set outline
         if outline:
@@ -301,7 +306,7 @@ class HPixmap(QtGui.QPixmap):
         else:
             _col = qt.get_col(col)
         _brush = QtGui.QBrush(_col)
-        _rect = _get_rect(pos=pos, size=size, anchor=anchor)
+        _rect = get_rect(pos=pos, size=size, anchor=anchor)
 
         # Set pen
         _pen = None
@@ -557,40 +562,3 @@ class HPixmap(QtGui.QPixmap):
             _tmp.setMask(self.mask())
         self.add_overlay(_tmp, operation='over')
         return self
-
-
-def _get_rect(anchor, pos, size):
-    """Get rect for the given pos/size and anchor position.
-
-    Args:
-        anchor (str): anchor point
-        pos (QPoint): anchor position
-        size (QSize): rect size
-
-    Returns:
-        (QRect): rectangle
-    """
-    from psyhive import qt
-
-    _size = qt.get_size(size)
-    _pos = qt.get_p(pos)
-    if anchor == 'C':
-        _root = _pos - qt.get_p(_size)/2
-    elif anchor == 'L':
-        _root = _pos - qt.get_p(0, _size.height()/2)
-    elif anchor == 'R':
-        _root = _pos - qt.get_p(_size.width(), _size.height()/2)
-    elif anchor == 'T':
-        _root = _pos - qt.get_p(_size.width()/2, 0)
-    elif anchor == 'TL':
-        _root = _pos
-    elif anchor == 'TR':
-        _root = _pos - qt.get_p(_size.width(), 0)
-    elif anchor == 'BL':
-        _root = _pos - qt.get_p(0, _size.height())
-    elif anchor == 'BR':
-        _root = _pos - qt.get_p(_size.width(), _size.height())
-    else:
-        raise ValueError(anchor)
-
-    return QtCore.QRect(_root, _size)

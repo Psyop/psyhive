@@ -1,6 +1,6 @@
 """Tools for mimicing maya's palette outside maya."""
 
-from psyhive.qt.wrapper.mgr import QtGui, QtWidgets
+from .wrapper import QtGui, QtWidgets
 
 HIGHLIGHT_COLOR = QtGui.QColor(103, 141, 178)
 BRIGHTNESS_SPREAD = 2.5

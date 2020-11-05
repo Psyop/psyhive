@@ -12,7 +12,7 @@ from .misc import (
     lprint, system, dprint, wrap_fn, chain_fns, to_nice, get_single,
     get_plural, last, str_to_seed, get_ord, copy_text, bytes_to_str,
     to_camel, val_map, get_time_t, clamp, read_url, safe_zip, is_pascal,
-    nice_age, get_time_f, to_pascal)
+    nice_age, get_time_f, to_pascal, strftime)
 from .cfg import get_cfg, set_cfg
 from .path import (
     File, Path, Dir, abs_path, read_file, find, write_file, replace_file,
@@ -23,5 +23,5 @@ from .py_file import (
     PyFile, MissingDocs, text_to_py_file, PyBase, PyDef, PyClass)
 from .range_ import (
     ints_to_str, str_to_ints, ValueRange, fr_range, fr_enumerate,
-    str_to_frames, str_to_range)
+    str_to_frames, str_to_range, first_last)
 from .seq import Seq, Collection, seq_from_frame, Movie, find_seqs

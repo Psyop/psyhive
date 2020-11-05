@@ -4,8 +4,9 @@ import six
 
 from psyhive.utils import lprint, get_single, dprint, get_plural
 
-from psyhive.qt.wrapper.mgr import QtWidgets, QtGui, Qt
-from psyhive.qt.misc import get_col, get_pixmap, get_p, get_icon
+from .qtw_mgr import QtWidgets, QtGui, Qt
+from .qtw_utils import get_rect
+from ..misc import get_col, get_pixmap, get_p, get_icon
 
 
 def _dummy():
@@ -23,8 +24,14 @@ class HWidgetBase(object):
         """
         return self.pos() + get_p(self.size())/2
 
-    def redraw(self, *args, **kwargs):
-        """To be implemented replaced with redraw method."""
+    def set_icon(self, pixmap):
+        """Set icon for this widget.
+
+        Args:
+            pixmap (str|QPixmap): pixmap to apply
+        """
+        _icon = QtGui.QIcon(get_pixmap(pixmap))
+        self.setIcon(_icon)
 
     def set_pixmap(self, pixmap):
         """Set pixmap for this widget.
@@ -34,14 +41,22 @@ class HWidgetBase(object):
         """
         self.setPixmap(get_pixmap(pixmap))
 
-    def set_icon(self, pixmap):
-        """Set icon for this widget.
+    def set_rect(self, pos, size=None, anchor='TL'):
+        """Set rectangle for this widget.
 
         Args:
-            pixmap (str|QPixmap): pixmap to apply
+            pos (QPoint): anchor position
+            size (QSize): widget size
+            anchor (str): anchor
+
+        Returns:
+            (QRect): widget rectangle (with TL anchor)
         """
-        _icon = QtGui.QIcon(get_pixmap(pixmap))
-        self.setIcon(_icon)
+        _rect = get_rect(pos=pos, size=size or self.size(), anchor=anchor)
+        return self.setGeometry(_rect)
+
+    def redraw(self, *args, **kwargs):
+        """To be implemented replaced with redraw method."""
 
     def __repr__(self):
         return '<{}:{}>'.format(

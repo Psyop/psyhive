@@ -8,8 +8,10 @@ import pprint
 import platform
 import time
 
-from psyhive import host
-from psyhive.utils import dprint, dev_mode
+import six
+
+from psyhive import host, pipe
+from psyhive.utils import dprint, dev_mode, File, abs_path, lprint
 
 _ELASTIC_URL = 'http://la1dock001.psyop.tv:9200'
 _ES_DATA_TYPE = 'data'
@@ -111,12 +113,75 @@ def _write_usage_to_kibana(name=None, catch=True, args=None, verbose=0):
     dprint('Wrote usage to kibana ({:.02f}s)'.format(_dur), verbose=verbose)
 
 
-def get_usage_tracker(name=None, args=False, verbose=0):
+def _write_usage_to_file(name, args, kwargs, verbose=1):
+    """Append usage to daily text file for current user.
+
+    The files are written in this both this and hvanderbeen test projects.
+
+    Args:
+        name (str): function name
+        args (list): function args
+        kwargs (dict): function kwargs
+        verbose (int): print process data
+    """
+    _cur_proj = pipe.cur_project()
+
+    # Compile data
+    _data = {
+        'cwd': abs_path(os.getcwd()),
+        'time': int(time.time()),
+        'proj': _cur_proj.name,
+        'name': name}
+    _kwargs_data = {}
+    for _key, _val in kwargs.items():
+        _kwargs_data[_key] = _clean_arg(_val)
+    for _name, _val in [
+            ('host', host.NAME),
+            ('scene', host.cur_scene()),
+            ('args', [_clean_arg(_arg) for _arg in args]),
+            ('kwargs', _kwargs_data),
+    ]:
+        if _val:
+            _data[_name] = _val
+
+    # Get list of projs to write to
+    _projs = {_cur_proj}
+    _hv_proj = pipe.find_project('hvanderbeek_0001P', catch=True)
+    if _hv_proj.exists():
+        _projs.add(_hv_proj)
+
+    # Write data
+    for _proj in _projs:
+        _yml = File('{}/production/psyhive/usage/{}/{}.yml'.format(
+            _proj.path, time.strftime('%y%m%d'), os.environ['USER']))
+        lprint('\nWRITE USAGE!', name, args, kwargs, verbose=verbose)
+        lprint(' -', _yml.path, verbose=verbose)
+        _yml.write_yaml([_data], mode='a')
+
+
+def _clean_arg(arg):
+    """Clean the given arg for writing to yaml.
+
+    For basic types, just use the value - otherwise convert to string.
+
+    Args:
+        arg (any): arg to clean
+
+    Returns:
+        (any): cleaned arg
+    """
+    if isinstance(arg, (int, float, bool, six.string_types)):
+        return arg
+    return str(arg)
+
+
+def get_usage_tracker(name=None, args=False, kibana=False, verbose=0):
     """Build usage tracker decorator.
 
     Args:
         name (str): override function name
         args (bool): store args/kwargs data
+        kibana (bool): write to kibana
         verbose (int): print process data
 
     Returns:
@@ -128,9 +193,13 @@ def get_usage_tracker(name=None, args=False, verbose=0):
         @functools.wraps(func)
         def _usage_tracked_fn(*args_, **kwargs):
             if not os.environ.get('PSYHIVE_DISABLE_USAGE'):
-                _write_usage_to_kibana(
+                if kibana:
+                    _write_usage_to_kibana(
+                        name=name or func.__name__, verbose=verbose,
+                        args=(args_, kwargs) if args else None)
+                _write_usage_to_file(
                     name=name or func.__name__, verbose=verbose,
-                    args=(args_, kwargs) if args else None)
+                    args=args_, kwargs=kwargs)
             return func(*args_, **kwargs)
 
         return _usage_tracked_fn

@@ -176,6 +176,19 @@ def ints_to_str(values, rng_sep="-", chunk_sep=","):
     return _val_str
 
 
+def first_last(list_):
+    """Tag first and last values of a list.
+
+    Args:
+        list_ (list): list to tag
+
+    Returns:
+        (tuple list): list of (first, last, item) values
+    """
+    return [(_idx == 0, _idx == len(list_)-1, _item)
+            for _idx, _item in enumerate(list_)]
+
+
 def fr_range(count, last_=True):
     """Get a list of floating point value in the range 0 to 1.
 

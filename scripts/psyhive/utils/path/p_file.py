@@ -238,12 +238,13 @@ class File(Path):
                 raise ValueError(_result)
         write_file(file_=self.path, text=text, force=_force)
 
-    def write_yaml(self, data, force=False):
+    def write_yaml(self, data, force=False, mode='w'):
         """Write yaml data to file.
 
         Args:
             data (dict): data to write
             force (bool): replace existing without confirmation
+            mode (str): write mode (default is w - replace)
         """
         from .p_tools import write_yaml
-        write_yaml(file_=self.path, data=data, force=force)
+        write_yaml(file_=self.path, data=data, force=force, mode=mode)

@@ -653,13 +653,14 @@ def write_file(file_, text, force=False):
     _file.close()
 
 
-def write_yaml(file_, data, force=False):
+def write_yaml(file_, data, force=False, mode='w'):
     """Write yaml data to file.
 
     Args:
         file_ (str): path to yaml file
         data (dict): data to write to yaml
         force (bool): replace existing without confirmation
+        mode (str): write mode (default is w - replace)
     """
     try:
         import yaml
@@ -669,12 +670,12 @@ def write_yaml(file_, data, force=False):
 
     _file = File(get_path(file_))
 
-    if _file.exists():
+    if mode == 'w' and _file.exists():
         if not force:
             from psyhive import qt
             qt.ok_cancel('Overwrite file?\n\n'+_file.path)
         _file.delete(force=True)
 
     _file.test_dir()
-    with open(_file.path, 'w') as _hook:
+    with open(_file.path, mode=mode) as _hook:
         yaml.dump(data, _hook, default_flow_style=False)

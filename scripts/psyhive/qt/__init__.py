@@ -11,7 +11,7 @@ from .wrapper import (
 
     # QtCore/QtGui overrides
     HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN,
-    TEST_IMG, TEST_PNG, TEST_JPG)
+    TEST_IMG, TEST_PNG, TEST_JPG, RENDER_HINTS)
 
 from .maya_palette import set_maya_palette
 from .misc import (

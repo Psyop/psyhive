@@ -241,7 +241,7 @@ def get_time_t(val):
     Returns:
         (stuct_time): time tuple
     """
-    if isinstance(val, float):
+    if isinstance(val, (int, float)):
         return time.localtime(val)
     elif isinstance(val, time.struct_time):
         return val
@@ -381,24 +381,24 @@ def read_url(url, edit=False, attempts=5):
     return _data
 
 
-def safe_zip(list_a, list_b):
-    """Zip two lists together, erroring if they don't have the same length.
+def safe_zip(*lists):
+    """Zip multiple lists together.
 
-    Args:
-        list_a (list): first list
-        list_b (list): second list
+    This will error if they don't have the same length.
 
     Returns:
-        (list): zipped list
+        (tuple list): zipped lists
     """
-    if not len(list_a) == len(list_b):
-        print 'LIST A', list_a
-        print 'LIST B', list_b
-        raise ValueError(
-            'Length of list a ({:d}) does not match length of list b '
-            '({:d})'.format(len(list_a), len(list_b)))
+    assert len(lists) >= 2
+    for _idx, _list in enumerate(lists[1:]):
+        if not len(lists[0]) == len(_list):
+            print 'LIST 1:', lists[0]
+            print 'LIST {:d} {}'.format(_idx+2, _list)
+            raise ValueError(
+                'Length of list {:d} ({:d}) does not match length of list 1 '
+                '({:d})'.format(_idx+2, len(_list), len(lists[0])))
 
-    return [(_itema, _itemb) for _itema, _itemb in zip(list_a, list_b)]
+    return [_items for _items in zip(*lists)]
 
 
 def str_to_seed(string, offset=0):
@@ -420,6 +420,22 @@ def str_to_seed(string, offset=0):
         _total += int(_random.random()*100000)
     _random.seed(_total)
     return _random
+
+
+def strftime(format_, time_=None):
+    """Get string format for the given time.
+
+    This allows the time to be passed as a float or tuple.
+
+    Args:
+        format_ (str): time format string
+        time_ (float|tuple|None): time to use
+
+    Returns:
+        (str): formatted string
+    """
+    _time = time_ or time.time()
+    return time.strftime(format_, get_time_t(_time))
 
 
 def system(cmd, result=True, verbose=0):

@@ -1,6 +1,6 @@
 """Wrappers for QtCore objects."""
 
-from psyhive.qt.wrapper.mgr import QtCore
+from ..qtw_mgr import QtCore
 
 
 class HPoint(QtCore.QPoint):
