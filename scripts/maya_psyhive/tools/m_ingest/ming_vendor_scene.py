@@ -387,6 +387,7 @@ class VendorScene(File, ingest.Ingestible):
         if (
                 not self.has_capture_sg_version() and
                 not _cap.cache_read('submitted transgen')):
+            print ' - CAPTURE', _cap.path
             _cap.submit_sg_version()
             assert _cap.cache_read('submitted transgen')
 

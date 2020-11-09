@@ -1,3 +1,20 @@
+#### v0.117.0 ####
+
+    Released: Mon 9th Nov 2020 10:32am
+
+    Ingest vendor anim: bugfix error due to long paths (kcassidy)
+    
+    maya_psyhive:
+        tools.yeti updated export naming for untagged shows,
+    psyhive:
+        pipe.Project.get_cfg added,
+        tools.track_usage added platform + machine name,
+        tools.track_usage convert unicode to str,
+        utils.build_cache_fmt use relative path if project level and path within project,
+        utils get_cfg/set_cfg allow project override,
+        utils.Dir.contains added,
+
+
 #### v0.116.1 ####
 
     Released: Thu 5th Nov 2020 08:47am

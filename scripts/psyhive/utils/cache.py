@@ -122,7 +122,10 @@ def build_cache_fmt(
         _root = tempfile.gettempdir()
     elif level == 'project':
         from psyhive import pipe
-        _root = '{}/production'.format(pipe.cur_project().path)
+        _proj = pipe.cur_project()
+        _root = '{}/production'.format(_proj.path)
+        if _proj.contains(_path):
+            _path = Path(_proj.rel_path(_path))
     else:
         raise ValueError(level)
 

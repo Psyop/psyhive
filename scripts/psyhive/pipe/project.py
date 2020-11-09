@@ -5,7 +5,7 @@ import os
 
 from psyhive.utils import (
     find, store_result, Dir, get_single, lprint, passes_filter,
-    apply_filter, read_yaml, File, abs_path, Cacheable)
+    apply_filter, read_yaml, File, abs_path, Cacheable, get_cfg)
 
 PROJECTS_ROOT = abs_path(
     os.environ.get('PSYOP_PROJECTS_ROOT', 'P:/projects'))
@@ -79,6 +79,14 @@ class Project(Dir, Cacheable):
             _shots.append(_shot)
 
         return _shots
+
+    def get_cfg(self):
+        """Get config for this project.
+
+        Returns:
+            (dict): project config
+        """
+        return get_cfg(namespace='psyhive', level='project', project=self)
 
     def read_psylaunch_cfg(self, edit=False, verbose=0):
         """Read psylaunch config data for this project.

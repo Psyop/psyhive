@@ -103,24 +103,6 @@ def dprint(*args, **kwargs):
     lprint(time.strftime('[%H:%M:%S]'), *args, **kwargs)
 
 
-def get_cfg(namespace, verbose=0):
-    """Read config from the given namespace.
-
-    Args:
-        namespace (str): namespace name to read from
-        verbose (int): print process data
-
-    Returns:
-        (dict): config yaml file contents
-    """
-    from psyhive.utils.path import abs_path, read_yaml
-    _yaml = abs_path(
-        '../../../cfg/{}.yml'.format(namespace),
-        root=os.path.dirname(__file__))
-    lprint('YAML', _yaml, verbose=verbose)
-    return read_yaml(_yaml)
-
-
 def get_single(
         items, catch=False, name='item', verb='found', fail_message=None,
         error=None, verbose=0):

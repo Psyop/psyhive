@@ -6,7 +6,7 @@ import tempfile
 
 from maya import cmds
 
-from psyhive import tk2, host, qt, icons
+from psyhive import tk2, host, qt, icons, pipe
 from psyhive.utils import (
     abs_path, Seq, safe_zip, lprint, Dir, dprint, get_plural)
 
@@ -97,12 +97,22 @@ def yeti_to_output(yeti, work=None):
         (TTOutputFileSeq): export path
     """
     _work = work or tk2.cur_work()
-    _out = _work.map_to(
-        tk2.TTOutputFileSeq,
-        output_name='{}Yeti_{}'.format(
-            yeti.namespace, yeti.get_parent().clean_name),
-        format='yeti', output_type='fxcache', extension='fur',
-        Step=_work.step, Task=_work.task)
+    _cfg = pipe.cur_project().get_cfg()
+    _use_legacy = _cfg.get('yeti', {}).get('use_legacy_naming')
+    if not _use_legacy:
+        _out = work.map_to(
+            tk2.TTOutputFileSeq,
+            output_name=yeti.namespace,
+            channel=yeti.get_parent().clean_name.clean_name,
+            format='yeti', output_type='yeticache', extension='fur',
+            Step=work.step, Task=work.task)
+    else:
+        _out = _work.map_to(
+            tk2.TTOutputFileSeq,
+            output_name='{}Yeti_{}'.format(
+                yeti.namespace, yeti.get_parent().clean_name),
+            format='yeti', output_type='fxcache', extension='fur',
+            Step=_work.step, Task=_work.task)
     return _out
 
 

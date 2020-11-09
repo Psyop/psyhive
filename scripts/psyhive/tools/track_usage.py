@@ -6,6 +6,7 @@ import getpass
 import os
 import pprint
 import platform
+import sys
 import time
 
 import six
@@ -131,7 +132,10 @@ def _write_usage_to_file(name, args, kwargs, verbose=1):
         'cwd': abs_path(os.getcwd()),
         'time': int(time.time()),
         'proj': _cur_proj.name,
-        'name': name}
+        'name': name,
+        'platform': sys.platform,
+        'machine_name': platform.node(),
+    }
     _kwargs_data = {}
     for _key, _val in kwargs.items():
         _kwargs_data[_key] = _clean_arg(_val)
@@ -170,6 +174,8 @@ def _clean_arg(arg):
     Returns:
         (any): cleaned arg
     """
+    if isinstance(arg, unicode):
+        return str(arg)
     if isinstance(arg, (int, float, bool, six.string_types)):
         return arg
     return str(arg)

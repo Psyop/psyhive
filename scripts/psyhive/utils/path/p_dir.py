@@ -12,6 +12,19 @@ from .p_utils import restore_cwd
 class Dir(Path):
     """Represents a directory on disk."""
 
+    def contains(self, path):
+        """Test if the given path is within this directory.
+
+        Args:
+            path (str): path to test
+
+        Returns:
+            (bool): whether path in within this dir
+        """
+        from .p_tools import abs_path, get_path
+        _path = get_path(path)
+        return abs_path(_path).startswith(abs_path(self.path))
+
     def delete(self, force=False, wording='delete', icon=None):
         """Delete this directory.
 
