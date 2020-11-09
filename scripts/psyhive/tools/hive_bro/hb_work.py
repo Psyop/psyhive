@@ -206,6 +206,7 @@ def get_recent_work(verbose=0):
         (TTWork list): list of work files
     """
     _settings = QtCore.QSettings('Sgtk', 'psy-multi-fileops')
+    lprint('READING SETTINGS', _settings.fileName(), verbose=verbose)
     _setting_name = '{}/recent_files'.format(pipe.cur_project().name)
     _works = []
     for _file in _settings.value(_setting_name, []):

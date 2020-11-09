@@ -1,3 +1,15 @@
+#### v0.117.1 ####
+
+    Released: Mon 9th Nov 2020 13:05pm
+
+    Tank support: ignore kFailures on read mesh asset mesh data (alanyang)
+    
+    maya_psyhive:
+        tank_support.read_mesh_data ignore meshes throwing kFailure on access data,
+    psyhive:
+        tools.hive_bro.get_recent_work print settings filename on verbose,
+
+
 #### v0.117.0 ####
 
     Released: Mon 9th Nov 2020 10:32am

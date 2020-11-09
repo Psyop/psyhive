@@ -30,18 +30,24 @@ def read_mesh_data(verbose=0):
         _meshes = hom.find_nodes(class_=hom.HFnMesh)
 
     # Read mesh data
-    _data = {}
+    _data = {'errored_meshes': []}
     for _mesh in _meshes:
 
-        if _mesh.isFromReferencedFile:
+        # Ignore referenced nodes
+        try:
+            if _mesh.isFromReferencedFile:
+                continue
+        except RuntimeError as _exc:
+            print ' - WARNING: mesh {} throws MFnMesh error >>> {}'.format(
+                _mesh, _exc.message)
+            _data['errored_meshes'].append(str(_mesh))
             continue
 
+        # Collect mesh data
         _uv_sets = [str(_set) for _set in _mesh.getUVSetNames()]
-
         lprint('MESH', _mesh, _mesh.shp, _mesh.shp.typeName, verbose=verbose)
         lprint(' - NUM VTXS', _mesh.numVertices, verbose=verbose)
         lprint(' - UV SETS', _mesh.numUVSets, _uv_sets, verbose=verbose)
-
         _mesh_data = {}
         _mesh_data['uv_sets'] = _uv_sets
         _mesh_data['vtx_count'] = _mesh.numVertices
