@@ -1,3 +1,14 @@
+#### v0.118.0 ####
+
+    Released: Tue 10th Nov 2020 12:17pm
+
+    Usage tracker: bugfix error on missing hv test project,
+    
+    psyhive:
+        tools.track_usage bugfix err on no cur project + missing hv project,
+        utils.MaFile added,
+
+
 #### v0.117.1 ####
 
     Released: Mon 9th Nov 2020 13:05pm

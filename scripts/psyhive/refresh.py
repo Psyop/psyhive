@@ -27,6 +27,7 @@ _RELOAD_ORDER = [
     'psyhive.utils.py_file.def_',
     'psyhive.utils.py_file.class_',
     'psyhive.utils.py_file',
+    'psyhive.utils.ma_file',
     'psyhive.utils',
     'psyhive.icons.set_',
     'psyhive.icons',

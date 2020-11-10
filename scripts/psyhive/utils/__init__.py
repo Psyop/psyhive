@@ -4,16 +4,17 @@ from .cache import (
     store_result, Cacheable, get_result_to_file_storer, obj_read, obj_write,
     store_result_to_file, store_result_on_obj, get_result_storer,
     store_result_content_dependent, build_cache_fmt, ReadError, CacheMissing)
+from .cfg import get_cfg, set_cfg
 from .dev_ import dev_mode, set_dev_mode, revert_dev_mode
 from .email_ import send_email
 from .heart import check_heart, HEART
 from .filter_ import passes_filter, apply_filter
+from .ma_file import MaFile
 from .misc import (
     lprint, system, dprint, wrap_fn, chain_fns, to_nice, get_single,
     get_plural, last, str_to_seed, get_ord, copy_text, bytes_to_str,
     to_camel, val_map, get_time_t, clamp, read_url, safe_zip, is_pascal,
     nice_age, get_time_f, to_pascal, strftime)
-from .cfg import get_cfg, set_cfg
 from .path import (
     File, Path, Dir, abs_path, read_file, find, write_file, replace_file,
     search_files_for_text, test_path, touch, restore_cwd, rel_path, FileError,

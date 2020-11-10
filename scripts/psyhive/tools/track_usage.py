@@ -131,10 +131,9 @@ def _write_usage_to_file(name, args, kwargs, verbose=1):
     _data = {
         'cwd': abs_path(os.getcwd()),
         'time': int(time.time()),
-        'proj': _cur_proj.name,
         'name': name,
         'platform': sys.platform,
-        'machine_name': platform.node(),
+        'machine': platform.node(),
     }
     _kwargs_data = {}
     for _key, _val in kwargs.items():
@@ -144,14 +143,17 @@ def _write_usage_to_file(name, args, kwargs, verbose=1):
             ('scene', host.cur_scene()),
             ('args', [_clean_arg(_arg) for _arg in args]),
             ('kwargs', _kwargs_data),
+            ('proj', _cur_proj.name if _cur_proj else None),
     ]:
         if _val:
             _data[_name] = _val
 
     # Get list of projs to write to
-    _projs = {_cur_proj}
+    _projs = set()
+    if _cur_proj:
+        _projs.add(_cur_proj)
     _hv_proj = pipe.find_project('hvanderbeek_0001P', catch=True)
-    if _hv_proj.exists():
+    if _hv_proj:
         _projs.add(_hv_proj)
 
     # Write data
