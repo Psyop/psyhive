@@ -362,6 +362,16 @@ def read_outgoing(obj, class_=None, type_=None):
     return _conns
 
 
+def set_locator_scale(value):
+    """Set locator scale global.
+
+    Args:
+        value (float): scale to apply
+    """
+    from maya_psyhive import open_maya as hom
+    hom.LOC_SCALE = value
+
+
 def sph_rand():
     """Generate a random point on a sphere.
 

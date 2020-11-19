@@ -163,7 +163,15 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
         _bake_geo.append(_dup)
 
         # Bind to rig
-        _blend = hom.CMDS.blendShape(_rig_tfm, _dup)
+        try:
+            _blend = hom.CMDS.blendShape(_rig_tfm, _dup)
+        except RuntimeError:
+            del_namespace(_tmp_ns)
+            _shade.remove(force=True)
+            cmds.namespace(set=":")
+            raise RuntimeError(
+                'Attached failed - unable to create blendShape on '
+                '{}.'.format(_rig_tfm))
         _blend.plug('origin').set_enum('world')
         _blend.plug('weight[0]').set_val(1.0)
 
@@ -172,7 +180,8 @@ def drive_shade_geo_from_rig(cache_set, progress=False, verbose=0):
 
     if not _bake_geo:
         del_namespace(_tmp_ns)
-        raise RuntimeError('No geo was attached - this means none of the '
-                           'shade geo matched the rig bakeSet geo.')
+        raise RuntimeError(
+            'No geo was attached - this means none of the '
+            'shade geo matched the rig bakeSet geo.')
 
     return _bake_geo, _bake_geo

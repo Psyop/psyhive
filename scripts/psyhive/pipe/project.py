@@ -43,6 +43,15 @@ class Project(Dir, Cacheable):
         self.cache_fmt = '{}/production/psyhive/cache/{{}}.pkl'.format(
             self.path)
 
+    @property
+    def code(self):
+        """Get the project code.
+
+        Returns:
+            (int): code as integer
+        """
+        return int(self.name.split('_')[-1].strip('PVBIFM'))
+
     def find_shot(self, name):
         """Find shot matching the given name.
 

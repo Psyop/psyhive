@@ -1,3 +1,19 @@
+#### v0.118.1 ####
+
+    Released: Wed 18th Nov 2020 16:05pm
+
+    Tank support: bugfix leftover geo on publish fail to attach rig to shade geo (kcassidy)
+    
+    maya_psyhive:
+        open_maya.set_locator_scale added,
+        tank_support.drive_shade_geo_from_rig clean scene on fail to create blend for mesh pair,
+        tank_support.read_mesh_data ignore invalid meshes,
+    psyhive:
+        pipe.Project.code added,
+        utils.first added,
+        utils.MaFile.find_fps added film/ntsc handling,
+
+
 #### v0.118.0 ####
 
     Released: Tue 10th Nov 2020 12:17pm

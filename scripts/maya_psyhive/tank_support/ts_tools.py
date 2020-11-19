@@ -30,7 +30,7 @@ def read_mesh_data(verbose=0):
         _meshes = hom.find_nodes(class_=hom.HFnMesh)
 
     # Read mesh data
-    _data = {'errored_meshes': []}
+    _data = {}
     for _mesh in _meshes:
 
         # Ignore referenced nodes
@@ -40,7 +40,6 @@ def read_mesh_data(verbose=0):
         except RuntimeError as _exc:
             print ' - WARNING: mesh {} throws MFnMesh error >>> {}'.format(
                 _mesh, _exc.message)
-            _data['errored_meshes'].append(str(_mesh))
             continue
 
         # Collect mesh data

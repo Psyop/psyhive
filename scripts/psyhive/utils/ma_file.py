@@ -204,4 +204,6 @@ class MaFile(File):
         """
         _unit = self.find_expr('currentUnit')
         _time = _unit.read_flag('-t')
-        return {'pal': 25.0}[_time]
+        return {'pal': 25.0,
+                'ntsc': 30.0,
+                'film': 24.0}[_time]

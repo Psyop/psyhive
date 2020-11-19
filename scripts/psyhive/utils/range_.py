@@ -176,6 +176,18 @@ def ints_to_str(values, rng_sep="-", chunk_sep=","):
     return _val_str
 
 
+def first(list_):
+    """Tag first value of a list.
+
+    Args:
+        list_ (list): list to tag
+
+    Returns:
+        (tuple list): list of (first, item) values
+    """
+    return [(_idx == 0, _item) for _idx, _item in enumerate(list_)]
+
+
 def first_last(list_):
     """Tag first and last values of a list.
 
