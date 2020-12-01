@@ -77,7 +77,7 @@ ignore:
         hv_test/diary/y19/d0717/make_littlezoo_zip.py
     missing-docstring: '*'
     no-member:
-        hv_test/diary/
+        /diary/
         maya_psyhive/shows/_fr_browser.py
         psyhive/qt/dialog/dg_base.py
         psyhive/qt/dialog/pixmap_ui.py
@@ -87,11 +87,12 @@ ignore:
         psyhive/utils/path/p_tools.py
         sanity_check/checks/maya/general/shotgun.py
     no-name-in-module:
+        /diary/
         hv_test/tools/qube/__init__.py
     no-self-use:
+        /diary/
         /plug-ins/
         /tests/
-        hv_test/diary/
         hv_test/release/rel_misc.py
         hv_test/toolkits/release_tools.py
         hv_test/tools/cod_bro/cb_interface.py

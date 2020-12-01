@@ -52,9 +52,10 @@ def abs_path(path, win=False, root=None, verbose=0):
     ]:
         _path = _path.replace(_find, _replace)
     if _path.startswith('~/'):
-        _path = '{}/{}'.format(
-            os.environ.get('HOME') or os.environ['HOMEDRIVE'],
-            _path[2:]).replace('//', '/')
+        _home = os.environ.get('HOME') or os.environ.get('HOMEDRIVE')
+        if not _home:
+            raise RuntimeError('Unable to find home dir')
+        _path = '{}/{}'.format(_home, _path[2:]).replace('//', '/')
     lprint(' - APPLIED HOME', _path, verbose=verbose)
 
     # Handle relative paths

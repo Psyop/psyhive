@@ -1,3 +1,15 @@
+#### v0.118.2 ####
+
+    Released: Mon 30th Nov 2020 16:57pm
+
+    Check heart function: catch error on no home dir set (ccesareo)
+    
+    psyhive:
+        tools.track_usage catch missing $USER,
+        utils.check_heart catch no home dir set,
+        utils.abs_path raise RuntimeError on ~ + no home dir set,
+
+
 #### v0.118.1 ####
 
     Released: Wed 18th Nov 2020 16:05pm

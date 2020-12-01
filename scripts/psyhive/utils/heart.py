@@ -1,10 +1,14 @@
 """Tools for managing the check heart loop breaker tool."""
 
+import tempfile
 import time
 
 from .path import File, abs_path
 
-HEART = File(abs_path('~/.heart'))
+try:
+    HEART = File(abs_path('~/.heart'))
+except RuntimeError:  # Missing home dir
+    HEART = File(abs_path('{}/heart.file'.format(tempfile.gettempdir())))
 
 _INITIATED = False
 _LAST_CHECK = None
