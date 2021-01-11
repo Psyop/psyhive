@@ -1,3 +1,17 @@
+#### v0.119.1 ####
+
+    Released: Mon 11th Jan 2021 13:02pm
+
+    ingest anim tool: bugfix error due to ommited shot with matching name (iirvin)
+    
+    maya_psyhive:
+        m_ingest.ingest_verndor_anim error on project mismatch,
+        m_ingest.ingest_verndor_anim bugfix error on cache scene cam to disk,
+    psyhive:
+        tk2.get_shot_sg_data ignore omitted shots,
+        tk2.find_shots ignore omitted shots in sg mode,
+
+
 #### v0.119.0 ####
 
     Released: Mon 11th Jan 2021 10:42am

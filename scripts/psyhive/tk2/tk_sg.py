@@ -126,6 +126,7 @@ def get_shot_sg_data(shot):
         'Shot', filters=[
             ["project", "is", [get_project_sg_data(shot.project)]],
             ["code", "is", _sg_name],
+            ["sg_status_list", "is_not", 'omt'],
         ])
     if not _data:
         raise RuntimeError('Shot missing from shotgun {}'.format(shot.name))

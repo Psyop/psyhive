@@ -107,6 +107,12 @@ def ingest_vendor_anim(
         recache (bool): reread cached data about the file
     """
 
+    # Check project
+    if pipe.Project(dir_) != pipe.cur_project():
+        raise ValueError(
+            'Path is in a different project ({}) from the current one '
+            '({})'.format(pipe.Project(dir_).name, pipe.cur_project().name))
+
     # Set vendor
     _vendor = vendor or ingest.vendor_from_path(dir_)
     assert _vendor

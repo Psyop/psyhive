@@ -1,7 +1,7 @@
 """Tools for managing tank template representations."""
 
 from psyhive import pipe, host
-from psyhive.utils import find, get_single, passes_filter
+from psyhive.utils import find, get_single, passes_filter, lprint
 
 from .tt_base import TTSequenceRoot, TTStepRoot, TTShot, TTAsset
 from .tt_work import TTWork
@@ -113,7 +113,8 @@ def find_shot(name, catch=False, mode='disk'):
     return get_single(_shots, catch=catch)
 
 
-def find_shots(class_=None, filter_=None, sequence=None, mode='disk'):
+def find_shots(class_=None, filter_=None, sequence=None, mode='disk',
+               verbose=0):
     """Find shots in the current job.
 
     Args:
@@ -121,6 +122,7 @@ def find_shots(class_=None, filter_=None, sequence=None, mode='disk'):
         filter_ (str): filter by shot name
         sequence (str): filter by sequence name
         mode (str): where to search for shot (disk/sg)
+        verbose (int): print process data
 
     Returns:
         (TTRoot): list of shots
@@ -136,11 +138,22 @@ def find_shots(class_=None, filter_=None, sequence=None, mode='disk'):
         from psyhive import tk2
         _path_fmt = '{}/sequences/{}/{}'
         _shots = []
-        for _seq in tk2.get_sg_data(
-                type_='Sequence', fields=['shots', 'code'], limit=0):
+        _seqs_data = tk2.get_sg_data(
+            type_='Sequence', fields=['shots', 'code'], limit=0)
+        _shots_data = tk2.get_sg_data(
+            type_='Shot', fields=['sg_status_list', 'code'], limit=0)
+        lprint('SEQS', _seqs_data, verbose=verbose)
+        lprint('SHOTS', _shots_data, verbose=verbose)
+        for _seq in _seqs_data:
             for _shot in _seq['shots']:
+                _shot_data = get_single([
+                    _data for _data in _shots_data
+                    if _data['id'] == _shot['id']])
+                lprint(' -', _shot_data, verbose=verbose)
                 _shot_path = _path_fmt.format(
                     pipe.cur_project().path, _seq['code'], _shot['name'])
+                if _shot_data['sg_status_list'] == 'omt':
+                    continue
                 _shot = tk2.TTShot(_shot_path)
                 _shots.append(_shot)
         return _shots

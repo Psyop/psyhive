@@ -177,7 +177,7 @@ class VendorScene(File, ingest.Ingestible):
         """
         print 'READING CAM', self.path
         host.open_scene(self.path, lazy=True, force=True)
-        return read_scene_render_cam()
+        return str(read_scene_render_cam())
 
     @store_result_to_file
     def scene_get_refs(self, force=False):
