@@ -2,8 +2,8 @@
 
 from psyhive.utils import File, abs_path
 
-from psyhive.pipe.misc import read_ver_n
-from psyhive.pipe.shot import Shot
+from .misc import read_ver_n
+from .shot import Shot
 
 
 class WorkFile(File):

@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import time
 
-from psyhive import qt, host
+from psyhive import qt, host, deprecate
 from psyhive.utils import (
     File, abs_path, lprint, find, dprint, read_yaml, get_single,
     write_yaml, diff)
@@ -36,7 +36,7 @@ class TTWorkArea(TTDirBase):
         _hint = self.hint_fmt.format(area=_area, dcc=_dcc)
         super(TTWorkArea, self).__init__(path, hint=_hint)
 
-    def find_increments(self):
+    def find_incs(self):
         """Find increments belonging to this work area.
 
         Returns:
@@ -47,6 +47,9 @@ class TTWorkArea(TTDirBase):
             hint=_hint, class_=TTIncrement, Task='blah', increment=0,
             extension=get_extn(self.dcc), version=0)
         return find(_tmp_inc.dir, depth=1, type_='f', class_=TTIncrement)
+
+    find_increments = deprecate.deprecate_func(
+        tag='16/12/20 Use find_incs')(find_incs)
 
     def find_work(self, class_=None, task=None):
         """Find work files in this shot area.
@@ -175,7 +178,7 @@ class TTWork(TTBase, File):
         """
         return '{}/cache/{}_{{}}.cache'.format(self.dir, self.basename)
 
-    def find_increments(self, verbose=0):
+    def find_incs(self, verbose=0):
         """Find increments of this work file.
 
         Args:
@@ -187,9 +190,12 @@ class TTWork(TTBase, File):
         _area = self.get_work_area()
         lprint('AREA', _area, verbose=verbose)
         _incs = [
-            _inc for _inc in _area.find_increments()
+            _inc for _inc in _area.find_incs()
             if _inc.version == self.version and _inc.task == self.task]
         return _incs
+
+    find_increments = deprecate.deprecate_func(
+        tag='16/12/20 Use find_incs')(find_incs)
 
     def find_latest(self, vers=None):
         """Find latest version of this work file stream.
@@ -325,16 +331,19 @@ class TTWork(TTBase, File):
             _vers.append(_work)
         return _vers
 
-    def get_comment(self, verbose=1):
+    def get_comment(self):
         """Get this work file's comment.
-
-        Args:
-            verbose (int): print process data
 
         Returns:
             (str): comment
         """
-        return self.get_metadata(verbose=verbose).get('comment')
+        _fileops = find_tank_app('psy-multi-fileops')
+        _mod = find_tank_mod('workspace', app='psy-multi-fileops')
+        _tk_workspace = _mod.get_workspace_from_path(
+            app=_fileops, path=self.path)
+        _tk_workfile = _tk_workspace.get_workfile(
+            name=self.task, version=self.version)
+        return _tk_workfile.metadata.comment.get('value')
 
     def get_metadata(self, data=None, catch=True, verbose=0):
         """Get metadata for this work file.
@@ -444,6 +453,19 @@ class TTWork(TTBase, File):
         _fileops = find_tank_app('psy-multi-fileops')
         _fileops.open_file(self.path, force=force)
 
+    def next_inc(self):
+        """Get next increment file for this work.
+
+        Returns:
+            (TTIncrement): next inc
+        """
+        _incs = self.find_incs()
+        if not _incs:
+            _inc_n = 1
+        else:
+            _inc_n = _incs[-1].inc_n + 1
+        return self.map_to(TTIncrement, increment=_inc_n)
+
     def save(self, comment, safe=True, force=False):
         """Save this version.
 
@@ -530,6 +552,7 @@ class TTIncrement(TTBase, File):
     """Represents a work file increment."""
 
     hint_fmt = '{dcc}_{area}_increment'
+    increment = None
 
     def __init__(self, path):
         """Constructor.
@@ -543,6 +566,26 @@ class TTIncrement(TTBase, File):
         _hint = self.hint_fmt.format(dcc=_dcc, area=_area)
         super(TTIncrement, self).__init__(path, hint=_hint)
 
+    @property
+    def inc_n(self):
+        """Get increment as integer.
+
+        Returns:
+            (int): increment number
+        """
+        return int(self.increment)
+
+    def get_comment(self):
+        """Get comment for this inc file.
+
+        Returns:
+            (str): comment
+        """
+        _app = find_tank_app('fileops')
+        _mod = find_tank_mod('workspace', app='fileops')
+        _fo_work = _mod.get_workfile_from_path(app=_app, path=self.path)
+        return _fo_work.metadata.comment.get('value')
+
     def get_shot(self):
         """Get this increment's shot.
 
@@ -552,3 +595,16 @@ class TTIncrement(TTBase, File):
         if self.shot:
             return TTShot(self.path)
         return None
+
+    def set_comment(self, comment):
+        """Set comment for this inc file.
+
+        Args:
+            comment (str): comment to apply
+        """
+        assert self.exists()
+        _app = find_tank_app('fileops')
+        _mod = find_tank_mod('workspace', app='fileops')
+        _fo_work = _mod.get_workfile_from_path(app=_app, path=self.path)
+        _fo_work.metadata.comment = comment
+        _fo_work.metadata.save()

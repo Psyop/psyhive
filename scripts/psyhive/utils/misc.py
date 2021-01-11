@@ -346,7 +346,8 @@ def read_url(url, edit=False, attempts=5):
             _connection = urllib2.urlopen(url)
             _data = _connection.read()
         except (urllib2.HTTPError, httplib.IncompleteRead) as _exc:
-            print 'FAILED({}) - {:d}'.format(type(_exc).__name__, _idx+1)
+            print 'FAILED({}) - {:d} {}'.format(
+                type(_exc).__name__, _idx+1, _exc.message)
             time.sleep(2)
         else:
             break

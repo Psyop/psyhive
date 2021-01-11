@@ -19,9 +19,11 @@ class TestMIngest(unittest.TestCase):
         _build_bad_scene()
         _issues = m_ingest.check_current_scene(show_dialog=False)
         pprint.pprint(_issues)
+        print 'FOUND {:d} ISSUES'.format(len(_issues))
         assert 'File extension for animation should be ma' in _issues
         assert 'Scene has display layers: test_LYR' in _issues
-        assert len(_issues) == 7
+        assert 'Missing render camera' in _issues
+        assert len(_issues) == 8
 
 
 def _build_bad_scene(force=True):

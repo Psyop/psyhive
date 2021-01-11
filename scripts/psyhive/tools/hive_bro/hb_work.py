@@ -35,7 +35,7 @@ def get_work_ctx_opts(work, menu, redraw_work, parent):
     _add_work_ctx_output_files(work=work, menu=menu)
 
     # Add increments
-    _incs = work.find_increments()
+    _incs = work.find_incs()
     menu.addSeparator()
     if _incs:
         _menu = menu.add_menu('Increments')

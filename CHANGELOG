@@ -1,3 +1,28 @@
+#### v0.119.0 ####
+
+    Released: Mon 11th Jan 2021 10:42am
+
+    ingest anim tool: 
+        force asset namespace to match asset name (kcassidy),
+        force camera to be renderCam (iirvin),
+    
+    maya_psyhive:
+        m_ingest read_scene_render_cam/ingest_current_scene added, 
+        m_ingest fix namespace forces asset name as root,
+        m_ingest.ingest_vendor_anim added recache opt (hidden),
+        m_ingest.VendorScene.scene_get_cam added force arg,
+    psyhive:
+        qt.HRect added,
+        qt.HPixmap.add_path added loop arg,
+        tk2.TTWork deprecated find_increments -> find_incs,
+        tk2.TTWork.get_comment use tank metadata code,
+        tk2.next_inc added,
+        tk2.TTIncrement inc_n/get_comment/set_comment added,
+        utils.MaFile added dataStructure handling,
+        utils.MaFile allow set path of file exprs,
+        utils.MaFile find_create_nodes/find_files/find_refs/save_as added,
+
+
 #### v0.118.2 ####
 
     Released: Mon 30th Nov 2020 16:57pm

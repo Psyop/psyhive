@@ -10,15 +10,42 @@ from psyhive import host, qt, py_gui
 from psyhive.tools import ingest
 from psyhive.utils import File, get_plural, check_heart, lprint
 
-from maya_psyhive import ref
+from maya_psyhive import ref, open_maya as hom
 from maya_psyhive.utils import DEFAULT_NODES
+
+PYGUI_TITLE = 'Psyop remote ingest tools'
 
 _STEPS = ['model', 'rig', 'shade', 'previz', 'animation', 'lighting']
 _GROUPS = ['CHAR', 'PROPS', 'SET', 'CAMERA', 'JUNK']
-PYGUI_TITLE = 'Psyop remote ingest tools'
 
 
 py_gui.set_section('Check', collapse=False)
+
+
+def _find_bad_node_issues():
+    """Find issues due to bad nodes.
+
+    Returns:
+        (str list): list of issues with current file
+    """
+    _issues = []
+
+    for _type in ['displayLayer', 'renderLayer']:
+        _lyrs = [_lyr for _lyr in cmds.ls(type=_type)
+                 if _lyr not in DEFAULT_NODES
+                 if not cmds.referenceQuery(_lyr, isNodeReferenced=True)]
+        if _lyrs:
+            _issues.append('Scene has {} layers: {}'.format(
+                _type.replace("Layer", ""), ', '.join(_lyrs)))
+    for _type in ['unknown']:
+        _nodes = [_node for _node in cmds.ls(type=_type)
+                  if _node not in DEFAULT_NODES
+                  if not cmds.referenceQuery(_node, isNodeReferenced=True)]
+        if _nodes:
+            _issues.append('Scene has {} nodes: {}'.format(
+                _type, ', '.join(_nodes)))
+
+    return _issues
 
 
 def _find_scene_name_issues(file_):
@@ -54,11 +81,12 @@ def _find_scene_name_issues(file_):
     return _issues
 
 
-def _find_ref_namespace_issues(ref_):
+def _find_ref_namespace_issues(ref_, asset=None):
     """Find any issues with the reference namespace.
 
     Args:
         ref_ (FileRef): reference to check
+        asset (PsyAsset): psyop asset for this ref (if any)
 
     Returns:
         (str list): issues with reference namespace
@@ -68,9 +96,19 @@ def _find_ref_namespace_issues(ref_):
     if not ref_.namespace:
         _issues.append("Reference {} has no namespace".format(ref_.ref_node))
         return _issues
-    if ref_.namespace.isupper():
-        _issues.append(
-            "Reference {} has capitalised namespace".format(ref_.namespace))
+
+    if asset:
+        if ref_.namespace == asset.asset:
+            pass
+        elif not ref_.namespace.startswith(asset.asset+'_'):
+            _issues.append(
+                "Asset reference {} namespace does not start with asset "
+                "name '{}_'".format(ref_.namespace, asset.asset))
+    else:
+        if ref_.namespace.isupper():
+            _issues.append(
+                "Reference {} has capitalised namespace".format(
+                    ref_.namespace))
     if ref_.namespace.count('_') not in (0, 1):
         _issues.append(
             "Reference {} has too many underscores".format(ref_.namespace))
@@ -136,11 +174,15 @@ def _find_ref_issues(ref_):
         (str list): issues with reference
     """
     _file = File(host.cur_scene())
+    _ref_file = File(ref_.path)
+    _psy_asset = None
+    if ingest.is_psy_asset(_ref_file):
+        _psy_asset = ingest.PsyAsset(_ref_file)
 
     _issues = []
 
     # Check namespace
-    _issues += _find_ref_namespace_issues(ref_)
+    _issues += _find_ref_namespace_issues(ref_, asset=_psy_asset)
     if not ref_.namespace:
         return _issues
 
@@ -151,7 +193,6 @@ def _find_ref_issues(ref_):
         return _issues
 
     # Check ref file path
-    _ref_file = File(ref_.path)
     print '   - FILE', _ref_file.path
     _local_file = File('{}/{}'.format(_file.dir, _ref_file.filename))
     if ingest.is_vendor_file(_ref_file):
@@ -159,10 +200,9 @@ def _find_ref_issues(ref_):
         print '   - VENDOR FILE'
         if _vendor_file.step != 'rig':
             _issues.append("Reference {} is not a rig".format(ref_.namespace))
-    elif ingest.is_psy_asset(_ref_file):
-        _psy_file = ingest.PsyAsset(_ref_file)
-        print '   - PSYOP FILE'
-        if _psy_file.step != 'rig':
+    elif _psy_asset:
+        print '   - PSYOP ASSET'
+        if _psy_asset.step != 'rig':
             _issues.append(
                 "Psyop reference {} is not a rig".format(ref_.namespace))
     elif not _local_file.exists():
@@ -173,6 +213,18 @@ def _find_ref_issues(ref_):
                 ref_.namespace, _ref_file.filename, _file.dir))
 
     return _issues
+
+
+def read_scene_render_cam():
+    """Read current scene render cam.
+
+    Returns:
+        (HFnCamera): render cam
+    """
+    for _cam in hom.find_cams():
+        if _cam in ['renderCam', 'camera:renderCam']:
+            return _cam
+    return None
 
 
 @py_gui.install_gui(hide=['verbose', 'show_dialog'])
@@ -193,6 +245,7 @@ def check_current_scene(show_dialog=True, verbose=1):
 
     # Check current scene filename
     _issues += _find_scene_name_issues(_file)
+    _tag, _step, _ver = ingest.parse_basename(_file.basename)
 
     # Check maya version
     _ver = int(cmds.about(version=True))
@@ -200,20 +253,7 @@ def check_current_scene(show_dialog=True, verbose=1):
         _issues.append('Bad maya version {:d}'.format(_ver))
 
     # Check for unwanted node types
-    for _type in ['displayLayer', 'renderLayer']:
-        _lyrs = [_lyr for _lyr in cmds.ls(type=_type)
-                 if _lyr not in DEFAULT_NODES
-                 if not cmds.referenceQuery(_lyr, isNodeReferenced=True)]
-        if _lyrs:
-            _issues.append('Scene has {} layers: {}'.format(
-                _type.replace("Layer", ""), ', '.join(_lyrs)))
-    for _type in ['unknown']:
-        _nodes = [_node for _node in cmds.ls(type=_type)
-                  if _node not in DEFAULT_NODES
-                  if not cmds.referenceQuery(_node, isNodeReferenced=True)]
-        if _nodes:
-            _issues.append('Scene has {} nodes: {}'.format(
-                _type, ', '.join(_nodes)))
+    _issues += _find_bad_node_issues()
 
     # Check references
     _refs = ref.find_refs(unloaded=False)
@@ -221,6 +261,14 @@ def check_current_scene(show_dialog=True, verbose=1):
     for _ref in _refs:
         lprint(' - CHECKING', _ref, verbose=verbose)
         _issues += _find_ref_issues(_ref)
+
+    # Check camera
+    lprint(' - STEP', _step, verbose=verbose)
+    if _step in ['previs', 'previz', 'animation']:
+        _cam = read_scene_render_cam()
+        lprint(' - CAM', _cam, verbose=verbose)
+        if not _cam:
+            _issues.append('Missing render camera')
 
     # Print summary
     if verbose:
@@ -252,9 +300,14 @@ def fix_namespaces():
     _used = []
     _to_rename = []
     for _ref in ref.find_refs(unloaded=False):
-        if not _find_ref_namespace_issues(_ref):
+        _asset = (ingest.PsyAsset(_ref.path) if ingest.is_psy_asset(_ref.path)
+                  else None)
+        if not _find_ref_namespace_issues(_ref, asset=_asset):
             continue
-        _base = _ref.namespace.split('_')[0]
+        if _asset:
+            _base = _asset.asset
+        else:
+            _base = _ref.namespace.split('_')[0]
         _name = _base
         _idx = 1
         while True:

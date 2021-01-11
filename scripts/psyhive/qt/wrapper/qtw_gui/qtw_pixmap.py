@@ -167,7 +167,7 @@ class HPixmap(QtGui.QPixmap):
 
         return _rect
 
-    def add_path(self, pts, col='black', thickness=None, pen=None):
+    def add_path(self, pts, col='black', thickness=None, pen=None, loop=False):
         """Draw a path on this pixmap.
 
         Args:
@@ -175,6 +175,7 @@ class HPixmap(QtGui.QPixmap):
             col (str): path colour
             thickness (float): line thickness
             pen (QPen): override pen (ignores all other pen attrs)
+            loop (bool): loop back to first point
         """
         from psyhive import qt
 
@@ -191,10 +192,14 @@ class HPixmap(QtGui.QPixmap):
         _brush = QtGui.QBrush()
         _brush.setStyle(Qt.NoBrush)
 
+        _pts = pts
+        if loop:
+            _pts = _pts+[_pts[0]]
+
         # Make path object
         _path = QtGui.QPainterPath()
-        _path.moveTo(qt.get_p(pts[0]))
-        for _pt in pts[1:]:
+        _path.moveTo(qt.get_p(_pts[0]))
+        for _pt in _pts[1:]:
             _path.lineTo(qt.get_p(_pt))
 
         _pnt = HPainter()

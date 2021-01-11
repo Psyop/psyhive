@@ -8,4 +8,4 @@ from .qtw_widgets import (
     HTextBrowser)
 from .qtw_gui import (
     HPixmap, HColor, HPainter, TEST_IMG, TEST_JPG, TEST_PNG, RENDER_HINTS)
-from .qtw_core import HPoint
+from .qtw_core import HPoint, HRect

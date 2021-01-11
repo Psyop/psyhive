@@ -84,14 +84,14 @@ def _get_ingestable_scenes(dir_, filter_):
 
 
 @py_gui.install_gui(
-    label_width=130, hide=['ignore_extn', 'force'], icon=ingest.ICON,
-    browser={'dir_': py_gui.BrowserLauncher(
+    label_width=130, hide=['ignore_extn', 'force', 'recache'],
+    icon=ingest.ICON, browser={'dir_': py_gui.BrowserLauncher(
         mode='SingleDirExisting', default_dir=_VENDOR_IN)})
 def ingest_vendor_anim(
         dir_, vendor=None, force=False, filter_=None,
         cache_on_farm=True, ignore_extn=False,
         ignore_dlayers=False, ignore_rlayers=False,
-        ignore_multi_top_nodes=False):
+        ignore_multi_top_nodes=False, recache=False):
     """Ingest vendor animation files.
 
     Args:
@@ -104,6 +104,7 @@ def ingest_vendor_anim(
         ignore_dlayers (bool): ignore display layer issues
         ignore_rlayers (bool): ignore render layer issues
         ignore_multi_top_nodes (bool): ignore multiple top node issues
+        recache (bool): reread cached data about the file
     """
 
     # Set vendor
@@ -145,7 +146,7 @@ def ingest_vendor_anim(
         _scene_isses = _scene.get_ingest_issues(**_ingest_kwargs)
         if _scene_isses:
             _issues.append((_scene, _scene_isses))
-        print ' - CAM', _scene.scene_get_cam()
+        print ' - CAM', _scene.scene_get_cam(force=recache)
 
         _scene.ingest(vendor=vendor, force=True, cache_on_farm=cache_on_farm)
         _status, _ = _scene.get_ingest_status()

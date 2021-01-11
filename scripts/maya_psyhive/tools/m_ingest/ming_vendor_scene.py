@@ -6,11 +6,11 @@ from psyhive import tk2, host, pipe, qt
 from psyhive.tools import ingest
 from psyhive.utils import (
     File, lprint, store_result_to_file, get_result_to_file_storer,
-    build_cache_fmt, get_single)
+    build_cache_fmt)
 
-from maya_psyhive import ref, open_maya as hom, ui
+from maya_psyhive import ui, ref
 
-from .ming_remote import check_current_scene
+from .ming_remote import check_current_scene, read_scene_render_cam
 
 _WAITING_ON_FARM_CACHE_TOKEN = 'waiting on farm cache 30/09/20'
 
@@ -166,15 +166,18 @@ class VendorScene(File, ingest.Ingestible):
         return _issues
 
     @get_result_to_file_storer(min_mtime=1596664734)
-    def scene_get_cam(self):
+    def scene_get_cam(self, force=False):
         """Get render cam from this scene.
+
+        Args:
+            force (bool): force reread cached data
 
         Returns:
             (str): camera name
         """
         print 'READING CAM', self.path
         host.open_scene(self.path, lazy=True, force=True)
-        return _read_scene_render_cam()
+        return read_scene_render_cam()
 
     @store_result_to_file
     def scene_get_refs(self, force=False):
@@ -528,69 +531,6 @@ class VendorScene(File, ingest.Ingestible):
         return _work
 
 
-def _is_cam_renderable(cam):
-    """Check if the given cam is renderable.
-
-    Args:
-        cam (HFnCamera): camera to check
-
-    Returns:
-        (bool): renderable
-    """
-    return cam.shp.plug('renderable').get_val()
-
-
-def _is_cam_referenced(cam):
-    """Check if the given camera is referenced.
-
-    Args:
-        cam (HFnCamera): camera to check
-
-    Returns:
-        (bool): referenced
-    """
-    return cam.shp.isFromReferencedFile
-
-
-def _match_clean_name(name):
-    """Get a function to match the given clean node name.
-
-    Args:
-        name (str): name to match
-
-    Returns:
-        (fn): name matching function
-    """
-    def _clean_name_is(cam):
-        return cam.clean_name == name
-    return _clean_name_is
-
-
-def _read_scene_render_cam():
-    """Read current scene render cam.
-
-    Returns:
-        (HFnCamera): render cam
-    """
-    _cams = hom.find_cams()
-    for _filter in [
-            None,
-            _is_cam_referenced,
-            _match_clean_name('animCam'),
-            _match_clean_name('renderCam'),
-            _is_cam_renderable,
-    ]:
-        if _filter:
-            _filtered_cams = filter(_filter, _cams)
-            lprint(' - APPLING FILTER', _filter, len(_filtered_cams),
-                   _filtered_cams)
-            if not _filtered_cams:
-                print ' - REJECTED FILTER'
-                continue
-            _cams = _filtered_cams
-
-        print 'CAMS', len(_cams), _cams
-        if get_single(_cams, catch=True):
-            return str(get_single(_cams))
-
-    return None
+def ingest_current_scene():
+    """Ingest current scene file."""
+    VendorScene(host.cur_scene()).ingest()

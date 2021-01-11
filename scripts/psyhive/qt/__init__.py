@@ -9,8 +9,11 @@ from .wrapper import (
     HPushButton, HCheckBox, HLabel, HTreeWidgetItem, HListWidgetItem,
     HListWidget, HComboBox, HTreeWidget, HTabWidget, HTextBrowser,
 
-    # QtCore/QtGui overrides
-    HPixmap, HColor, HPoint, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN,
+    # QtCore overrides
+    HPoint, HRect,
+
+    # QtGui overrides
+    HPixmap, HColor, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN,
     TEST_IMG, TEST_PNG, TEST_JPG, RENDER_HINTS)
 
 from .maya_palette import set_maya_palette
