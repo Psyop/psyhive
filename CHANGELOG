@@ -1,3 +1,13 @@
+#### v0.119.2 ####
+
+    Released: Mon 11th Jan 2021 16:14pm
+
+    ingest anim tool: catch/update rigs from different job (iirvin)
+    
+    maya_psyhive:
+        m_ingest.ingest_verndor_anim rejects refs from different job,
+
+
 #### v0.119.1 ####
 
     Released: Mon 11th Jan 2021 13:02pm

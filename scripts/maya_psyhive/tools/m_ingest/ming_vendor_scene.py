@@ -300,7 +300,9 @@ class VendorScene(File, ingest.Ingestible):
         """
         print ' - CHECKING REF', ref_
         print '   - PATH', ref_.path
-        if File(ref_.path).exists():
+        if (
+                File(ref_.path).exists() and
+                pipe.Project(ref_.path) == pipe.cur_project()):
 
             try:
                 _file = tk2.TTOutputFile(ref_.path)
