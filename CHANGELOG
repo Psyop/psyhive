@@ -1,3 +1,25 @@
+#### v0.120.0 ####
+
+    Released: Wed 27th Jan 2021 12:28pm
+
+    tank support: (cbach) [MON-1004485365]
+        added abc export function,
+        added abc mode helper function,
+    
+    maya_psyhive:
+        ref.create_ref bugfix error on nested ref,
+        ref.find_ref added nested flag + better error on fail,
+        tank_support.abc_mode added,
+        utils.save_abc added,
+    psyhive:
+        qt added HSize/get_rect,
+        qt.HPixmap.aspect added,
+        tk2 find_asset/find_assets added mode flag,
+        tk2.find_shots bugfix ignoring sequence flag in sg mode,
+        utils.Dir copy_to/get_subdir added,
+        utils.PyBase.get_code added docs flag,
+
+
 #### v0.119.2 ####
 
     Released: Mon 11th Jan 2021 16:14pm

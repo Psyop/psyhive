@@ -423,7 +423,7 @@ def create_ref(file_, namespace, class_=None, force=False):
             del_namespace(namespace, force=force)
 
     # Create the reference
-    _cur_refs = set(cmds.ls(type='reference'))
+    _cur_refs = set(find_refs())
     _kwargs = {
         'reference': True,
         'namespace': namespace,
@@ -432,17 +432,17 @@ def create_ref(file_, namespace, class_=None, force=False):
     cmds.file(_file.abs_path(), **_kwargs)
 
     # Find new reference node
-    _ref = get_single(set(cmds.ls(type='reference')).difference(_cur_refs))
+    _ref = get_single(set(find_refs()).difference(_cur_refs))
 
     # Fbx ref seems to update timeline (?)
     if host.t_range() != _rng:
         host.set_range(*_rng)
 
-    return _class(_ref)
+    return _class(_ref.ref_node)
 
 
 def find_ref(namespace=None, filter_=None, catch=False, class_=None,
-             prefix=None, extn=None, verbose=0):
+             prefix=None, extn=None, nested=False, verbose=0):
     """Find reference with given namespace.
 
     Args:
@@ -453,15 +453,21 @@ def find_ref(namespace=None, filter_=None, catch=False, class_=None,
         prefix (str): match reference by prefix (prefix references don't
             use namespaces)
         extn (str): filter by extension
+        nested (bool): search nested refs
         verbose (int): print process data
 
     Returns:
         (FileRef): matching ref
     """
     _refs = find_refs(namespace=namespace, filter_=filter_, class_=class_,
-                      prefix=prefix, extn=extn)
+                      prefix=prefix, extn=extn, nested=nested)
     lprint('Found {:d} refs'.format(len(_refs)), _refs, verbose=verbose)
-    return get_single(_refs, catch=catch, name='ref')
+    try:
+        return get_single(_refs, catch=catch)
+    except ValueError as _exc:
+        if namespace:
+            raise ValueError('No {} reference found'.format(namespace))
+        raise _exc
 
 
 def find_refs(namespace=None, filter_=None, class_=None, prefix=None,

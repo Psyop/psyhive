@@ -190,8 +190,11 @@ class PyBase(object):
             for _child in self.find_children():
                 _child.fix_docs()
 
-    def get_code(self):
+    def get_code(self, docs=True):
         """Get code for this object.
+
+        Args:
+            docs (bool): include docstrings
 
         Returns:
             (str): python code
@@ -208,7 +211,20 @@ class PyBase(object):
             _next = _children[_children.index(_this)+1]
             assert not _next.name.startswith(_this.name+'.')
             _end = _next.get_ast().lineno - 1
-        return '\n'.join(self.py_file.read().split('\n')[_start: _end])
+        _code = '\n'.join(self.py_file.read().split('\n')[_start: _end])
+
+        # Remove docs
+        if not docs and self.docs:
+            _splitter = '"""'
+            if not _code.count(_splitter):
+                _splitter = "'''"
+            if not _code.count(_splitter):
+                print _code
+                raise RuntimeError
+            _tokens = _code.split(_splitter)
+            _code = _tokens[0] + _splitter.join(_tokens[2:])
+
+        return _code
 
     def get_docs_suggestion(self, verbose=0):
         """Get suggestion for this def's docstring.

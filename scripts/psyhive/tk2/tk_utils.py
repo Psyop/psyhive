@@ -320,6 +320,7 @@ def _clean_leftover_modules(force=False, verbose=0):
 
     # Find leftover modules
     _to_delete = []
+    lprint('APPS', _engine.apps, verbose=verbose)
     for _app_name in _engine.apps:
         _other_name = _get_app_other_name(_app_name)
         _app = _engine.apps[_app_name]

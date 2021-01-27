@@ -1,4 +1,8 @@
-"""Tools for managing tank template representations."""
+"""Tools for managing tank template representations.
+
+The templates file is stored here:
+<project>/code/primary/tank/config/core/templates.yml
+"""
 
 from .tt_base import (
     TTSequenceRoot, TTRoot, TTStepRoot, TTShot, TTAsset)

@@ -1,10 +1,29 @@
 """General tank support tools."""
 
+import os
+
 from maya import cmds
 
 from psyhive.tools import catch_error
 from psyhive.utils import lprint
 from maya_psyhive import open_maya as hom
+
+
+def abc_mode():
+    """Find which abc mode to use.
+
+    This is exocortex before maya 2020 or native afterwards. It can be
+    overridden using the TANK_ABC_MODE environment variable. This affects
+    the Cache, Publish and Asset Manager tools.
+
+    Returns:
+        (str): abc mode
+    """
+    if 'TANK_ABC_MODE' in os.environ:
+        return os.environ['TANK_ABC_MODE']
+
+    _ver = int(cmds.about(version=True))
+    return 'exocortex' if _ver < 2020 else 'native'
 
 
 @catch_error

@@ -3,7 +3,7 @@
 from maya import cmds
 
 from psyhive.utils import lprint, File, abs_path, dprint, get_path
-from .mu_tools import load_plugin
+from .mu_tools import load_plugin, mel_
 
 
 def open_scene(file_, force=False, prompt=False, lazy=False, load_refs=True):
@@ -32,6 +32,77 @@ def open_scene(file_, force=False, prompt=False, lazy=False, load_refs=True):
 
     cmds.file(_file, open=True, force=True, prompt=prompt, ignoreVersion=True,
               **_kwargs)
+
+
+def save_abc(
+        file_, objs=None, rng=None, step_size=1.0, user_attr_prefixes=(),
+        mode='export', format_='ogawa', no_normals=False, uv_write=True,
+        write_face_sets=True, selection=False):
+    """Save an abc to disk.
+
+    Args:
+        file_ (str): path to save to
+        objs (str list): objects to save
+        rng (tuple): export frame range
+        step_size (float): step size in frames
+        user_attr_prefixes (tuple): user attribute prefix list
+        mode (str): export mode
+            export - export the abc
+            job_str - just return the job string
+        format_ (str): abc format
+        no_normals (bool): add -noNormals flag
+        uv_write (bool): add -uvWrite flag
+        write_face_sets (bool): add -writeFaceSets flag
+        selection (bool): export selection
+
+    Returns:
+        (str): job string (if mode is job_str)
+    """
+    from psyhive import host
+
+    if not (objs or selection):
+        raise RuntimeError('Nothing to export')
+
+    # Process flags
+    _objs_str = ""
+    if objs:
+        _objs_str = "-root " + " -root ".join(map(str, objs))
+    _uap_str = ""
+    for _uap in user_attr_prefixes:
+        _uap_str += " -userAttrPrefix "+_uap
+    _start, _end = rng or host.t_range(int)
+
+    # Build job str
+    _job_str = (
+        "-frameRange {start:d} {end:d} "
+        "-dataFormat {format} "
+        "-step {step} "
+        "-worldSpace "
+        "{no_normals} {uv_write} {write_face_sets} {selection}"
+        "{user_attr_prefixes} "
+        "-file {file} "
+        "{roots_str} ".format(
+            start=_start, end=_end, step=step_size,
+            file=abs_path(file_), format=format_,
+            roots_str=_objs_str,
+            no_normals='-noNormals' if no_normals else '',
+            uv_write='-uvWrite' if uv_write else '',
+            write_face_sets='-writeFaceSets' if write_face_sets else '',
+            selection='-selection' if selection else '',
+            user_attr_prefixes=_uap_str))
+    while '  ' in _job_str:
+        _job_str = _job_str.replace('  ', ' ')
+
+    # Execute
+    if mode == 'job_str':
+        return _job_str
+    elif mode == 'export':
+        cmds.loadPlugin('AbcExport', quiet=True)
+        File(file_).test_dir()
+        _mel = 'AbcExport -jobArg "{}"'.format(_job_str)
+        mel_(_mel)
+    else:
+        raise ValueError(mode)
 
 
 def save_as(file_, revert_filename=True, export_selection=False, force=False,

@@ -39,45 +39,66 @@ def cur_work(class_=None):
         return None
 
 
-def find_asset(filter_=None, asset=None, catch=False):
+def find_asset(filter_=None, asset=None, catch=False, mode='sg'):
     """Find asset matching given filter.
 
     Args:
         filter_ (str): filter by path
         asset (str): filter by asset name
         catch (bool): no error on fail
+        mode (str): where to search (disk/sg)
 
     Returns:
         (TTAsset): matching asset root
     """
-    _assets = find_assets()
-    if filter_:
-        _assets = [_asset for _asset in _assets
-                   if passes_filter(_asset.path, filter_)]
+    _assets = find_assets(mode=mode, filter_=filter_)
     if asset:
         _assets = [_asset for _asset in _assets if _asset.asset == asset]
     return get_single(_assets, catch=catch, verbose=1)
 
 
-def find_assets(filter_=None):
+def find_assets(filter_=None, mode='disk', verbose=0):
     """Read asset roots.
 
     Args:
         filter_ (str): filter by file path
+        mode (str): where to search (disk/sg)
+        verbose (int): print process data
 
     Returns:
         (TTAsset list): list of assets in this show
     """
-    _root = pipe.cur_project().path+'/assets'
-    _roots = []
-    for _dir in find(_root, depth=3, type_='d', filter_=filter_):
-        try:
-            _asset = TTAsset(_dir)
-        except ValueError:
-            continue
-        _roots.append(_asset)
+    if mode == 'disk':
+        _root = pipe.cur_project().path+'/assets'
+        _assets = []
+        for _dir in find(_root, depth=3, type_='d', filter_=filter_):
+            try:
+                _asset = TTAsset(_dir)
+            except ValueError:
+                continue
+            _assets.append(_asset)
+    elif mode == 'sg':
+        from psyhive import tk2
+        _path_fmt = '{}/assets/3D/{}/{}'
+        _assets = []
+        _assets_data = tk2.get_sg_data(
+            type_='Asset', fields=['sg_status_list', 'code', 'sg_asset_type'],
+            limit=0)
+        lprint('ASSETS', _assets_data, verbose=verbose)
+        for _asset_data in _assets_data:
+            _asset_path = _path_fmt.format(
+                pipe.cur_project().path, _asset_data['sg_asset_type'],
+                _asset_data['code'])
+            _asset = tk2.TTAsset(_asset_path)
+            _assets.append(_asset)
+    else:
+        raise ValueError(mode)
 
-    return _roots
+    if filter_:
+        _assets = [_asset for _asset in _assets
+                   if passes_filter(_asset.path, filter_)]
+
+    return _assets
 
 
 def find_sequences():
@@ -145,6 +166,8 @@ def find_shots(class_=None, filter_=None, sequence=None, mode='disk',
         lprint('SEQS', _seqs_data, verbose=verbose)
         lprint('SHOTS', _shots_data, verbose=verbose)
         for _seq in _seqs_data:
+            if sequence and not _seq['code'] == sequence:
+                continue
             for _shot in _seq['shots']:
                 _shot_data = get_single([
                     _data for _data in _shots_data

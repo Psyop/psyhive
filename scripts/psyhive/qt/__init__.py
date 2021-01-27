@@ -10,11 +10,14 @@ from .wrapper import (
     HListWidget, HComboBox, HTreeWidget, HTabWidget, HTextBrowser,
 
     # QtCore overrides
-    HPoint, HRect,
+    HPoint, HRect, HSize,
 
     # QtGui overrides
     HPixmap, HColor, HPainter, HMenu, X_AXIS, Y_AXIS, ORIGIN,
-    TEST_IMG, TEST_PNG, TEST_JPG, RENDER_HINTS)
+    TEST_IMG, TEST_PNG, TEST_JPG, RENDER_HINTS,
+
+    # utils
+    get_rect)
 
 from .maya_palette import set_maya_palette
 from .misc import (

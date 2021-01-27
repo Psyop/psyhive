@@ -25,6 +25,20 @@ class Dir(Path):
         _path = get_path(path)
         return abs_path(_path).startswith(abs_path(self.path))
 
+    def copy_to(self, trg, force=False):
+        """Copy this dir to another location.
+
+        Args:
+            trg (str|Dir): target location
+            force (bool): replace existing without confirmation
+        """
+        from .p_tools import get_path
+        assert self.exists()
+        assert self.is_dir()
+        _target = Dir(get_path(trg))
+        _target.delete(force=force)
+        shutil.copytree(self.path, _target.path)
+
     def delete(self, force=False, wording='delete', icon=None):
         """Delete this directory.
 
@@ -72,6 +86,17 @@ class Dir(Path):
         """
         from .p_file import File
         return File(self.path+'/'+filename)
+
+    def get_subdir(self, dirname):
+        """Get child dir of this directory.
+
+        Args:
+            dirname (str): name of dir
+
+        Returns:
+            (Dir): dir object
+        """
+        return Dir(self.path+'/'+dirname)
 
     @restore_cwd
     def launch_browser(self):

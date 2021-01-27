@@ -388,6 +388,14 @@ class HPixmap(QtGui.QPixmap):
         _pnt.add_text(**_kwargs)
         _pnt.end()
 
+    def aspect(self):
+        """Get aspect ratio of this pixmap.
+
+        Returns:
+            (float): aspect ration
+        """
+        return 1.0*self.width()/self.height()
+
     def center(self):
         """Get centrepoint of this pixmap.
 
